@@ -12,12 +12,14 @@ from .base import (
     ParseException,
     handle,
 )
-from .data import Platform, ImageContent, MediaContent
+from .data import Platform, MediaContent
 
 
 class NCMParser(BaseParser):
     # 平台信息
-    platform: ClassVar[Platform] = Platform(name=PlatformEnum.NETEASE, display_name="网易云音乐")
+    platform: ClassVar[Platform] = Platform(
+        name=PlatformEnum.NETEASE, display_name="网易云音乐"
+    )
 
     def __init__(self):
         super().__init__()
@@ -36,7 +38,9 @@ class NCMParser(BaseParser):
     async def _get_redirect_url(self, url: str) -> str:
         """获取重定向后的URL"""
 
-        async with AsyncClient(verify=False, follow_redirects=True, timeout=self.timeout) as client:
+        async with AsyncClient(
+            verify=False, follow_redirects=True, timeout=self.timeout
+        ) as client:
             response = await client.get(url)
             response.raise_for_status()
             return str(response.url)
@@ -49,7 +53,9 @@ class NCMParser(BaseParser):
             ncm_url = await self._get_redirect_url(ncm_url)
 
         # 获取网易云歌曲id
-        matched = re.search(r"(?:\?|&)id=(\d+)", ncm_url) or re.search(r"song/(\d+)", ncm_url)
+        matched = re.search(r"(?:\?|&)id=(\d+)", ncm_url) or re.search(
+            r"song/(\d+)", ncm_url
+        )
 
         if not matched:
             raise ParseException(f"无效网易云链接: {ncm_url}")
@@ -62,7 +68,9 @@ class NCMParser(BaseParser):
             # 尝试多种音质直到成功
             for quality in self.audio_qualities:
                 try:
-                    async with AsyncClient(verify=False, timeout=self.timeout) as client:
+                    async with AsyncClient(
+                        verify=False, timeout=self.timeout
+                    ) as client:
                         api_url = "https://api.bugpk.com/api/163_music"
                         # 使用GET请求，参数包括ids、level和type
                         params = {"ids": ncm_id, "level": quality, "type": "json"}
@@ -72,10 +80,14 @@ class NCMParser(BaseParser):
 
                         # 检查接口返回状态
                         if data.get("status") != 200:
-                            logger.warning(f"网易云接口返回错误: {data}，尝试下一种音质")
+                            logger.warning(
+                                f"网易云接口返回错误: {data}，尝试下一种音质"
+                            )
                             continue
 
-                        logger.info(f"使用音质: {quality} 解析成功: {data['name']} - {data['ar_name']}")
+                        logger.info(
+                            f"使用音质: {quality} 解析成功: {data['name']} - {data['ar_name']}"
+                        )
                         audio_info = f"音质: {quality} | 大小: {data.get('size', '')}"
 
                         # 提取歌词信息
@@ -117,7 +129,7 @@ class NCMParser(BaseParser):
         if result["lyric"]:
             text += f"\n歌词:\n{result['lyric']}"
 
-        contents: list[MediaContent | str] = [text]
+        contents: list[MediaContent] = []
 
         # 创建音频内容
         if result["audio_url"]:
@@ -132,13 +144,13 @@ class NCMParser(BaseParser):
             )
 
         # 创建封面图片内容
-        from ..download import DOWNLOADER
 
-        contents.append(ImageContent(DOWNLOADER.download_img(result["cover_url"], ext_headers=self.headers)))
+        contents.append(self.create_image(result["cover_url"]))
 
         # 构建额外信息
         extra = {
             "info": result["audio_info"],
+            "lyric": text,
             "type": "audio",
             "type_tag": "音乐",
             "type_icon": "fa-music",

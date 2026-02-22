@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             padding: 20px;
             color: #333;
         }
+
         .music-card {
             background: white;
             border-radius: 12px;
@@ -21,6 +23,7 @@
             padding: 24px;
             position: relative;
         }
+
         /* 二维码定位 */
         .qr-code {
             position: absolute;
@@ -29,13 +32,16 @@
             width: 80px;
             height: 80px;
         }
+
         .header {
             display: flex;
             align-items: flex-start;
             gap: 20px;
             margin-bottom: 24px;
-            padding-right: 100px; /* 为二维码留出空间 */
+            padding-right: 100px;
+            /* 为二维码留出空间 */
         }
+
         .cover {
             width: 150px;
             height: 150px;
@@ -43,10 +49,13 @@
             object-fit: cover;
             flex-shrink: 0;
         }
+
         .info {
             flex: 1;
-            min-width: 0; /* 防止内容溢出 */
+            min-width: 0;
+            /* 防止内容溢出 */
         }
+
         .title {
             font-size: 24px;
             font-weight: 600;
@@ -55,6 +64,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         .artist {
             font-size: 18px;
             color: #666;
@@ -63,6 +73,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         .album {
             font-size: 16px;
             color: #999;
@@ -71,6 +82,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         .platform {
             display: inline-block;
             background-color: #f0f0f0;
@@ -80,6 +92,7 @@
             font-size: 12px;
             margin-top: 8px;
         }
+
         /* 音质和大小信息定位 */
         .quality-info {
             position: absolute;
@@ -92,15 +105,19 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .lyric-container {
             margin: 24px 0;
-            padding-right: 120px; /* 为右下角信息留出空间 */
+            padding-right: 120px;
+            /* 为右下角信息留出空间 */
         }
+
         .lyric-title {
             font-size: 18px;
             font-weight: 600;
             margin: 0 0 16px 0;
         }
+
         .lyric {
             font-size: 16px;
             line-height: 1.8;
@@ -112,21 +129,26 @@
             max-height: auto;
             overflow-y: auto;
         }
+
         /* 自定义滚动条 */
         .lyric::-webkit-scrollbar {
             width: 6px;
         }
+
         .lyric::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 3px;
         }
+
         .lyric::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 3px;
         }
+
         .lyric::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
         /* 来源链接样式 */
         .url {
             margin-top: 16px;
@@ -137,22 +159,27 @@
             color: #666;
             word-break: break-all;
         }
+
         /* 响应式调整 */
         @media (max-width: 600px) {
             .qr-code {
                 width: 60px;
                 height: 60px;
             }
+
             .header {
                 padding-right: 80px;
             }
+
             .cover {
                 width: 120px;
                 height: 120px;
             }
+
             .lyric-container {
                 padding-right: 0;
             }
+
             .quality-info {
                 position: static;
                 margin-top: 16px;
@@ -161,50 +188,55 @@
         }
     </style>
 </head>
+
 <body>
     <div class="music-card">
         <!-- 右上角二维码 -->
         {% if result.qr_code_path %}
-            <img src="{{ result.qr_code_path }}" alt="二维码" class="qr-code">
+        <img src="{{ result.qr_code_path }}" alt="二维码" class="qr-code">
         {% endif %}
-        
+
         <div class="header">
             <!-- 专辑图 -->
             {% if result.cover_path %}
-                <img src="{{ result.cover_path }}" alt="专辑封面" class="cover">
+            <img src="{{ result.cover_path }}" alt="专辑封面" class="cover">
             {% endif %}
-            
+
             <!-- 左上角歌曲信息 -->
             <div class="info">
                 <h1 class="title">{{ result.title }}</h1>
                 <p class="artist">{{ result.author.name }}</p>
                 <!-- 专辑名 -->
-                {% if result.text and '专辑:' in result.text %}
-                    <p class="album">{{ result.text.split('专辑:')[1].split('\n')[0].strip() if '\n' in result.text else result.text.split('专辑:')[1].strip() }}</p>
+                {% if result.extra and '专辑:' in result.extra %}
+                <p class="album">{{ result.extra.lyric.split('专辑:')[1].split('\n')[0].strip() if '\n' in
+                    result.extra.lyric else
+                    result.extra.lyric.split('专辑:')[1].strip() }}</p>
                 {% endif %}
                 <div class="platform">{{ result.platform.display_name }}</div>
             </div>
         </div>
-        
+
         <!-- 歌词展示 -->
-        {% if result.text and '歌词' in result.text %}
-            <div class="lyric-container">
-                <h2 class="lyric-title">歌词</h2>
-                <div class="lyric">{{ result.text.split('歌词:\n')[1] if '歌词:\n' in result.text else result.text }}</div>
-            </div>
+        {% if result.extra and '歌词' in result.extra %}
+        <div class="lyric-container">
+            <h2 class="lyric-title">歌词</h2>
+            <div class="lyric">{{ result.extra.lyric.split('歌词:\n')[1] if '歌词:\n' in result.extra.lyric else
+                result.extra.lyric }}</div>
+        </div>
         {% endif %}
-        
+
         <!-- 右下角音质和大小 -->
         {% if result.extra.info %}
-            <div class="quality-info">{{ result.extra.info }}</div>
+        <div class="quality-info">{{ result.extra.info }}</div>
         {% endif %}
-        
+
         <!-- 来源链接 -->
         {% if result.url %}
-            <div class="url">
-                来源链接: <a href="{{ result.url }}" target="_blank">{{ result.url }}</a>
-            </div>
+        <div class="url">
+            来源链接: <a href="{{ result.url }}" target="_blank">{{ result.url }}</a>
+        </div>
         {% endif %}
     </div>
 </body>
+
 </html>

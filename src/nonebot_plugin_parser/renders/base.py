@@ -315,6 +315,7 @@ class Renderer:
             "cover_path": await result.cover_path,
             "state": result.state,
             "comments": result.comments,
+            "build_html": build_html,
         }
 
         if result.author:
