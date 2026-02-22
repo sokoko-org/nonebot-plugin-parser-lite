@@ -1,9 +1,9 @@
+import base64
 import re
 import json
 import contextlib
 from re import Match
 from typing import ClassVar
-from difflib import SequenceMatcher
 
 from httpx import AsyncClient
 
@@ -13,198 +13,202 @@ from .base import (
     ParseException,
     handle,
 )
-from .data import Platform, ImageContent, MediaContent
-from ..config import pconfig
+from .data import Platform, MediaContent
 from ..constants import COMMON_HEADER
+from msgspec import Struct, field
+from msgspec.json import Decoder
+
+
+class PlayInfo(Struct):
+    errcode: int
+    """错误码，0无错。如果出错了，后面那些都是默认值，没出错就不可能是默认值"""
+    album_img: str = ""
+    """歌曲封面，需要把中间的{size}替换"""
+    bitRate: int = 0
+    """比特率"""
+    choricSinger: str = ""
+    """合唱歌手"""
+    error: str = ""
+    """错误信息"""
+    fileName: str = ""
+    """下载文件名"""
+    fileSize: int = 0
+    """文件大小"""
+    extName: str = ""
+    """文件扩展名"""
+    hash: str = ""
+    """歌曲hash"""
+    imgUrl: str = ""
+    """作者头像，需要把中间的{size}替换"""
+    intro: str = ""
+    """简介?, 可能是mv的东西"""
+    mvhash: str = ""
+    """
+    mv的hash
+    
+    应该可以通过
+    `http://mobilecdnbj.kugou.com/api/v3/mv/detail?area_code=1&plat=0&mvhash={mvhash}&with_res_tag=1`
+    获取到mv，没找到测试用例
+    """
+    pay_type: int = 0
+    """歌曲类型 0,免费; 3,付费"""
+    singerId: int = 0
+    """歌手id"""
+    singerName: str = ""
+    """歌手名称"""
+    songName: str = ""
+    """歌曲名称"""
+    timeLength: int = 0
+    """歌曲时长，单位秒"""
+    url: str = ""
+    """歌曲下载地址"""
+
+
+class CandidatesList(Struct):
+    id: str
+    """歌词id"""
+    accesskey: str
+    """accessKey"""
+    singer: str
+    """歌手名称"""
+    song: str
+    """歌曲名称"""
+    language: str
+    """歌词语言"""
+
+
+class KrcsSearch(Struct):
+    errcode: int
+    """错误码, 200无错"""
+    errmsg: str
+    """错误信息"""
+    expire: int
+    """accessKey过期时间(应该是秒)"""
+    candidates: list[CandidatesList] = field(default_factory=list)
+    """歌词结果列表"""
+
+
+class Lyrics(Struct):
+    error_code: int
+    """错误码, 0无错"""
+    info: str
+    """信息"""
+    fmt: str
+    """歌词格式, 由url传参决定"""
+    _source: str
+    """来源"""
+    charset: str
+    """字符集"""
+    content: str
+    """歌词base64内容"""
+    id: str
+    """歌词id"""
 
 
 class KuGouParser(BaseParser):
     # 平台信息
-    platform: ClassVar[Platform] = Platform(name=PlatformEnum.KUGOU, display_name="酷狗音乐")
+    platform: ClassVar[Platform] = Platform(
+        name=PlatformEnum.KUGOU, display_name="酷狗音乐"
+    )
 
-    async def search_songs(self, title: str, n: int | None = None) -> list:
-        """搜索歌曲函数"""
-        from httpx import AsyncClient
-
-        # 检查kugou_lzkey是否已配置
-        if not pconfig.kugou_lzkey:
-            raise ParseException("酷狗音乐API密钥未配置，请在配置文件中设置parser_kugou_lzkey")
-
-        if n is None:
-            api_url = (
-                f"https://sdkapi.hhlqilongzhu.cn/api/dgMusic_kugou/?key={pconfig.kugou_lzkey}&msg={title}&type=json"
-            )
-        else:
-            api_url = f"https://sdkapi.hhlqilongzhu.cn/api/dgMusic_kugou/?key={pconfig.kugou_lzkey}&msg={title}&type=json&n={n}"
-
-        headers = COMMON_HEADER.copy()
-        async with AsyncClient(headers=headers, verify=False, timeout=self.timeout) as client:
-            response = await client.get(api_url)
-            if response.status_code != 200:
-                raise ParseException(f"歌曲搜索接口异常: HTTP {response.status_code}")
-
-            result = response.json()
-
-            # 处理不同结构的API响应
-            if "data" in result:
-                return result["data"]  # 新格式: 包含data列表
-            elif "title" in result:
-                return [result]  # 旧格式: 单首歌曲直接返回
-            else:
-                raise ParseException("接口返回数据格式未知")
-
-    def _extract_embedded_info(self, html_text: str) -> dict:
-        """提取页面内嵌的歌曲信息"""
-        if smarty_match := re.search(r"var dataFromSmarty\s*=\s*(\[.*?\]),", html_text, re.DOTALL):
+    def _extract_hash(self, html_text: str) -> str:
+        """获取歌曲hash"""
+        if smarty_match := re.search(
+            r"var dataFromSmarty\s*=\s*(\[.*?\]),", html_text, re.DOTALL
+        ):
             with contextlib.suppress(json.JSONDecodeError):
                 smarty_data = json.loads(smarty_match[1])
                 if isinstance(smarty_data, list) and smarty_data:
-                    return {
-                        "hash": smarty_data[0].get("hash", "").upper(),
-                        "title": smarty_data[0].get("song_name", ""),
-                        "author": smarty_data[0].get("author_name", ""),
-                        "duration": smarty_data[0].get("timelength", 0),
-                    }
-        return {}
-
-    def _clean_search_title(self, title: str) -> str:
-        """清理搜索标题，只保留字母、数字和汉字（不含任何连接符）"""
-        # 只保留字母(a-zA-Z)、数字(0-9)和汉字(\u4e00-\u9fa5)
-        return re.sub(r"[^\w\u4e00-\u9fa5]", "", title)
+                    return smarty_data[0].get("hash", "").upper()
+        return ""
 
     @handle(
         "kugou.com",
-        r"https?://[^\s]*?kugou\.com.*?(?:/share/[a-zA-Z0-9]+\.html|(?:id|chain)=[a-zA-Z0-9]+)",
+        r"https?://[^\s]*?kugou\.com.*?(?:/(?:share|mixsong)/[a-zA-Z0-9]+\.html|(?:id|chain)=[a-zA-Z0-9]+)",
     )
     async def _parse_kugou_share(self, searched: Match[str]):
         """解析酷狗分享链接"""
         share_url = searched.group(0)
         # 获取分享页HTML
         headers = COMMON_HEADER.copy()
-        async with AsyncClient(headers=headers, verify=False, timeout=self.timeout) as client:
+        async with AsyncClient(
+            headers=headers, verify=False, timeout=self.timeout
+        ) as client:
             response = await client.get(share_url)
             response.raise_for_status()
             html_text = response.text
 
-            # 提取内嵌歌曲信息
-            embedded_info = self._extract_embedded_info(html_text)
+            # 提取歌曲hash
+            _hash = self._extract_hash(html_text)
 
-            # 提取页面标题
-            title_match = re.search(r"<title>(.+?)_(.+?)_高音质在线", html_text)
-            if not title_match:
-                raise ParseException("无法从分享页提取歌曲标题")
+            if not _hash:
+                raise ParseException("未找到歌曲hash")
 
-            page_title = title_match[1].strip()
-            page_author = title_match[2].strip()
-            search_title = f"{page_title} - {page_author}"
-
-            search_title_clean = self._clean_search_title(search_title)
-            page_title_clean = self._clean_search_title(page_title)
-
-            # 搜索歌曲
-            try:
-                songs = await self.search_songs(search_title_clean)
-            except Exception:
-                try:
-                    songs = await self.search_songs(page_title_clean)
-                except Exception as e:
-                    raise ParseException(f"使用标题二次搜索失败: {e}") from e
-
-            if not songs:
-                raise ParseException("未搜索到相关歌曲")
-
-            # 匹配最佳歌曲
-            best_match = None
-            best_score = 0
-
-            # 计算匹配分数
-
-            for song in songs:
-                # 1. 优先匹配内嵌hash
-                if embedded_info and "hash" in embedded_info and song.get("hash", "").upper() == embedded_info["hash"]:
-                    best_match = song
-                    break
-
-                # 2. 计算标题相似度
-                title_similarity = SequenceMatcher(
-                    None, str(song.get("title", "")).lower(), str(page_title).lower()
-                ).ratio()
-
-                # 3. 计算作者相似度
-                author_similarity = SequenceMatcher(
-                    None, str(song.get("singer", "")).lower(), str(page_author).lower()
-                ).ratio()
-
-                # 综合评分 = 标题相似度 * 0.6 + 作者相似度 * 0.4
-                total_score = title_similarity * 0.6 + author_similarity * 0.4
-
-                if total_score > best_score:
-                    best_score = total_score
-                    best_match = song
-
-            # 检查匹配结果
-            if not best_match:
-                best_match = songs[0]  # 默认选择第一首
-
-            # 获取最佳匹配歌曲数据
-            _id = best_match.get("n", 1)
-
-            try:
-                song_info = await self.search_songs(search_title_clean, n=_id)
-            except Exception as e:
-                raise ParseException(f"歌曲信息获取失败: {e}") from e
-
-            # 确保song_info是列表
-            if not isinstance(song_info, list):
-                song_info = [song_info]
-
-            if not song_info:
-                raise ParseException("未获取到歌曲详细信息")
-
-            song_details = song_info[0]
+            # 获取歌曲信息
+            response = await client.get(
+                f"https://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo&hash={_hash}"
+            )
+            playinfo = Decoder(PlayInfo).decode(response.content)
+            if playinfo.errcode != 0:
+                raise ParseException(
+                    f"酷狗音乐解析失败: {playinfo.errcode} {playinfo.error}"
+                )
 
             # 创建音频内容
-            audio_url = song_details.get("music_url", "")
+            audio_url = playinfo.url
             if not audio_url:
                 raise ParseException("未找到音频资源")
 
-            # 创建有意义的音频文件名
-            audio_name = f"{song_details.get('title', 'unknown')}-{song_details.get('singer', 'unknown')}.mp3"
+            audio_name = f"{playinfo.fileName}.{playinfo.extName}"
 
-            audio_content = self.create_audio(audio_url, float(song_details.get("duration", 0)), audio_name=audio_name)
+            audio_content = self.create_audio(
+                audio_url, playinfo.timeLength, audio_name
+            )
+            author = self.create_author(
+                playinfo.singerName  # , playinfo.imgUrl.format(size=480)
+            )
+
+            # 获取歌词列表
+            response = await client.get(
+                f"https://krcs.kugou.com/search?hash={playinfo.hash}"
+            )
+            krcs = Decoder(KrcsSearch).decode(response.content)
+            if krcs.errcode != 200:
+                raise ParseException(f"酷狗音乐解析失败: 歌词搜索失败: {krcs.errmsg}")
+            if not krcs.candidates:
+                raise ParseException("未找到歌词")
+
+            # 获取歌词内容
+            response = await client.get(
+                f"https://lyrics.kugou.com/download?ver=1&id={krcs.candidates[0].id}&accesskey={krcs.candidates[0].accesskey}&fmt=lrc"
+            )
+            lyrics = Decoder(Lyrics).decode(response.content)
+            if lyrics.error_code != 0:
+                raise ParseException(f"酷狗音乐解析失败: 歌词获取失败: {lyrics.info}")
             # 构建歌词文本
-            lyric = song_details.get("lyrics", "")
-            text = f"歌词:\n{lyric}" if lyric else ""
+            lyric = base64.b64decode(lyrics.content).decode(lyrics.charset)
+            text = f"歌词:\n{lyric}"
 
             # 创建封面图片内容
-            cover_url = song_details.get("cover", "")
-            contents: list[MediaContent | str] = [text]
-
-            if cover_url:
-                from ..download import DOWNLOADER
-
-                cover_content = ImageContent(DOWNLOADER.download_img(cover_url, ext_headers=self.headers))
-                contents.append(cover_content)
+            cover_url = playinfo.album_img.format(size=480)
+            contents: list[MediaContent] = [self.create_image(cover_url)]
 
             contents.append(audio_content)
 
-            # 构建链接
-            hash_value = best_match.get("hash", "")
-            link = song_details.get("link", f"https://www.kugou.com/song/#hash={hash_value}")
-
             # 构建额外信息
             extra = {
-                "info": f"时长: {int(float(song_details.get('duration', 0)) // 60)}"
-                f":{int(float(song_details.get('duration', 0)) % 60):02d}",
+                "info": f"比特率: {playinfo.bitRate}K | 时长: {int(float(playinfo.timeLength) // 60)}"
+                f":{int(float(playinfo.timeLength) % 60):02d}",
+                "lyric": text,
                 "type": "audio",
                 "type_tag": "音乐",
                 "type_icon": "fa-music",
             }
 
             return self.result(
-                title=song_details.get("title", page_title),
-                author=self.create_author(song_details.get("singer", page_author)),
-                url=link,
+                title=playinfo.songName,
+                author=author,
+                url=share_url,
                 content=contents,
                 extra=extra,
             )
