@@ -207,7 +207,7 @@
                 <h1 class="title">{{ result.title }}</h1>
                 <p class="artist">{{ result.author.name }}</p>
                 <!-- 专辑名 -->
-                {% if result.extra and '专辑:' in result.extra %}
+                {% if result.extra and '专辑:' in result.extra.lyric %}
                 <p class="album">{{ result.extra.lyric.split('专辑:')[1].split('\n')[0].strip() if '\n' in
                     result.extra.lyric else
                     result.extra.lyric.split('专辑:')[1].strip() }}</p>
@@ -217,7 +217,7 @@
         </div>
 
         <!-- 歌词展示 -->
-        {% if result.extra and '歌词' in result.extra %}
+        {% if result.extra and '歌词' in result.extra.lyric %}
         <div class="lyric-container">
             <h2 class="lyric-title">歌词</h2>
             <div class="lyric">{{ result.extra.lyric.split('歌词:\n')[1] if '歌词:\n' in result.extra.lyric else
