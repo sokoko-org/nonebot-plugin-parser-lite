@@ -6,14 +6,12 @@ from typing import Any
 from datetime import datetime
 
 import httpx
-from nonebot import logger, require
+from nonebot import logger
 
 from .base import BaseParser, handle
 from .data import Platform
 from ..constants import PlatformEnum
 from ..exception import ParseException
-
-require("nonebot_plugin_htmlrender")
 
 from nonebot_plugin_htmlrender import get_new_page
 

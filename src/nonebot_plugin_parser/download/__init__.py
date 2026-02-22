@@ -115,7 +115,7 @@ class StreamDownloader:
             total (int | None): 总大小. Defaults to None.
 
         Returns:
-            tqdm: 进度条
+            Progress: 进度条
         """
         progress = Progress(
             "[progress.description]{task.description}",

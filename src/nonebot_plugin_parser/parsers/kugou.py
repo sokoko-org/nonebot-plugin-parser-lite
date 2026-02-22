@@ -5,6 +5,8 @@ from re import Match
 from typing import ClassVar
 from difflib import SequenceMatcher
 
+from httpx import AsyncClient
+
 from .base import (
     BaseParser,
     PlatformEnum,
@@ -18,9 +20,7 @@ from ..constants import COMMON_HEADER
 
 class KuGouParser(BaseParser):
     # 平台信息
-    platform: ClassVar[Platform] = Platform(
-        name=PlatformEnum.KUGOU, display_name="酷狗音乐"
-    )
+    platform: ClassVar[Platform] = Platform(name=PlatformEnum.KUGOU, display_name="酷狗音乐")
 
     async def search_songs(self, title: str, n: int | None = None) -> list:
         """搜索歌曲函数"""
@@ -28,19 +28,17 @@ class KuGouParser(BaseParser):
 
         # 检查kugou_lzkey是否已配置
         if not pconfig.kugou_lzkey:
-            raise ParseException(
-                "酷狗音乐API密钥未配置，请在配置文件中设置parser_kugou_lzkey"
-            )
+            raise ParseException("酷狗音乐API密钥未配置，请在配置文件中设置parser_kugou_lzkey")
 
         if n is None:
-            api_url = f"https://sdkapi.hhlqilongzhu.cn/api/dgMusic_kugou/?key={pconfig.kugou_lzkey}&msg={title}&type=json"
+            api_url = (
+                f"https://sdkapi.hhlqilongzhu.cn/api/dgMusic_kugou/?key={pconfig.kugou_lzkey}&msg={title}&type=json"
+            )
         else:
             api_url = f"https://sdkapi.hhlqilongzhu.cn/api/dgMusic_kugou/?key={pconfig.kugou_lzkey}&msg={title}&type=json&n={n}"
 
         headers = COMMON_HEADER.copy()
-        async with AsyncClient(
-            headers=headers, verify=False, timeout=self.timeout
-        ) as client:
+        async with AsyncClient(headers=headers, verify=False, timeout=self.timeout) as client:
             response = await client.get(api_url)
             if response.status_code != 200:
                 raise ParseException(f"歌曲搜索接口异常: HTTP {response.status_code}")
@@ -57,9 +55,7 @@ class KuGouParser(BaseParser):
 
     def _extract_embedded_info(self, html_text: str) -> dict:
         """提取页面内嵌的歌曲信息"""
-        if smarty_match := re.search(
-            r"var dataFromSmarty\s*=\s*(\[.*?\]),", html_text, re.DOTALL
-        ):
+        if smarty_match := re.search(r"var dataFromSmarty\s*=\s*(\[.*?\]),", html_text, re.DOTALL):
             with contextlib.suppress(json.JSONDecodeError):
                 smarty_data = json.loads(smarty_match[1])
                 if isinstance(smarty_data, list) and smarty_data:
@@ -83,14 +79,9 @@ class KuGouParser(BaseParser):
     async def _parse_kugou_share(self, searched: Match[str]):
         """解析酷狗分享链接"""
         share_url = searched.group(0)
-
-        from httpx import AsyncClient
-
         # 获取分享页HTML
         headers = COMMON_HEADER.copy()
-        async with AsyncClient(
-                headers=headers, verify=False, timeout=self.timeout
-            ) as client:
+        async with AsyncClient(headers=headers, verify=False, timeout=self.timeout) as client:
             response = await client.get(share_url)
             response.raise_for_status()
             html_text = response.text
@@ -130,11 +121,7 @@ class KuGouParser(BaseParser):
 
             for song in songs:
                 # 1. 优先匹配内嵌hash
-                if (
-                    embedded_info
-                    and "hash" in embedded_info
-                    and song.get("hash", "").upper() == embedded_info["hash"]
-                ):
+                if embedded_info and "hash" in embedded_info and song.get("hash", "").upper() == embedded_info["hash"]:
                     best_match = song
                     break
 
@@ -184,33 +171,26 @@ class KuGouParser(BaseParser):
             # 创建有意义的音频文件名
             audio_name = f"{song_details.get('title', 'unknown')}-{song_details.get('singer', 'unknown')}.mp3"
 
-            audio_content = self.create_audio(
-                audio_url, float(song_details.get("duration", 0)), audio_name=audio_name
-            )
+            audio_content = self.create_audio(audio_url, float(song_details.get("duration", 0)), audio_name=audio_name)
             # 构建歌词文本
             lyric = song_details.get("lyrics", "")
             text = f"歌词:\n{lyric}" if lyric else ""
 
             # 创建封面图片内容
             cover_url = song_details.get("cover", "")
-            contents: list[MediaContent|str] = [text]
+            contents: list[MediaContent | str] = [text]
 
             if cover_url:
                 from ..download import DOWNLOADER
 
-                cover_content = ImageContent(
-                    DOWNLOADER.download_img(cover_url, ext_headers=self.headers)
-                )
+                cover_content = ImageContent(DOWNLOADER.download_img(cover_url, ext_headers=self.headers))
                 contents.append(cover_content)
 
             contents.append(audio_content)
 
-
             # 构建链接
             hash_value = best_match.get("hash", "")
-            link = song_details.get(
-                "link", f"https://www.kugou.com/song/#hash={hash_value}"
-            )
+            link = song_details.get("link", f"https://www.kugou.com/song/#hash={hash_value}")
 
             # 构建额外信息
             extra = {

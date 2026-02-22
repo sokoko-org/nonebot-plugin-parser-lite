@@ -8,6 +8,7 @@ require("nonebot_plugin_alconna")
 require("nonebot_plugin_uninfo")
 require("nonebot_plugin_htmlrender")
 require("nonebot_plugin_apscheduler")
+require("nonebot_plugin_localstore")
 
 from .utils import safe_unlink
 from .config import Config, pconfig

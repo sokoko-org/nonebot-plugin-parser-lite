@@ -273,7 +273,9 @@ class BaseParser:
         if cover_url:
             cover_task = DOWNLOADER.download_img(cover_url, ext_headers=self.headers)
         if isinstance(url_or_task, str):
-            url_or_task = DOWNLOADER.download_video(url_or_task, video_name=video_name, ext_headers=self.headers)
+            url_or_task = DOWNLOADER.download_video(
+                url_or_task, video_name=video_name, ext_headers=self.headers
+            )
 
         return VideoContent(url_or_task, cover_task, duration)
 
@@ -321,7 +323,9 @@ class BaseParser:
             audio_name = f"{cleaned_base}{ext}"
 
         if isinstance(url_or_task, str):
-            url_or_task = DOWNLOADER.download_audio(url_or_task, audio_name=audio_name, ext_headers=self.headers)
+            url_or_task = DOWNLOADER.download_audio(
+                url_or_task, audio_name=audio_name, ext_headers=self.headers
+            )
 
         return AudioContent(url_or_task, duration)
 

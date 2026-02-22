@@ -6,7 +6,7 @@ from pathlib import Path
 from collections.abc import AsyncGenerator
 
 import qrcode  # pyright: ignore[reportMissingModuleSource]
-from nonebot import logger, require
+from nonebot import logger
 
 from .utils import build_html, build_plain_text
 from ..config import pconfig, _nickname
@@ -21,7 +21,6 @@ from ..parsers.data import (
     GraphicsContent,
 )
 
-require("nonebot_plugin_htmlrender")
 from nonebot_plugin_htmlrender import template_to_pic
 
 
@@ -31,7 +30,9 @@ class Renderer:
     templates_dir: ClassVar[Path] = Path(__file__).parent / "templates"
     """模板目录"""
 
-    async def render_messages(self, result: ParseResult) -> AsyncGenerator[UniMessage[Any], None]:
+    async def render_messages(
+        self, result: ParseResult
+    ) -> AsyncGenerator[UniMessage[Any], None]:
         """渲染消息
 
         :param result: 解析结果
@@ -56,7 +57,9 @@ class Renderer:
         async for message in self.render_contents(result):
             yield message
 
-    async def render_contents(self, result: ParseResult) -> AsyncGenerator[UniMessage[Any], None]:
+    async def render_contents(
+        self, result: ParseResult
+    ) -> AsyncGenerator[UniMessage[Any], None]:
         """渲染媒体内容消息
 
         Args:
@@ -75,7 +78,9 @@ class Renderer:
         for cont in result.content:
             match cont:
                 case VideoContent() | AudioContent():
-                    need_delay = pconfig.delay_send_media or pconfig.delay_send_lazy_download
+                    need_delay = (
+                        pconfig.delay_send_media or pconfig.delay_send_lazy_download
+                    )
                     failed, media = await self._handle_media_content(cont, need_delay)
                     failed_count += failed
                     if media is not None:
@@ -102,14 +107,18 @@ class Renderer:
                         failed_count += 1
                         continue
 
-        if media_contents and (pconfig.delay_send_media or pconfig.delay_send_lazy_download):
+        if media_contents and (
+            pconfig.delay_send_media or pconfig.delay_send_lazy_download
+        ):
             result.media_contents = media_contents
 
         if forwardable_segs:
             self._append_forward_text_segments(result, forwardable_segs)
 
             if pconfig.need_forward_contents or len(forwardable_segs) > 4:
-                forward_msg = UniHelper.construct_forward_message(forwardable_segs + dynamic_segs)
+                forward_msg = UniHelper.construct_forward_message(
+                    forwardable_segs + dynamic_segs
+                )
                 yield UniMessage(forward_msg)
             else:
                 yield UniMessage(forwardable_segs)
@@ -127,17 +136,22 @@ class Renderer:
     ) -> tuple[int, MediaContent | Path | None]:
         """处理单个音视频内容，返回失败次数增量和可能的延迟发送内容。"""
         logger.debug(
-            f"处理{type(cont).__name__}，" f"need_delay={need_delay}, lazy_download={pconfig.delay_send_lazy_download}"
+            f"处理{type(cont).__name__}，"
+            f"need_delay={need_delay}, lazy_download={pconfig.delay_send_lazy_download}"
         )
 
         if need_delay:
             return await self._handle_delayed_media(cont)
         return await self._handle_immediate_media(cont)
 
-    async def _handle_delayed_media(self, cont: MediaContent) -> tuple[int, MediaContent | Path | None]:
+    async def _handle_delayed_media(
+        self, cont: MediaContent
+    ) -> tuple[int, MediaContent | Path | None]:
         """处理延迟发送的音视频内容。"""
         if pconfig.delay_send_lazy_download:
-            logger.debug(f"延迟发送{type(cont).__name__}，缓存MediaContent对象，不立即下载")
+            logger.debug(
+                f"延迟发送{type(cont).__name__}，缓存MediaContent对象，不立即下载"
+            )
             return 0, cont
 
         try:
@@ -189,14 +203,23 @@ class Renderer:
         if result.repost:
             self._build_result_with_repost(result, forwardable_segs, author_name)
         else:
-            forwardable_segs.append(f"{author_name}：{build_plain_text(result.content)}")
+            forwardable_segs.append(
+                f"{author_name}：{build_plain_text(result.content)}"
+            )
 
     def _build_result_with_repost(
-        self, result: ParseResult, forwardable_segs: list[ForwardNodeInner], author_name: str
+        self,
+        result: ParseResult,
+        forwardable_segs: list[ForwardNodeInner],
+        author_name: str,
     ):
         assert result.repost
-        repost_author = result.repost.author.name if result.repost.author else "未知用户"
-        forwardable_segs.append(f"{author_name}[转发{repost_author}]：{build_plain_text(result.content)}")
+        repost_author = (
+            result.repost.author.name if result.repost.author else "未知用户"
+        )
+        forwardable_segs.append(
+            f"{author_name}[转发{repost_author}]：{build_plain_text(result.content)}"
+        )
 
         repost_text: list[str] = []
         if result.repost.title:

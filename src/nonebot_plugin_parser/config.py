@@ -1,12 +1,11 @@
 from pathlib import Path
 
-from nonebot import require, get_driver, get_plugin_config
+from nonebot import get_driver, get_plugin_config
 from pydantic import BaseModel
 from bilibili_api.video import VideoCodecs, VideoQuality
 
 from .constants import PlatformEnum
 
-require("nonebot_plugin_localstore")
 import nonebot_plugin_localstore as _store
 from nonebot.plugin import PluginMetadata
 

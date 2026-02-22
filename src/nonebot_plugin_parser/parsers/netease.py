@@ -3,6 +3,7 @@ import asyncio
 from re import Match
 from typing import ClassVar
 
+from httpx import AsyncClient
 from nonebot import logger
 
 from .base import (
@@ -12,7 +13,6 @@ from .base import (
     handle,
 )
 from .data import Platform, ImageContent, MediaContent
-from ..constants import COMMON_HEADER
 
 
 class NCMParser(BaseParser):
@@ -35,10 +35,8 @@ class NCMParser(BaseParser):
 
     async def _get_redirect_url(self, url: str) -> str:
         """获取重定向后的URL"""
-        from httpx import AsyncClient
 
-        headers = COMMON_HEADER.copy()
-        async with AsyncClient(headers=headers, verify=False, follow_redirects=True, timeout=self.timeout) as client:
+        async with AsyncClient(verify=False, follow_redirects=True, timeout=self.timeout) as client:
             response = await client.get(url)
             response.raise_for_status()
             return str(response.url)
@@ -64,17 +62,7 @@ class NCMParser(BaseParser):
             # 尝试多种音质直到成功
             for quality in self.audio_qualities:
                 try:
-                    from httpx import AsyncClient
-
-                    headers = COMMON_HEADER.copy()
-                    headers.update(
-                        {
-                            "Content-Type": "application/json",
-                            "User-Agent": "API-Client/1.0",
-                        }
-                    )
-
-                    async with AsyncClient(headers=headers, verify=False, timeout=self.timeout) as client:
+                    async with AsyncClient(verify=False, timeout=self.timeout) as client:
                         api_url = "https://api.bugpk.com/api/163_music"
                         # 使用GET请求，参数包括ids、level和type
                         params = {"ids": ncm_id, "level": quality, "type": "json"}

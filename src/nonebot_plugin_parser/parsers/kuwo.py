@@ -2,6 +2,7 @@ import contextlib
 from re import Match
 from typing import ClassVar
 
+from httpx import AsyncClient
 from nonebot import logger
 
 from .base import (
@@ -11,7 +12,6 @@ from .base import (
     handle,
 )
 from .data import Platform, ImageContent, MediaContent
-from ..constants import COMMON_HEADER
 
 
 class KuWoParser(BaseParser):
@@ -24,14 +24,9 @@ class KuWoParser(BaseParser):
         share_url = searched.group(0)
         logger.debug(f"触发酷我音乐解析: {share_url}")
 
-        from httpx import AsyncClient
-
         # 使用API解析
         try:
-            headers = COMMON_HEADER.copy()
-            headers.update({"Content-Type": "application/json", "User-Agent": "API-Client/1.0"})
-
-            async with AsyncClient(headers=headers, verify=False, timeout=self.timeout) as client:
+            async with AsyncClient(verify=False, timeout=self.timeout) as client:
                 api_url = "https://api.bugpk.com/api/kuwo"
                 params = {"url": share_url}
                 resp = await client.get(api_url, params=params)
