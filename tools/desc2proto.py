@@ -1,6 +1,7 @@
 import google.protobuf.descriptor_pb2 as pb2
 from google.protobuf.descriptor import FieldDescriptor
 
+
 def run_ultimate_restore(desc_path, output_proto):
     with open(desc_path, "rb") as f:
         fds = pb2.FileDescriptorSet()
@@ -28,7 +29,7 @@ def run_ultimate_restore(desc_path, output_proto):
     def get_clean_type(fld):
         """剥离包名，获取类名"""
         if fld.type_name:
-            return fld.type_name.split('.')[-1]
+            return fld.type_name.split(".")[-1]
         return TYPE_STR.get(fld.type, "string")
 
     def process_enum(enum, indent=""):
@@ -40,7 +41,7 @@ def run_ultimate_restore(desc_path, output_proto):
 
     def process_msg(msg, indent=""):
         lines = [f"{indent}message {msg.name} {{"]
-        
+
         # 1. 预处理：识别 MapEntry
         map_entries = {}
         for nested in msg.nested_type:
@@ -48,26 +49,25 @@ def run_ultimate_restore(desc_path, output_proto):
                 k_type = get_clean_type(nested.field[0])
                 v_type = get_clean_type(nested.field[1])
                 map_entries[nested.name] = (k_type, v_type)
-        
+
         # 2. 嵌套定义：消息与枚举
         for nested in msg.nested_type:
             if not nested.options.map_entry:
-                lines.extend(process_msg(nested, indent + "  "))
+                lines.extend(process_msg(nested, f"{indent}  "))
                 lines.append("")
         for enum in msg.enum_type:
-            lines.extend(process_enum(enum, indent + "  "))
+            lines.extend(process_enum(enum, f"{indent}  "))
             lines.append("")
 
         # 3. 字段处理 (包含 Oneof 分组逻辑)
         oneof_groups = {}
-        processed_fields = set()
 
         for fld in msg.field:
             if fld.HasField("oneof_index"):
                 oneof_groups.setdefault(fld.oneof_index, []).append(fld)
                 continue
 
-            f_type_name = fld.type_name.split('.')[-1] if fld.type_name else ""
+            f_type_name = fld.type_name.split(".")[-1] if fld.type_name else ""
             if f_type_name in map_entries:
                 # 还原为 map<k, v>
                 k, v = map_entries[f_type_name]
@@ -92,11 +92,7 @@ def run_ultimate_restore(desc_path, output_proto):
         return lines
 
     # --- 开始组装文档 ---
-    output = [
-        f'// Generated from {desc_path}',
-        'syntax = "proto3";',
-        ''
-    ]
+    output = [f"// Generated from {desc_path}", 'syntax = "proto3";', ""]
 
     for f in fds.file:
         output.append(f"// SOURCE FILE: {f.name}")
@@ -115,8 +111,8 @@ def run_ultimate_restore(desc_path, output_proto):
         for svc in f.service:
             output.append(f"service {svc.name} {{")
             for m in svc.method:
-                in_t = m.input_type.split('.')[-1]
-                out_t = m.output_type.split('.')[-1]
+                in_t = m.input_type.split(".")[-1]
+                out_t = m.output_type.split(".")[-1]
                 c_stream = "stream " if m.client_streaming else ""
                 s_stream = "stream " if m.server_streaming else ""
                 output.append(f"  rpc {m.name} ({c_stream}{in_t}) returns ({s_stream}{out_t});")
@@ -125,10 +121,11 @@ def run_ultimate_restore(desc_path, output_proto):
     # 写入文件
     with open(output_proto, "w", encoding="utf-8") as f_out:
         f_out.write("\n".join(output))
-    
-    print(f"✅ [成功] 完整平铺协议已还原至: {output_proto}")
+
+    print(f"✅ [成功] 完整平铺协议已还原至: {output_proto}")  # noqa: T201
+
 
 # --- 执行区 ---
-
+desc = input("请输入 desc 文件名称(当前路径下): ")
 # 接着用 protoc 编译这个全量 proto 即可
-run_ultimate_restore("PbPageResIdl.desc", "PbPageResIdl.proto")
+run_ultimate_restore(f"{desc}.desc", f"{desc}.proto")

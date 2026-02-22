@@ -1,35 +1,18 @@
-# pyright: reportAttributeAccessIssue=false
-
 import contextlib
 from typing import Any
-from pathlib import Path
 from datetime import datetime
 
 from httpx import AsyncClient, NetworkError
-from google.protobuf import descriptor_pb2, descriptor_pool
-from google.protobuf.message_factory import GetMessageClass
 
 from ..data import MediaContent, VideoContent, StickerContent, GraphicsContent
 from .models import Post, Posts, FragAt, Contents, FragLink, FragText, FragEmoji, FragImage, FragVideo
 from ...download import DOWNLOADER
-from ...constants import COMMON_HEADER
-
-headers = COMMON_HEADER.copy()
-
-
-def get_message(name: str):
-    fds = descriptor_pb2.FileDescriptorSet()
-    fds.ParseFromString((Path(__file__).parent / f"{name}.desc").read_bytes())
-    pool = descriptor_pool.DescriptorPool()
-    for fd in fds.file:
-        pool.Add(fd)
-
-    msg_descriptor = pool.FindMessageTypeByName(name)
-    return GetMessageClass(msg_descriptor)
+from .PbPageReqIdl import PbPageReqIdl
+from .PbPageResIdl import PbPageResIdl
 
 
 def make_req(tid: int) -> bytes:
-    req_proto = get_message("PbPageReqIdl")()
+    req_proto = PbPageReqIdl()
     req_proto.data.common._client_type = 2
     req_proto.data.common._client_version = "12.64.1.1"
     req_proto.data.kz = tid
@@ -40,7 +23,7 @@ def make_req(tid: int) -> bytes:
     req_proto.data.with_floor = True
     req_proto.data.floor_sort_type = True
     req_proto.data.floor_rn = 4
-    return req_proto.SerializeToString()
+    return bytes(req_proto)
 
 
 async def pack_req(data: bytes) -> bytes:
@@ -57,8 +40,6 @@ async def pack_req(data: bytes) -> bytes:
         + data
         + f"\r\n--{boundary}--\r\n".encode()
     )
-
-    # 设置 Content-Type，带上固定 boundary
     async with AsyncClient(verify=False) as client:
         response = await client.post(
             "http://tiebac.baidu.com/c/f/pb/page",
@@ -77,8 +58,7 @@ async def pack_req(data: bytes) -> bytes:
 
 
 def parse_res(data: bytes) -> Posts:
-    res = get_message("PbPageResIdl")()
-    res.ParseFromString(data)
+    res = PbPageResIdl.parse(data)
     if res.error.errorno:
         raise NetworkError(res.error.errmsg)
 
@@ -107,13 +87,10 @@ def build_contents(posts: Posts) -> list[MediaContent | str]:
         if isinstance(part, FragText):
             contents.append(part.text)
         elif isinstance(part, FragEmoji):
-            sticker_task = DOWNLOADER.download_img(
-                f"https://tb3.bdstatic.com/emoji/{part.id}@2x.png",
-                ext_headers=headers,
-            )
+            sticker_task = DOWNLOADER.download_img(f"https://tb3.bdstatic.com/emoji/{part.id}@2x.png")
             contents.append(StickerContent(sticker_task, "small", part.desc))
         elif isinstance(part, FragImage):
-            image_task = DOWNLOADER.download_img(part.origin_src, ext_headers=headers)
+            image_task = DOWNLOADER.download_img(part.origin_src)
             contents.append(GraphicsContent(image_task))
         elif isinstance(part, FragAt):
             # 如果上一项是文本，则追加到上一项末尾
@@ -128,14 +105,14 @@ def build_contents(posts: Posts) -> list[MediaContent | str]:
             else:
                 contents.append(url_str)
         elif isinstance(part, FragVideo):
-            video_task = DOWNLOADER.download_video(part.src, ext_headers=headers)
-            cover_task = DOWNLOADER.download_img(part.cover_src, ext_headers=headers)
+            video_task = DOWNLOADER.download_video(part.src)
+            cover_task = DOWNLOADER.download_img(part.cover_src)
             contents.append(VideoContent(video_task, cover_task, part.duration))
         # 经过测试，所有帖子中的语音均无法播放，无法进行地址捕获
         # 现在好像也发不了这玩意了
         # 最近的语音消息在2018年
         # elif isinstance(part, FragVoice):
-        #     audio_task = DOWNLOADER.download_audio(part.md5, ext_headers=headers)
+        #     audio_task = DOWNLOADER.download_audio(part.md5)
         #     contents.append(post.create_audio_content(audio_task, part.duration))
 
     return contents
