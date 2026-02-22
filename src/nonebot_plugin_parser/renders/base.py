@@ -70,7 +70,6 @@ class Renderer:
         """
         failed_count = 0
         forwardable_segs: list[ForwardNodeInner] = []
-        dynamic_segs: list[ForwardNodeInner] = []
 
         # 用于存储延迟发送的媒体内容
         media_contents: list[MediaContent | Path] = []
@@ -116,15 +115,10 @@ class Renderer:
             self._append_forward_text_segments(result, forwardable_segs)
 
             if pconfig.need_forward_contents or len(forwardable_segs) > 4:
-                forward_msg = UniHelper.construct_forward_message(
-                    forwardable_segs + dynamic_segs
-                )
+                forward_msg = UniHelper.construct_forward_message(forwardable_segs)
                 yield UniMessage(forward_msg)
             else:
                 yield UniMessage(forwardable_segs)
-
-                if dynamic_segs:
-                    yield UniMessage(UniHelper.construct_forward_message(dynamic_segs))
 
         if failed_count > 0:
             message = f"{failed_count} 项媒体下载失败"
@@ -202,10 +196,8 @@ class Renderer:
 
         if result.repost:
             self._build_result_with_repost(result, forwardable_segs, author_name)
-        else:
-            forwardable_segs.append(
-                f"{author_name}：{build_plain_text(result.content)}"
-            )
+        elif plain := build_plain_text(result.content):
+            forwardable_segs.append(f"{author_name}：{plain}")
 
     def _build_result_with_repost(
         self,
