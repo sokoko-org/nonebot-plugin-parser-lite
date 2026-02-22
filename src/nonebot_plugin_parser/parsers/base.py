@@ -1,5 +1,6 @@
 """Parser 基类定义"""
 
+# ruff: noqa: E402
 import asyncio
 from re import Match, Pattern, compile
 from abc import ABC

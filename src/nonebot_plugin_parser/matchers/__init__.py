@@ -14,12 +14,16 @@ from ..parsers import BaseParser, ParseResult, BilibiliParser
 from ..renders import RENDERER
 from ..download import DOWNLOADER
 from ..parsers.data import AudioContent, VideoContent
+from nonebot import on_notice
+from nonebot_plugin_alconna.uniseg import message_reaction
 
 
 def _get_enabled_parser_classes() -> list[type[BaseParser]]:
     disabled_platforms = set(pconfig.disabled_platforms)
     all_subclass = BaseParser.get_all_subclass()
-    return [_cls for _cls in all_subclass if _cls.platform.name not in disabled_platforms]
+    return [
+        _cls for _cls in all_subclass if _cls.platform.name not in disabled_platforms
+    ]
 
 
 # 关键词 -> Parser 映射
@@ -96,14 +100,23 @@ async def parser_handler(
                     logger.debug(f"Receipt.msg_ids: {receipt_msg_ids}")
                     if receipt_msg_ids:
                         for msg_id_info in receipt_msg_ids:
-                            if isinstance(msg_id_info, dict) and "message_id" in msg_id_info:
+                            if (
+                                isinstance(msg_id_info, dict)
+                                and "message_id" in msg_id_info
+                            ):
                                 msg_id = str(msg_id_info["message_id"])
-                                logger.debug(f"通过Receipt.msg_ids[0]['message_id']获取到消息ID: {msg_id}")
+                                logger.debug(
+                                    f"通过Receipt.msg_ids[0]['message_id']获取到消息ID: {msg_id}"
+                                )
                                 break
                     if msg_id:
                         _MSG_ID_RESULT_MAP[msg_id] = result
-                        logger.debug(f"保存消息ID与解析结果的关联: msg_id={msg_id}, url={cache_key}")
-                        logger.debug(f"当前_MSG_ID_RESULT_MAP大小: {len(_MSG_ID_RESULT_MAP)}")
+                        logger.debug(
+                            f"保存消息ID与解析结果的关联: msg_id={msg_id}, url={cache_key}"
+                        )
+                        logger.debug(
+                            f"当前_MSG_ID_RESULT_MAP大小: {len(_MSG_ID_RESULT_MAP)}"
+                        )
                     else:
                         logger.debug("未获取到消息ID")
                 except (NotImplementedError, TypeError, AttributeError) as e:
@@ -154,11 +167,6 @@ async def _():
         await UniMessage(msg).send()
 
 
-# 监听特定表情，触发延迟发送的媒体内容
-# group_msg_emoji_like事件
-from nonebot import on_notice
-from nonebot_plugin_alconna.uniseg import message_reaction
-
 on_notice_ = on_notice(priority=1, block=False)
 
 
@@ -183,13 +191,19 @@ async def handle_group_msg_emoji_like(event: NoticeEvent):
     elif hasattr(event, "notice_type") and event.notice_type == "group_msg_emoji_like":
         is_group_emoji_like = True
         if likes := getattr(event, "likes", None):
-            emoji_id = likes[0].get("emoji_id", "") if isinstance(likes[0], dict) else likes[0].emoji_id
+            emoji_id = (
+                likes[0].get("emoji_id", "")
+                if isinstance(likes[0], dict)
+                else likes[0].emoji_id
+            )
         if msg_id := getattr(event, "message_id", None):
             liked_message_id = msg_id
         is_add = getattr(event, "is_add", True)
     emoji_id = int(emoji_id)
     liked_message_id = int(liked_message_id)
-    logger.debug(f"emoji_id:{emoji_id} | liked_message_id:{liked_message_id} | is_add:{is_add}")
+    logger.debug(
+        f"emoji_id:{emoji_id} | liked_message_id:{liked_message_id} | is_add:{is_add}"
+    )
     # 检查是否是group_msg_emoji_like事件且表情ID有效
     if not is_group_emoji_like or not emoji_id:
         return
@@ -211,7 +225,9 @@ async def handle_group_msg_emoji_like(event: NoticeEvent):
         logger.warning(f"Failed to send resolving reaction: {e}")
 
     try:
-        logger.debug(f"收到表情点赞事件: emoji_id={emoji_id}, message_id={liked_message_id}, event={event}")
+        logger.debug(
+            f"收到表情点赞事件: emoji_id={emoji_id}, message_id={liked_message_id}, event={event}"
+        )
         logger.debug(f"当前_MSG_ID_RESULT_MAP: {list(_MSG_ID_RESULT_MAP.keys())}")
 
         # 根据消息ID获取对应的解析结果
@@ -245,7 +261,9 @@ async def handle_group_msg_emoji_like(event: NoticeEvent):
 
         # 如果仍然没有媒体内容，返回但不移除消息ID
         if not result.media_contents:
-            logger.debug(f"消息ID {liked_message_id} 对应的解析结果中没有可发送的媒体内容")
+            logger.debug(
+                f"消息ID {liked_message_id} 对应的解析结果中没有可发送的媒体内容"
+            )
             # 发送"失败"的表情（使用用户指定的表情ID 10060）
             try:
                 if liked_message_id:
@@ -337,11 +355,15 @@ async def handle_group_msg_emoji_like(event: NoticeEvent):
         if remaining_media:
             # 如果还有未发送成功的媒体，更新缓存中的解析结果
             _MSG_ID_RESULT_MAP[str(liked_message_id)] = result
-            logger.debug(f"更新_MSG_ID_RESULT_MAP中的消息ID: {liked_message_id}（剩余{len(remaining_media)}个媒体）")
+            logger.debug(
+                f"更新_MSG_ID_RESULT_MAP中的消息ID: {liked_message_id}（剩余{len(remaining_media)}个媒体）"
+            )
 
         elif str(liked_message_id) in _MSG_ID_RESULT_MAP:
             del _MSG_ID_RESULT_MAP[str(liked_message_id)]
-            logger.debug(f"从_MSG_ID_RESULT_MAP中移除消息ID: {liked_message_id}（所有媒体发送成功）")
+            logger.debug(
+                f"从_MSG_ID_RESULT_MAP中移除消息ID: {liked_message_id}（所有媒体发送成功）"
+            )
         # 发送对应的表情
         if sent:
             # 发送"完成"的表情（使用用户指定的表情ID 124）
