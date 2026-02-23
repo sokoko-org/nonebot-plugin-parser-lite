@@ -8,7 +8,7 @@ from datetime import datetime
 from httpx import AsyncClient, NetworkError
 from google.protobuf import descriptor_pb2, descriptor_pool
 from google.protobuf.message_factory import GetMessageClass
-from ..data import MediaContent, VideoContent, StickerContent, GraphicsContent
+from ..data import MediaContent, VideoContent, StickerContent, GraphicContent
 from .models import (
     Post,
     Posts,
@@ -127,7 +127,7 @@ def build_contents(posts: Posts) -> list[MediaContent | str]:
             contents.append(StickerContent(sticker_task, "small", part.desc))
         elif isinstance(part, FragImage):
             image_task = DOWNLOADER.download_img(part.origin_src, ext_headers=headers)
-            contents.append(GraphicsContent(image_task))
+            contents.append(GraphicContent(image_task))
         elif isinstance(part, FragAt):
             # 如果上一项是文本，则追加到上一项末尾
             if contents and isinstance(contents[-1], str):

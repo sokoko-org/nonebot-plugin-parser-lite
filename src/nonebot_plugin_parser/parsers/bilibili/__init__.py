@@ -560,7 +560,7 @@ class BilibiliParser(BaseParser):
         for node in opus_data.gen_text_img():
             if isinstance(node, ImageNode):
                 # 使用 DOWNLOADER 下载并封装为 GraphicsContent
-                contents.append(self.create_graphics(node.url, node.alt))
+                contents.append(self.create_graphic(node.url, node.alt))
 
             elif isinstance(node, TextNode):
                 contents.append(node.text)
@@ -720,7 +720,7 @@ class BilibiliParser(BaseParser):
             title=favdata.title,
             timestamp=favdata.timestamp,
             author=self.create_author(favdata.info.upper.name, favdata.info.upper.face),
-            content=[self.create_graphics(fav.cover, fav.desc) for fav in favdata.medias],
+            content=[self.create_graphic(fav.cover, fav.desc) for fav in favdata.medias],
         )
 
     async def _get_video(self, *, bvid: str | None = None, avid: int | None = None) -> Video:

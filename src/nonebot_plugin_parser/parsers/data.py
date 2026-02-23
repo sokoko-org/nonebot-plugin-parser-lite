@@ -75,8 +75,8 @@ class ImageContent(MediaContent):
 
 
 @dataclass(repr=False, slots=True)
-class GraphicsContent(MediaContent):
-    """图文内容 即不参与九宫格的图片"""
+class GraphicContent(MediaContent):
+    """仅渲染图片,此图片不参与九宫格且不会被下载发送给用户"""
 
     alt: str | None = None
     """图片描述 渲染时居中显示"""
@@ -115,6 +115,8 @@ class Author:
     """作者头像 URL 或本地路径"""
     description: str | None = None
     """作者个性签名等"""
+    id: str | int | None = None
+    """作者id"""
 
     async def get_avatar_path(self) -> Path | None:
         if self.avatar is None:
@@ -126,18 +128,18 @@ class Author:
 
 
 @dataclass(repr=False, slots=True)
-class State:
+class Stats:
     """统计信息"""
 
-    view_count: int = 0
+    view_count: int | None = None
     """浏览数"""
-    like_count: int = 0
+    like_count: int | None = None
     """点赞数"""
-    collecte_count: int = 0
+    collecte_count: int | None = None
     """收藏数"""
-    share_count: int = 0
+    share_count: int | None = None
     """分享数"""
-    comment_count: int = 0
+    comment_count: int | None = None
     """评论数"""
     extra: dict[str, Any] = field(default_factory=dict)
     """额外信息, 比如弹幕数/硬币数"""
@@ -153,7 +155,7 @@ class Comment:
     """评论内容，可以是文本或媒体对象"""
     timestamp: int | None
     """发布时间戳，单位秒"""
-    state: State | None = None
+    state: Stats | None = None
     """统计信息"""
     location: str | None = None
     """位置信息，可选"""
@@ -191,7 +193,7 @@ class ParseResult:
     """来源链接"""
     content: Sequence[MediaContent | str | None] = field(default_factory=list)
     """资源/文本内容"""
-    state: State | None = None
+    stats: Stats | None = None
     """统计信息"""
     comments: list[Comment] = field(default_factory=list)
     """评论列表"""
@@ -223,14 +225,9 @@ class ParseResult:
         for cont in self.content:
             if isinstance(cont, VideoContent):
                 return await cont.get_cover_path()
-            elif isinstance(cont, ImageContent):
+            elif isinstance(cont, (ImageContent, GraphicContent)):
                 return await cont.get_path()
-
-        # 如果没有视频和图片内容，使用默认图片
-        default_image_path = (
-            Path(__file__).parent.parent / "renders" / "resources" / "QIQI.jpg"
-        )
-        return default_image_path if default_image_path.exists() else None
+        return None
 
     @property
     def formatted_datetime(self) -> str | None:

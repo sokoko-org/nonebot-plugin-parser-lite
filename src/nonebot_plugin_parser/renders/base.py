@@ -18,7 +18,6 @@ from ..parsers.data import (
     ImageContent,
     MediaContent,
     VideoContent,
-    GraphicsContent,
 )
 
 from nonebot_plugin_htmlrender import template_to_pic
@@ -54,13 +53,13 @@ class Renderer:
         yield msg
 
         # 媒体内容
-        async for message in self.render_contents(result):
+        async for message in self.send_content(result):
             yield message
 
-    async def render_contents(
+    async def send_content(
         self, result: ParseResult
     ) -> AsyncGenerator[UniMessage[Any], None]:
-        """渲染媒体内容消息
+        """发送媒体内容消息
 
         Args:
             result (ParseResult): 解析结果
@@ -93,19 +92,6 @@ class Renderer:
                     except DownloadException:
                         failed_count += 1
                         continue
-                case GraphicsContent() as graphics:
-                    try:
-                        path = await cont.get_path()
-                        graphics_msg = UniHelper.img_seg(path)
-                        if graphics.alt is not None:
-                            graphics_msg = graphics_msg + graphics.alt
-                        forwardable_segs.append(graphics_msg)
-                    except (DownloadLimitException, ZeroSizeException):
-                        continue
-                    except DownloadException:
-                        failed_count += 1
-                        continue
-
         if media_contents and (
             pconfig.delay_send_media or pconfig.delay_send_lazy_download
         ):
@@ -305,7 +291,7 @@ class Renderer:
             },
             "content": content,
             "cover_path": await result.cover_path,
-            "state": result.state,
+            "state": result.stats,
             "comments": result.comments,
             "build_html": build_html,
         }

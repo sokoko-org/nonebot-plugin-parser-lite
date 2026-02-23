@@ -7,7 +7,7 @@ from ..parsers.data import (
     ImageContent,
     MediaContent,
     StickerContent,
-    GraphicsContent,
+    GraphicContent,
 )
 
 
@@ -134,7 +134,7 @@ async def build_html(content: Sequence[MediaContent | str | None]) -> str:
                 else:
                     html_parts.append(f'<p class="text">{cont}</p>')
 
-            elif isinstance(cont, GraphicsContent):
+            elif isinstance(cont, GraphicContent):
                 g_path = await cont.get_path()
                 g_src = g_path.as_uri()
                 alt = cont.alt or ""

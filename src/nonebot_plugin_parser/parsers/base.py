@@ -17,7 +17,7 @@ import os
 from httpx import AsyncClient
 
 from .data import (
-    State,
+    Stats,
     Author,
     Comment,
     Platform,
@@ -27,7 +27,7 @@ from .data import (
     MediaContent,
     VideoContent,
     StickerContent,
-    GraphicsContent,
+    GraphicContent,
     ParseResultKwargs,
 )
 from ..utils import keep_zh_en_num
@@ -245,13 +245,21 @@ class BaseParser:
         name: str,
         avatar_url: str | None = None,
         description: str | None = None,
+        id: str | int | None = None,
     ):
-        """创建作者对象"""
+        """
+        创建作者对象
+
+        :param name: 作者名称
+        :param avatar_url: 作者头像 URL
+        :param description: 作者描述
+        :param id: 作者 ID
+        """
 
         avatar_task = None
         if avatar_url:
             avatar_task = DOWNLOADER.download_img(avatar_url, ext_headers=self.headers)
-        return Author(name=name, avatar=avatar_task, description=description)
+        return Author(name=name, avatar=avatar_task, description=description, id=id)
 
     def create_video(
         self,
@@ -260,7 +268,14 @@ class BaseParser:
         duration: float = 0.0,
         video_name: str | None = None,
     ):
-        """创建视频内容"""
+        """
+        创建视频内容
+
+        :param url_or_task: 视频 URL 或下载任务
+        :param cover_url: 封面 URL
+        :param duration: 视频时长
+        :param video_name: 视频名称
+        """
 
         # 清理文件名，只保留安全字符
         if video_name:
@@ -284,7 +299,11 @@ class BaseParser:
         self,
         video_urls: list[str],
     ):
-        """创建视频内容列表"""
+        """
+        创建视频内容列表
+
+        :param video_urls: 视频 URL 列表
+        """
 
         return [self.create_video(url) for url in video_urls]
 
@@ -292,7 +311,11 @@ class BaseParser:
         self,
         image_urls: list[str],
     ):
-        """创建图片内容列表"""
+        """
+        创建图片内容列表
+
+        :param image_urls: 图片 URL 列表
+        """
 
         return [self.create_image(url) for url in image_urls]
 
@@ -300,7 +323,11 @@ class BaseParser:
         self,
         url_or_task: str | Task[Path],
     ):
-        """创建图片内容"""
+        """
+        创建图片内容
+
+        :param url_or_task: 图片 URL 或下载任务
+        """
 
         if isinstance(url_or_task, str):
             url_or_task = DOWNLOADER.download_img(url_or_task, ext_headers=self.headers)
@@ -313,7 +340,13 @@ class BaseParser:
         duration: float = 0.0,
         audio_name: str | None = None,
     ):
-        """创建音频内容"""
+        """
+        创建音频内容
+
+        :param url_or_task: 音频 URL 或下载任务
+        :param duration: 音频时长
+        :param audio_name: 音频名称
+        """
 
         # 清理文件名，只保留安全字符
         if audio_name:
@@ -330,15 +363,20 @@ class BaseParser:
 
         return AudioContent(url_or_task, duration)
 
-    def create_graphics(
+    def create_graphic(
         self,
         image_url: str,
         alt: str | None = None,
     ):
-        """创建图文内容 图片不能为空 文字可空 渲染时文字在前 图片在后"""
+        """
+        创建仅渲染图片,此图片不参与九宫格且不会被下载发送给用户
+
+        :param image_url: 图片 URL
+        :param alt: 图片描述
+        """
 
         image_task = DOWNLOADER.download_img(image_url, ext_headers=self.headers)
-        return GraphicsContent(image_task, alt)
+        return GraphicContent(image_task, alt)
 
     def create_sticker(
         self,
@@ -358,7 +396,7 @@ class BaseParser:
         image_task = DOWNLOADER.download_img(url, ext_headers=self.headers)
         return StickerContent(image_task, size, desc)
 
-    def create_state(
+    def create_stats(
         self,
         view_count: int = 0,
         like_count: int = 0,
@@ -367,11 +405,20 @@ class BaseParser:
         comment_count: int = 0,
         extra: dict[str, Any] | None = None,
     ):
-        """创建统计信息"""
+        """
+        创建统计信息
+
+        :param view_count: 浏览数
+        :param like_count: 点赞数
+        :param collect_count: 收藏数
+        :param share_count: 分享数
+        :param comment_count: 评论数
+        :param extra: 额外的信息
+        """
         if extra is None:
             extra = {}
 
-        return State(
+        return Stats(
             view_count=view_count,
             like_count=like_count,
             collecte_count=collect_count,
@@ -385,12 +432,22 @@ class BaseParser:
         author: Author,
         content: list[MediaContent | str | None],
         timestamp: int | None = None,
-        state: State | None = None,
+        state: Stats | None = None,
         location: str | None = None,
         replies: list[Comment] | None = None,
         parent_author: Author | None = None,
     ):
-        """创建评论内容"""
+        """
+        创建评论内容
+
+        :param author: 评论作者
+        :param content: 评论内容
+        :param timestamp: 评论时间戳
+        :param state: 评论统计信息
+        :param location: 评论位置
+        :param replies: 评论回复
+        :param parent_author: 评论的父级作者
+        """
 
         if replies is None:
             replies = []

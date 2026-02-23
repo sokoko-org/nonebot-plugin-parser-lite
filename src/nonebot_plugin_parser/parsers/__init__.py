@@ -9,7 +9,7 @@ from .data import (
     AudioContent,
     ImageContent,
     VideoContent,
-    GraphicsContent,
+    GraphicContent,
 )
 from .kuwo import KuWoParser as KuWoParser
 from .acfun import AcfunParser as AcfunParser
@@ -33,7 +33,7 @@ __all__ = [
     "BaseParser",
     "BilibiliParser",
     "DouyinParser",
-    "GraphicsContent",
+    "GraphicContent",
     "ImageContent",
     "KuGouParser",
     "KuWoParser",

@@ -191,7 +191,7 @@ class KuGouParser(BaseParser):
 
             # 创建封面图片内容
             cover_url = playinfo.album_img.format(size=480)
-            contents: list[MediaContent] = [self.create_image(cover_url)]
+            contents: list[MediaContent] = [self.create_graphic(cover_url)]
 
             contents.append(audio_content)
 
