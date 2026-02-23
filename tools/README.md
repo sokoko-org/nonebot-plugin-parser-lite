@@ -13,9 +13,3 @@ protoc -I . --include_imports --descriptor_set_out=all.desc ./path/to/your/main.
 ```shell
 py desc2proto.py
 ```
-
-## 合并后的proto文件编译 Betterproto
-
-```shell
-protoc -I . --python_betterproto2_out=. example.proto
-```

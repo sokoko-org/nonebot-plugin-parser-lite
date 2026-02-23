@@ -1,8 +1,10 @@
 # Ref https://github.com/lumina37/aiotieba/blob/ad99009d6584bb5341b8cf11cd0095085f81f414/aiotieba/api/get_posts/_classdef.py
 # 精简优化版
+
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportIncompatibleMethodOverride=false
 # pyright: reportArgumentType=false
+
 
 from __future__ import annotations
 
@@ -15,8 +17,6 @@ from collections.abc import Iterator
 
 import yarl
 from google.protobuf.message import Message
-
-from .PbPageResIdl import PbPageResIdlDataRes
 
 TypeContainer = TypeVar("TypeContainer")
 
@@ -421,8 +421,8 @@ class Gender(IntEnum):
     用户性别
 
     Note:
-        UNKNOWN 未知
-        MALE 男性
+        UNKNOWN 未知\n
+        MALE 男性\n
         FEMALE 女性
     """
 
@@ -436,8 +436,8 @@ class PrivLike(IntEnum):
     关注吧列表的公开状态
 
     Note:
-        PUBLIC 所有人可见
-        FRIEND 好友可见
+        PUBLIC 所有人可见\n
+        FRIEND 好友可见\n
         HIDE 完全隐藏
     """
 
@@ -451,9 +451,9 @@ class PrivReply(IntEnum):
     帖子评论权限
 
     Note:
-        ALL 允许所有人
-        UNKNOWN 未知分类
-        FANS 仅允许我的粉丝
+        ALL 允许所有人\n
+        UNKNOWN 未知分类\n
+        FANS 仅允许我的粉丝\n
         FOLLOW 仅允许我的关注
     """
 
@@ -1125,7 +1125,7 @@ class Posts(Containers[Post]):
     thread: Thread = dcs.field(default_factory=Thread)
 
     @staticmethod
-    def from_tbdata(data_proto: PbPageResIdlDataRes) -> Posts:
+    def from_tbdata(data_proto: Message) -> Posts:
         page = Page.from_tbdata(data_proto.page)
         forum = Forum.from_tbdata(data_proto.forum)
         thread = Thread.from_tbdata(data_proto)
