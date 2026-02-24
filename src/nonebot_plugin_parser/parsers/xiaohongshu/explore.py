@@ -1,19 +1,17 @@
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from .common import Video
-
 
 class StreamUrl(Struct):
     """Wrapper for stream url"""
 
     masterUrl: str
     """主链接"""
-    backupUrls: list[str]
-    """备选链接"""
+    # backupUrls: list[str]
+    # """备选链接"""
 
 
-class ImageStream(Struct):
+class Stream(Struct):
     """Wrapper for image stream"""
 
     h264: list[StreamUrl] = field(default_factory=list)
@@ -25,16 +23,32 @@ class ImageStream(Struct):
     def stream_url(self) -> str:
         """获取第一个非空流列表中的第一个可用URL，优先级为h264 > h265 > h266 > av1"""
         return next(
-            (stream_list[0].masterUrl for stream_list in [self.h264, self.h265, self.h266, self.av1] if stream_list),
+            (
+                stream_list[0].masterUrl
+                for stream_list in [self.h264, self.h265, self.h266, self.av1]
+                if stream_list
+            ),
             "",
         )
 
 
+class Media(Struct):
+    stream: Stream
+
+
+class Video(Struct):
+    media: Media
+
+    @property
+    def video_url(self) -> str:
+        return self.media.stream.stream_url
+
+
 class Image(Struct):
     urlDefault: str
-    livePhoto: bool
+    livePhoto: bool = False
     """是否为动态图片(即视频)"""
-    stream: ImageStream = field(default_factory=ImageStream)
+    stream: Stream = field(default_factory=Stream)
     """图片流信息(若为动态图片，应从此获取图片mp4)"""
 
     @property
@@ -54,15 +68,23 @@ class User(Struct):
     avatar: str
 
 
+class InteractInfo(Struct):
+    likedCount: str
+    collectedCount: str
+    commentCount: str
+    shareCount: str
+
+
 class NoteDetail(Struct):
-    type: str
-    """类型，一般是normal/video"""
+    # type: str
+    # """类型，一般是normal/video"""
     title: str
     """标题"""
     desc: str
     """简介"""
     user: User
     lastUpdateTime: int
+    interactInfo: InteractInfo
     imageList: list[Image] = field(default_factory=list)
     video: Video | None = None
 
@@ -88,10 +110,34 @@ class NoteDetail(Struct):
         return [image.live_url for image in self.imageList if image.live_url]
 
 
+class CommentUser(Struct):
+    nickname: str
+    image: str
+    userId: str
+
+
+class Comment(Struct):
+    userInfo: CommentUser
+    createTime: int
+    subCommentCount: str
+    content: str
+    likeCount: str
+    ipLocation: str
+    pictures: list[Image] = field(default_factory=list)
+    subComments: list["Comment"] = field(default_factory=list)
+
+
+class CommentsList(Struct):
+    """Wrapper for comments list"""
+
+    comments: list[Comment] = field(name="list", default_factory=list)
+
+
 class NoteDetailWrapper(Struct):
     """Wrapper for note detail, represents the value in noteDetailMap[xhs_id]"""
 
     note: NoteDetail
+    comments: CommentsList
 
 
 class Note(Struct):
@@ -100,10 +146,20 @@ class Note(Struct):
     noteDetailMap: dict[str, NoteDetailWrapper]
 
 
+class MojiData(Struct):
+    redmojiMap: dict[str, str]
+    """表情包映射字典"""
+
+
+class RedMoji(Struct):
+    mojiData: MojiData
+
+
 class InitialState(Struct):
     """Root structure of window.__INITIAL_STATE__"""
 
     note: Note
+    redMoji: RedMoji
 
 
 decoder = Decoder(InitialState)

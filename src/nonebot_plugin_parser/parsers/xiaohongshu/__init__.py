@@ -5,9 +5,11 @@ from urllib.parse import parse_qsl
 from curl_cffi import AsyncSession
 
 from ..base import Platform, BaseParser, PlatformEnum, ParseException, handle, pconfig
-from ..data import MediaContent
+from ..data import Comment, MediaContent
 from .explore import InitialState as exploreInitialState
 from .explore import decoder as exploreDecoder
+
+EMOJI_PATTERN = re.compile(r"(\[[\u4e00-\u9fff]{1,4}R\])")
 
 
 class XiaoHongShuParser(BaseParser):
@@ -50,9 +52,7 @@ class XiaoHongShuParser(BaseParser):
         url = f"https://{searched[0]}"
         return await self.parse_with_redirect(url, self.ios_headers)
 
-    # discovery 链接需要在控制台使用手机模式打开，不然会跳转 explore
     # https://www.xiaohongshu.com/discovery/item/691e68a8000000001e02bcda?xsec_token=CBunzr4Cq8N7jbcXqpWDxGn11k7XwVIJ59KOvkRS_Qabw=
-    # https://www.xiaohongshu.com/explore/691e68a8000000001e02bcda?xsec_token=CBunzr4Cq8N7jbcXqpWDxGn11k7XwVIJ59KOvkRS_Qabw=
     @handle(
         "xiaohongshu.com",
         r"(?P<type>explore|search_result|discovery/item)/(?P<note_id>[0-9a-zA-Z]+)\?(?P<qs>[A-Za-z0-9._%&+=/#@-]+)",
@@ -95,48 +95,122 @@ class XiaoHongShuParser(BaseParser):
             raise ParseException("小红书分享链接失效或内容已删除")
         return exploreDecoder.decode(raw)
 
-    def _build_result_from_note(
-        self,
-        *,
-        title: str,
-        text: str,
-        author_name: str,
-        author_avatar: str,
-        video_url: str | None,
-        live_urls: list[tuple[str, str]],
-        image_urls: list[str],
-        timestamp: int,
-        cover_from_images: bool = True,
-    ):
-        contents: list[MediaContent | str] = [text]
+    async def parse_explore(self, url: str, note_id: str):
+        init_state = await self._fetch_initial_state(url)
+        note_data = init_state.note.noteDetailMap[note_id]
+        note_detail = note_data.note
+        contents: list[MediaContent | str] = [note_detail.desc]
+        image_urls = note_detail.image_urls
 
-        if video_url:
-            cover_url = image_urls[0] if cover_from_images and image_urls else None
+        if video_url := note_detail.video_url:
+            cover_url = image_urls[0] if image_urls else None
             contents.append(self.create_video(video_url, cover_url))
         elif image_urls:
             contents.extend(self.create_images(image_urls))
 
         contents.extend(
             self.create_video(live_url, live_cover_url)
-            for live_url, live_cover_url in live_urls
+            for live_url, live_cover_url in note_detail.live_urls
         )
-        author = self.create_author(name=author_name, avatar_url=author_avatar)
+        author = self.create_author(
+            name=note_detail.nickname, avatar_url=note_detail.avatar_url
+        )
+
+        def parse_text_with_stickers(text: str) -> list[str | MediaContent]:
+            """
+            :param text: 原始文本
+            :return: [str | MediaContent]
+            """
+            mapping = init_state.redMoji.mojiData.redmojiMap
+            if not mapping:  # 映射为空则不处理
+                return [text]
+            result: list[str | MediaContent] = []
+            last_end = 0
+            has_replacement = False  # 是否真的替换出了 sticker
+
+            for m in EMOJI_PATTERN.finditer(text):
+                start, end = m.span()
+                key = m.group(1)  # 如 "[大笑R]"
+
+                url = mapping.get(key)
+
+                if not url:
+                    # 没有映射就直接跳过这次匹配：
+                    continue
+
+                # 走到这里说明至少有一次成功替换
+                has_replacement = True
+
+                # 先把上一个匹配结束到这次匹配开始之间的文本加入
+                if start > last_end:
+                    if segment := text[last_end:start]:
+                        result.append(segment)
+
+                # 加入 sticker
+                result.append(
+                    self.create_sticker(
+                        url=url,
+                        desc=key,
+                    )
+                )
+
+                last_end = end
+
+            # 如果没有任何成功替换，直接返回整段文本
+            if not has_replacement:
+                return [text] if text else []
+
+            # 处理最后一段普通文本
+            if last_end < len(text):
+                if tail := text[last_end:]:
+                    result.append(tail)
+
+            return result
+
+        commentList: list[Comment] = []
+
+        for c in note_data.comments.comments:
+            comment = self.create_comment(
+                author=self.create_author(
+                    name=c.userInfo.nickname,
+                    avatar_url=c.userInfo.image,
+                ),
+                content=parse_text_with_stickers(c.content),
+                timestamp=c.createTime,
+                stats=self.create_stats(
+                    like_count=c.likeCount,
+                    comment_count=c.subCommentCount,
+                ),
+                location=c.ipLocation,
+            )
+
+            for sub in c.subComments:
+                comment.replies.append(
+                    self.create_comment(
+                        author=self.create_author(
+                            name=sub.userInfo.nickname,
+                            avatar_url=sub.userInfo.image,
+                        ),
+                        content=parse_text_with_stickers(sub.content),
+                        timestamp=sub.createTime,
+                        stats=self.create_stats(
+                            like_count=sub.likeCount,
+                            comment_count=sub.subCommentCount,
+                        ),
+                    )
+                )
+            commentList.append(comment)
 
         return self.result(
-            title=title, author=author, content=contents, timestamp=timestamp
-        )
-
-    async def parse_explore(self, url: str, note_id: str):
-        init_state = await self._fetch_initial_state(url)
-        note_detail = init_state.note.noteDetailMap[note_id].note
-
-        return self._build_result_from_note(
             title=note_detail.title,
-            text=note_detail.desc,
-            author_name=note_detail.nickname,
-            author_avatar=note_detail.avatar_url,
-            video_url=note_detail.video_url,
-            live_urls=note_detail.live_urls,
-            image_urls=note_detail.image_urls,
+            author=author,
+            stats=self.create_stats(
+                like_count=note_detail.interactInfo.likedCount,
+                comment_count=note_detail.interactInfo.commentCount,
+                share_count=note_detail.interactInfo.shareCount,
+                collect_count=note_detail.interactInfo.collectedCount,
+            ),
+            comments=commentList,
+            content=contents,
             timestamp=note_detail.lastUpdateTime // 1000,
         )
