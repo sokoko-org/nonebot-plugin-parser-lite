@@ -26,7 +26,9 @@ ANDROID_HEADER: Final[dict[str, str]] = {
 
 COMMON_TIMEOUT: Final[Timeout] = Timeout(connect=15.0, read=20.0, write=10.0, pool=10.0)
 
-DOWNLOAD_TIMEOUT: Final[Timeout] = Timeout(connect=15.0, read=240.0, write=10.0, pool=10.0)
+DOWNLOAD_TIMEOUT: Final[Timeout] = Timeout(
+    connect=15.0, read=240.0, write=10.0, pool=10.0
+)
 
 
 class PlatformEnum(str, Enum):
@@ -38,7 +40,7 @@ class PlatformEnum(str, Enum):
     NETEASE = "netease"
     NGA = "nga"
     TIKTOK = "tiktok"
-    X = "X"
+    X = "x"
     WEIBO = "weibo"
     XIAOHONGSHU = "xiaohongshu"
     TAPTAP = "taptap"
