@@ -6,7 +6,14 @@ from pathlib import Path
 import aiofiles
 from httpx import HTTPError, AsyncClient
 from nonebot import logger
-from rich.progress import Progress, BarColumn, TimeElapsedColumn, TimeRemainingColumn
+from rich.progress import (
+    DownloadColumn,
+    Progress,
+    BarColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
 
 from .task import auto_task
 from ..utils import merge_av, safe_unlink, generate_file_name
@@ -27,24 +34,20 @@ class StreamDownloader:
     async def streamd(
         self,
         url: str,
-        *,
         file_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
         max_retries: int = 3,
     ) -> Path:
-        """download file by url with stream
+        """
+        :param url: 下载文件的链接地址
+        :param file_name: 保存到本地的文件名，为空时根据 url 自动生成
+        :param ext_headers: 额外的请求头，会与默认请求头合并
+        :param max_retries: 下载失败时的最大重试次数
 
-        Args:
-            url (str): url address
-            file_name (str | None): file name. Defaults to generate_file_name.
-            ext_headers (dict[str, str] | None): ext headers. Defaults to None.
-            max_retries (int): maximum number of retries when download fails. Defaults to 3.
-
-        Returns:
-            Path: file path
-
-        Raises:
-            httpx.HTTPError: When download fails
+        :return: 下载完成后的本地文件路径
+        :raises ZeroSizeException: 资源大小为 0 时抛出
+        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
+        :raises DownloadException: 重试多次仍失败时抛出
         """
 
         if not file_name:
@@ -57,7 +60,6 @@ class StreamDownloader:
         headers = {**self.headers, **(ext_headers or {})}
 
         retry_count = 0
-        original_file_name = file_name
         while retry_count <= max_retries:
             try:
                 async with self.client.stream(
@@ -93,11 +95,6 @@ class StreamDownloader:
                         f"下载失败，已重试 {max_retries} 次 | url: {url}, file_path: {file_path}"
                     )
                     raise DownloadException(f"媒体下载失败: {e}") from e
-                # 如果是第二次重试或更晚，使用随机文件名
-                if retry_count >= 2:
-                    file_name = generate_file_name(url, Path(original_file_name).suffix)
-                    file_path = self.cache_dir / file_name
-                    logger.warning(f"使用随机文件名重试下载: {file_name}")
                 logger.warning(
                     f"下载失败，正在重试 ({retry_count}/{max_retries}) | url: {url}, "
                     f"error: {e}, 重试文件名: {file_name}"
@@ -107,22 +104,22 @@ class StreamDownloader:
         return file_path
 
     @staticmethod
-    def get_progress_bar(desc: str, total: int | None = None) -> Progress:
+    def get_progress_bar(desc: str, total: int) -> Progress:
         """获取进度条 bar
 
-        Args:
-            desc (str): 描述
-            total (int | None): 总大小. Defaults to None.
+        :param desc: 进度条描述文本
+        :param total: 总大小（字节数），用于显示进度比例，为空时显示为不确定进度
 
-        Returns:
-            Progress: 进度条
+        :return: 已配置好的进度条对象
         """
         progress = Progress(
             "[progress.description]{task.description}",
             BarColumn(),
             "[progress.percentage]{task.percentage:>3.0f}%",
-            TimeElapsedColumn(),  # 已用时间
-            TimeRemainingColumn(),  # 剩余时间
+            DownloadColumn(),
+            TransferSpeedColumn(),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
         )
         progress.add_task(f"[green]{desc}", total=total)
         return progress
@@ -131,35 +128,36 @@ class StreamDownloader:
     async def download_video(
         self,
         url: str,
-        *,
         video_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
     ) -> Path:
-        """download video file by url with stream
-
-        Args:
-            url (str): url address
-            video_name (str | None): video name. Defaults to get name by parse url.
-            ext_headers (dict[str, str] | None): ext headers. Defaults to None.
-
-        Returns:
-            Path: video file path
-
-        Raises:
-            httpx.HTTPError: When download fails
         """
-        # 检查是否是 m3u8 链接
-        if ".m3u8" in url:
-            return await self._download_m3u8_video(url, video_name)
+        下载普通视频
 
+        :param url: 视频下载地址
+        :param video_name: 保存到本地的视频文件名，为空时根据 url 自动生成 mp4 文件名
+        :param ext_headers: 额外的请求头，会与默认请求头合并
+
+        :return: 下载完成后的视频文件路径
+        :raises DownloadException: 下载过程中发生错误时抛出
+        """
         if video_name is None:
             video_name = generate_file_name(url, ".mp4")
         return await self.streamd(url, file_name=video_name, ext_headers=ext_headers)
 
-    async def _download_m3u8_video(
+    @auto_task
+    async def download_m3u8_video(
         self, m3u8_url: str, video_name: str | None = None
     ) -> Path:
-        """下载 m3u8 视频并合并为 mp4"""
+        """
+        下载 m3u8 视频并合并到 mp4
+
+        :param m3u8_url: m3u8 播放列表链接地址
+        :param video_name: 输出的 mp4 文件名，为空时根据 m3u8 链接生成
+
+        :return: 最终合并并转封装后的 mp4 文件路径
+        :raises DownloadException: m3u8 解析、下载或转封装失败时抛出
+        """
         # 生成文件 ID
         file_id = hashlib.md5(m3u8_url.encode()).hexdigest()[:16]
 
@@ -239,7 +237,14 @@ class StreamDownloader:
             raise DownloadException(f"视频下载失败: {e}") from e
 
     async def _smart_parse_m3u8(self, m3u8_url: str) -> list[str]:
-        """智能解析 m3u8，支持 Master Playlist (嵌套) 和 Media Playlist"""
+        """
+        智能解析 m3u8，支持 Master Playlist (嵌套) 和 Media Playlist
+
+        :param m3u8_url: m3u8 播放列表链接地址
+
+        :return: 展平后的 ts 片段完整下载链接列表
+        :raises DownloadException: 解析 m3u8 内容失败或未找到有效子列表时抛出
+        """
         from urllib.parse import urljoin
 
         logger.info(f"[StreamDownloader] 开始解析 m3u8: {m3u8_url}")
@@ -288,7 +293,14 @@ class StreamDownloader:
         return ts_urls
 
     async def _fetch_text(self, url: str) -> str:
-        """辅助函数：获取文本内容"""
+        """
+        获取文本内容
+
+        :param url: 目标文本资源的链接地址
+
+        :return: 响应体的文本内容
+        :raises DownloadException: 请求状态码非 200 时抛出
+        """
         # 准备请求 headers
         fetch_headers = self.headers.copy()
         if "taptap.cn" in url:
@@ -304,6 +316,9 @@ class StreamDownloader:
         return resp.text
 
     async def _has_ffmpeg(self) -> bool:
+        """
+        :return: 本机是否可用 ffmpeg 可执行程序
+        """
         try:
             proc = await asyncio.create_subprocess_shell(
                 "ffmpeg -version",
@@ -316,6 +331,11 @@ class StreamDownloader:
             return False
 
     async def _remux_to_mp4(self, input_path: Path, output_path: Path):
+        """
+        :param input_path: 输入的 ts 或其他容器格式文件路径
+        :param output_path: 转封装后输出的 mp4 文件路径
+        :return: None
+        """
         # 增加 -f mp4 强制格式，增加 probesize 防止开头数据分析失败
         cmd = (
             f'ffmpeg -y -v error -probesize 50M -analyzeduration 100M -i "{input_path}"'
@@ -331,22 +351,17 @@ class StreamDownloader:
     async def download_audio(
         self,
         url: str,
-        *,
         audio_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
     ) -> Path:
-        """download audio file by url with stream
+        """
+        下载音频
+        :param url: 音频下载地址
+        :param audio_name: 保存到本地的音频文件名，为空时根据 url 自动生成 mp3 文件名
+        :param ext_headers: 额外的请求头，会与默认请求头合并
 
-        Args:
-            url (str): url address
-            audio_name (str | None ): audio name. Defaults to generate from url.
-            ext_headers (dict[str, str] | None): ext headers. Defaults to None.
-
-        Returns:
-            Path: audio file path
-
-        Raises:
-            httpx.HTTPError: When download fails
+        :return: 下载完成后的音频文件路径
+        :raises DownloadException: 下载过程中发生错误时抛出
         """
         if audio_name is None:
             audio_name = generate_file_name(url, ".mp3")
@@ -356,61 +371,43 @@ class StreamDownloader:
     async def download_img(
         self,
         url: str,
-        *,
         img_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
     ) -> Path:
-        """download image file by url with stream
+        """
+        下载图片
 
-        Args:
-            url (str): url
-            img_name (str | None): image name. Defaults to generate from url.
-            ext_headers (dict[str, str] | None): ext headers. Defaults to None.
+        :param url: 图片下载地址
+        :param img_name: 保存到本地的图片文件名，为空时根据 url 自动生成 jpg 文件名
+        :param ext_headers: 额外的请求头，会与默认请求头合并
 
-        Returns:
-            Path: image file path
-
-        Raises:
-            httpx.HTTPError: When download fails
+        :return: 下载完成后的图片文件路径
+        :raises DownloadException: 下载过程中发生错误时抛出
         """
         if img_name is None:
             img_name = generate_file_name(url, ".jpg")
         return await self.streamd(url, file_name=img_name, ext_headers=ext_headers)
 
-    async def download_imgs_without_raise(
-        self,
-        urls: list[str],
-        *,
-        ext_headers: dict[str, str] | None = None,
-    ) -> list[Path]:
-        """download images without raise
-
-        Args:
-            urls (list[str]): urls
-            ext_headers (dict[str, str] | None): ext headers. Defaults to None.
-
-        Returns:
-            list[Path]: image file paths
-        """
-        paths_or_errs = await asyncio.gather(
-            *[self.download_img(url, ext_headers=ext_headers) for url in urls],
-            return_exceptions=True,
-        )
-        return [p for p in paths_or_errs if isinstance(p, Path)]
-
-    @auto_task
     async def download_av_and_merge(
         self,
         v_url: str,
         a_url: str,
-        *,
         output_path: Path,
         ext_headers: dict[str, str] | None = None,
     ) -> Path:
-        """download video and audio file by url with stream and merge"""
+        """
+        下载音频和视频文件并合并
+
+        :param v_url: 视频流下载地址
+        :param a_url: 音频流下载地址
+        :param output_path: 合并后输出的文件路径
+        :param ext_headers: 额外的请求头，会与默认请求头合并
+        :return: 合并后的视频文件本地路径
+        :raises DownloadException: 下载或合并过程中发生错误时抛出
+        """
         v_path, a_path = await asyncio.gather(
-            self.download_video(v_url, ext_headers=ext_headers),
-            self.download_audio(a_url, ext_headers=ext_headers),
+            self.download_video(url=v_url, ext_headers=ext_headers),
+            self.download_audio(url=a_url, ext_headers=ext_headers),
         )
         await merge_av(v_path=v_path, a_path=a_path, output_path=output_path)
         return output_path

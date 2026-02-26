@@ -1,38 +1,30 @@
-from typing import Any, Literal, TypedDict
-from asyncio import Task
+from typing import Any, Literal, TypedDict, overload
 from pathlib import Path
 from datetime import datetime
 from dataclasses import field, dataclass
-from collections.abc import Callable, Sequence, Coroutine
+from collections.abc import Sequence
+
+from ..download.task import DownloadTaskWrapper
 
 
-def repr_path_task(
-    path_task: Path | Task[Path] | Callable[[], Coroutine[Any, Any, Path]],
-) -> str:
-    if isinstance(path_task, Path):
-        return f"path={path_task.name}"
-    elif isinstance(path_task, Task):
-        return f"task={path_task.get_name()}, done={path_task.done()}"
-    else:
-        return f"callable={path_task.__name__}"
+def repr_path_task(path_task: DownloadTaskWrapper[Path]) -> str:
+    return f"url={path_task.url!r}"
 
 
 @dataclass(repr=False, slots=True)
 class MediaContent:
-    path_task: Path | Task[Path] | Callable[[], Coroutine[Any, Any, Path]]
+    path_task: DownloadTaskWrapper[Path]
     need_send: bool = True
     """是否发送"""
 
-    async def get_path(self) -> Path:
-        if isinstance(self.path_task, Path):
-            pass
-        elif isinstance(self.path_task, Task):
-            self.path_task = await self.path_task
-        else:
-            # 执行可调用对象（coroutine function）
-            self.path_task = await self.path_task()
-
-        return self.path_task
+    @overload
+    async def get_path(self) -> Path: ...
+    @overload
+    async def get_path(self, download: Literal[True]) -> Path: ...
+    @overload
+    async def get_path(self, download: Literal[False]) -> str: ...
+    async def get_path(self, download: bool = True) -> Path | str:
+        return await self.path_task if download else self.path_task.url
 
     def __repr__(self) -> str:
         prefix = self.__class__.__name__
@@ -50,18 +42,21 @@ class AudioContent(MediaContent):
 class VideoContent(MediaContent):
     """视频内容"""
 
-    cover: Path | Task[Path] | None = None
+    cover: DownloadTaskWrapper[Path] | None = None
     """视频封面"""
     duration: float = 0.0
     """时长 单位: 秒"""
 
-    async def get_cover_path(self) -> Path | None:
+    @overload
+    async def get_cover_path(self) -> Path | None: ...
+    @overload
+    async def get_cover_path(self, download: Literal[True]) -> Path | None: ...
+    @overload
+    async def get_cover_path(self, download: Literal[False]) -> str | None: ...
+    async def get_cover_path(self, download: bool = True) -> Path | str | None:
         if self.cover is None:
             return None
-        if isinstance(self.cover, Path):
-            return self.cover
-        self.cover = await self.cover
-        return self.cover
+        return await self.cover if download else self.cover.url
 
     @property
     def display_duration(self) -> str:
@@ -115,18 +110,21 @@ class Author:
     """作者名称"""
     id: str | None = None
     """作者id"""
-    avatar: Path | Task[Path] | None = None
+    avatar: DownloadTaskWrapper[Path] | None = None
     """作者头像 URL 或本地路径"""
     description: str | None = None
     """作者个性签名等"""
 
-    async def get_avatar_path(self) -> Path | None:
+    @overload
+    async def get_avatar_path(self) -> Path | None: ...
+    @overload
+    async def get_avatar_path(self, download: Literal[True]) -> Path | None: ...
+    @overload
+    async def get_avatar_path(self, download: Literal[False]) -> str | None: ...
+    async def get_avatar_path(self, download: bool = True) -> Path | str | None:
         if self.avatar is None:
             return None
-        if isinstance(self.avatar, Path):
-            return self.avatar
-        self.avatar = await self.avatar
-        return self.avatar
+        return await self.avatar if download else self.avatar.url
 
 
 @dataclass(repr=False, slots=True)
@@ -220,15 +218,20 @@ class ParseResult:
     def extra_info(self) -> str | None:
         return self.extra.get("info")
 
-    @property
-    async def cover_path(self) -> Path | None:
+    @overload
+    async def get_cover_path(self) -> Path | None: ...
+    @overload
+    async def get_cover_path(self, download: Literal[True]) -> Path | None: ...
+    @overload
+    async def get_cover_path(self, download: Literal[False]) -> str | None: ...
+    async def get_cover_path(self, download: bool = True) -> str | Path | None:
         """获取封面路径"""
         # 先检查视频内容
         for cont in self.content:
             if isinstance(cont, VideoContent):
-                return await cont.get_cover_path()
+                return await cont.get_cover_path(download=download)
             elif isinstance(cont, (ImageContent, GraphicContent)):
-                return await cont.get_path()
+                return await cont.get_path(download=download)
         return None
 
     @property

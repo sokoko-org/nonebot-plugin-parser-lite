@@ -7,14 +7,7 @@ from bilibili_api.video import VideoCodecs, VideoQuality
 from .constants import PlatformEnum
 
 import nonebot_plugin_localstore as _store
-from nonebot.plugin import PluginMetadata
-
-# 默认配置
-_driver = get_driver()
-_nickname = next(iter(_driver.config.nickname), "nonebot-plugin-parser")
-_cache_dir: Path = _store.get_plugin_cache_dir()
-_config_dir: Path = _store.get_plugin_config_dir()
-_data_dir: Path = _store.get_plugin_data_dir()
+from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 
 # 定义Config类
@@ -186,12 +179,17 @@ __plugin_meta__ = PluginMetadata(
     homepage="https://github.com/fllesser/nonebot-plugin-parser",
     type="application",
     config=Config,
-    supported_adapters={"~onebot.v11", "~onebot.v12"},
+    supported_adapters=inherit_supported_adapters(
+        "nonebot_plugin_alconna", "nonebot_plugin_uninfo"
+    ),
 )
 
 
 # 初始化配置实例
 _driver = get_driver()
+_cache_dir: Path = _store.get_plugin_cache_dir()
+_config_dir: Path = _store.get_plugin_config_dir()
+_data_dir: Path = _store.get_plugin_data_dir()
 pconfig: Config = get_plugin_config(Config)
 """插件配置"""
 gconfig = _driver.config

@@ -1,20 +1,15 @@
 """Parser 基类定义"""
 
-# ruff: noqa: E402
 import asyncio
+from pathlib import Path
 from re import Match, Pattern, compile
 from abc import ABC
 from typing import TYPE_CHECKING, Any, Literal, Sequence, TypeVar, ClassVar, cast
-from asyncio import Task
-from pathlib import Path
 from collections.abc import Callable, Coroutine
 from typing_extensions import Unpack, ParamSpec
-
-P = ParamSpec("P")
-R = TypeVar("R")
-
 from httpx import AsyncClient
 
+from ..download.task import DownloadTaskWrapper
 from .data import (
     Author,
     MediaContent,
@@ -48,6 +43,8 @@ from ..exception import ZeroSizeException as ZeroSizeException
 from ..exception import SizeLimitException as SizeLimitException
 from ..exception import DurationLimitException as DurationLimitException
 
+P = ParamSpec("P")
+R = TypeVar("R")
 T = TypeVar("T", bound="BaseParser")
 HandlerFunc = Callable[[T, Match[str]], Coroutine[Any, Any, ParseResult]]
 KeyPatterns = list[tuple[str, Pattern[str]]]
@@ -89,7 +86,7 @@ def retry(max_retries: int = 3, delay: float = 1.0):
 
 
 # 注册处理器装饰器
-def handle(keyword: str, pattern: str, max_retries: int = 3):
+def handle(keyword: str, pattern: str, max_retries: int = 1):
     """注册处理器装饰器"""
 
     def decorator(func: HandlerFunc[T]) -> HandlerFunc[T]:
@@ -100,8 +97,7 @@ def handle(keyword: str, pattern: str, max_retries: int = 3):
         key_patterns.append((keyword, compile(pattern)))
 
         # 应用重试装饰器，但保留原始函数的_key_patterns属性
-        # wrapped_func = retry(max_retries=max_retries)(func)
-        wrapped_func = func
+        wrapped_func = retry(max_retries=max_retries)(func)
         # 取消重试，防止死号
         # 复制_key_patterns属性到包装函数
         setattr(wrapped_func, _KEY_PATTERNS, key_patterns)
@@ -267,7 +263,9 @@ class BaseParser:
 
     def create_video(
         self,
-        url_or_task: str | Task[Path] | Callable[[], Coroutine[Any, Any, Path]],
+        url_or_task: str
+        | DownloadTaskWrapper[Path]
+        | Callable[[], Coroutine[Any, Any, Path]],
         cover_url: str | None = None,
         duration: float = 0.0,
         video_name: str | None = None,
@@ -276,7 +274,7 @@ class BaseParser:
         """
         创建视频内容
 
-        :param url_or_task: 视频 URL 或下载任务
+        :param url: 视频 URL
         :param cover_url: 封面 URL
         :param duration: 视频时长
         :param video_name: 视频名称
@@ -317,21 +315,21 @@ class BaseParser:
 
     def create_image(
         self,
-        url_or_task: str | Task[Path],
+        url: str,
         need_send: bool = True,
     ):
         """
         创建图片内容
 
-        :param url_or_task: 图片 URL 或下载任务
+        :param url: 图片 URL
         :param need_send: 是否发送
         """
 
-        return create_image(url_or_task=url_or_task, need_send=need_send)
+        return create_image(url=url, need_send=need_send)
 
     def create_audio(
         self,
-        url_or_task: str | Task[Path],
+        url: str,
         duration: float = 0.0,
         audio_name: str | None = None,
         need_send: bool = True,
@@ -339,14 +337,14 @@ class BaseParser:
         """
         创建音频内容
 
-        :param url_or_task: 音频 URL 或下载任务
+        :param url: 音频 URL
         :param duration: 音频时长
         :param audio_name: 音频名称
         :param need_send: 是否发送
         """
 
         return create_audio(
-            url_or_task=url_or_task,
+            url=url,
             duration=duration,
             audio_name=audio_name,
             need_send=need_send,

@@ -297,18 +297,18 @@ class Renderer:
                 "logo_path": (logo_path.as_uri() if logo_path.exists() else None),
             },
             "content": content,
-            "cover_path": await result.cover_path,
+            "cover_path": await result.get_cover_path(),
             "stats": result.stats,
             "comments": comments,
         }
 
         if result.author:
-            avatar_path = await result.author.get_avatar_path()
+            avatar_path = await result.author.get_avatar_path(download=False)
 
             data["author"] = {
                 "name": result.author.name,
                 "id": result.author.id,  # 传递 UID
-                "avatar_path": avatar_path.as_uri() if avatar_path else None,
+                "avatar_path": avatar_path or None,
             }
 
         if result.repost:

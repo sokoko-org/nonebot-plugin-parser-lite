@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 import os
 from pathlib import Path
 from typing import Any, Literal, Sequence
@@ -16,10 +16,9 @@ from .data import (
 )
 from ..utils import keep_zh_en_num
 from ..config import pconfig as pconfig
-from ..download import DOWNLOADER as DOWNLOADER
+from ..download import DOWNLOADER
+from ..download.task import DownloadTaskWrapper
 from ..constants import COMMON_HEADER
-from asyncio import Task
-from collections.abc import Coroutine
 
 headers = COMMON_HEADER.copy()
 
@@ -46,7 +45,9 @@ def create_author(
 
 
 def create_video(
-    url_or_task: str | Task[Path] | Callable[[], Coroutine[Any, Any, Path]],
+    url_or_task: str
+    | DownloadTaskWrapper[Path]
+    | Callable[[], Coroutine[Any, Any, Path]],
     cover_url: str | None = None,
     duration: float = 0.0,
     video_name: str | None = None,
@@ -55,7 +56,7 @@ def create_video(
     """
     创建视频内容
 
-    :param url_or_task: 视频 URL 或下载任务
+    :param url: 视频 URL
     :param cover_url: 封面 URL
     :param duration: 视频时长
     :param video_name: 视频名称
@@ -72,13 +73,32 @@ def create_video(
     cover_task = None
     if cover_url:
         cover_task = DOWNLOADER.download_img(cover_url, ext_headers=headers)
+    # 1) 传入 URL: 使用默认下载逻辑
     if isinstance(url_or_task, str):
-        url_or_task = DOWNLOADER.download_video(
+        video_task = DOWNLOADER.download_video(
             url_or_task, video_name=video_name, ext_headers=headers
         )
+    # 2) 传入 DownloadTaskWrapper: 保持原样
+    elif isinstance(url_or_task, DownloadTaskWrapper):
+        video_task = url_or_task
+    # 3) 传入下载函数: 自定义下载逻辑（不走 auto_task）
+    else:
 
+        async def _runner() -> Path:
+            return await url_or_task()
+
+        # 这里手动构造一个 DownloadTaskWrapper，url 塞个占位描述字符串
+        video_task = DownloadTaskWrapper(
+            func=_runner,
+            args=(),
+            kwargs={},
+            url=f"<custom-download:{video_name or 'video'}>",
+        )
     return VideoContent(
-        path_task=url_or_task, cover=cover_task, duration=duration, need_send=need_send
+        path_task=video_task,
+        cover=cover_task,
+        duration=duration,
+        need_send=need_send,
     )
 
 
@@ -95,20 +115,19 @@ def create_videos(
 
 
 def create_image(
-    url_or_task: str | Task[Path],
+    url: str,
     need_send: bool = True,
 ):
     """
     创建图片内容
 
-    :param url_or_task: 图片 URL 或下载任务
+    :param url: 图片 URL
     :param need_send: 是否发送
     """
 
-    if isinstance(url_or_task, str):
-        url_or_task = DOWNLOADER.download_img(url_or_task, ext_headers=headers)
+    task = DOWNLOADER.download_img(url, ext_headers=headers)
 
-    return ImageContent(path_task=url_or_task, need_send=need_send)
+    return ImageContent(path_task=task, need_send=need_send)
 
 
 def create_images(
@@ -124,7 +143,7 @@ def create_images(
 
 
 def create_audio(
-    url_or_task: str | Task[Path],
+    url: str,
     duration: float = 0.0,
     audio_name: str | None = None,
     need_send: bool = True,
@@ -132,7 +151,7 @@ def create_audio(
     """
     创建音频内容
 
-    :param url_or_task: 音频 URL 或下载任务
+    :param url: 音频 URL
     :param duration: 音频时长
     :param audio_name: 音频名称
     :param need_send: 是否发送
@@ -146,12 +165,9 @@ def create_audio(
         cleaned_base = keep_zh_en_num(base_name)
         audio_name = f"{cleaned_base}{ext}"
 
-    if isinstance(url_or_task, str):
-        url_or_task = DOWNLOADER.download_audio(
-            url_or_task, audio_name=audio_name, ext_headers=headers
-        )
+    task = DOWNLOADER.download_audio(url, audio_name=audio_name, ext_headers=headers)
 
-    return AudioContent(path_task=url_or_task, duration=duration, need_send=need_send)
+    return AudioContent(path_task=task, duration=duration, need_send=need_send)
 
 
 def create_graphic(

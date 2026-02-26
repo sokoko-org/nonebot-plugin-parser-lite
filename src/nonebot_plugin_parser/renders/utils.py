@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from markupsafe import escape
@@ -54,15 +55,18 @@ def build_images(img_list: list[str]) -> str:
     )
 
 
-async def build_html(content: list[MediaContent | str | None]) -> str:
+async def build_html(
+    content: list[MediaContent | str | None], download: bool = True
+) -> str:
     """构建模板可用的内容 HTML 字符串。
 
     文本、图片、表情、graphics 在这里直接拼成完整 HTML
+    :param content: 内容列表
+    :param download: 是否下载媒体
 
     :return: HTML
     """
     html_parts: list[str] = []
-
     current_imgs: list[str] = []
     """当前图片段相关状态：用于处理“连续图片合并为宫格”"""
 
@@ -78,8 +82,9 @@ async def build_html(content: list[MediaContent | str | None]) -> str:
 
     for idx, cont in enumerate(content):
         if isinstance(cont, ImageContent):
-            path = await cont.get_path()
-            src = path.as_uri()
+            src = await cont.get_path(download=download)
+            if isinstance(src, Path):
+                src = src.as_uri()
             current_imgs.append(src)
         else:
             # 任意非 image 内容会打断图片连续段
@@ -101,23 +106,25 @@ async def build_html(content: list[MediaContent | str | None]) -> str:
                 first_text_seen = True
 
             elif isinstance(cont, GraphicContent):
-                g_path = await cont.get_path()
-                g_src = g_path.as_uri()
+                src = await cont.get_path(download=download)
+                if isinstance(src, Path):
+                    src = src.as_uri()
                 alt = cont.alt or ""
                 html_parts.append(
                     '<div class="images-container">'
                     '<div class="images-grid single">'
                     '<div class="image-item">'
-                    f'<img src="{g_src}">'
+                    f'<img src="{src}">'
                     "</div></div>"
                     f'<center><span class="text">{alt}</span></center>'
                     "</div>"
                 )
             elif isinstance(cont, StickerContent):
-                s_path = await cont.get_path()
-                s_src = s_path.as_uri()
+                src = await cont.get_path(download=download)
+                if isinstance(src, Path):
+                    src = src.as_uri()
                 size = cont.size
-                html_parts.append(f'<img class="sticker {size}" src="{s_src}">')
+                html_parts.append(f'<img class="sticker {size}" src="{src}">')
 
     # 末尾如果还有图片段，补一次 flush
     flush_images()
@@ -133,15 +140,17 @@ def build_plain_text(content: list[MediaContent | str | None]) -> str:
 async def build_comments(comment_list: list[Comment]) -> list[dict[str, Any]]:
     comments: list[dict[str, Any]] = []
     for comment in comment_list:
-        avatar_path = await comment.author.get_avatar_path()
+        avatar_path = await comment.author.get_avatar_path(download=False)
         comments.append(
             {
                 "author": {
                     "name": comment.author.name,
-                    "id": comment.author.id,  # 传递 UID
-                    "avatar_path": avatar_path.as_uri() if avatar_path else None,
+                    "id": comment.author.id,
+                    "avatar_path": avatar_path or None,
                 },
-                "content": await build_html(list(comment.content)),
+                "content": await build_html(
+                    content=list(comment.content), download=False
+                ),
                 "formatted_datetime": comment.formatted_datetime,
                 "stats": comment.stats,
                 "location": comment.location,

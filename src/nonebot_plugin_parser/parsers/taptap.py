@@ -47,8 +47,12 @@ class TapTapParser(BaseParser):
             try:
                 async with get_new_page() as page:
                     # 导航到 URL，增加等待时间确保页面完全加载
-                    await page.goto(url, wait_until="networkidle")  # 等待网络空闲，确保资源加载完成
-                    await page.wait_for_timeout(5000)  # 增加等待时间到5秒，确保页面完全渲染
+                    await page.goto(
+                        url, wait_until="networkidle"
+                    )  # 等待网络空闲，确保资源加载完成
+                    await page.wait_for_timeout(
+                        5000
+                    )  # 增加等待时间到5秒，确保页面完全渲染
 
                     # 获取页面内容
                     response_text = await page.content()
@@ -70,7 +74,9 @@ class TapTapParser(BaseParser):
 
                         for pattern in patterns:
                             if match := re.search(pattern, response_text, re.DOTALL):
-                                logger.debug(f"使用正则表达式匹配成功: {pattern[:50]}...")
+                                logger.debug(
+                                    f"使用正则表达式匹配成功: {pattern[:50]}..."
+                                )
                                 try:
                                     if json_match := re.search(
                                         r"__NUXT_DATA__\s*=\s*(\[.*?\])",
@@ -87,7 +93,9 @@ class TapTapParser(BaseParser):
                                         nuxt_data = parsed_data
                                         break
                                 except json.JSONDecodeError as e:
-                                    logger.debug(f"解析 Nuxt 数据失败，尝试下一个正则表达式: {e}")
+                                    logger.debug(
+                                        f"解析 Nuxt 数据失败，尝试下一个正则表达式: {e}"
+                                    )
                                     continue
 
                     # 方式2: 如果找不到 __NUXT_DATA__，尝试从 window.__NUXT__ 中提取
@@ -135,10 +143,16 @@ class TapTapParser(BaseParser):
             except Exception as e:
                 retry_count += 1
                 if retry_count > max_retries:
-                    logger.error(f"获取 Nuxt 数据失败，已重试 {max_retries} 次 | url: {url}, error: {e}")
-                    raise ParseException(f"获取 Nuxt 数据失败: {url}, error: {e}") from e
+                    logger.error(
+                        f"获取 Nuxt 数据失败，已重试 {max_retries} 次 | url: {url}, error: {e}"
+                    )
+                    raise ParseException(
+                        f"获取 Nuxt 数据失败: {url}, error: {e}"
+                    ) from e
 
-                logger.warning(f"获取 Nuxt 数据失败，正在重试 ({retry_count}/{max_retries}) | url: {url}, error: {e}")
+                logger.warning(
+                    f"获取 Nuxt 数据失败，正在重试 ({retry_count}/{max_retries}) | url: {url}, error: {e}"
+                )
                 await asyncio.sleep(1 * retry_count)  # 指数退避
 
         # 这个代码路径理论上不会执行，因为循环中要么返回要么抛出异常
@@ -155,7 +169,9 @@ class TapTapParser(BaseParser):
 
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(api_url, params=params, headers=self.headers)
+                response = await client.get(
+                    api_url, params=params, headers=self.headers
+                )
                 response.raise_for_status()
                 return response.json()
         except Exception as e:
@@ -176,7 +192,9 @@ class TapTapParser(BaseParser):
 
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(api_url, params=params, headers=self.headers)
+                response = await client.get(
+                    api_url, params=params, headers=self.headers
+                )
                 response.raise_for_status()
                 data = response.json()
                 if data.get("success") and data.get("data"):
@@ -257,7 +275,9 @@ class TapTapParser(BaseParser):
 
             app_data = author_data.get("app", {})
             result["author"]["app_title"] = app_data.get("title", "")
-            result["author"]["app_icon"] = app_data.get("icon", {}).get("original_url", "")
+            result["author"]["app_icon"] = app_data.get("icon", {}).get(
+                "original_url", ""
+            )
 
             # 游戏信息
             moment_app = moment_data.get("app", {})
@@ -265,8 +285,12 @@ class TapTapParser(BaseParser):
                 result["app"] = {
                     "title": moment_app.get("title", ""),
                     "icon": moment_app.get("icon", {}).get("original_url", ""),
-                    "rating": moment_app.get("stat", {}).get("rating", {}).get("score", ""),
-                    "latest_score": moment_app.get("stat", {}).get("rating", {}).get("latest_score", ""),
+                    "rating": moment_app.get("stat", {})
+                    .get("rating", {})
+                    .get("score", ""),
+                    "latest_score": moment_app.get("stat", {})
+                    .get("rating", {})
+                    .get("latest_score", ""),
                     "tags": moment_app.get("tags", []),
                 }
 
@@ -295,16 +319,22 @@ class TapTapParser(BaseParser):
 
                 try:
                     async with httpx.AsyncClient(timeout=10.0) as client:
-                        play_response = await client.get(play_info_url, params=play_info_params, headers=self.headers)
+                        play_response = await client.get(
+                            play_info_url, params=play_info_params, headers=self.headers
+                        )
                         play_response.raise_for_status()
                         play_data = play_response.json()
 
                         if play_data.get("data") and play_data["data"].get("url"):
                             real_url = play_data["data"]["url"]
                             result["videos"].append(real_url)
-                            logger.success(f"[TapTap] 从play-info接口获取到视频链接: {real_url[:50]}...")
+                            logger.success(
+                                f"[TapTap] 从play-info接口获取到视频链接: {real_url[:50]}..."
+                            )
                 except Exception as e:
-                    logger.warning(f"[TapTap] 获取视频play-info失败，将尝试浏览器嗅探: {e}")
+                    logger.warning(
+                        f"[TapTap] 获取视频play-info失败，将尝试浏览器嗅探: {e}"
+                    )
 
             # 内容解析 (Text & Images)
             first_post = data.get("first_post", {})
@@ -315,7 +345,9 @@ class TapTapParser(BaseParser):
 
             for content_item in json_contents:
                 item_type = content_item.get("type")
-                result["content_items"].append({"type": item_type, "data": content_item})
+                result["content_items"].append(
+                    {"type": item_type, "data": content_item}
+                )
 
                 if item_type == "paragraph":
                     paragraph_text = []
@@ -398,7 +430,9 @@ class TapTapParser(BaseParser):
             processed_comments = []
             for comment in comments[:10]:  # 只保留前10条评论
                 # 获取评论时间
-                created_time = comment.get("created_time") or comment.get("updated_time")
+                created_time = comment.get("created_time") or comment.get(
+                    "updated_time"
+                )
                 formatted_time = ""
                 if created_time:
                     try:
@@ -435,7 +469,9 @@ class TapTapParser(BaseParser):
                         "name": author.get("name", ""),
                         "avatar": author.get("avatar", ""),
                         "badges": badges,
-                        "processed_badges": "".join(processed_badges),  # 添加处理后的徽章HTML
+                        "processed_badges": "".join(
+                            processed_badges
+                        ),  # 添加处理后的徽章HTML
                     },
                     "content": "",
                     "created_time": created_time,
@@ -458,7 +494,9 @@ class TapTapParser(BaseParser):
                                     image_info = child.get("info", {}).get("image", {})
                                     original_url = image_info.get("original_url")
                                     if original_url:
-                                        tap_emoji_text = child.get("children", [])[0]["text"]
+                                        tap_emoji_text = child.get("children", [])[0][
+                                            "text"
+                                        ]
                                         processed_comment["content"] += (
                                             f'<img src="{original_url}" alt="表情" class="comment-badge"'
                                             f' title="{tap_emoji_text}" style="width: 20px; height: 20px;'
@@ -479,7 +517,9 @@ class TapTapParser(BaseParser):
                 if "child_posts" in comment:
                     for reply in comment["child_posts"][:5]:  # 只保留前5条回复
                         # 获取回复时间
-                        reply_created_time = reply.get("created_time") or reply.get("updated_time")
+                        reply_created_time = reply.get("created_time") or reply.get(
+                            "updated_time"
+                        )
                         reply_formatted_time = ""
                         if reply_created_time:
                             try:
@@ -516,7 +556,9 @@ class TapTapParser(BaseParser):
                                 "name": reply_author.get("name", ""),
                                 "avatar": reply_author.get("avatar", ""),
                                 "badges": reply_badges,
-                                "processed_badges": "".join(processed_reply_badges),  # 添加处理后的徽章HTML
+                                "processed_badges": "".join(
+                                    processed_reply_badges
+                                ),  # 添加处理后的徽章HTML
                             },
                             "content": "",
                             "created_time": reply_created_time,
@@ -534,10 +576,16 @@ class TapTapParser(BaseParser):
                                         if child.get("text"):
                                             processed_reply["content"] += child["text"]
                                         if child.get("type", "") == "tap_emoji":
-                                            image_info = child.get("info", {}).get("image", {})
-                                            original_url = image_info.get("original_url")
+                                            image_info = child.get("info", {}).get(
+                                                "image", {}
+                                            )
+                                            original_url = image_info.get(
+                                                "original_url"
+                                            )
                                             if original_url:
-                                                tap_emoji_text = child.get("children", [])[0]["text"]
+                                                tap_emoji_text = child.get(
+                                                    "children", []
+                                                )[0]["text"]
                                                 processed_reply["content"] += (
                                                     f'<img src="{original_url}" alt="表情" class="comment-badge"'
                                                     f' title="{tap_emoji_text}" style="width: 20px; height: 20px;'
@@ -586,7 +634,9 @@ class TapTapParser(BaseParser):
             async with get_new_page() as page:
                 try:
                     # 注入防检测脚本
-                    await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
+                    await page.add_init_script(
+                        "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});"
+                    )
                     await page.add_init_script(
                         "Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});"
                     )
@@ -599,15 +649,26 @@ class TapTapParser(BaseParser):
                             resp_url = response.url
 
                             # 1. 捕获 .m3u8 (含签名)
-                            if ".m3u8" in resp_url and "sign=" in resp_url and "taptap.cn" in resp_url:
-                                logger.debug(f"[TapTap] 嗅探到 M3U8: {resp_url[:50]}...")
+                            if (
+                                ".m3u8" in resp_url
+                                and "sign=" in resp_url
+                                and "taptap.cn" in resp_url
+                            ):
+                                logger.debug(
+                                    f"[TapTap] 嗅探到 M3U8: {resp_url[:50]}..."
+                                )
                                 captured_videos.add(resp_url)
 
                             # 2. 捕获 play-info 接口
-                            if "video/v1/play-info" in resp_url and response.status == 200:
+                            if (
+                                "video/v1/play-info" in resp_url
+                                and response.status == 200
+                            ):
                                 with contextlib.suppress(Exception):
                                     json_data = await response.json()
-                                    if json_data.get("data") and json_data["data"].get("url"):
+                                    if json_data.get("data") and json_data["data"].get(
+                                        "url"
+                                    ):
                                         real_url = json_data["data"]["url"]
                                         captured_videos.add(real_url)
 
@@ -622,8 +683,12 @@ class TapTapParser(BaseParser):
                         logger.info("[TapTap] API失败，执行完整 Nuxt 数据提取兜底")
                         data = []
                         try:
-                            await page.wait_for_selector("#__NUXT_DATA__", timeout=25000, state="attached")
-                            json_str = await page.evaluate('document.getElementById("__NUXT_DATA__").textContent')
+                            await page.wait_for_selector(
+                                "#__NUXT_DATA__", timeout=25000, state="attached"
+                            )
+                            json_str = await page.evaluate(
+                                'document.getElementById("__NUXT_DATA__").textContent'
+                            )
                             if json_str:
                                 data = json.loads(json_str)
                         except Exception as e:
@@ -645,22 +710,39 @@ class TapTapParser(BaseParser):
                                     if isinstance(user_obj, dict):
                                         # 提取作者名称
                                         result["author"]["name"] = (
-                                            self._resolve_nuxt_value(data, user_obj.get("name", "")) or ""
+                                            self._resolve_nuxt_value(
+                                                data, user_obj.get("name", "")
+                                            )
+                                            or ""
                                         )
                                         # 提取作者头像
                                         if "avatar" in user_obj:
-                                            avatar = self._resolve_nuxt_value(data, user_obj["avatar"])
-                                            if isinstance(avatar, str) and avatar.startswith("http"):
+                                            avatar = self._resolve_nuxt_value(
+                                                data, user_obj["avatar"]
+                                            )
+                                            if isinstance(
+                                                avatar, str
+                                            ) and avatar.startswith("http"):
                                                 result["author"]["avatar"] = avatar
-                                            elif isinstance(avatar, dict) and "original_url" in avatar:
+                                            elif (
+                                                isinstance(avatar, dict)
+                                                and "original_url" in avatar
+                                            ):
                                                 result["author"]["avatar"] = (
-                                                    self._resolve_nuxt_value(data, avatar["original_url"]) or ""
+                                                    self._resolve_nuxt_value(
+                                                        data, avatar["original_url"]
+                                                    )
+                                                    or ""
                                                 )
 
                                 # 处理包含 title 和 summary 字段的对象，提取标题和完整摘要
                                 if "title" in item and "summary" in item:
-                                    title = self._resolve_nuxt_value(data, item["title"])
-                                    summary = self._resolve_nuxt_value(data, item["summary"])
+                                    title = self._resolve_nuxt_value(
+                                        data, item["title"]
+                                    )
+                                    summary = self._resolve_nuxt_value(
+                                        data, item["summary"]
+                                    )
                                     if title and isinstance(title, str):
                                         result["title"] = title
                                     if summary and isinstance(summary, str):
@@ -672,59 +754,98 @@ class TapTapParser(BaseParser):
                                     stat_ref = item["stat"]
                                     stat_obj = self._resolve_nuxt_value(data, stat_ref)
                                     if isinstance(stat_obj, dict):
-                                        result["stats"]["likes"] = stat_obj.get("supports", 0) or stat_obj.get(
-                                            "likes", 0
+                                        result["stats"]["likes"] = stat_obj.get(
+                                            "supports", 0
+                                        ) or stat_obj.get("likes", 0)
+                                        result["stats"]["comments"] = stat_obj.get(
+                                            "comments", 0
                                         )
-                                        result["stats"]["comments"] = stat_obj.get("comments", 0)
-                                        result["stats"]["shares"] = stat_obj.get("shares", 0)
-                                        result["stats"]["views"] = stat_obj.get("pv_total", 0)
-                                        result["stats"]["plays"] = stat_obj.get("play_total", 0)
+                                        result["stats"]["shares"] = stat_obj.get(
+                                            "shares", 0
+                                        )
+                                        result["stats"]["views"] = stat_obj.get(
+                                            "pv_total", 0
+                                        )
+                                        result["stats"]["plays"] = stat_obj.get(
+                                            "play_total", 0
+                                        )
 
                                 # 直接处理包含统计数据的对象
                                 if "supports" in item or "likes" in item:
-                                    result["stats"]["likes"] = item.get("supports", 0) or item.get("likes", 0)
-                                    result["stats"]["comments"] = item.get("comments", 0)
+                                    result["stats"]["likes"] = item.get(
+                                        "supports", 0
+                                    ) or item.get("likes", 0)
+                                    result["stats"]["comments"] = item.get(
+                                        "comments", 0
+                                    )
                                     result["stats"]["shares"] = item.get("shares", 0)
                                     result["stats"]["views"] = item.get("pv_total", 0)
                                     result["stats"]["plays"] = item.get("play_total", 0)
 
                                 # 处理包含 contents 字段的对象，提取额外文本内容
                                 if "contents" in item:
-                                    contents = self._resolve_nuxt_value(data, item["contents"])
+                                    contents = self._resolve_nuxt_value(
+                                        data, item["contents"]
+                                    )
                                     if isinstance(contents, list):
                                         for content_item in contents:
                                             if isinstance(content_item, dict):
                                                 # 处理文本内容
                                                 if "text" in content_item:
-                                                    text = self._resolve_nuxt_value(data, content_item["text"])
+                                                    text = self._resolve_nuxt_value(
+                                                        data, content_item["text"]
+                                                    )
                                                     if text and isinstance(text, str):
                                                         all_text_parts.append(text)
                                                 # 处理段落内容
-                                                elif content_item.get("type") == "paragraph":
-                                                    children = content_item.get("children")
+                                                elif (
+                                                    content_item.get("type")
+                                                    == "paragraph"
+                                                ):
+                                                    children = content_item.get(
+                                                        "children"
+                                                    )
                                                     if isinstance(children, list):
                                                         for child in children:
-                                                            if isinstance(child, dict) and "text" in child:
+                                                            if (
+                                                                isinstance(child, dict)
+                                                                and "text" in child
+                                                            ):
                                                                 child_text = self._resolve_nuxt_value(
                                                                     data, child["text"]
                                                                 )
-                                                                if child_text and isinstance(child_text, str):
-                                                                    all_text_parts.append(child_text)
+                                                                if (
+                                                                    child_text
+                                                                    and isinstance(
+                                                                        child_text, str
+                                                                    )
+                                                                ):
+                                                                    all_text_parts.append(
+                                                                        child_text
+                                                                    )
                                                 # 处理带有text引用的内容项
-                                                elif "text" in self._resolve_nuxt_value(data, content_item):
-                                                    text = self._resolve_nuxt_value(data, content_item["text"])
+                                                elif "text" in self._resolve_nuxt_value(
+                                                    data, content_item
+                                                ):
+                                                    text = self._resolve_nuxt_value(
+                                                        data, content_item["text"]
+                                                    )
                                                     if text and isinstance(text, str):
                                                         all_text_parts.append(text)
 
                                 # 处理包含 description 字段的对象，可能包含文本内容
                                 if "description" in item:
-                                    description = self._resolve_nuxt_value(data, item["description"])
+                                    description = self._resolve_nuxt_value(
+                                        data, item["description"]
+                                    )
                                     if description and isinstance(description, str):
                                         all_text_parts.append(description)
 
                                 # 处理包含 content 字段的对象，可能包含文本内容
                                 if "content" in item:
-                                    content = self._resolve_nuxt_value(data, item["content"])
+                                    content = self._resolve_nuxt_value(
+                                        data, item["content"]
+                                    )
                                     if content and isinstance(content, str):
                                         all_text_parts.append(content)
 
@@ -738,34 +859,52 @@ class TapTapParser(BaseParser):
                                 if "created_at" in item or "publish_time" in item:
                                     publish_time = self._resolve_nuxt_value(
                                         data,
-                                        item.get("created_at") or item.get("publish_time"),
+                                        item.get("created_at")
+                                        or item.get("publish_time"),
                                     )
                                     if publish_time:
                                         result["publish_time"] = publish_time
 
                                 # 提取视频信息 (API失败时从Nuxt补全)
                                 if "pin_video" in item:
-                                    video_info = self._resolve_nuxt_value(data, item["pin_video"])
+                                    video_info = self._resolve_nuxt_value(
+                                        data, item["pin_video"]
+                                    )
                                     if isinstance(video_info, dict):
                                         if "duration" in video_info:
-                                            result["video_duration"] = self._resolve_nuxt_value(
-                                                data, video_info["duration"]
+                                            result["video_duration"] = (
+                                                self._resolve_nuxt_value(
+                                                    data, video_info["duration"]
+                                                )
                                             )
                                         if "video_id" in video_info:
-                                            result["video_id"] = self._resolve_nuxt_value(data, video_info["video_id"])
+                                            result["video_id"] = (
+                                                self._resolve_nuxt_value(
+                                                    data, video_info["video_id"]
+                                                )
+                                            )
 
                                 # 提取作者等级和标签
                                 if "honor_title" in item:
                                     result["author"]["honor_title"] = (
-                                        self._resolve_nuxt_value(data, item["honor_title"]) or ""
+                                        self._resolve_nuxt_value(
+                                            data, item["honor_title"]
+                                        )
+                                        or ""
                                     )
                                 if "honor_obj_id" in item:
                                     result["author"]["honor_obj_id"] = (
-                                        self._resolve_nuxt_value(data, item["honor_obj_id"]) or ""
+                                        self._resolve_nuxt_value(
+                                            data, item["honor_obj_id"]
+                                        )
+                                        or ""
                                     )
                                 if "honor_obj_type" in item:
                                     result["author"]["honor_obj_type"] = (
-                                        self._resolve_nuxt_value(data, item["honor_obj_type"]) or ""
+                                        self._resolve_nuxt_value(
+                                            data, item["honor_obj_type"]
+                                        )
+                                        or ""
                                     )
 
                             # 合并所有文本部分，去重并保留顺序
@@ -799,16 +938,34 @@ class TapTapParser(BaseParser):
                                     continue
 
                                 if "original_url" in item:
-                                    img_url = self._resolve_nuxt_value(data, item["original_url"])
-                                    if img_url and isinstance(img_url, str) and img_url.startswith("http"):
+                                    img_url = self._resolve_nuxt_value(
+                                        data, item["original_url"]
+                                    )
+                                    if (
+                                        img_url
+                                        and isinstance(img_url, str)
+                                        and img_url.startswith("http")
+                                    ):
                                         lower_url = img_url.lower()
-                                        if all(k not in lower_url for k in img_blacklist) and img_url not in images:
+                                        if (
+                                            all(
+                                                k not in lower_url
+                                                for k in img_blacklist
+                                            )
+                                            and img_url not in images
+                                        ):
                                             images.append(img_url)
 
                                 # 尝试从 Nuxt 数据中找 MP4 直链 (并加入嗅探集合)
                                 if "video_url" in item or "url" in item:
-                                    u = self._resolve_nuxt_value(data, item.get("video_url") or item.get("url"))
-                                    if isinstance(u, str) and (".mp4" in u) and u.startswith("http"):
+                                    u = self._resolve_nuxt_value(
+                                        data, item.get("video_url") or item.get("url")
+                                    )
+                                    if (
+                                        isinstance(u, str)
+                                        and (".mp4" in u)
+                                        and u.startswith("http")
+                                    ):
                                         captured_videos.add(u)
 
                             result["images"] = images
@@ -836,7 +993,10 @@ class TapTapParser(BaseParser):
                             video_dict[vid_id].append(v_url)
                         else:
                             # 如果没有匹配到ID (可能是 MP4 直链或其他 CDN 格式)，则单独处理
-                            if v_url not in unique_videos and v_url not in result["videos"]:
+                            if (
+                                v_url not in unique_videos
+                                and v_url not in result["videos"]
+                            ):
                                 unique_videos.append(v_url)
 
                     # 对于每个视频ID，优先选择最高分辨率的M3U8
@@ -859,7 +1019,9 @@ class TapTapParser(BaseParser):
                             # 选择优先级最高的URL
                             highest_priority_url = urls[0]
                             unique_videos.append(highest_priority_url)
-                            logger.debug(f"[TapTap] 视频 {vid_id} 选择最高分辨率: {highest_priority_url}")
+                            logger.debug(
+                                f"[TapTap] 视频 {vid_id} 选择最高分辨率: {highest_priority_url}"
+                            )
 
                     # 合并嗅探到的视频到结果中 (去重)
                     for v in unique_videos:
@@ -867,7 +1029,9 @@ class TapTapParser(BaseParser):
                             result["videos"].append(v)
 
                     if result["videos"]:
-                        logger.success(f"[TapTap] 最终捕获视频数: {len(result['videos'])}")
+                        logger.success(
+                            f"[TapTap] 最终捕获视频数: {len(result['videos'])}"
+                        )
                     else:
                         logger.warning("[TapTap] 未检测到视频链接")
 
@@ -894,7 +1058,12 @@ class TapTapParser(BaseParser):
         for item in data:
             if isinstance(item, dict) and all(key in item for key in moment_signature):
                 moment_id = self._resolve_nuxt_value(data, item.get("id_str"))
-                if not (moment_id and isinstance(moment_id, str) and moment_id.isdigit() and len(moment_id) > 10):
+                if not (
+                    moment_id
+                    and isinstance(moment_id, str)
+                    and moment_id.isdigit()
+                    and len(moment_id) > 10
+                ):
                     continue
 
                 topic_index = item.get("topic")
@@ -908,7 +1077,9 @@ class TapTapParser(BaseParser):
                     {
                         "id": moment_id,
                         "title": self._resolve_nuxt_value(data, topic_obj.get("title")),
-                        "summary": self._resolve_nuxt_value(data, topic_obj.get("summary")),
+                        "summary": self._resolve_nuxt_value(
+                            data, topic_obj.get("summary")
+                        ),
                     }
                 )
 
@@ -929,7 +1100,9 @@ class TapTapParser(BaseParser):
         comments = []
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(api_url, params=params, headers=self.headers)
+                response = await client.get(
+                    api_url, params=params, headers=self.headers
+                )
                 response.raise_for_status()
                 api_data = response.json()
 
@@ -1036,7 +1209,9 @@ class TapTapParser(BaseParser):
 
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(api_url, params=params, headers=self.headers)
+                response = await client.get(
+                    api_url, params=params, headers=self.headers
+                )
                 response.raise_for_status()
                 api_data = response.json()
 
@@ -1074,7 +1249,9 @@ class TapTapParser(BaseParser):
                     result["app"] = {
                         "title": app_data.get("title", ""),
                         "icon": app_data.get("icon", {}).get("original_url", ""),
-                        "rating": app_data.get("stat", {}).get("rating", {}).get("score", ""),
+                        "rating": app_data.get("stat", {})
+                        .get("rating", {})
+                        .get("score", ""),
                         "tags": app_data.get("tags", []),
                     }
 
@@ -1093,7 +1270,9 @@ class TapTapParser(BaseParser):
                     # 获取评论的评论
                     result["comments"] = await self._fetch_review_comments(review_id)
 
-                    logger.info(f"[TapTap] 评论详情解析成功: {result['author']['name']} - {result['app']['title']}")
+                    logger.info(
+                        f"[TapTap] 评论详情解析成功: {result['author']['name']} - {result['app']['title']}"
+                    )
                 else:
                     logger.error("[TapTap] 评论详情API获取失败")
         except Exception as e:
@@ -1164,7 +1343,9 @@ class TapTapParser(BaseParser):
         # 构建作者对象
         author = None
         if detail["author"]["name"]:
-            author = self.create_author(name=detail["author"]["name"], avatar_url=detail["author"]["avatar"])
+            author = self.create_author(
+                name=detail["author"]["name"], avatar_url=detail["author"]["avatar"]
+            )
 
         # 处理发布时间，转换为时间戳
         timestamp = None
@@ -1177,7 +1358,9 @@ class TapTapParser(BaseParser):
                 # 尝试解析不同格式的时间字符串
                 with contextlib.suppress(ValueError, TypeError):
                     # 示例：2023-12-25T14:30:00+08:00
-                    dt = datetime.fromisoformat(str(publish_time).replace("Z", "+00:00"))
+                    dt = datetime.fromisoformat(
+                        str(publish_time).replace("Z", "+00:00")
+                    )
                     timestamp = int(dt.timestamp())
 
         # 格式化时间函数

@@ -162,7 +162,7 @@ class KuGouParser(BaseParser):
             audio_name = f"{playinfo.fileName}.{playinfo.extName}"
 
             audio_content = self.create_audio(
-                url_or_task=audio_url,
+                url=audio_url,
                 duration=playinfo.timeLength,
                 audio_name=audio_name,
             )
@@ -194,7 +194,7 @@ class KuGouParser(BaseParser):
             # 创建封面图片内容
             cover_url = playinfo.album_img.format(size=480)
             contents: list[MediaContent] = [
-                self.create_image(url_or_task=cover_url, need_send=False)
+                self.create_image(url=cover_url, need_send=False)
             ]
 
             contents.append(audio_content)

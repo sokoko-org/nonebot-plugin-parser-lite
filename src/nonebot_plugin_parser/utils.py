@@ -45,11 +45,10 @@ async def safe_unlink(path: Path):
         logger.warning(f"删除 {path} 失败")
 
 
-async def exec_ffmpeg_cmd(cmd: list[str]) -> None:
+async def exec_ffmpeg_cmd(cmd: list[str]):
     """执行命令
 
-    Args:
-        cmd (list[str]): 命令序列
+    :param cmd: 命令序列
     """
     try:
         process = await asyncio.create_subprocess_exec(
@@ -65,18 +64,12 @@ async def exec_ffmpeg_cmd(cmd: list[str]) -> None:
         raise RuntimeError(f"ffmpeg 执行失败: {error_msg}")
 
 
-async def merge_av(
-    *,
-    v_path: Path,
-    a_path: Path,
-    output_path: Path,
-) -> None:
+async def merge_av(v_path: Path, a_path: Path, output_path: Path):
     """合并视频和音频
 
-    Args:
-        v_path (Path): 视频文件路径
-        a_path (Path): 音频文件路径
-        output_path (Path): 输出文件路径
+    :param v_path: 视频文件路径
+    :param a_path: 音频文件路径
+    :param output_path: 输出文件路径
     """
     logger.info(f"Merging {v_path.name} and {a_path.name} to {output_path.name}")
 
@@ -101,18 +94,12 @@ async def merge_av(
     logger.success(f"Merged {output_path.name}, {fmt_size(output_path)}")
 
 
-async def merge_av_h264(
-    *,
-    v_path: Path,
-    a_path: Path,
-    output_path: Path,
-) -> None:
+async def merge_av_h264(v_path: Path, a_path: Path, output_path: Path):
     """合并视频和音频，并使用 H.264 编码
 
-    Args:
-        v_path (Path): 视频文件路径
-        a_path (Path): 音频文件路径
-        output_path (Path): 输出文件路径
+    :param v_path: 视频文件路径
+    :param a_path: 音频文件路径
+    :param output_path: 输出文件路径
     """
     logger.info(
         f"Merging {v_path.name} and {a_path.name} to {output_path.name} with H.264"
@@ -151,11 +138,9 @@ async def merge_av_h264(
 async def encode_video_to_h264(video_path: Path) -> Path:
     """将视频重新编码到 h264
 
-    Args:
-        video_path (Path): 视频路径
+    :param video_path: 视频路径
 
-    Returns:
-        Path: 编码后的视频路径
+    :return: 编码后的视频路径
     """
     output_path = video_path.with_name(f"{video_path.stem}_h264{video_path.suffix}")
     if output_path.exists():
@@ -191,12 +176,10 @@ def fmt_size(file_path: Path) -> str:
 def generate_file_name(url: str, default_suffix: str = "") -> str:
     """根据 url 生成文件名
 
-    Args:
-        url (str): url
-        default_suffix (str): 默认后缀. Defaults to "".
+    Lparam url: url
+    :param default_suffix: 默认后缀
 
-    Returns:
-        str: 文件名
+    :return: 文件名
     """
     # 根据 url 获取文件后缀
     path = Path(urlparse(url).path)
