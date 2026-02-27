@@ -1,7 +1,7 @@
 import re
 from typing import ClassVar
 
-import msgspec
+from msgspec import convert
 from httpx import AsyncClient
 
 from ..base import BaseParser, PlatformEnum, ParseException, handle
@@ -51,7 +51,7 @@ class KuaiShouParser(BaseParser):
             raise ParseException("failed to parse video JSON info from HTML")
 
         raw = decode_init_state(matched[1].strip())
-        data_map = msgspec.convert(raw, Data)
+        data_map = convert(raw, Data)
 
         photo = data_map.info.photo
         if photo is None:

@@ -1,4 +1,5 @@
-from msgspec import Struct, json
+from msgspec import Struct
+from msgspec.json import Decoder
 
 
 class Author(Struct):
@@ -82,4 +83,4 @@ class InitState(Struct):
     initialState: InitStateData
 
 
-decoder = json.Decoder(InitState)
+decoder = Decoder(InitState)

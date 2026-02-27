@@ -1,7 +1,8 @@
 from random import choice
 from typing import Any
 
-from msgspec import Struct, json, field
+from msgspec import Struct, field
+from msgspec.json import Decoder
 
 from ..base import ParseException
 
@@ -142,4 +143,4 @@ class RouterData(Struct):
         )
 
 
-decoder = json.Decoder(RouterData)
+decoder = Decoder(RouterData)
