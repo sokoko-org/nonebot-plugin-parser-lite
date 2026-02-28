@@ -73,14 +73,51 @@ class Info(Struct):
     photo: Photo | None = None
 
 
-class EmotionConfigList(Struct):
-    emojiCode: str
-    emojiUrlList: list[str]
+# class EmotionConfigList(Struct):
+#     emojiCode: str
+#     emojiUrlList: list[str]
 
 
-class SystemStartup(Struct):
-    emotionConfigList: list[EmotionConfigList]
-    """贴纸映射列表"""
+# class SystemStartup(Struct):
+#     emotionConfigList: list[EmotionConfigList]
+#     """贴纸映射列表(不全)"""
+
+
+class Comment(Struct):
+    content: str
+    timestamp: int
+    likedCount: int
+    authorArea: str
+    """归属地"""
+    comment_id: int
+    """评论id"""
+    headurl: str
+    """头像"""
+    user_sex: str
+    author_name: str
+    subCommentCount: int = 0
+    """子评论数量"""
+
+
+class SubCommentList(Struct):
+    subComments: list[Comment]
+    """子评论列表"""
+
+    def __iter__(self):
+        return iter(self.subComments)
+
+    def __getitem__(self, index):
+        return self.subComments[index]
+
+    def __len__(self):
+        return len(self.subComments)
+
+
+class CommentList(Struct):
+    subCommentsMap: dict[str, SubCommentList]
+    """子评论映射map, {父评论id: 子评论列表}"""
+    rootComments: list[Comment]
+    """父评论列表"""
 
 
 class Data(Struct):
@@ -94,11 +131,12 @@ class Data(Struct):
     - `/rest/wd/user/profile/author` 作者信息
     """
 
-    startup: SystemStartup = field(name="/rest/wd/system/startup")
-    """系统信息"""
+    # startup: SystemStartup = field(name="/rest/wd/system/startup")
+    # """系统信息"""
     info: Info = field(name="/rest/wd/ugH5App/photo/simple/info")
     """视频/图集信息"""
-    comments: dict | None = field(default=None, name="/rest/wd/photo/comment/list")
+    comments: CommentList | None = field(
+        default=None, name="/rest/wd/photo/comment/list"
+    )
     """评论信息，为页面二次加载赋值
-    > TODO: 待完善模型
     """

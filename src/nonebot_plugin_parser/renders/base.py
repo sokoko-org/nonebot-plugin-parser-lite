@@ -43,7 +43,7 @@ class Renderer:
             image_seg = await self.cache_or_render_image(result)
             # 获取图片路径
         except Exception as e:
-            logger.error(f"获取图片路径失败: {e}")
+            logger.error(f"获取图片路径失败: {type(e)}:{e!r}")
             image_seg = None
 
         # 尝试直接发送图片

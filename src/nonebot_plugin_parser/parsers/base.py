@@ -96,8 +96,8 @@ def handle(keyword: str, pattern: str, max_retries: int = 1):
         key_patterns: KeyPatterns = getattr(func, _KEY_PATTERNS)
         key_patterns.append((keyword, compile(pattern)))
 
-        # 应用重试装饰器，但保留原始函数的_key_patterns属性
-        wrapped_func = retry(max_retries=max_retries)(func)
+        # 应用重试装饰器
+        wrapped_func = func
         # 取消重试，防止死号
         # 复制_key_patterns属性到包装函数
         setattr(wrapped_func, _KEY_PATTERNS, key_patterns)
