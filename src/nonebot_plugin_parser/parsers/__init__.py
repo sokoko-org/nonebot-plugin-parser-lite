@@ -24,6 +24,7 @@ from .bilibili import BilibiliParser as BilibiliParser
 from .kuaishou import KuaiShouParser as KuaiShouParser
 from .xiaohongshu import XiaoHongShuParser as XiaoHongShuParser
 from .zhihu import ZhiHuParser as ZhiHuParser
+from .duitang import DuiTangParser as DuiTangParser
 
 __all__ = [
     "AcfunParser",
@@ -49,5 +50,6 @@ __all__ = [
     "WeiBoParser",
     "XiaoHongShuParser",
     "ZhiHuParser",
+    "DuiTangParser",
     "handle",
 ]
