@@ -4,8 +4,6 @@ from datetime import datetime
 from dataclasses import field, dataclass
 from collections.abc import Sequence
 
-from markupsafe import Markup
-
 from ..download.task import DownloadTaskWrapper
 
 

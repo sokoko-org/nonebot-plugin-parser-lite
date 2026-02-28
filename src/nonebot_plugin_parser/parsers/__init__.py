@@ -1,5 +1,3 @@
-# 导出所有 Parser 类
-from .nga import NGAParser as NGAParser
 from .base import BaseParser as BaseParser
 from .base import handle
 from .data import (
@@ -40,7 +38,6 @@ __all__ = [
     "KuWoParser",
     "KuaiShouParser",
     "NCMParser",
-    "NGAParser",
     "ParseResult",
     "Platform",
     "QSMusicParser",
