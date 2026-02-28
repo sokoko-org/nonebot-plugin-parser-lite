@@ -16,6 +16,7 @@ from ..download import DOWNLOADER
 from ..parsers.data import AudioContent, VideoContent
 from nonebot import on_notice
 from nonebot_plugin_alconna.uniseg import message_reaction
+from ..browser import BROWSER
 
 
 def _get_enabled_parser_classes() -> list[type[BaseParser]]:
@@ -42,7 +43,10 @@ def get_parser_by_type(parser_type: type[T]) -> T:
     raise ValueError(f"未找到类型为 {parser_type} 的 parser 实例")
 
 
-@get_driver().on_startup
+driver = get_driver()
+
+
+@driver.on_startup
 def register_parser_matcher():
     enabled_classes = _get_enabled_parser_classes()
 
@@ -57,6 +61,11 @@ def register_parser_matcher():
     patterns = [p for _cls in enabled_classes for p in _cls._key_patterns]
     matcher = on_keyword_regex(*patterns)
     matcher.append_handler(parser_handler)
+
+
+@driver.on_shutdown
+def close_browser():
+    BROWSER.quit()
 
 
 # 缓存结果

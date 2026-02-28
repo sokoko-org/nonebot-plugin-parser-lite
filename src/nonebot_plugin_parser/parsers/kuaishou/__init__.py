@@ -26,10 +26,6 @@ class KuaiShouParser(BaseParser):
         name=PlatformEnum.KUAISHOU, display_name="快手"
     )
 
-    def __init__(self):
-        super().__init__()
-        self.ios_headers["Referer"] = "https://v.kuaishou.com/"
-
     # https://v.kuaishou.com/2yAnzeZ
     @handle("v.kuaishou", r"v\.kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("kuaishou", r"(?:www\.)?kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
@@ -46,7 +42,7 @@ class KuaiShouParser(BaseParser):
         real_url = real_url.replace("/fw/long-video/", "/fw/photo/")
         tab = BROWSER.new_tab()
         tab.set.user_agent(
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1 Edg/132.0.0.0",
+            self.ios_headers["User-Agent"],
             "iPhone",
         )
         tab.set.load_mode.none()
