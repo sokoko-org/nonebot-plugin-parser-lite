@@ -17,7 +17,7 @@ from .matchers import clear_result_cache
 from nonebot_plugin_apscheduler import scheduler
 
 __plugin_meta__ = PluginMetadata(
-    name="链接分享解析 Alconna 版",
+    name="链接分享解析 Lite 版",
     description="通用媒体卡片渲染[B站|抖音|快手|微博|小红书|百度贴吧|TikTok|Twitter|AcFun|NGA]",
     usage="发送支持平台的(BV号/链接/小程序/卡片)即可",
     type="application",
@@ -27,9 +27,9 @@ __plugin_meta__ = PluginMetadata(
         "nonebot_plugin_alconna", "nonebot_plugin_uninfo"
     ),
     extra={
-        "author": "fllesser",
+        "author": "fllesser&molanp",
         "email": "fllessive@gmail.com",
-        "homepage": "https://github.com/fllesser/nonebot-plugin-parser",
+        "homepage": "https://github.com/molanp/nonebot-plugin-parser-lite",
     },
 )
 

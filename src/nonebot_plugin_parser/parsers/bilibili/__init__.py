@@ -34,8 +34,12 @@ from ..base import (
     DurationLimitException,
     handle,
     pconfig,
+    Author,
+    Comment,
+    Platform,
+    MediaContent,
+    Stats,
 )
-from ..data import Author, Comment, Platform, MediaContent, Stats
 from .video import VideoInfo, AIConclusion
 from ..cookie import ck2dict
 from .dynamic import DynamicData, DynamicInfo

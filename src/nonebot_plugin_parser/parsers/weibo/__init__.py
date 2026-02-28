@@ -7,8 +7,14 @@ from bs4 import Tag, BeautifulSoup
 from httpx import Cookies, AsyncClient
 
 from . import common, article
-from ..base import Platform, BaseParser, PlatformEnum, ParseException, handle
-from ..data import MediaContent
+from ..base import (
+    Platform,
+    BaseParser,
+    PlatformEnum,
+    ParseException,
+    handle,
+    MediaContent,
+)
 
 
 class WeiBoParser(BaseParser):

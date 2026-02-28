@@ -1,11 +1,7 @@
 from re import Match
 from typing import ClassVar
 
-from ..base import (
-    BaseParser,
-    handle,
-)
-from ..data import Platform
+from ..base import BaseParser, handle, Platform
 from .utils import get_post, build_comments, build_content
 from ...constants import PlatformEnum
 
