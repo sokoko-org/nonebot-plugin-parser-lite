@@ -11,6 +11,8 @@ from .encrypt import build_url
 from ..base import BaseParser, handle, Platform, PlatformEnum, ParseException, Comment
 from re import Match
 from httpx import AsyncClient
+from nonebot.log import logger
+from ...browser import BROWSER
 
 
 class XiaoHeiHeParser(BaseParser):
@@ -28,6 +30,10 @@ class XiaoHeiHeParser(BaseParser):
                 "Accept": "application/json, text/plain, */*",
             }
         )
+        tab = BROWSER.new_tab(url="https://www.xiaoheihe.cn/")
+        self.x_xhh_tokenid = tab.run_js("window.SMSdk.getDeviceId()", as_expr=True)
+        logger.info(f"成功获取到小黑盒tokenid: {self.x_xhh_tokenid}")
+        tab.close()
 
     @handle(
         "api.xiaoheihe.cn/v3/bbs/app/api/web/share",
@@ -42,11 +48,7 @@ class XiaoHeiHeParser(BaseParser):
             headers=self.headers,
             timeout=self.timeout,
             verify=False,
-            cookies={
-                "x_xhh_tokenid": "Boy7mxr15+ckLj3nTzhgH++a/0Vy5ROaW3gisfLeO+9Ptp+KBpKSpkBSANOiQs4p0oFx3r/xrlKAOCghvrqGDqw=="
-            },
-            # 自定义 x_xhh_tokenid 获取方式，使用无痕浏览器，打开小黑盒首页，控制台输入 window.SMSdk.getDeviceId()
-            # 每次无痕都是随机的，随便造
+            cookies={"x_xhh_tokenid": self.x_xhh_tokenid},
         ) as client:
             response = await client.get(build_url(link_id))
             response.raise_for_status()
@@ -67,6 +69,7 @@ class XiaoHeiHeParser(BaseParser):
                 name=data.link.user.username,
                 avatar_url=data.link.user.avatar_url,
             ),
+            comments=comments,
             stats=self.create_stats(
                 view_count=format_num(data.link.click),
                 like_count=format_num(data.link.link_award_num),
@@ -74,7 +77,6 @@ class XiaoHeiHeParser(BaseParser):
                 share_count=format_num(data.link.forward_num),
                 collect_count=format_num(data.link.favour_count),
             ),
-            comments=comments,
         )
 
     def _build_comments(self, data: BaseResult) -> list[Comment]:
