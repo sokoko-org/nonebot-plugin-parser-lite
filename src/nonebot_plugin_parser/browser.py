@@ -10,6 +10,9 @@ from DrissionPage import Chromium, ChromiumOptions
 system = platform.system()
 browser_path = None
 
+system = platform.system()
+browser_path = None
+
 if system == "Windows":
     import winreg
 
@@ -23,7 +26,19 @@ if system == "Windows":
             value, _ = winreg.QueryValueEx(key, "")
             browser_path = value.split(",")[0]
             break
+elif system == "Darwin":
+    # macOS 下常见浏览器的默认安装路径
+    mac_paths = (
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    )
+    for path in mac_paths:
+        from pathlib import Path
 
+        if Path(path).is_file():
+            browser_path = path
+            break
 if not browser_path:
     raise RuntimeError("无法找到Edge/Chrome浏览器")
 
