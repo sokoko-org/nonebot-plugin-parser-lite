@@ -9,16 +9,12 @@ import struct
 import time as _time
 from typing import Final
 
-
-TIME: Final[int] = int(_time.time())
+TIME = 0
 BASE_URL: Final[str] = "api.xiaoheihe.cn"
 PATH: Final[str] = "/bbs/app/link/tree"
-LINK_ID: Final[int] = 172930295
 
 
 def get_nonce() -> str:
-    # 32 位无符号
-    # 大端无符号 4 字节
     data = struct.pack(">d", float(TIME))
     return hashlib.md5(data).hexdigest().upper()
 
@@ -140,6 +136,8 @@ def get_hkey() -> str:
 
 def build_url(link_id: str) -> str:
     """构造等价的请求 URL。"""
+    global TIME
+    TIME = int(_time.time())
     return (
         f"https://{BASE_URL}{PATH}"
         "?os_type=web&app=heybox&client_type=web&version=999.0.4"
