@@ -20,6 +20,7 @@ from ..utils import merge_av, safe_unlink, generate_file_name
 from ..config import pconfig
 from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
 from ..exception import DownloadException, ZeroSizeException, SizeLimitException
+from urllib.parse import urljoin
 
 
 class StreamDownloader:
@@ -156,6 +157,7 @@ class StreamDownloader:
         :param video_name: 输出的 mp4 文件名，为空时根据 m3u8 链接生成
 
         :return: 最终合并并转封装后的 mp4 文件路径
+        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
         :raises DownloadException: m3u8 解析、下载或转封装失败时抛出
         """
         # 生成文件 ID
@@ -217,7 +219,8 @@ class StreamDownloader:
                                                 )
                                                 raise SizeLimitException
                                         break
-                                # 检查 resp.status
+                            except SizeLimitException as e:
+                                raise SizeLimitException from e
                             except Exception as e:
                                 logger.debug(
                                     f"下载 ts 文件失败，重试中 ({retry+1}/3): {ts_url}, error: {e}"
@@ -259,7 +262,6 @@ class StreamDownloader:
         :return: 展平后的 ts 片段完整下载链接列表
         :raises DownloadException: 解析 m3u8 内容失败或未找到有效子列表时抛出
         """
-        from urllib.parse import urljoin
 
         logger.info(f"[StreamDownloader] 开始解析 m3u8: {m3u8_url}")
         content = await self._fetch_text(m3u8_url)
