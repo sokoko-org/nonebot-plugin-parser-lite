@@ -1,3 +1,6 @@
+# TODO: 重构接口，使用推特内部原生接口
+# TODO: 使用反代，允许国内直接下载推特媒体
+
 import re
 from typing import ClassVar
 
@@ -5,8 +8,7 @@ from httpx import AsyncClient
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from .base import BaseParser, PlatformEnum, handle
-from .data import Platform, ParseResult, MediaContent
+from .base import BaseParser, PlatformEnum, handle, Platform, ParseResult, MediaContent
 
 
 class MediaElement(Struct):
@@ -18,8 +20,14 @@ class MediaElement(Struct):
     duration_millis: int | None = None
 
 
+class Article(Struct):
+    image: str | None = None
+    preview_text: str | None = None
+    title: str | None = None
+
+
 class VxTwitterResponse(Struct):
-    article: str | None
+    article: str | Article | None
     date_epoch: int
     fetched_on: int
     likes: int
@@ -32,6 +40,10 @@ class VxTwitterResponse(Struct):
     qrt: "VxTwitterResponse | None" = None
     """引用推文"""
     media_extended: list[MediaElement] = field(default_factory=list)
+
+    @property
+    def name(self) -> str:
+        return f"{self.user_name} @{self.user_screen_name}"
 
 
 decoder = Decoder(VxTwitterResponse)
@@ -58,7 +70,10 @@ class TwitterParser(BaseParser):
 
     def _collect_result(self, data: VxTwitterResponse) -> ParseResult:
         author = self.create_author(
-            name=data.user_name, avatar_url=data.user_profile_image_url
+            name=data.name, avatar_url=data.user_profile_image_url
+        )
+        title = (
+            data.article.title if isinstance(data.article, Article) else data.article
         )
 
         contents: list[MediaContent | str] = [data.text]
@@ -73,7 +88,7 @@ class TwitterParser(BaseParser):
 
         return self.result(
             author=author,
-            title=data.article,
+            title=title,
             timestamp=data.date_epoch,
             content=contents,
             repost=repost,
