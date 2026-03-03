@@ -15,9 +15,9 @@ from nonebot.log import logger
 from ...browser import BROWSER
 
 
-class XiaoHeiHeParser(BaseParser):
+class HeyBoxParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
-        name=PlatformEnum.XIAOHEIHE, display_name="小黑盒"
+        name=PlatformEnum.HEYBOX, display_name="小黑盒"
     )
 
     def __init__(self):

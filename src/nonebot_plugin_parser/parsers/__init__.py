@@ -22,10 +22,10 @@ from .toutiao import ToutiaoParser as ToutiaoParser
 from .x import TwitterParser as TwitterParser
 from .bilibili import BilibiliParser as BilibiliParser
 from .kuaishou import KuaiShouParser as KuaiShouParser
-from .xiaohongshu import XiaoHongShuParser as XiaoHongShuParser
+from .rednote import RedNoteParser as RedNoteParser
 from .zhihu import ZhiHuParser as ZhiHuParser
 from .duitang import DuiTangParser as DuiTangParser
-from .xiaoheihe import XiaoHeiHeParser as XiaoHeiHeParser
+from .heybox import HeyBoxParser as HeyBoxParser
 
 __all__ = [
     "AcfunParser",
@@ -49,9 +49,9 @@ __all__ = [
     "TwitterParser",
     "VideoContent",
     "WeiBoParser",
-    "XiaoHongShuParser",
+    "RedNoteParser",
     "ZhiHuParser",
     "DuiTangParser",
-    "XiaoHeiHeParser",
+    "HeyBoxParser",
     "handle",
 ]

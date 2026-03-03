@@ -20,10 +20,10 @@ from .explore import decoder as exploreDecoder
 _STICKER_PATTERN = re.compile(r"\[(?P<name>[^]]+R)\]")
 
 
-class XiaoHongShuParser(BaseParser):
+class RedNoteParser(BaseParser):
     # 平台信息
     platform: ClassVar[Platform] = Platform(
-        name=PlatformEnum.XIAOHONGSHU, display_name="小红书"
+        name=PlatformEnum.REDNOTE, display_name="小红书"
     )
     session: AsyncSession
     # 小红书笔记详情页对真实浏览器仍有速率限制，达到限制后需要时间恢复
@@ -194,7 +194,7 @@ class XiaoHongShuParser(BaseParser):
             name = match["name"]
             result.append(
                 self.create_sticker(
-                    url=f"https://emoji.awkchan.top/assets/xiaohongshu/{name}.png",
+                    url=f"https://emoji.awkchan.top/assets/rednote/{name}.png",
                     size="small",
                 )
             )

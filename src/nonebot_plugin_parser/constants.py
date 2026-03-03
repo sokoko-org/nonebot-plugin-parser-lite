@@ -41,7 +41,7 @@ class PlatformEnum(str, Enum):
     TIKTOK = "tiktok"
     X = "x"
     WEIBO = "weibo"
-    XIAOHONGSHU = "xiaohongshu"
+    REDNOTE = "rednote"
     TAPTAP = "taptap"
     QSMUSIC = "qsmusic"
     KUWO = "kuwo"
@@ -49,7 +49,7 @@ class PlatformEnum(str, Enum):
     TIEBA = "tieba"
     ZHIHU = "zhihu"
     DUITANG = "duitang"
-    XIAOHEIHE = "xiaoheihe"
+    HEYBOX = "heybox"
 
     def __str__(self) -> str:
         return self.value

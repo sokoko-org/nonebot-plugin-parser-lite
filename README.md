@@ -94,7 +94,7 @@ parser_max_size=90
 
 # [可选] 全局禁止的解析
 # 示例 parser_disabled_platforms=["bilibili", "douyin"] 表示禁止了哔哩哔哩和抖音
-# 可选值: ["bilibili", "douyin", "kuaishou", "x", "acfun", "weibo", "xiaohongshu"]
+# 可选值: ["bilibili", "douyin", "kuaishou", "x", "acfun", "weibo", "rednote"]
 parser_disabled_platforms=["x"]
 
 # [可选] 是否在解析结果中附加原始URL

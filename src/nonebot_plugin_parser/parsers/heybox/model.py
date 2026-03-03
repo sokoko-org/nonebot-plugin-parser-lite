@@ -42,7 +42,7 @@ class CommentItem(Struct):
         if self.is_cy:
             content.append(
                 create_sticker(
-                    url="https://imgheybox.max-c.com/oa/2024/10/31/ce360d2affd7976e27e5c68a3de676c7.png",
+                    url="https://emoji.awkchan.top/assets/heybox/cy.png",
                     size="small",
                     desc="插眼",
                 )
@@ -131,7 +131,7 @@ def format_sticker(text: str) -> list[MediaContent | str]:
         size = "medium" if "bigemoji" in name else "small"
         result.append(
             create_sticker(
-                url=f"https://emoji.awkchan.top/assets/xiaoheihe/{name}.png",
+                url=f"https://emoji.awkchan.top/assets/heybox/{name}.png",
                 size=size,
             )
         )
