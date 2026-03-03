@@ -1,5 +1,4 @@
 import re
-import asyncio
 from re import Match
 from typing import ClassVar
 
@@ -24,16 +23,6 @@ class NCMParser(BaseParser):
     def __init__(self):
         super().__init__()
         self.short_url_pattern = re.compile(r"(http:|https:)//163cn\.tv/([a-zA-Z0-9]+)")
-        # 音质优先级列表
-        self.audio_qualities = [
-            "jymaster",  # 超清母带
-            "sky",  # 沉浸环绕声
-            "jyeffect",  # 高清环绕声
-            "hires",  # Hi-Res音质
-            "lossless",  # 无损音质
-            "exhigh",  # 极高音质
-            "standard",  # 标准音质
-        ]
 
     async def _get_redirect_url(self, url: str) -> str:
         """获取重定向后的URL"""
@@ -65,53 +54,37 @@ class NCMParser(BaseParser):
 
         # 使用新API解析
         try:
-            # 尝试多种音质直到成功
-            for quality in self.audio_qualities:
-                try:
-                    async with AsyncClient(
-                        verify=False, timeout=self.timeout
-                    ) as client:
-                        api_url = "https://api.bugpk.com/api/163_music"
-                        # 使用GET请求，参数包括ids、level和type
-                        params = {"ids": ncm_id, "level": quality, "type": "json"}
-                        resp = await client.get(api_url, params=params)
-                        resp.raise_for_status()
-                        data = resp.json()
+            async with AsyncClient(verify=False, timeout=self.timeout) as client:
+                api_url = "https://api.bugpk.com/api/163_music"
+                # 使用GET请求，参数包括ids、level和type
+                params = {"ids": ncm_id, "level": "standard", "type": "json"}
+                resp = await client.get(api_url, params=params)
+                resp.raise_for_status()
+                data = resp.json()
 
-                        # 检查接口返回状态
-                        if data.get("status") != 200:
-                            logger.warning(
-                                f"网易云接口返回错误: {data}，尝试下一种音质"
-                            )
-                            continue
+                # 检查接口返回状态
+                if data.get("status") != 200:
+                    raise ParseException(f"网易云接口返回错误: {data}")
 
-                        logger.info(
-                            f"使用音质: {quality} 解析成功: {data['name']} - {data['ar_name']}"
-                        )
-                        audio_info = f"音质: {quality} | 大小: {data.get('size', '')}"
+                logger.info(f"解析成功: {data['name']} - {data['ar_name']}")
+                audio_info = f"音质: standard | 大小: {data.get('size', '')}"
 
-                        # 提取歌词信息
-                        lyric = ""
-                        if data.get("lyric"):
-                            lyric = data["lyric"]
-                            logger.info(f"找到歌词，长度: {len(lyric)}字符")
+                # 提取歌词信息
+                lyric = ""
+                if data.get("lyric"):
+                    lyric = data["lyric"]
+                    logger.info(f"找到歌词，长度: {len(lyric)}字符")
 
-                        # 成功获取，返回结果
-                        return {
-                            "title": data["name"],
-                            "author": data["ar_name"],
-                            "audio_info": audio_info,
-                            "cover_url": data["pic"],
-                            "audio_url": data["url"],
-                            "mv_info": {},  # 新API没有返回MV信息
-                            "lyric": lyric,
-                        }
-                except Exception as e:
-                    logger.warning(f"请求失败: {e}，尝试下一种音质")
-                    # 延时
-                    await asyncio.sleep(1)
-            raise ParseException("所有音质解析均失败")
-
+                # 成功获取，返回结果
+                return {
+                    "title": data["name"],
+                    "author": data["ar_name"],
+                    "audio_info": audio_info,
+                    "cover_url": data["pic"],
+                    "audio_url": data["url"],
+                    "mv_info": {},  # 新API没有返回MV信息
+                    "lyric": lyric,
+                }
         except Exception as e:
             raise ParseException(f"网易云音乐解析失败: {e}") from e
 
