@@ -42,7 +42,6 @@ class PlatformEnum(str, Enum):
     X = "x"
     WEIBO = "weibo"
     REDNOTE = "rednote"
-    TAPTAP = "taptap"
     QSMUSIC = "qsmusic"
     KUWO = "kuwo"
     TOUTIAO = "toutiao"
