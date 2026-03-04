@@ -1,4 +1,4 @@
-# TODO: 使用反代，允许国内直接下载推特媒体
+# TODO: 使用反代，允许国内直接下载推特视频媒体
 
 from re import Match
 from typing import ClassVar

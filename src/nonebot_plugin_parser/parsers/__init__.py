@@ -15,7 +15,8 @@ from .kugou import KuGouParser
 from .tieba import TiebaParser
 from .weibo import WeiBoParser
 from .douyin import DouyinParser
-from .taptap import TapTapParser
+
+# from .taptap import TapTapParser
 from .netease import NCMParser
 from .qsmusic import QSMusicParser
 from .toutiao import ToutiaoParser
@@ -43,7 +44,7 @@ __all__ = [
     "ParseResult",
     "Platform",
     "QSMusicParser",
-    "TapTapParser",
+    # "TapTapParser",
     "TiebaParser",
     "ToutiaoParser",
     "XParser",
