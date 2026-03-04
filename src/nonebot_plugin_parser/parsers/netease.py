@@ -2,7 +2,7 @@ import re
 from re import Match
 from typing import ClassVar
 
-from httpx import AsyncClient
+from ..utils.http_utils import get_async_client
 from nonebot import logger
 
 from .base import (
@@ -27,9 +27,7 @@ class NCMParser(BaseParser):
     async def _get_redirect_url(self, url: str) -> str:
         """获取重定向后的URL"""
 
-        async with AsyncClient(
-            verify=False, follow_redirects=True, timeout=self.timeout
-        ) as client:
+        async with get_async_client(follow_redirects=True) as client:
             response = await client.get(url)
             response.raise_for_status()
             return str(response.url)
@@ -54,7 +52,7 @@ class NCMParser(BaseParser):
 
         # 使用新API解析
         try:
-            async with AsyncClient(verify=False, timeout=self.timeout) as client:
+            async with get_async_client() as client:
                 api_url = "https://api.bugpk.com/api/163_music"
                 # 使用GET请求，参数包括ids、level和type
                 params = {"ids": ncm_id, "level": "standard", "type": "json"}

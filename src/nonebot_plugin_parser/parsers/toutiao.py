@@ -11,7 +11,7 @@ from .base import (
     handle,
 )
 from .data import Platform, MediaContent
-from ..constants import COMMON_HEADER
+from ..utils.http_utils import get_async_client
 
 
 class ToutiaoParser(BaseParser):
@@ -33,18 +33,9 @@ class ToutiaoParser(BaseParser):
         share_url = searched.group(0)
         logger.debug(f"触发今日头条解析: {share_url}")
 
-        from httpx import AsyncClient
-
         # 使用API解析
         try:
-            headers = COMMON_HEADER.copy()
-            headers.update(
-                {"Content-Type": "application/json", "User-Agent": "API-Client/1.0"}
-            )
-
-            async with AsyncClient(
-                headers=headers, verify=False, timeout=self.timeout
-            ) as client:
+            async with get_async_client() as client:
                 api_url = "https://api.bugpk.com/api/toutiao"
                 params = {"url": share_url}
                 resp = await client.get(api_url, params=params)

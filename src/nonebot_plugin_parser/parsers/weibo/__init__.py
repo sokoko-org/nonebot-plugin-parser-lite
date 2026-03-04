@@ -4,7 +4,8 @@ from uuid import uuid4
 from typing import ClassVar
 
 from bs4 import Tag, BeautifulSoup
-from httpx import Cookies, AsyncClient
+
+from ...utils.http_utils import get_async_client
 
 from . import common, article
 from ..base import (
@@ -82,9 +83,8 @@ class WeiBoParser(BaseParser):
             "_t": int(time() * 1000),
         }
 
-        async with AsyncClient(
+        async with get_async_client(
             headers=self.headers,
-            timeout=self.timeout,
         ) as client:
             response = await client.get(url, params=params)
             response.raise_for_status()
@@ -137,7 +137,7 @@ class WeiBoParser(BaseParser):
         }
         post_content = 'data={"Component_Play_Playinfo":{"oid":"' + fid + '"}}'
 
-        async with AsyncClient(headers=headers, timeout=self.timeout) as client:
+        async with get_async_client(headers=headers) as client:
             response = await client.post(req_url, content=post_content)
             response.raise_for_status()
 
@@ -176,15 +176,12 @@ class WeiBoParser(BaseParser):
 
         # 加时间戳参数，减少被缓存/规则命中的概率
         ts = int(time() * 1000)
-        url = f"https://m.weibo.cn/statuses/show?id={weibo_id}&_={ts}"
+        url = f"https://www.weibo.cn/statuses/show?id={weibo_id}&_={ts}"
 
         # 关键：不带 cookie、不跟随重定向（避免二跳携 cookie）
-        async with AsyncClient(
+        async with get_async_client(
             headers=headers,
-            timeout=self.timeout,
             follow_redirects=False,
-            cookies=Cookies(),
-            trust_env=False,
         ) as client:
             response = await client.get(url)
             if response.status_code != 200:

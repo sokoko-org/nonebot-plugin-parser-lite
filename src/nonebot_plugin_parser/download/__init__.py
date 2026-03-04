@@ -1,26 +1,27 @@
-import os
 import asyncio
 import hashlib
+import os
 from pathlib import Path
+from urllib.parse import urljoin
 
 import aiofiles
-from httpx import HTTPError, AsyncClient
+from httpx import AsyncClient, HTTPError
 from nonebot import logger
 from rich.progress import (
+    BarColumn,
     DownloadColumn,
     Progress,
-    BarColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
     TransferSpeedColumn,
 )
 
-from .task import auto_task
-from ..utils.common import merge_av, safe_unlink, generate_file_name
 from ..config import pconfig
 from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
-from ..exception import DownloadException, ZeroSizeException, SizeLimitException
-from urllib.parse import urljoin
+from ..exception import DownloadException, SizeLimitException, ZeroSizeException
+from ..utils.common import generate_file_name, merge_av, safe_unlink
+from ..utils.http_utils import AsyncClient
+from .task import auto_task
 
 
 class StreamDownloader:
@@ -223,7 +224,7 @@ class StreamDownloader:
                                 raise SizeLimitException from e
                             except Exception as e:
                                 logger.debug(
-                                    f"下载 ts 文件失败，重试中 ({retry+1}/3): {ts_url}, error: {e}"
+                                    f"下载 ts 文件失败，重试中 ({retry + 1}/3): {ts_url}, error: {e}"
                                 )
                                 await asyncio.sleep(1)
 

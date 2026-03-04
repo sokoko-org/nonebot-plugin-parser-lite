@@ -1,50 +1,51 @@
-import re
-import json
 import asyncio
 import contextlib
+import json
+import re
+from collections.abc import AsyncGenerator
 from re import Match
 from typing import Any, ClassVar
-from collections.abc import AsyncGenerator
 
-import httpx
-from msgspec import convert
-from nonebot import logger
-from bilibili_api import HEADERS, Credential, select_client, request_settings
-from bilibili_api.live import LiveRoom
-from bilibili_api.opus import Opus
-from bilibili_api.video import (
-    Video,
-    AudioStreamDownloadURL,
-    VideoStreamDownloadURL,
-    VideoDownloadURLDataDetecter,
-)
+from bilibili_api import HEADERS, Credential, request_settings, select_client
 from bilibili_api.article import Article
 from bilibili_api.dynamic import Dynamic
-from bilibili_api.login_v2 import QrCodeLogin, QrCodeLoginEvents
 from bilibili_api.favorite_list import get_video_favorite_list_content
+from bilibili_api.live import LiveRoom
+from bilibili_api.login_v2 import QrCodeLogin, QrCodeLoginEvents
+from bilibili_api.opus import Opus
+from bilibili_api.video import (
+    AudioStreamDownloadURL,
+    Video,
+    VideoDownloadURLDataDetecter,
+    VideoStreamDownloadURL,
+)
+from httpx import AsyncClient
+from msgspec import convert
+from nonebot import logger
 
-from .live import RoomData
-from .opus import OpusItem, TextNode, ImageNode
+from ...utils.common import format_num
+from ...utils.http_utils import get_async_client
 from ..base import (
     DOWNLOADER,
+    Author,
     BaseParser,
-    PlatformEnum,
-    ParseException,
+    Comment,
     DownloadException,
     DurationLimitException,
+    MediaContent,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    Stats,
     handle,
     pconfig,
-    Author,
-    Comment,
-    Platform,
-    MediaContent,
-    Stats,
 )
-from .video import VideoInfo, AIConclusion
 from ..cookie import ck2dict
 from .dynamic import DynamicData, DynamicInfo
 from .favlist import FavData
-from ...utils.common import format_num
+from .live import RoomData
+from .opus import ImageNode, OpusItem, TextNode
+from .video import AIConclusion, VideoInfo
 
 # 选择客户端
 select_client("curl_cffi")
@@ -895,7 +896,7 @@ class BilibiliParser(BaseParser):
                     f"{k}={v}" for k, v in cookies.items()
                 )
 
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with get_async_client() as client:
             # 1. 热评接口
             hot_url = "https://api.bilibili.com/x/v2/reply/hot"
             hot_params = {
@@ -943,7 +944,7 @@ class BilibiliParser(BaseParser):
 
     async def _request_comment_api(
         self,
-        client: httpx.AsyncClient,
+        client: AsyncClient,
         *,
         api_url: str,
         params: dict[str, Any],

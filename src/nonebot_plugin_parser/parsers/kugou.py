@@ -5,7 +5,7 @@ import contextlib
 from re import Match
 from typing import ClassVar
 
-from httpx import AsyncClient
+from ..utils.http_utils import get_async_client
 
 from .base import (
     BaseParser,
@@ -14,7 +14,6 @@ from .base import (
     handle,
 )
 from .data import Platform, MediaContent
-from ..constants import COMMON_HEADER
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
@@ -129,11 +128,7 @@ class KuGouParser(BaseParser):
     async def _parse_kugou_share(self, searched: Match[str]):
         """解析酷狗分享链接"""
         share_url = searched.group(0)
-        # 获取分享页HTML
-        headers = COMMON_HEADER.copy()
-        async with AsyncClient(
-            headers=headers, verify=False, timeout=self.timeout
-        ) as client:
+        async with get_async_client() as client:
             response = await client.get(share_url)
             response.raise_for_status()
             html_text = response.text

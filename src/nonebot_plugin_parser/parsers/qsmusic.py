@@ -2,7 +2,7 @@ import re
 from re import Match
 from typing import ClassVar
 
-from httpx import AsyncClient
+from ..utils.http_utils import get_async_client
 from nonebot import logger
 
 from .base import (
@@ -28,7 +28,7 @@ class QSMusicParser(BaseParser):
 
         # 使用API解析
         try:
-            async with AsyncClient(verify=False, timeout=self.timeout) as client:
+            async with get_async_client() as client:
                 api_url = "https://api.bugpk.com/api/qsmusic"
                 params = {"url": share_url}
                 resp = await client.get(api_url, params=params)

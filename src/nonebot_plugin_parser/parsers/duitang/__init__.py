@@ -3,6 +3,8 @@ from typing import ClassVar
 
 from httpx import AsyncClient
 
+from ...utils.http_utils import get_async_client
+
 
 from ...utils.common import format_num
 
@@ -21,11 +23,7 @@ class DuiTangParser(BaseParser):
     async def parse_blog(self, searched: Match[str]):
         blog_id = searched["blog_id"]
 
-        async with AsyncClient(
-            headers=self.headers,
-            timeout=self.timeout,
-            verify=False,
-        ) as client:
+        async with get_async_client() as client:
             blog_data = await self._fetch_blog_detail(client, blog_id=blog_id)
             comment_data = await self._fetch_comments(
                 client,
@@ -58,11 +56,7 @@ class DuiTangParser(BaseParser):
     async def parse_atlas(self, searched: Match[str]):
         atlas_id = searched["atlas_id"]
 
-        async with AsyncClient(
-            headers=self.headers,
-            timeout=self.timeout,
-            verify=False,
-        ) as client:
+        async with get_async_client() as client:
             atlas_data = await self._fetch_atlas_detail(client, atlas_id=atlas_id)
             comment_data = await self._fetch_comments(
                 client,

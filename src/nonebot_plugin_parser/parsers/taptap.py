@@ -5,8 +5,8 @@ import contextlib
 from typing import Any
 from datetime import datetime
 
-import httpx
 from nonebot import logger
+from ..utils.http_utils import get_async_client
 
 from .base import BaseParser, handle
 from .data import Platform
@@ -168,7 +168,7 @@ class TapTapParser(BaseParser):
         }
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with get_async_client() as client:
                 response = await client.get(
                     api_url, params=params, headers=self.headers
                 )
@@ -191,7 +191,7 @@ class TapTapParser(BaseParser):
         }
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with get_async_client() as client:
                 response = await client.get(
                     api_url, params=params, headers=self.headers
                 )
@@ -318,7 +318,7 @@ class TapTapParser(BaseParser):
                 play_info_params = {"video_id": video_id}
 
                 try:
-                    async with httpx.AsyncClient(timeout=10.0) as client:
+                    async with get_async_client() as client:
                         play_response = await client.get(
                             play_info_url, params=play_info_params, headers=self.headers
                         )
@@ -1099,7 +1099,7 @@ class TapTapParser(BaseParser):
 
         comments = []
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with get_async_client() as client:
                 response = await client.get(
                     api_url, params=params, headers=self.headers
                 )
@@ -1208,7 +1208,7 @@ class TapTapParser(BaseParser):
         }
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with get_async_client() as client:
                 response = await client.get(
                     api_url, params=params, headers=self.headers
                 )

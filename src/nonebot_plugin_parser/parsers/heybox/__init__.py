@@ -10,9 +10,9 @@ from .encrypt import build_url
 
 from ..base import BaseParser, handle, Platform, PlatformEnum, ParseException, Comment
 from re import Match
-from httpx import AsyncClient
 from nonebot.log import logger
 from ...utils.browser import BROWSER
+from ...utils.http_utils import get_async_client
 
 
 class HeyBoxParser(BaseParser):
@@ -44,10 +44,8 @@ class HeyBoxParser(BaseParser):
     async def _parse(self, searched: Match[str]):
         link_id = searched["link_id"]
 
-        async with AsyncClient(
+        async with get_async_client(
             headers=self.headers,
-            timeout=self.timeout,
-            verify=False,
             cookies={"x_xhh_tokenid": self.x_xhh_tokenid},
         ) as client:
             response = await client.get(build_url(link_id))

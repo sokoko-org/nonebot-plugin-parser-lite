@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from httpx import AsyncClient, NetworkError
+from ...utils.http_utils import get_async_client
 from google.protobuf import descriptor_pb2, descriptor_pool
 from google.protobuf.message_factory import GetMessageClass
 from ..data import MediaContent, Comment
@@ -73,7 +73,7 @@ async def pack_req(data: bytes) -> bytes:
     )
 
     # 设置 Content-Type，带上固定 boundary
-    async with AsyncClient(verify=False) as client:
+    async with get_async_client() as client:
         response = await client.post(
             "http://tiebac.baidu.com/c/f/pb/page",
             headers={
@@ -94,7 +94,7 @@ def parse_res(data: bytes) -> Posts:
     res = get_message("PbPageResIdl")()
     res.ParseFromString(data)
     if res.error.errorno:
-        raise NetworkError(res.error.errmsg)
+        raise ValueError(res.error.errmsg)
 
     data_proto = res.data
     return Posts.from_tbdata(data_proto)

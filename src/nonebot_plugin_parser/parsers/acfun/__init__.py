@@ -1,15 +1,13 @@
 import re
 from typing import ClassVar
 
-from httpx import AsyncClient
-
+from ...utils.http_utils import get_async_client
 from ..base import (
     DOWNLOADER,
-    COMMON_TIMEOUT,
-    Platform,
     BaseParser,
-    PlatformEnum,
     ParseException,
+    Platform,
+    PlatformEnum,
     handle,
 )
 from .video import decoder
@@ -66,7 +64,7 @@ class AcfunParser(BaseParser):
         # 拼接查询参数
         url = f"{url}?quickViewId=videoInfo_new&ajaxpipe=1"
 
-        async with AsyncClient(headers=self.headers, timeout=COMMON_TIMEOUT) as client:
+        async with get_async_client(headers=self.headers) as client:
             response = await client.get(url)
             response.raise_for_status()
             raw = response.text

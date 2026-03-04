@@ -1,11 +1,11 @@
 import re
 from typing import ClassVar
 
-from httpx import AsyncClient
 from nonebot import logger
 
+from ...utils.http_utils import get_async_client
+
 from ..base import (
-    COMMON_TIMEOUT,
     Platform,
     BaseParser,
     PlatformEnum,
@@ -61,11 +61,9 @@ class DouyinParser(BaseParser):
         return f"https://m.douyin.com/share/{ty}/{vid}"
 
     async def parse_video(self, url: str):
-        async with AsyncClient(
+        async with get_async_client(
             headers=self.ios_headers,
-            timeout=COMMON_TIMEOUT,
             follow_redirects=False,
-            verify=False,
         ) as client:
             response = await client.get(url)
             if response.status_code != 200:

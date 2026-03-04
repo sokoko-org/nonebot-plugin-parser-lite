@@ -7,7 +7,7 @@ from abc import ABC
 from typing import TYPE_CHECKING, Any, Literal, Sequence, TypeVar, ClassVar, cast
 from collections.abc import Callable, Coroutine
 from typing_extensions import Unpack, ParamSpec
-from httpx import AsyncClient
+from ..utils.http_utils import get_async_client
 
 from ..download.task import DownloadTaskWrapper
 from .data import (
@@ -33,7 +33,7 @@ from .creator import (
 )
 from ..config import pconfig as pconfig
 from ..download import DOWNLOADER as DOWNLOADER
-from ..constants import IOS_HEADER, COMMON_HEADER, ANDROID_HEADER, COMMON_TIMEOUT
+from ..constants import IOS_HEADER, COMMON_HEADER, ANDROID_HEADER
 from ..constants import DOWNLOAD_TIMEOUT as DOWNLOAD_TIMEOUT
 from ..constants import PlatformEnum as PlatformEnum
 from ..exception import TipException as TipException
@@ -127,7 +127,6 @@ class BaseParser:
         self.headers = COMMON_HEADER.copy()
         self.ios_headers = IOS_HEADER.copy()
         self.android_headers = ANDROID_HEADER.copy()
-        self.timeout = COMMON_TIMEOUT
 
     def __init_subclass__(cls, **kwargs):
         """自动注册子类到 _registry"""
@@ -210,11 +209,9 @@ class BaseParser:
         """获取重定向后的 URL, 单次重定向"""
 
         headers = headers or COMMON_HEADER.copy()
-        async with AsyncClient(
+        async with get_async_client(
             headers=headers,
-            verify=False,
             follow_redirects=False,
-            timeout=COMMON_TIMEOUT,
         ) as client:
             response = await client.get(url)
             if response.status_code >= 400:
@@ -230,11 +227,9 @@ class BaseParser:
         """获取重定向后的 URL, 允许多次重定向"""
 
         headers = headers or COMMON_HEADER.copy()
-        async with AsyncClient(
+        async with get_async_client(
             headers=headers,
-            verify=False,
             follow_redirects=True,
-            timeout=COMMON_TIMEOUT,
         ) as client:
             response = await client.get(url)
             if response.status_code >= 400:
