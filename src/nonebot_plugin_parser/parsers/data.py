@@ -183,7 +183,7 @@ class ParseResult:
 
     platform: Platform
     """平台信息"""
-    author: Author | None = None
+    author: Author
     """作者信息"""
     title: str | None = None
     """标题"""
@@ -266,7 +266,7 @@ class ParseResultKwargs(TypedDict, total=False):
     """发布时间戳, 秒"""
     url: str | None
     """来源链接"""
-    author: Author | None
+    author: Author
     """作者信息"""
     extra: dict[str, Any]
     """额外信息"""

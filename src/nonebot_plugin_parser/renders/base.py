@@ -253,12 +253,18 @@ class Renderer:
         env = Environment(loader=FileSystemLoader(self.templates_dir))
         template = env.get_template(template_name)
         # 渲染
-        with open(f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html", "w", encoding="utf8") as f:  # noqa: E501
+        with open(
+            f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html",
+            "w",
+            encoding="utf8",
+        ) as f:  # noqa: E501
             f.write(
                 template.render(
                     **{
                         "result": template_data,
-                        "rendering_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "rendering_time": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                         "bot_name": _nickname,
                     }
                 )
@@ -279,12 +285,15 @@ class Renderer:
             },
         )
 
-    async def _resolve_parse_result(self, result: ParseResult) -> dict[str, Any]:
+    async def _resolve_parse_result(
+        self, result: ParseResult, download: bool = True
+    ) -> dict[str, Any]:
         """解析 ParseResult 为模板可用的字典数据"""
 
         logo_path = Path(__file__).parent / "resources" / f"{result.platform.name}.png"
-        content = await build_html(list(result.content))
+        content = await build_html(list(result.content), download=download)
         comments = await build_comments(result.comments)
+        avatar_path = await result.author.get_avatar_path(download=False)
         # 这些是一定会有的字段
         data: dict[str, Any] = {
             "title": result.title,
@@ -300,19 +309,17 @@ class Renderer:
             "cover_path": await result.get_cover_path(),
             "stats": result.stats,
             "comments": comments,
-        }
-
-        if result.author:
-            avatar_path = await result.author.get_avatar_path(download=False)
-
-            data["author"] = {
+            "author": {
                 "name": result.author.name,
                 "id": result.author.id,  # 传递 UID
                 "avatar_path": avatar_path or None,
-            }
+            },
+        }
 
         if result.repost:
-            data["repost"] = await self._resolve_parse_result(result.repost)
+            data["repost"] = await self._resolve_parse_result(
+                result.repost, download=False
+            )
 
         # 添加二维码支持
         if pconfig.append_qrcode and result.url:
