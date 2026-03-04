@@ -402,6 +402,8 @@ class StreamDownloader:
         """
         if img_name is None:
             img_name = generate_file_name(url, ".jpg")
+        if pconfig.pic_proxy:
+            url = f"{pconfig.pic_proxy}{url}"
         return await self.streamd(url, file_name=img_name, ext_headers=ext_headers)
 
     async def download_av_and_merge(

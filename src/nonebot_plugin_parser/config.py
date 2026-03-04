@@ -54,6 +54,8 @@ class Config(BaseModel):
     """触发延迟发送视频的表情ID列表，用于监听group_msg_emoji_like事件"""
     parser_delay_send_lazy_download: bool = False
     """是否开启懒下载模式，仅在用户请求时才下载视频"""
+    parser_pic_proxy: str = ""
+    """图片反向代理地址，用于处理图片下载失败的问题"""
 
     @property
     def nickname(self) -> str:
@@ -169,6 +171,11 @@ class Config(BaseModel):
     def delay_send_lazy_download(self) -> bool:
         """是否开启懒下载模式"""
         return self.parser_delay_send_lazy_download
+
+    @property
+    def pic_proxy(self) -> str:
+        """图片反向代理地址"""
+        return self.parser_pic_proxy
 
 
 # 定义插件元数据
