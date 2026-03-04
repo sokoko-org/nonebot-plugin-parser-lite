@@ -45,6 +45,5 @@ def get_async_client(
         transport=base_transport,
         mounts=mounts or None,
         timeout=timeout,
-        trust_env=False,
         **kwargs,
     )

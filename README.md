@@ -73,7 +73,7 @@ parser_bili_video_quality=80
 # [可选] 小红书 Cookie, 部分链接无法解析，可填
 parser_xhs_ck=""
 
-# [可选] 代理, 仅作用于 tiktok 解析
+# [可选] 代理, 仅作用于 推特 解析
 # 推特解析会自动读取环境变量中的 http_proxy / https_proxy(代理软件通常会自动设置)
 parser_proxy=None
 
@@ -114,7 +114,7 @@ parser_delay_send_lazy_download=False
 # [可选] 图片反代,用于解决可能的403和外网访问问题
 # (例如,https://image.baidu.com/search/down?url=)
 # 可以用于不使用魔法下载推特图片(bushi
-parser_pic_proxy=
+parser_pic_proxy=None
 ```
 
 </details>
