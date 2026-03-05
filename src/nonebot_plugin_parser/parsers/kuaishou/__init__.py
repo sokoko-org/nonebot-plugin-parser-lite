@@ -15,7 +15,7 @@ from ..base import (
 from .decode import decode_init_state
 from .states import Data, CommentList
 from ...utils.common import format_num
-from ...utils.browser import BROWSER
+from ...utils.browser import BROWSER, DataPacket
 
 _STICKER_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 
@@ -51,8 +51,7 @@ class KuaiShouParser(BaseParser):
         tab.listen.start("/rest/wd/photo/comment/list")
         tab.get(real_url)
         cms = tab.listen.wait()
-        assert cms
-        assert not isinstance(cms, list)
+        assert isinstance(cms, DataPacket)
         tab.listen.stop()
         tab.stop_loading()
         data = tab.run_js("window.INIT_STATE", as_expr=True)
