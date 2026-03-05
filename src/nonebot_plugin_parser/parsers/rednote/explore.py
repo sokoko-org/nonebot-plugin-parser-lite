@@ -129,7 +129,7 @@ class Comment(Struct):
 class CommentsList(Struct):
     """Wrapper for comments list"""
 
-    list: list[Comment] = field(default_factory=list)
+    list: list[Comment]
 
 
 class NoteDetailWrapper(Struct):
