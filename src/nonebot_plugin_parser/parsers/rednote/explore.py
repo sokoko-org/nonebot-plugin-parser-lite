@@ -119,7 +119,6 @@ class CommentUser(Struct):
 class Comment(Struct):
     userInfo: CommentUser
     createTime: int
-    subCommentCount: str
     content: str
     likeCount: str
     ipLocation: str
@@ -130,7 +129,7 @@ class Comment(Struct):
 class CommentsList(Struct):
     """Wrapper for comments list"""
 
-    comments: list[Comment] = field(name="list", default_factory=list)
+    list: list[Comment] = field(default_factory=list)
 
 
 class NoteDetailWrapper(Struct):

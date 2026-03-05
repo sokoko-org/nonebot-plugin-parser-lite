@@ -126,7 +126,7 @@ class RedNoteParser(BaseParser):
 
         commentList: list[Comment] = []
 
-        for c in note_data.comments.comments:
+        for c in note_data.comments.list:
             comment = self.create_comment(
                 author=self.create_author(
                     name=c.userInfo.nickname,
@@ -136,7 +136,7 @@ class RedNoteParser(BaseParser):
                 timestamp=c.createTime,
                 stats=self.create_stats(
                     like_count=c.likeCount,
-                    comment_count=c.subCommentCount,
+                    comment_count=str(len(c.subComments)),
                 ),
                 location=c.ipLocation,
             )
@@ -152,7 +152,6 @@ class RedNoteParser(BaseParser):
                         timestamp=sub.createTime,
                         stats=self.create_stats(
                             like_count=sub.likeCount,
-                            comment_count=sub.subCommentCount,
                         ),
                     )
                 )
