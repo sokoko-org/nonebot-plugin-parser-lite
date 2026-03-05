@@ -2,7 +2,7 @@ import re
 from typing import ClassVar
 from urllib.parse import parse_qsl
 
-from curl_cffi import AsyncSession
+from ...utils.http_utils import get_async_client
 
 from ..base import (
     Platform,
@@ -14,8 +14,12 @@ from ..base import (
     Comment,
     MediaContent,
 )
-from .explore import InitialState as exploreInitialState
-from .explore import decoder as exploreDecoder
+from msgspec import convert
+from .explore import (
+    CommentList,
+    decoder as exploreDecoder,
+)
+from nonebot.log import logger
 
 _STICKER_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
 
@@ -25,7 +29,6 @@ class RedNoteParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.REDNOTE, display_name="小红书"
     )
-    session: AsyncSession
     # 小红书笔记详情页对真实浏览器仍有速率限制，达到限制后需要时间恢复
     # 暂时不知ck能否缓解此问题
 
@@ -51,9 +54,6 @@ class RedNoteParser(BaseParser):
         if pconfig.xhs_ck:
             self.headers["cookie"] = pconfig.xhs_ck
             self.ios_headers["cookie"] = pconfig.xhs_ck
-        self.session = AsyncSession(
-            headers=self.headers, timeout=15, impersonate="chrome131"
-        )
 
     @handle("xhslink.com", r"xhslink\.com/[A-Za-z0-9._?%&+=/#@-]+")
     async def _parse_short_link(self, searched: re.Match[str]):
@@ -85,27 +85,40 @@ class RedNoteParser(BaseParser):
 
         full_url += f"?xsec_token={xsec_token}&xsec_source=pc_share"
 
-        return await self.parse_explore(full_url, note_id)
+        return await self.parse_explore(full_url, note_id, xsec_token)
 
-    async def _fetch_initial_state(self, url: str) -> exploreInitialState:
-        """
-        mode: "explore"
-        """
-        response = await self.session.get(url)
-        # may be 302
-        if response.status_code > 400:
+    async def parse_explore(self, url: str, note_id: str, xsec_token: str):
+        async with get_async_client() as client:
+            response = await client.get(url)
             response.raise_for_status()
-        html = response.text
-        pattern = r"window\.__INITIAL_STATE__=(.*?)</script>"
-        if matched := re.search(pattern, html):
-            raw = matched[1].replace("undefined", "null")
-        else:
-            raise ParseException("小红书分享链接失效或内容已删除")
-        return exploreDecoder.decode(raw)
+            html = response.text
+            pattern = r"window\.__INITIAL_STATE__=(.*?)</script>"
+            if matched := re.search(pattern, html):
+                raw = matched[1].replace("undefined", '""')
+            else:
+                raise ParseException("小红书分享链接失效或内容已删除")
+            response = await client.get(
+                "https://edith.xiaohongshu.com/api/sns/web/v2/comment/page",
+                params={
+                    "note_id": note_id,
+                    "cursor": "",
+                    "top_comment_id": "",
+                    "image_formats": "jpg,webp,avif",
+                    "xsec_token": xsec_token,
+                },
+            )
+            data = response.json()
+            if data["code"] != 0:
+                logger.warning("获取小红书评论数据失败")
+                logger.error(response.text)
+                com_data = {"comments": []}
+            else:
+                com_data = data["data"]
 
-    async def parse_explore(self, url: str, note_id: str):
-        init_state = await self._fetch_initial_state(url)
+        init_state = exploreDecoder.decode(raw)
         note_data = init_state.note.noteDetailMap[note_id]
+        note_data.comments_list = convert(com_data, CommentList)
+
         note_detail = note_data.note
         contents: list[MediaContent | str] = [note_detail.desc]
         image_urls = note_detail.image_urls
@@ -126,7 +139,7 @@ class RedNoteParser(BaseParser):
 
         commentList: list[Comment] = []
 
-        for c in note_data.comments.list:
+        for c in note_data.comments_list.comments:
             comment = self.create_comment(
                 author=self.create_author(
                     name=c.userInfo.nickname,

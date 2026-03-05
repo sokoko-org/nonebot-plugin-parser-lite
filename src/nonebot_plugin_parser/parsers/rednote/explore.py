@@ -126,17 +126,15 @@ class Comment(Struct):
     subComments: list["Comment"] = field(default_factory=list)
 
 
-class CommentsList(Struct):
-    """Wrapper for comments list"""
-
-    list: list[Comment]
+class CommentList(Struct):
+    comments: list[Comment]
 
 
 class NoteDetailWrapper(Struct):
     """Wrapper for note detail, represents the value in noteDetailMap[xhs_id]"""
 
     note: NoteDetail
-    comments: CommentsList
+    comments_list: CommentList | None = None
 
 
 class Note(Struct):
