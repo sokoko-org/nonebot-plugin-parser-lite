@@ -16,6 +16,12 @@ from .video import decoder
 from ...utils.format import format_num
 
 
+ROUTER_PATTERN = re.compile(
+    pattern=r"window\._ROUTER_DATA\s*=\s*(.*?)</script>",
+    flags=re.DOTALL,
+)
+
+
 class DouyinParser(BaseParser):
     # 平台信息
     platform: ClassVar[Platform] = Platform(
@@ -70,11 +76,7 @@ class DouyinParser(BaseParser):
                 raise ParseException(f"status: {response.status_code}")
             text = response.text
 
-        pattern = re.compile(
-            pattern=r"window\._ROUTER_DATA\s*=\s*(.*?)</script>",
-            flags=re.DOTALL,
-        )
-        matched = pattern.search(text)
+        matched = ROUTER_PATTERN.search(text)
 
         if not matched or not matched[1]:
             raise ParseException("can't find _ROUTER_DATA in html")

@@ -17,6 +17,11 @@ from ...utils.browser import BROWSER
 from bs4 import BeautifulSoup
 from bs4.element import Tag, NavigableString
 
+INITIAL_DATA = re.compile(
+    pattern=r'<script id="js-initialData" type="text/json">(.*?)</script>',
+    flags=re.DOTALL,
+)
+
 
 class ZhiHuParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
@@ -73,8 +78,7 @@ class ZhiHuParser(BaseParser):
         tab = BROWSER.new_tab(url)
         html = tab.html
         tab.close()
-        pattern = r'<script id="js-initialData" type="text/json">(.*?)</script>'
-        if matched := re.search(pattern, html):
+        if matched := INITIAL_DATA.search(html):
             raw = matched[1].replace("undefined", "null")
         else:
             raise ParseException("知乎分享链接失效或内容已删除")

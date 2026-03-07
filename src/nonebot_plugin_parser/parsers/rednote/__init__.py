@@ -25,6 +25,11 @@ from nonebot.log import logger
 
 REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
 
+INITIAL_STATE = re.compile(
+    pattern=r"window\.__INITIAL_STATE__=(.*?)</script>",
+    flags=re.DOTALL,
+)
+
 
 class RedNoteParser(BaseParser):
     # 平台信息
@@ -107,8 +112,7 @@ class RedNoteParser(BaseParser):
         response.raise_for_status()
         html = response.text
 
-        pattern = r"window\.__INITIAL_STATE__=(.*?)</script>"
-        if matched := re.search(pattern, html):
+        if matched := INITIAL_STATE.search(html):
             # 将 undefined 替换为空字符串，避免 JSON 解析失败
             return matched[1].replace("undefined", '""')
 
