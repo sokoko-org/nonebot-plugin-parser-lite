@@ -29,9 +29,7 @@ class Renderer:
     templates_dir: ClassVar[Path] = Path(__file__).parent / "templates"
     """模板目录"""
 
-    async def render_messages(
-        self, result: ParseResult
-    ) -> AsyncGenerator[UniMessage[Any], None]:
+    async def render_messages(self, result: ParseResult) -> UniMessage[Any]:
         """渲染消息
 
         :param result: 解析结果
@@ -50,7 +48,7 @@ class Renderer:
         if self.append_url:
             urls = (result.display_url, result.repost_display_url)
             msg += "\n".join(url for url in urls if url)
-        yield msg
+        return msg
 
     async def send_content(
         self, result: ParseResult
@@ -210,7 +208,7 @@ class Renderer:
                     template_name = file_name
 
             #    from jinja2 import FileSystemLoader, Environment
-        
+
             #    # 创建一个包加载器对象
             #    env = Environment(loader=FileSystemLoader(self.templates_dir))
             #    template = env.get_template(template_name)

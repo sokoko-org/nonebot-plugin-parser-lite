@@ -71,18 +71,17 @@ class LazyManager:
     @classmethod
     async def _timeout_handler(cls, user_id: str) -> None:
         """会话超时自动清理。"""
-        # 保存自己这个任务引用，用于避免 self-cancel
         self_task = asyncio.current_task()
-        if self_task is None:
-            # 理论上不会发生，但防御性处理
-            await asyncio.sleep(cls.TIMEOUT_SECONDS)
-            if user_id in cls.SESSIONS:
-                cls.remove(user_id)
-            return
 
         await asyncio.sleep(cls.TIMEOUT_SECONDS)
-        if user_id in cls.SESSIONS:
-            # 告知 remove 当前任务，防止自取消
+
+        # 理论上 current_task 不会为 None，这里仅做防御性处理
+        if user_id not in cls.SESSIONS:
+            return
+
+        if self_task is None:
+            cls.remove(user_id)
+        else:
             cls.remove(user_id, current_task=self_task)
 
 
@@ -156,40 +155,42 @@ async def parser_handler(
     sr: SearchResult = Searched(),
 ):
     """统一的解析处理器"""
-    # 1. 获取缓存结果
     cache_key = sr.searched[0]
-    result = _RESULT_CACHE.get(cache_key)
 
+    # 1. 从缓存获取或重新解析
+    result = _RESULT_CACHE.get(cache_key)
     if result is None:
-        # 2. 获取对应平台 parser
         parser = get_parser(sr.keyword)
         result = await parser.parse(sr.keyword, sr.searched)
-        logger.debug(f"解析结果: {result}")
+        logger.debug("解析结果: %r", result)
+        _RESULT_CACHE[cache_key] = result
     else:
-        logger.debug(f"命中缓存: {cache_key}, 结果: {result}")
+        logger.debug("命中缓存: %s, 结果: %r", cache_key, result)
 
-    # 3. 渲染内容消息并发送，保存消息ID
+    # 2. 渲染并发送
     try:
-        async for message in RENDERER.render_messages(result):
-            await message.send()
-        # 媒体内容
+        message = await RENDERER.render_messages(result)
         if pconfig.lazy_download:
+            # 懒下载模式：只发送渲染结果 + 下载提示，由 lazy_matcher 负责后续内容发送
             download_cmd = ", ".join(pconfig.download_command)
-            await UniMessage(
-                f"懒下载已启用，请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来下载媒体资源: \n{download_cmd}"
-            ).send()
+            tips = UniMessage(
+                f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来下载媒体资源: \n{download_cmd}"
+            )
             LazyManager.add(session.user.id, result)
-        else:
-            async for message in RENDERER.send_content(result):
-                await message.send()
-    except Exception as e:
-        # 渲染失败时，尝试直接发送解析结果
-        logger.error(f"渲染失败: {e}")
-        # from ..helper import UniMessage
-        # await UniMessage(f"解析成功，但渲染失败: {e!s}").send()
 
-    # 4. 缓存解析结果
-    _RESULT_CACHE[cache_key] = result
+            # 当前 RENDERER.render_messages 返回的是单条消息
+            await (message + tips).send()
+        else:
+            # 非懒下载模式：先发送渲染内容，再发送下载内容
+            await message.send()
+
+            async for content_msg in RENDERER.send_content(result):
+                await content_msg.send()
+    except Exception as e:
+        # 渲染或发送失败时的兜底日志
+        logger.error("渲染或发送失败: %s", e, exc_info=True)
+        # 如需可在此补发纯文本提示：
+        # await UniMessage(f"解析成功，但渲染/发送失败: {e!s}").send()
 
 
 @on_alconna(Alconna("bm", Args["bv?", str, ""]), priority=3, block=True).handle()
