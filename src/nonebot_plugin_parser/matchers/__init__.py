@@ -221,7 +221,6 @@ if pconfig.lazy_download:
                 return
             if not result.content:
                 await UniHelper.message_reaction(event, "fail")
-                await LazyManager.remove(session.user.id)
                 return
             await UniHelper.message_reaction(event, "resolving")
 
@@ -231,3 +230,5 @@ if pconfig.lazy_download:
 
         except Exception:
             await UniHelper.message_reaction(event, "fail")
+        finally:
+            await LazyManager.remove(session.user.id)
