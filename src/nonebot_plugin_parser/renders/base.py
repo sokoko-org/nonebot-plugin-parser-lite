@@ -104,6 +104,7 @@ class Renderer:
     async def _handle_immediate_media(
         self, cont: MediaContent
     ) -> AsyncGenerator[UniMessage[Any], None]:
+        # sourcery skip: merge-duplicate-blocks, remove-redundant-if
         """处理需要立即发送的音视频媒体，返回对应的消息段。"""
         if not isinstance(cont, (VideoContent, AudioContent)):
             return
@@ -111,18 +112,16 @@ class Renderer:
         path = await cont.get_path()
         logger.debug(f"立即发送{type(cont).__name__}: {path}")
 
-        if (
-            isinstance(cont, VideoContent)
-            and pconfig.need_upload_video
-            or not isinstance(cont, VideoContent)
-            and isinstance(cont, AudioContent)
-            and pconfig.need_upload_audio
-        ):
-            yield UniMessage(UniHelper.file_seg(path))
-        elif isinstance(cont, VideoContent):
-            yield UniMessage(UniHelper.video_seg(path))
+        if isinstance(cont, VideoContent):
+            if pconfig.need_upload_video:
+                yield UniMessage(UniHelper.file_seg(path))
+            else:
+                yield UniMessage(UniHelper.video_seg(path))
         elif isinstance(cont, AudioContent):
-            yield UniMessage(UniHelper.record_seg(path))
+            if pconfig.need_upload_audio:
+                yield UniMessage(UniHelper.file_seg(path))
+            else:
+                yield UniMessage(UniHelper.record_seg(path))
 
     async def _build_forwardable_segment(
         self, cont: MediaContent
