@@ -79,7 +79,10 @@ parser_bili_video_quality=80
 parser_xhs_ck=""
 
 # [可选] 音频解析，是否需要上传群文件
-parser_need_upload=False
+parser_need_upload_audio=False
+
+# [可选] 视频解析，是否需要上传群文件
+parser_need_upload_video=False
 
 # [可选] 视频，图片，音频是否使用 base64 发送
 # 注意：编解码和传输 base64 会占用更多的内存,性能和带宽, 甚至可能会使 websocket 连接崩溃
@@ -109,7 +112,7 @@ parser_lazy_download=False
 # [可选] 懒下载模式等待命令超时时间
 parser_lazy_download_timeout=30
 
-# [可选] 在懒加载模式中用户请求下载视频时的命令列表
+# [可选] 在懒下载模式中用户请求下载视频时的命令列表
 parser_download_command=["下载视频", "xz"]
 
 # [可选] 图片反代,用于解决可能的403和外网访问问题

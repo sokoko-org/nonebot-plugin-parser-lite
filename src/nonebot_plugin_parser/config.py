@@ -49,7 +49,7 @@ class Config(BaseModel):
     parser_lazy_download_timeout: int = 30
     """懒下载模式等待命令超时时间"""
     parser_download_command: list[str] = ["下载视频", "xz"]
-    """在懒加载模式中用户请求下载视频时的命令列表"""
+    """在懒下载模式中用户请求下载视频时的命令列表"""
     parser_pic_proxy: str | None = None
     """图片反向代理地址，用于处理图片下载失败的问题"""
     parser_browser_path: str | None = None
@@ -111,11 +111,6 @@ class Config(BaseModel):
         return self.parser_xhs_ck
 
     @property
-    def need_upload(self) -> bool:
-        """是否需要上传音视频文件（兼容旧配置）"""
-        return self.parser_need_upload
-
-    @property
     def need_upload_audio(self) -> bool:
         """是否需要上传音频文件"""
         return self.parser_need_upload_audio or self.parser_need_upload
@@ -152,7 +147,7 @@ class Config(BaseModel):
 
     @property
     def download_command(self) -> list[str]:
-        """在懒加载模式中用户请求下载视频时的命令列表"""
+        """在懒下载模式中用户请求下载视频时的命令列表"""
         return self.parser_download_command
 
     @property

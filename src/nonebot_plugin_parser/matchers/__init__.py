@@ -32,10 +32,10 @@ class LazyManager:
     SESSIONS: ClassVar[dict[str, "LazyManager.Session"]] = {}
 
     @classmethod
-    async def add(cls, user_id: str, parse_result: ParseResult) -> None:
+    def add(cls, user_id: str, parse_result: ParseResult) -> None:
         """为用户创建/刷新懒下载会话。"""
         # 取消之前的会话
-        await cls.remove(user_id)
+        cls.remove(user_id)
 
         task: asyncio.Task[None] = asyncio.create_task(cls._timeout_handler(user_id))
         session: LazyManager.Session = cls.Session(
@@ -45,24 +45,41 @@ class LazyManager:
         cls.SESSIONS[user_id] = session
 
     @classmethod
-    async def get(cls, user_id: str) -> ParseResult | None:
+    def get(cls, user_id: str) -> ParseResult | None:
         """获取用户当前的懒下载解析结果。"""
         session = cls.SESSIONS.get(user_id)
         return session.result if session else None
 
     @classmethod
-    async def remove(cls, user_id: str) -> None:
-        """删除用户的懒下载会话并取消超时任务。"""
+    def remove(cls, user_id: str, *, current_task: asyncio.Task | None = None) -> None:
+        """删除用户的懒下载会话并取消超时任务。
+
+        current_task 用于避免在超时回调中自我取消，减少 CancelledError 噪音。
+        """
         session = cls.SESSIONS.pop(user_id, None)
-        if session is not None:
+        if session is None:
+            return
+
+        # 只有在不是当前正在运行的任务时才取消
+        if session.task is not current_task and not session.task.done():
             session.task.cancel()
 
     @classmethod
     async def _timeout_handler(cls, user_id: str) -> None:
         """会话超时自动清理。"""
+        # 保存自己这个任务引用，用于避免 self-cancel
+        self_task = asyncio.current_task()
+        if self_task is None:
+            # 理论上不会发生，但防御性处理
+            await asyncio.sleep(cls.TIMEOUT_SECONDS)
+            if user_id in cls.SESSIONS:
+                cls.remove(user_id)
+            return
+
         await asyncio.sleep(cls.TIMEOUT_SECONDS)
         if user_id in cls.SESSIONS:
-            await cls.remove(user_id)
+            # 告知 remove 当前任务，防止自取消
+            cls.remove(user_id, current_task=self_task)
 
 
 def _get_enabled_parser_classes() -> list[type[BaseParser]]:
@@ -157,7 +174,7 @@ async def parser_handler(
             await UniMessage(
                 f"懒下载已启用，请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来下载媒体资源: \n{download_cmd}"
             ).send()
-            await LazyManager.add(session.user.id, result)
+            LazyManager.add(session.user.id, result)
         else:
             async for message in RENDERER.send_content(result):
                 await message.send()
@@ -193,7 +210,7 @@ async def _(bv: Match[str]):
     )
     await UniMessage(UniHelper.record_seg(audio_path)).send()
 
-    if pconfig.need_upload:
+    if pconfig.need_upload_audio:
         await UniMessage(UniHelper.file_seg(audio_path)).send()
 
 
@@ -216,7 +233,7 @@ if pconfig.lazy_download:
     @lazy_matcher.handle()
     async def _(event: Event, session: Uninfo):
         try:
-            result = await LazyManager.get(session.user.id)
+            result = LazyManager.get(session.user.id)
             if not result:
                 return
             if not result.content:
@@ -231,4 +248,4 @@ if pconfig.lazy_download:
         except Exception:
             await UniHelper.message_reaction(event, "fail")
         finally:
-            await LazyManager.remove(session.user.id)
+            LazyManager.remove(session.user.id)
