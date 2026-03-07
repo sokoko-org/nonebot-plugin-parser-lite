@@ -106,6 +106,9 @@ parser_need_forward_contents=True
 # [可选] 是否开启懒下载模式，仅在用户请求时才下载视频
 parser_lazy_download=False
 
+# [可选] 懒下载模式等待命令超时时间
+parser_lazy_download_timeout=30
+
 # [可选] 在懒加载模式中用户请求下载视频时的命令列表
 parser_download_command=["下载视频", "xz"]
 

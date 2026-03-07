@@ -21,7 +21,7 @@ from .rule import SUPER_PRIVATE, Searched, SearchResult, on_keyword_regex
 class LazyManager:
     """管理每个用户的懒下载会话，支持超时自动清理。"""
 
-    TIMEOUT_SECONDS: ClassVar[int] = 30
+    TIMEOUT_SECONDS: ClassVar[int] = pconfig.lazy_download_timeout
 
     @dataclass
     class Session:
