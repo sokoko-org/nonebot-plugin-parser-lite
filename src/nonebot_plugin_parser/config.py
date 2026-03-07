@@ -1,13 +1,12 @@
 from pathlib import Path
 
-from nonebot import get_driver, get_plugin_config
-from pydantic import BaseModel
+import nonebot_plugin_localstore as _store
 from bilibili_api.video import VideoCodecs, VideoQuality
+from nonebot import get_driver, get_plugin_config
+from nonebot.plugin import PluginMetadata, inherit_supported_adapters
+from pydantic import BaseModel
 
 from .constants import PlatformEnum
-
-import nonebot_plugin_localstore as _store
-from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 
 class Config(BaseModel):
@@ -45,12 +44,10 @@ class Config(BaseModel):
     """B站视频清晰度"""
     parser_need_forward_contents: bool = True
     """是否需要合并转发内容(大于四项时始终转发)"""
-    parser_delay_send_media: bool = False
-    """是否延迟发送视频/音频，需要用户发送特定表情或点赞特定表情后才发送"""
-    parser_delay_send_emoji_ids: list[int] = [128077]
-    """触发延迟发送视频的表情ID列表，用于监听group_msg_emoji_like事件"""
-    parser_delay_send_lazy_download: bool = False
+    parser_lazy_download: bool = False
     """是否开启懒下载模式，仅在用户请求时才下载视频"""
+    parser_download_command: list[str] = ["下载视频", "xz"]
+    """在懒加载模式中用户请求下载视频时的命令列表"""
     parser_pic_proxy: str | None = None
     """图片反向代理地址，用于处理图片下载失败的问题"""
     parser_browser_path: str | None = None
@@ -152,19 +149,14 @@ class Config(BaseModel):
         return self.parser_blacklist_users
 
     @property
-    def delay_send_media(self) -> bool:
-        """是否延迟发送视频/音频"""
-        return self.parser_delay_send_media
+    def download_command(self) -> list[str]:
+        """在懒加载模式中用户请求下载视频时的命令列表"""
+        return self.parser_download_command
 
     @property
-    def delay_send_emoji_ids(self) -> list[int]:
-        """触发延迟发送视频的表情ID列表"""
-        return self.parser_delay_send_emoji_ids
-
-    @property
-    def delay_send_lazy_download(self) -> bool:
+    def lazy_download(self) -> bool:
         """是否开启懒下载模式"""
-        return self.parser_delay_send_lazy_download
+        return self.parser_lazy_download
 
     @property
     def pic_proxy(self) -> str | None:

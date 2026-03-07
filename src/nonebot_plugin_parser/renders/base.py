@@ -1,27 +1,26 @@
-import uuid
 import datetime
-from io import BytesIO
-from typing import Any, ClassVar
-from pathlib import Path
+import uuid
 from collections.abc import AsyncGenerator
+from io import BytesIO
+from pathlib import Path
+from typing import Any, ClassVar
 
 import qrcode
 from nonebot import logger
+from nonebot_plugin_htmlrender import template_to_pic
 
-from .utils import build_html, build_plain_text, build_comments
-from ..config import pconfig, _nickname
-from ..helper import UniHelper, UniMessage, ForwardNodeInner
-from ..exception import DownloadException, ZeroSizeException, DownloadLimitException
+from ..config import _nickname, pconfig
+from ..exception import DownloadException
+from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..parsers.data import (
-    ParseResult,
     AudioContent,
+    GraphicContent,
     ImageContent,
     MediaContent,
-    GraphicContent,
+    ParseResult,
     VideoContent,
 )
-
-from nonebot_plugin_htmlrender import template_to_pic
+from .utils import build_comments, build_html, build_plain_text
 
 
 class Renderer:
@@ -53,10 +52,6 @@ class Renderer:
             msg += "\n".join(url for url in urls if url)
         yield msg
 
-        # 媒体内容
-        async for message in self.send_content(result):
-            yield message
-
     async def send_content(
         self, result: ParseResult
     ) -> AsyncGenerator[UniMessage[Any], None]:
@@ -65,48 +60,32 @@ class Renderer:
         将解析结果中的媒体内容拆分为立即发送的音视频和可合并转发的图文，并处理延迟发送配置。
         """
         forwardable_segs: list[ForwardNodeInner] = []
-        media_contents: list[MediaContent | Path] = []
         failed_count = 0
 
-        need_delay = pconfig.delay_send_media or pconfig.delay_send_lazy_download
-
         for cont in result.content:
+            # 只关心需要发送的 MediaContent
             if not isinstance(cont, MediaContent) or not cont.need_send:
                 continue
 
-            match cont:
-                case VideoContent() | AudioContent():
-                    failed_delta, media = await self._handle_media_content(
-                        cont, need_delay
-                    )
-                    failed_count += failed_delta
-                    if media is not None:
-                        media_contents.append(media)
-                case ImageContent():
-                    try:
-                        path = await cont.get_path()
-                        forwardable_segs.append(UniHelper.img_seg(path))
-                    except (DownloadLimitException, ZeroSizeException):
-                        continue
-                    except DownloadException:
-                        failed_count += 1
-                        continue
-                case GraphicContent():
-                    try:
-                        path = await cont.get_path()
-                        graphics_msg = UniHelper.img_seg(path)
-                        if cont.alt is not None:
-                            graphics_msg = graphics_msg + cont.alt
-                        forwardable_segs.append(graphics_msg)
-                    except (DownloadLimitException, ZeroSizeException):
-                        continue
-                    except DownloadException:
-                        failed_count += 1
-                        continue
+            try:
+                async for msg in self._handle_immediate_media(cont):
+                    # 音视频类：直接 yield 消息
+                    yield msg
+            except DownloadException:
+                failed_count += 1
+                continue
 
-        if media_contents and need_delay:
-            result.media_contents = media_contents
+            # 图文 / 图片类：加入可转发列表
+            try:
+                seg = await self._build_forwardable_segment(cont)
+            except DownloadException:
+                failed_count += 1
+                continue
 
+            if seg is not None:
+                forwardable_segs.append(seg)
+
+        # 处理图文转发部分
         if forwardable_segs:
             self._append_forward_text_segments(result, forwardable_segs)
 
@@ -116,68 +95,52 @@ class Renderer:
             else:
                 yield UniMessage(forwardable_segs)
 
+        # 汇总下载失败信息
         if failed_count > 0:
             message = f"{failed_count} 项媒体下载失败"
             yield UniMessage(message)
             raise DownloadException(message)
 
-    async def _handle_media_content(
-        self, cont: MediaContent, need_delay: bool
-    ) -> tuple[int, MediaContent | Path | None]:
-        """处理单个音视频内容，返回失败次数增量和可能的延迟发送内容。"""
-        logger.debug(
-            f"处理{type(cont).__name__}，"
-            f"need_delay={need_delay}, lazy_download={pconfig.delay_send_lazy_download}"
-        )
-
-        if need_delay:
-            return await self._handle_delayed_media(cont)
-        return await self._handle_immediate_media(cont)
-
-    async def _handle_delayed_media(
+    async def _handle_immediate_media(
         self, cont: MediaContent
-    ) -> tuple[int, MediaContent | Path | None]:
-        """处理延迟发送的音视频内容。"""
-        if pconfig.delay_send_lazy_download:
-            logger.debug(
-                f"延迟发送{type(cont).__name__}，缓存MediaContent对象，不立即下载"
-            )
-            return 0, cont
+    ) -> AsyncGenerator[UniMessage[Any], None]:
+        """处理需要立即发送的音视频媒体，返回对应的消息段。"""
+        if not isinstance(cont, (VideoContent, AudioContent)):
+            return
 
-        try:
+        path = await cont.get_path()
+        logger.debug(f"立即发送{type(cont).__name__}: {path}")
+
+        if (
+            isinstance(cont, VideoContent)
+            and pconfig.need_upload_video
+            or not isinstance(cont, VideoContent)
+            and isinstance(cont, AudioContent)
+            and pconfig.need_upload_audio
+        ):
+            yield UniMessage(UniHelper.file_seg(path))
+        elif isinstance(cont, VideoContent):
+            yield UniMessage(UniHelper.video_seg(path))
+        elif isinstance(cont, AudioContent):
+            yield UniMessage(UniHelper.record_seg(path))
+
+    async def _build_forwardable_segment(
+        self, cont: MediaContent
+    ) -> ForwardNodeInner | None:
+        """构建可加入转发消息的片段（图片 / 图文）。"""
+        # 只有图片和图文会进入可转发段
+        if isinstance(cont, ImageContent):
             path = await cont.get_path()
-            logger.debug(f"延迟发送{type(cont).__name__}，已下载，缓存路径: {path}")
-            return 0, path
-        except (DownloadLimitException, ZeroSizeException):
-            return 0, None
-        except DownloadException:
-            return 1, None
+            return UniHelper.img_seg(path)
 
-    async def _handle_immediate_media(self, cont: MediaContent) -> tuple[int, None]:
-        """处理立即发送的音视频内容。"""
-        try:
+        if isinstance(cont, GraphicContent):
             path = await cont.get_path()
-            logger.debug(f"立即发送{type(cont).__name__}: {path}")
+            seg = UniHelper.img_seg(path)
+            if cont.alt:
+                seg = seg + cont.alt
+            return seg
 
-            if isinstance(cont, VideoContent):
-                if pconfig.need_upload_video:
-                    await UniMessage(UniHelper.file_seg(path)).send()
-                else:
-                    await UniMessage(UniHelper.video_seg(path)).send()
-            elif isinstance(cont, AudioContent):
-                try:
-                    if pconfig.need_upload_audio:
-                        await UniMessage(UniHelper.file_seg(path)).send()
-                    else:
-                        await UniMessage(UniHelper.record_seg(path)).send()
-                except Exception as e:
-                    logger.debug(f"直接发送音频失败，尝试使用群文件发送: {e}")
-                    await UniMessage(UniHelper.file_seg(path)).send()
-            return 0, None
-        except (DownloadLimitException, ZeroSizeException):
-            return 0, None
-        except DownloadException:
-            return 1, None
+        return None
 
     def _append_forward_text_segments(
         self,
@@ -247,28 +210,28 @@ class Renderer:
                 if (self.templates_dir / file_name).exists():
                     template_name = file_name
 
-#        from jinja2 import FileSystemLoader, Environment
-#
-#        # 创建一个包加载器对象
-#        env = Environment(loader=FileSystemLoader(self.templates_dir))
-#        template = env.get_template(template_name)
-#        # 渲染
-#        with open(
-#            f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html",
-#            "w",
-#            encoding="utf8",
-#        ) as f:  # noqa: E501
-#            f.write(
-#                template.render(
-#                    **{
-#                        "result": template_data,
-#                        "rendering_time": datetime.datetime.now().strftime(
-#                            "%Y-%m-%d %H:%M:%S"
-#                        ),
-#                        "bot_name": _nickname,
-#                    }
-#                )
-#            )
+        #        from jinja2 import FileSystemLoader, Environment
+        #
+        #        # 创建一个包加载器对象
+        #        env = Environment(loader=FileSystemLoader(self.templates_dir))
+        #        template = env.get_template(template_name)
+        #        # 渲染
+        #        with open(
+        #            f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html",
+        #            "w",
+        #            encoding="utf8",
+        #        ) as f:  # noqa: E501
+        #            f.write(
+        #                template.render(
+        #                    **{
+        #                        "result": template_data,
+        #                        "rendering_time": datetime.datetime.now().strftime(
+        #                            "%Y-%m-%d %H:%M:%S"
+        #                        ),
+        #                        "bot_name": _nickname,
+        #                    }
+        #                )
+        #            )
 
         return await template_to_pic(
             template_path=str(self.templates_dir),

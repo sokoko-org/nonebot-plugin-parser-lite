@@ -101,7 +101,7 @@ class Link(Struct):
             for part in parts:
                 if part["type"] == "html":
                     content.extend(extract_from_html(part["text"]))
-                    
+
                     break
                 if part["type"] == "text":
                     content.extend(
@@ -124,43 +124,44 @@ class BaseResult(Struct):
     comments: list[CommentData]
     link: Link
 
+
 def extract_from_html(html: str) -> list[MediaContent | str]:
-        """
-        从 HTML 内容中按顺序提取纯文本和图片。该方法通过遍历 HTML 节点，将图片节点转换为 MediaContent，并与周围文本一并按原顺序返回。
+    """
+    从 HTML 内容中按顺序提取纯文本和图片。该方法通过遍历 HTML 节点，将图片节点转换为 MediaContent，并与周围文本一并按原顺序返回。
 
-        :param html: 包含知乎内容的 HTML 字符串。
-        :return: 由纯文本字符串和 MediaContent 对象组成的列表，顺序与原始 HTML 中的展示顺序一致
-        """
+    :param html: 包含知乎内容的 HTML 字符串。
+    :return: 由纯文本字符串和 MediaContent 对象组成的列表，顺序与原始 HTML 中的展示顺序一致
+    """
 
-        soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")
+    soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")
 
-        # 忽略 <noscript> 中的内容，避免重复或无效的占位文本干扰顺序
-        for noscript in soup.find_all("noscript"):
-            noscript.decompose()
+    # 忽略 <noscript> 中的内容，避免重复或无效的占位文本干扰顺序
+    for noscript in soup.find_all("noscript"):
+        noscript.decompose()
 
-        result: list[MediaContent | str] = []
+    result: list[MediaContent | str] = []
 
-        for element in soup.descendants:
-            # 处理图片标签
-            if isinstance(element, Tag) and element.name == "img":
-                attrs: dict[str, str] = {
-                    str(k): str(v[0] if isinstance(v, list) and v else v)
-                    for k, v in (element.attrs or {}).items()
-                    if v is not None
-                }
-                if src := (
-                    attrs.get("data-original")
-                    or attrs.get("data-actualsrc")
-                    or attrs.get("data-default-watermark-src")
-                ):
-                    result.append(
-                        create_image(
-                            url=src,
-                        )
+    for element in soup.descendants:
+        # 处理图片标签
+        if isinstance(element, Tag) and element.name == "img":
+            attrs: dict[str, str] = {
+                str(k): str(v[0] if isinstance(v, list) and v else v)
+                for k, v in (element.attrs or {}).items()
+                if v is not None
+            }
+            if src := (
+                attrs.get("data-original")
+                or attrs.get("data-actualsrc")
+                or attrs.get("data-default-watermark-src")
+            ):
+                result.append(
+                    create_image(
+                        url=src,
                     )
-            # 处理纯文本节点
-            elif isinstance(element, NavigableString):
-                if text := str(element).strip():
-                    result.append(text)
+                )
+        # 处理纯文本节点
+        elif isinstance(element, NavigableString):
+            if text := str(element).strip():
+                result.append(text)
 
-        return result
+    return result

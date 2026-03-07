@@ -103,14 +103,11 @@ parser_append_url=False
 # [可选] 是否需要转发媒体内容(超过 4 项时始终使用合并转发)
 parser_need_forward_contents=True
 
-# [可选] 是否延迟发送视频/音频，需要用户发送特定表情或点赞特定表情后才发送
-parser_delay_send_media=False
-
-# [可选] 触发延迟发送视频的表情ID列表，用于监听group_msg_emoji_like事件
-parser_delay_send_emoji_ids=[128077]
-
 # [可选] 是否开启懒下载模式，仅在用户请求时才下载视频
-parser_delay_send_lazy_download=False
+parser_lazy_download=False
+
+# [可选] 在懒加载模式中用户请求下载视频时的命令列表
+parser_download_command=["下载视频", "xz"]
 
 # [可选] 图片反代,用于解决可能的403和外网访问问题
 # (例如,https://image.baidu.com/search/down?url=)
