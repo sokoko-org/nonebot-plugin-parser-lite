@@ -49,8 +49,6 @@ class Statistics(Struct):
     """评论数"""
     digg_count: int
     """点赞数"""
-    play_count: int
-    """播放数"""
     share_count: int
     """分享数"""
     collect_count: int

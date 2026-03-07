@@ -37,34 +37,30 @@ class DouyinParser(BaseParser):
 
     # https://www.douyin.com/video/7521023890996514083
     # https://www.douyin.com/note/7469411074119322899
-    @handle("douyin", r"douyin\.com/(?P<ty>video|note)/(?P<vid>\d+)")
-    @handle("iesdouyin", r"iesdouyin\.com/share/(?P<ty>slides|video|note)/(?P<vid>\d+)")
-    @handle("m.douyin", r"m\.douyin\.com/share/(?P<ty>slides|video|note)/(?P<vid>\d+)")
+    @handle("douyin", r"douyin\.com/(?P<ty>video|note|article)/(?P<vid>\d+)")
+    @handle(
+        "iesdouyin",
+        r"iesdouyin\.com/share/(?P<ty>slides|video|note|article)/(?P<vid>\d+)",
+    )
+    @handle(
+        "m.douyin",
+        r"m\.douyin\.com/share/(?P<ty>slides|video|note|article)/(?P<vid>\d+)",
+    )
     # https://jingxuan.douyin.com/m/video/7574300896016862490?app=yumme&utm_source=copy_link
     @handle(
         "jingxuan.douyin",
-        r"jingxuan\.douyin.com/m/(?P<ty>slides|video|note)/(?P<vid>\d+)",
+        r"jingxuan\.douyin.com/m/(?P<ty>slides|video|note|article)/(?P<vid>\d+)",
     )
     async def _parse_douyin(self, searched: re.Match[str]):
-        ty, vid = searched.group("ty"), searched.group("vid")
-        for url in (
-            self._build_m_douyin_url(ty, vid),
-            self._build_iesdouyin_url(ty, vid),
-        ):
-            try:
-                return await self.parse_video(url)
-            except ParseException as e:
-                logger.warning(f"failed to parse {url}, error: {e}")
-                continue
+        ty, vid = searched["ty"], searched["vid"]
+        if ty == "article":
+            ty = "note"
+        url = f"https://m.douyin.com/share/{ty}/{vid}"
+        try:
+            return await self.parse_video(url)
+        except ParseException as e:
+            logger.warning(f"failed to parse {url}, error: {e}")
         raise ParseException("分享已删除或资源直链提取失败, 请稍后再试")
-
-    @staticmethod
-    def _build_iesdouyin_url(ty: str, vid: str) -> str:
-        return f"https://www.iesdouyin.com/share/{ty}/{vid}"
-
-    @staticmethod
-    def _build_m_douyin_url(ty: str, vid: str) -> str:
-        return f"https://m.douyin.com/share/{ty}/{vid}"
 
     async def parse_video(self, url: str):
         async with get_async_client(
@@ -122,7 +118,6 @@ class DouyinParser(BaseParser):
             author=author,
             content=contents,
             stats=self.create_stats(
-                view_count=format_num(stats.play_count),
                 like_count=format_num(stats.digg_count),
                 comment_count=format_num(stats.comment_count),
                 share_count=format_num(stats.share_count),
