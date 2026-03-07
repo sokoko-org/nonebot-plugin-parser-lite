@@ -10,7 +10,7 @@ from nonebot import logger
 from nonebot_plugin_htmlrender import template_to_pic
 
 from ..config import _nickname, pconfig
-from ..exception import DownloadException
+from ..exception import DownloadException, SizeLimitException, ZeroSizeException
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..parsers.data import (
     AudioContent,
@@ -69,6 +69,8 @@ class Renderer:
                 async for msg in self._handle_immediate_media(cont):
                     # 音视频类：直接 yield 消息
                     yield msg
+            except (SizeLimitException, ZeroSizeException):
+                continue
             except DownloadException:
                 failed_count += 1
                 continue
