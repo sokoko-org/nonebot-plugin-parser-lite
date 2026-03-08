@@ -47,7 +47,6 @@
 
 ## ⚙️ 配置
 
-
 > [!NOTE]
 >
 > 插件会自动使用系统环境中的http系统代理进行网络请求
@@ -146,3 +145,5 @@ parser_browser_path=None
 - [xhs](https://github.com/ReaJason/xhs) 基于小红书 Web 端进行的请求封装。
 - [xhshow](https://github.com/Cloxl/xhshow) 小红书xs纯算 小红书x-s x-s-common xsc 等字段 纯算逆向
 - 神通广大的群友们
+- [karin-plugin-kkk](https://github.com/ikenxuan/karin-plugin-kkk) Karin 的多平台短视频 & 图文内容解析和推送插件，为群聊打造一流的社媒分享体验和用户更新推送
+- [amagi](https://github.com/ikenxuan/amagi) 抖音、B站 web 端相关数据接口封装基于 Node.js 的实现

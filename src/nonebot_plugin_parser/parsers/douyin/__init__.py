@@ -3,18 +3,10 @@ from typing import ClassVar
 
 from nonebot import logger
 
-from ...utils.http_utils import get_async_client
-
-from ..base import (
-    Platform,
-    BaseParser,
-    PlatformEnum,
-    ParseException,
-    handle,
-)
-from .video import decoder
 from ...utils.format import format_num
-
+from ...utils.http_utils import get_async_client
+from ..base import BaseParser, ParseException, Platform, PlatformEnum, handle
+from .video import decoder
 
 ROUTER_PATTERN = re.compile(
     pattern=r"window\._ROUTER_DATA\s*=\s*(.*?)</script>",
