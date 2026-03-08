@@ -3,19 +3,19 @@ from typing import ClassVar
 
 from msgspec import convert
 
+from ...utils.browser import BROWSER, DataPacket
+from ...utils.format import format_num, replace_placeholder_to_sticker
 from ..base import (
     BaseParser,
-    PlatformEnum,
-    ParseException,
-    handle,
     Comment,
-    Platform,
     MediaContent,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    handle,
 )
 from .decode import decode_init_state
-from .states import Data, CommentList, KsComment
-from ...utils.format import format_num, replace_placeholder_to_sticker
-from ...utils.browser import BROWSER, DataPacket
+from .states import CommentList, Data, KsComment
 
 KUAISHOU_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 
