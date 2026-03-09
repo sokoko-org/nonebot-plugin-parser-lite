@@ -151,7 +151,7 @@ class UniHelper:
         cls,
         event: Event,
         status: Literal["fail", "resolving", "done"],
-    ):
+    ) -> None:
         """发送消息回应
 
         Args:
@@ -169,7 +169,9 @@ class UniHelper:
         try:
             await uniseg.message_reaction(emoji, message_id=message_id)
         except Exception:
-            logger.warning(f"reaction {emoji} to {message_id} failed, maybe not support")
+            logger.warning(
+                f"reaction {emoji} to {message_id} failed, maybe not support"
+            )
 
     @classmethod
     def with_reaction(cls, func: Callable[..., Awaitable[Any]]):
