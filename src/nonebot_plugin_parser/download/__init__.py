@@ -526,6 +526,11 @@ class StreamDownloader:
     def _progress_with_task(
         desc: str, total: int | None = None
     ) -> Generator[tuple[Progress, TaskID]]:
+        """
+        :param desc: 进度条描述
+        :param total: 进度条总长度
+        :return: 进度条和任务 ID
+        """
         with Progress(
             "[progress.description]{task.description}",
             BarColumn(),
