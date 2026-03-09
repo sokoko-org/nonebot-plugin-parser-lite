@@ -151,7 +151,7 @@ class UniHelper:
         cls,
         event: Event,
         status: Literal["fail", "resolving", "done"],
-    ) -> None:
+    ):
         """发送消息回应
 
         Args:
