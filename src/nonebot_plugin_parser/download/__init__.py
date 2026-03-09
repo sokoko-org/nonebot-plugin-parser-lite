@@ -1,7 +1,9 @@
 import asyncio
+import contextlib
 import hashlib
 import os
 from pathlib import Path
+from typing import Generator
 from urllib.parse import urljoin
 
 import aiofiles
@@ -11,6 +13,7 @@ from rich.progress import (
     BarColumn,
     DownloadColumn,
     Progress,
+    TaskID,
     TimeElapsedColumn,
     TimeRemainingColumn,
     TransferSpeedColumn,
@@ -50,11 +53,11 @@ class StreamDownloader:
         :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
         :raises DownloadException: 重试多次仍失败时抛出
         """
-
         if not file_name:
             file_name = generate_file_name(url)
         file_path = self.cache_dir / file_name
-        # 如果文件存在，则直接返回
+
+        # 已有缓存文件，直接返回
         if file_path.exists():
             return file_path
 
@@ -63,54 +66,14 @@ class StreamDownloader:
         retry_count = 0
         while retry_count <= max_retries:
             try:
-                async with self.client.stream(
-                    "GET", url, headers=headers, follow_redirects=True
-                ) as response:
-                    response.raise_for_status()
-                    content_length_header = response.headers.get("Content-Length")
-
-                    # 解析 Content-Length，允许为 None（分块传输）
-                    content_length = (
-                        int(content_length_header) if content_length_header else None
-                    )
-
-                    # 有 Content-Length 时，先做一次快速预判
-                    if content_length is not None:
-                        if content_length == 0:
-                            logger.warning(f"媒体 url: {url}, 大小为 0, 取消下载")
-                            raise ZeroSizeException
-
-                        file_size_mb = content_length / 1024 / 1024
-                        if file_size_mb > pconfig.max_size:
-                            logger.warning(
-                                f"媒体 url: {url} 大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
-                            )
-                            raise SizeLimitException
-
-                    with self.get_progress_bar(file_name, content_length or 0) as bar:
-                        task_id = bar.task_ids[0]
-                        downloaded_bytes = 0
-
-                        async with aiofiles.open(file_path, "wb") as file:
-                            async for chunk in response.aiter_bytes(1024 * 1024):
-                                if not chunk:
-                                    continue
-                                await file.write(chunk)
-                                chunk_len = len(chunk)
-                                downloaded_bytes += chunk_len
-                                # 进度条在 content_length 为空时只显示已下载大小
-                                bar.advance(task_id, chunk_len)
-
-                                # 当服务端不提供 Content-Length 时，按实际已下载大小限流
-                                if content_length is None:
-                                    file_size_mb = downloaded_bytes / 1024 / 1024
-                                    if file_size_mb > pconfig.max_size:
-                                        logger.warning(
-                                            f"媒体 url: {url} 实际下载大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
-                                        )
-                                        raise SizeLimitException
-                    # 下载成功，跳出循环
-                    break
+                await self._download_with_stream(
+                    url=url,
+                    file_path=file_path,
+                    headers=headers,
+                    desc=file_name,
+                )
+                # 成功即跳出重试循环
+                break
             except (HTTPError, ConnectionError, TimeoutError, OSError) as e:
                 retry_count += 1
                 await safe_unlink(file_path)
@@ -119,34 +82,91 @@ class StreamDownloader:
                         f"下载失败，已重试 {max_retries} 次 | url: {url}, file_path: {file_path}"
                     )
                     raise DownloadException(f"媒体下载失败: {e}") from e
+
                 logger.warning(
                     f"下载失败，正在重试 ({retry_count}/{max_retries}) | url: {url}, "
                     f"error: {e}, 重试文件名: {file_name}"
                 )
-                # 等待一段时间后重试
-                await asyncio.sleep(1 * retry_count)  # 指数退避
+                # 简单退避
+                await asyncio.sleep(retry_count)
+
         return file_path
 
-    @staticmethod
-    def get_progress_bar(desc: str, total: int) -> Progress:
-        """获取进度条 bar
+    async def _download_with_stream(
+        self,
+        url: str,
+        file_path: Path,
+        headers: dict[str, str],
+        desc: str,
+    ) -> None:
+        def parse_content_length(header_val: str | None) -> int | None:
+            if not header_val:
+                return None
+            try:
+                return int(header_val)
+            except ValueError:
+                return None
 
-        :param desc: 进度条描述文本
-        :param total: 总大小（字节数），用于显示进度比例，为空时显示为不确定进度
+        def check_declared_size(content_length: int) -> None:
+            if content_length == 0:
+                logger.warning(f"媒体 url: {url}, 大小为 0, 取消下载")
+                raise ZeroSizeException
+            file_size_mb = content_length / 1024 / 1024
+            if file_size_mb > pconfig.max_size:
+                logger.warning(
+                    f"媒体 url: {url} 大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
+                )
+                raise SizeLimitException
 
-        :return: 已配置好的进度条对象
-        """
-        progress = Progress(
-            "[progress.description]{task.description}",
-            BarColumn(),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            DownloadColumn(),
-            TransferSpeedColumn(),
-            TimeElapsedColumn(),
-            TimeRemainingColumn(),
-        )
-        progress.add_task(f"[green]{desc}", total=total)
-        return progress
+        async with self.client.stream(
+            "GET", url, headers=headers, follow_redirects=True
+        ) as response:
+            response.raise_for_status()
+            content_length = parse_content_length(
+                response.headers.get("Content-Length")
+            )
+            if content_length is not None:
+                check_declared_size(content_length)
+            await self._write_stream_to_file(
+                response=response,
+                file_path=file_path,
+                desc=desc,
+                declared_length=content_length,
+                url=url,
+            )
+
+    async def _write_stream_to_file(
+        self,
+        response,
+        file_path: Path,
+        desc: str,
+        declared_length: int | None,
+        url: str,
+    ) -> None:
+        """将 HTTP 流写入文件，并处理进度条与实际大小限制。"""
+        with self._progress_with_task(desc, declared_length) as (bar, task):
+            downloaded_bytes = 0
+
+            async with aiofiles.open(file_path, "wb") as file:
+                async for chunk in response.aiter_bytes(1024 * 1024):
+                    if not chunk:
+                        continue
+
+                    await file.write(chunk)
+                    chunk_len = len(chunk)
+                    downloaded_bytes += chunk_len
+
+                    # 更新进度条（无 Content-Length 时显示“已下载字节数”）
+                    bar.advance(task, chunk_len)
+
+                    # 无 Content-Length 时，按实际已下载大小做限制
+                    if declared_length is None:
+                        file_size_mb = downloaded_bytes / 1024 / 1024
+                        if file_size_mb > pconfig.max_size:
+                            logger.warning(
+                                f"媒体 url: {url} 实际下载大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
+                            )
+                            raise SizeLimitException
 
     @auto_task
     async def download_video(
@@ -171,19 +191,22 @@ class StreamDownloader:
 
     @auto_task
     async def download_m3u8_video(
-        self, m3u8_url: str, video_name: str | None = None
+        self,
+        m3u8_url: str,
+        video_name: str | None = None,
+        ext_headers: dict[str, str] | None = None,
     ) -> Path:
         """
         下载 m3u8 视频并合并到 mp4
 
         :param m3u8_url: m3u8 播放列表链接地址
         :param video_name: 输出的 mp4 文件名，为空时根据 m3u8 链接生成
+        :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 最终合并并转封装后的 mp4 文件路径
         :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
         :raises DownloadException: m3u8 解析、下载或转封装失败时抛出
         """
-        # 生成文件 ID
         file_id = hashlib.md5(m3u8_url.encode()).hexdigest()[:16]
 
         if video_name is None:
@@ -200,70 +223,24 @@ class StreamDownloader:
         try:
             # 1. 智能解析 m3u8 (自动处理嵌套列表)
             ts_urls = await self._smart_parse_m3u8(m3u8_url)
-
             if not ts_urls:
                 raise DownloadException("m3u8 解析结果为空")
 
-            # 2. 下载并追加写入
-            downloaded_bytes = 0
-            # 准备用于 ts 下载的 headers，确保包含必要的验证信息
-            ts_headers = self.headers.copy()
-            # 如果是 TapTap 的链接，添加特定的 headers
-            if "taptap.cn" in m3u8_url:
-                ts_headers["Referer"] = "https://www.taptap.cn/"
-                ts_headers["Origin"] = "https://www.taptap.cn"
+            # 2. 下载所有 ts 片段到临时文件
+            headers = {**self.headers, **(ext_headers or {})}
+            downloaded_bytes = await self._download_m3u8_ts_files(
+                ts_urls=ts_urls,
+                temp_ts_path=temp_ts_path,
+                video_name=video_name,
+                headers=headers,
+            )
 
-            with self.get_progress_bar(video_name, len(ts_urls) * 1024 * 1024) as bar:
-                task_id = bar.task_ids[0]
-                async with aiofiles.open(temp_ts_path, "wb") as f:
-                    for ts_url in ts_urls:
-                        for retry in range(3):
-                            try:
-                                async with self.client.stream(
-                                    "GET",
-                                    ts_url,
-                                    headers=ts_headers,
-                                    timeout=15,
-                                    follow_redirects=True,
-                                ) as resp:
-                                    if resp.status_code == 200:
-                                        async for chunk in resp.aiter_bytes():
-                                            await f.write(chunk)
-                                            downloaded_bytes += len(chunk)
-                                            bar.advance(task_id, len(chunk))
-
-                                            # 按字节数进行大小限制判断，避免绕过单文件 Content-Length 限制
-                                            file_size_mb = (
-                                                downloaded_bytes / 1024 / 1024
-                                            )
-                                            if file_size_mb > pconfig.max_size:
-                                                logger.warning(
-                                                    f"m3u8 视频大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB，取消下载"
-                                                )
-                                                raise SizeLimitException
-                                        break
-                            except SizeLimitException as e:
-                                raise SizeLimitException from e
-                            except Exception as e:
-                                logger.debug(
-                                    f"下载 ts 文件失败，重试中 ({retry + 1}/3): {ts_url}, error: {e}"
-                                )
-                                await asyncio.sleep(1)
-
-            # 3. 校验文件大小 (防止空文件送给 FFmpeg)
-            if downloaded_bytes < 1024:
-                raise DownloadException(
-                    f"下载文件过小 ({downloaded_bytes} bytes)，可能下载失败"
-                )
-
-            # 4. 转封装处理
-            if await self._has_ffmpeg():
-                await self._remux_to_mp4(temp_ts_path, final_video_path)
-            elif temp_ts_path.exists():
-                temp_ts_path.rename(final_video_path)
-
-            if not final_video_path.exists() or final_video_path.stat().st_size <= 1024:
-                raise DownloadException("视频下载失败，最终文件不存在或大小过小")
+            # 3/4. 校验大小并转封装
+            await self._finalize_m3u8_download(
+                temp_ts_path=temp_ts_path,
+                final_video_path=final_video_path,
+                downloaded_bytes=downloaded_bytes,
+            )
 
             logger.success(f"[StreamDownloader] m3u8 视频下载完成: {final_video_path}")
             return final_video_path
@@ -271,10 +248,103 @@ class StreamDownloader:
             logger.warning(f"[StreamDownloader] m3u8 视频大小超限: {e}")
             await safe_unlink(temp_ts_path)
             raise
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[StreamDownloader] m3u8 视频下载流程出错: {e}")
             await safe_unlink(temp_ts_path)
             raise DownloadException(f"视频下载失败: {e}") from e
+
+    async def _download_m3u8_ts_files(
+        self,
+        ts_urls: list[str],
+        temp_ts_path: Path,
+        video_name: str,
+        headers: dict[str, str],
+    ) -> int:
+        """
+        下载所有 ts 片段并写入临时 ts 文件，返回最终文件实际字节数
+        """
+
+        async def download_single_ts(
+            ts_url: str,
+            f: aiofiles.threadpool.binary.AsyncBufferedIOBase,
+            bar: Progress,
+            task_id: TaskID,
+            max_retries: int = 3,
+        ) -> None:
+            for retry in range(max_retries):
+                try:
+                    async with self.client.stream(
+                        "GET",
+                        ts_url,
+                        headers=headers,
+                        timeout=15,
+                        follow_redirects=True,
+                    ) as resp:
+                        if resp.status_code != 200:
+                            raise DownloadException(
+                                f"请求 ts 失败: {resp.status_code} | url={ts_url}"
+                            )
+
+                        async for chunk in resp.aiter_bytes():
+                            if not chunk:
+                                continue
+
+                            await f.write(chunk)
+                            inc = len(chunk)
+                            bar.advance(task_id, inc)
+
+                            # 基于文件当前实际大小判断总大小限制
+                            current_bytes = await f.tell()
+                            file_size_mb = current_bytes / 1024 / 1024
+                            if file_size_mb > pconfig.max_size:
+                                logger.warning(
+                                    f"m3u8 视频大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB，取消下载"
+                                )
+                                raise SizeLimitException
+                    return
+                except SizeLimitException:
+                    # 超限直接抛出，不再重试
+                    raise
+                except Exception as e:  # noqa: BLE001
+                    logger.debug(
+                        f"下载 ts 文件失败，重试中 ({retry + 1}/{max_retries}): {ts_url}, error: {e}"
+                    )
+                    await asyncio.sleep(1)
+            raise DownloadException(f"多次重试仍失败的 ts 片段: {ts_url}")
+
+        with self._progress_with_task(video_name) as (bar, task_id):
+            async with aiofiles.open(temp_ts_path, "wb") as f:
+                for ts_url in ts_urls:
+                    await download_single_ts(ts_url, f, bar, task_id)
+
+                # 所有 ts 下载完成后，取一次实际文件大小返回
+                final_size = await f.tell()
+
+        return final_size
+
+    async def _finalize_m3u8_download(
+        self,
+        temp_ts_path: Path,
+        final_video_path: Path,
+        downloaded_bytes: int,
+    ) -> None:
+        """
+        校验 ts 汇总大小，并根据 ffmpeg 是否可用输出最终 mp4 文件。
+        """
+        # 校验文件大小 (防止空文件送给 FFmpeg)
+        if downloaded_bytes < 1024:
+            raise DownloadException(
+                f"下载文件过小 ({downloaded_bytes} bytes)，可能下载失败"
+            )
+
+        # 转封装处理
+        if await self._has_ffmpeg():
+            await self._remux_to_mp4(temp_ts_path, final_video_path)
+        elif temp_ts_path.exists():
+            temp_ts_path.rename(final_video_path)
+
+        if not final_video_path.exists() or final_video_path.stat().st_size <= 1024:
+            raise DownloadException("视频下载失败，最终文件不存在或大小过小")
 
     async def _smart_parse_m3u8(self, m3u8_url: str) -> list[str]:
         """
@@ -450,6 +520,28 @@ class StreamDownloader:
         )
         await merge_av(v_path=v_path, a_path=a_path, output_path=output_path)
         return output_path
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _progress_with_task(
+        desc: str, total: int | None = None
+    ) -> Generator[tuple[Progress, TaskID]]:
+        """
+        :param desc: 进度条描述
+        :param total: 进度条总长度
+        :return: 进度条和任务 ID
+        """
+        with Progress(
+            "[progress.description]{task.description}",
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            DownloadColumn(),
+            TransferSpeedColumn(),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
+        ) as bar:
+            task_id = bar.add_task(f"[green]{desc}", total=total)
+            yield bar, task_id
 
 
 DOWNLOADER: StreamDownloader = StreamDownloader()
