@@ -1,6 +1,8 @@
 import re
 from typing import ClassVar
 
+from ...utils.http_utils import get_async_client
+
 
 from ...utils.format import format_num
 
@@ -12,6 +14,7 @@ from ..base import (
     handle,
     ParseException,
     MediaContent,
+    create_video,
 )
 from ...utils.browser import BROWSER
 from bs4 import BeautifulSoup
@@ -41,7 +44,7 @@ class ZhiHuParser(BaseParser):
         answer = data.initialState.entities.answers[answer_id]
         return self.result(
             title=question.title.replace(r"\"", '"'),
-            content=self._extract_text_and_images(question.detail),
+            content=await self._parse_rich_content(question.detail),
             timestamp=question.created,
             url=f"https://www.zhihu.com/question/{question_id}/answer/{answer_id}",
             author=self.create_author(
@@ -64,18 +67,21 @@ class ZhiHuParser(BaseParser):
                         id=answer.author.urlToken,
                         description=answer.author.headline,
                     ),
-                    content=self._extract_text_and_images(answer.content),
+                    content=await self._parse_rich_content(answer.content),
                     timestamp=answer.createdTime,
                     stats=self.create_stats(
                         like_count=format_num(answer.voteupCount),
                         comment_count=format_num(answer.commentCount),
                     ),
+                    download=True,
                 )
             ],
         )
 
     async def fetch_initial_state(self, url: str):
-        tab = BROWSER.new_tab(url)
+        tab = BROWSER.new_tab()
+        tab.set.load_mode.eager()
+        tab.get(url)
         html = tab.html
         tab.close()
         if matched := INITIAL_DATA.search(html):
@@ -84,43 +90,107 @@ class ZhiHuParser(BaseParser):
             raise ParseException("知乎分享链接失效或内容已删除")
         return answerDecoder.decode(raw)
 
-    def _extract_text_and_images(self, html: str) -> list[MediaContent | str]:
-        """
-        从知乎 HTML 内容中按顺序提取纯文本和图片。该方法通过遍历 HTML 节点，将图片节点转换为 MediaContent，并与周围文本一并按原顺序返回。
+    async def fetch_video(self, video_id: str):
+        async with get_async_client() as client:
+            res = await client.post(
+                "https://www.zhihu.com/api/v4/video/play_info",
+                json={
+                    "content_id": video_id,
+                    "video_id": video_id,
+                    "content_type_str": "answer",
+                    "is_only_video": True,
+                },
+            )
+            data = res.json()
+        if "video_play" not in data:
+            raise ValueError(f"Invalid video data: {data}")
 
-        :param html: 包含知乎内容的 HTML 字符串。
-        :return: 由纯文本字符串和 MediaContent 对象组成的列表，顺序与原始 HTML 中的展示顺序一致
-        """
+        video_play = data["video_play"]
 
+        mp4_list = video_play["playlist"]["mp4"]
+
+        def _quality_rank(q: str) -> int:
+            """把 'FHD'/'HD'/'SD' 映射到数值，越大越好。"""
+            q = q.upper()
+            if q == "FHD":
+                return 3
+            if q == "HD":
+                return 2
+            return 1 if q == "SD" else 0
+
+        # 至少保证有一个条目，所以直接用 max 推导出最佳条目
+        best_item = max(
+            mp4_list,
+            key=lambda item: _quality_rank(item["quality"]),
+        )
+
+        return create_video(
+            url_or_task=best_item["url"][0],
+            cover_url=video_play["default_cover"],
+            duration=best_item["duration"],
+        )
+
+    async def _parse_rich_content(self, html: str) -> list[MediaContent | str]:
+        """
+        将知乎内容 HTML 解析为有顺序的文本 + 媒体列表。
+        """
         soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")
+        self._clean_soup(soup)
 
-        # 忽略 <noscript> 中的内容，避免重复或无效的占位文本干扰顺序
+        result: list[MediaContent | str] = []
+        async for item in self._iter_media_and_text(soup):
+            result.append(item)
+        return result
+
+    def _clean_soup(self, soup: BeautifulSoup) -> None:
+        """预清洗 DOM：移除 noscript 等无效节点。"""
         for noscript in soup.find_all("noscript"):
             noscript.decompose()
 
-        result: list[MediaContent | str] = []
-
+    async def _iter_media_and_text(self, soup: BeautifulSoup):
+        """
+        按 DOM 顺序依次产出文本 / 图片 / 视频等内容。
+        这是一个 async 生成器，方便内部按需 await。
+        """
         for element in soup.descendants:
-            # 处理图片标签
-            if isinstance(element, Tag) and element.name == "img":
-                attrs: dict[str, str] = {
-                    str(k): str(v[0] if isinstance(v, list) and v else v)
-                    for k, v in (element.attrs or {}).items()
-                    if v is not None
-                }
-                if src := (
-                    attrs.get("data-original")
-                    or attrs.get("data-actualsrc")
-                    or attrs.get("data-default-watermark-src")
-                ):
-                    result.append(
-                        self.create_image(
-                            url=src,
-                        )
-                    )
-            # 处理纯文本节点
+            # 标签节点
+            if isinstance(element, Tag):
+                # 视频卡片
+                if element.name == "a" and "video-box" in (element.get("class") or []):
+                    video = await self._parse_video_box(element)
+                    if video:
+                        yield video
+
+                    if data_name := element.get("data-name"):
+                        if text := str(data_name).strip():
+                            yield text
+
+                    # video-box 内部还有 img 就不再重复产出了
+                    continue
+
+                # 图片
+                elif element.name == "img":
+                    attrs: dict[str, str] = {
+                        str(k): str(v[0] if isinstance(v, list) and v else v)
+                        for k, v in (element.attrs or {}).items()
+                        if v
+                    }
+                    if src := (
+                        attrs.get("data-original")
+                        or attrs.get("data-actualsrc")
+                        or attrs.get("data-default-watermark-src")
+                        or attrs.get("src")
+                    ):
+                        yield self.create_image(url=src)
+
             elif isinstance(element, NavigableString):
                 if text := str(element).strip():
-                    result.append(text)
+                    yield text
 
-        return result
+    async def _parse_video_box(self, tag: Tag) -> MediaContent | None:
+        """
+        解析知乎 <a class="video-box">，根据 data-lens-id 拉取视频信息
+        """
+        video_id = tag.get("data-lens-id", "")
+        assert isinstance(video_id, str), "data-lens-id 不是字符串"
+        return await self.fetch_video(video_id) if video_id else None

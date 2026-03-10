@@ -415,6 +415,7 @@ class BaseParser:
         location: str | None = None,
         replies: list[Comment] | None = None,
         parent_author: Author | None = None,
+        download: bool = False,
     ):
         """
         创建评论内容
@@ -426,6 +427,7 @@ class BaseParser:
         :param location: 评论位置
         :param replies: 评论回复
         :param parent_author: 评论的父级作者
+        :param download: 是否下载评论资源并发送
         """
 
         return create_comment(
@@ -436,4 +438,5 @@ class BaseParser:
             location=location,
             replies=replies,
             parent_author=parent_author,
+            download=download,
         )

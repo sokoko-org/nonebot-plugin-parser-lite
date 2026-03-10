@@ -164,6 +164,9 @@ class Comment:
     parent_author: Author | None = None
     """父评论作者，用于渲染“回复 @xxx”，可选"""
 
+    _download: bool = False
+    """是否下载评论资源并发送"""
+
     def add_reply(self, comment: "Comment", parent: Author | None = None):
         """添加子评论"""
         comment.parent_author = parent or self.author

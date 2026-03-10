@@ -55,19 +55,17 @@ class Renderer:
     ) -> AsyncGenerator[UniMessage[Any], None]:
         """发送媒体内容消息。
 
-        将解析结果中的媒体内容拆分为立即发送的音视频和可合并转发的图文，并处理延迟发送配置。
+        将解析结果中的媒体内容拆分为：
+        - 需要立即发送的音视频（逐条 yield）
+        - 可合并转发的图文 / 图片（统一收集后一次发送）
         """
         forwardable_segs: list[ForwardNodeInner] = []
         failed_count = 0
 
-        for cont in result.content:
-            # 只关心需要发送的 MediaContent
-            if not isinstance(cont, MediaContent) or not cont.need_send:
-                continue
-
+        async for cont in self._iter_all_media(result):
+            # 先处理需要立即发送的音视频
             try:
                 async for msg in self._handle_immediate_media(cont):
-                    # 音视频类：直接 yield 消息
                     yield msg
             except (SizeLimitException, ZeroSizeException):
                 continue
@@ -75,7 +73,7 @@ class Renderer:
                 failed_count += 1
                 continue
 
-            # 图文 / 图片类：加入可转发列表
+            # 再尝试构建可转发的图文 / 图片片段
             try:
                 seg = await self._build_forwardable_segment(cont)
             except DownloadException:
@@ -93,6 +91,7 @@ class Renderer:
                 forward_msg = UniHelper.construct_forward_message(forwardable_segs)
                 yield UniMessage(forward_msg)
             else:
+                # 直接按顺序发出若干段（视平台实现为合并转发或多条消息）
                 yield UniMessage(forwardable_segs)
 
         # 汇总下载失败信息
@@ -100,6 +99,23 @@ class Renderer:
             message = f"{failed_count} 项媒体下载失败"
             yield UniMessage(message)
             raise DownloadException(message)
+
+    async def _iter_all_media(
+        self, result: ParseResult
+    ) -> AsyncGenerator[MediaContent, None]:
+        """统一遍历主体内容和需要下载的评论里的 MediaContent。"""
+        # 主内容
+        for cont in result.content:
+            if isinstance(cont, MediaContent) and cont.need_send:
+                yield cont
+
+        # 评论内容（仅遍历需要下载的评论）
+        for com in result.comments:
+            if not com._download:
+                continue
+            for cont in com.content:
+                if isinstance(cont, MediaContent) and cont.need_send:
+                    yield cont
 
     async def _handle_immediate_media(
         self, cont: MediaContent
