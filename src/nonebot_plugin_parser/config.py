@@ -3,7 +3,6 @@ from pathlib import Path
 import nonebot_plugin_localstore as _store
 from bilibili_api.video import VideoCodecs, VideoQuality
 from nonebot import get_driver, get_plugin_config
-from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 from pydantic import BaseModel
 
 from .constants import PlatformEnum
@@ -162,20 +161,6 @@ class Config(BaseModel):
     def browser_path(self) -> str | None:
         """浏览器程序路径"""
         return self.parser_browser_path
-
-
-# 定义插件元数据
-__plugin_meta__ = PluginMetadata(
-    name="nonebot-plugin-parser",
-    description="Nonebot2 链接分享自动解析插件",
-    usage="无需任何命令，直接发送链接即可",
-    homepage="https://github.com/fllesser/nonebot-plugin-parser",
-    type="application",
-    config=Config,
-    supported_adapters=inherit_supported_adapters(
-        "nonebot_plugin_alconna", "nonebot_plugin_uninfo"
-    ),
-)
 
 
 # 初始化配置实例
