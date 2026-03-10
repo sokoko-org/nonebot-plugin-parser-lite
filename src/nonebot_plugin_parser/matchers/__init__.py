@@ -181,17 +181,17 @@ async def parser_handler(
     if result is None:
         parser = get_parser(sr.keyword)
         result = await parser.parse(sr.keyword, sr.searched)
-        logger.debug("解析结果: %r", result)
+        logger.debug(f"解析结果: {result!r}")
         _RESULT_CACHE[cache_key] = result
     else:
-        logger.debug("命中缓存: %s, 结果: %r", cache_key, result)
+        logger.debug(f"命中缓存: {cache_key}, 结果: {result!r}")
 
     # 2. 渲染并发送
     try:
         await _send_parse_result(session, result)
     except Exception as e:
         # 渲染或发送失败时的兜底日志
-        logger.error("渲染或发送失败: %s", e, exc_info=True)
+        logger.error(f"渲染或发送失败: {e}", exc_info=True)
         # 如需可在此补发纯文本提示：
         # await UniMessage(f"解析成功，但渲染/发送失败: {e!s}").send()
 

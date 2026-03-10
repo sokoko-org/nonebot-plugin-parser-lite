@@ -438,5 +438,4 @@ class BaseParser:
             location=location,
             replies=replies,
             parent_author=parent_author,
-            download=download,
         )

@@ -14,7 +14,6 @@ from ..base import (
     handle,
     ParseException,
     MediaContent,
-    create_video,
 )
 from ...utils.browser import BROWSER
 from bs4 import BeautifulSoup
@@ -44,38 +43,19 @@ class ZhiHuParser(BaseParser):
         answer = data.initialState.entities.answers[answer_id]
         return self.result(
             title=question.title.replace(r"\"", '"'),
-            content=await self._parse_rich_content(question.detail),
-            timestamp=question.created,
+            content=await self._parse_rich_content(answer.content),
+            timestamp=answer.createdTime,
             url=f"https://www.zhihu.com/question/{question_id}/answer/{answer_id}",
             author=self.create_author(
-                name=question.author.name,
-                avatar_url=question.author.avatarUrl,
-                id=question.author.urlToken,
-                description=question.author.headline,
+                name=answer.author.name,
+                avatar_url=answer.author.avatarUrl,
+                id=answer.author.urlToken,
+                description=answer.author.headline,
             ),
             stats=self.create_stats(
-                view_count=format_num(question.visitCount),
-                like_count=format_num(question.voteupCount),
-                collect_count=format_num(question.followerCount),
-                comment_count=format_num(question.commentCount),
+                like_count=format_num(answer.voteupCount),
+                comment_count=format_num(answer.commentCount),
             ),
-            comments=[
-                self.create_comment(
-                    author=self.create_author(
-                        name=answer.author.name,
-                        avatar_url=answer.author.avatarUrl,
-                        id=answer.author.urlToken,
-                        description=answer.author.headline,
-                    ),
-                    content=await self._parse_rich_content(answer.content),
-                    timestamp=answer.createdTime,
-                    stats=self.create_stats(
-                        like_count=format_num(answer.voteupCount),
-                        comment_count=format_num(answer.commentCount),
-                    ),
-                    download=True,
-                )
-            ],
         )
 
     async def fetch_initial_state(self, url: str):
@@ -124,7 +104,7 @@ class ZhiHuParser(BaseParser):
             key=lambda item: _quality_rank(item["quality"]),
         )
 
-        return create_video(
+        return self.create_video(
             url_or_task=best_item["url"][0],
             cover_url=video_play["default_cover"],
             duration=best_item["duration"],
@@ -155,7 +135,7 @@ class ZhiHuParser(BaseParser):
         for element in soup.descendants:
             # 标签节点
             if isinstance(element, Tag):
-                # 视频卡片
+                # 视频卡片：整体视为一个单元，处理完后从 DOM 移除以避免重复产出
                 if element.name == "a" and "video-box" in (element.get("class") or []):
                     video = await self._parse_video_box(element)
                     if video:
@@ -165,11 +145,12 @@ class ZhiHuParser(BaseParser):
                         if text := str(data_name).strip():
                             yield text
 
-                    # video-box 内部还有 img 就不再重复产出了
+                    # 从 DOM 树移除该节点及其所有子节点，后续遍历不会再碰到
+                    element.decompose()
                     continue
 
                 # 图片
-                elif element.name == "img":
+                if element.name == "img":
                     attrs: dict[str, str] = {
                         str(k): str(v[0] if isinstance(v, list) and v else v)
                         for k, v in (element.attrs or {}).items()
@@ -187,10 +168,12 @@ class ZhiHuParser(BaseParser):
                 if text := str(element).strip():
                     yield text
 
-    async def _parse_video_box(self, tag: Tag) -> MediaContent | None:
+    async def _parse_video_box(self, tag: Tag):
         """
         解析知乎 <a class="video-box">，根据 data-lens-id 拉取视频信息
         """
-        video_id = tag.get("data-lens-id", "")
-        assert isinstance(video_id, str), "data-lens-id 不是字符串"
+        video_id = tag.get("data-lens-id")
+        if not isinstance(video_id, str) or not video_id:
+            # data-lens-id 缺失或类型异常时，认为无法解析该视频节点
+            return None
         return await self.fetch_video(video_id) if video_id else None

@@ -245,7 +245,6 @@ def create_comment(
     location: str | None = None,
     replies: list[Comment] | None = None,
     parent_author: Author | None = None,
-    download: bool = False,
 ):
     """
     创建评论内容
@@ -270,5 +269,4 @@ def create_comment(
         location=location,
         replies=replies,
         parent_author=parent_author,
-        _download=download,
     )

@@ -109,14 +109,6 @@ class Renderer:
             if isinstance(cont, MediaContent) and cont.need_send:
                 yield cont
 
-        # 评论内容（仅遍历需要下载的评论）
-        for com in result.comments:
-            if not com._download:
-                continue
-            for cont in com.content:
-                if isinstance(cont, MediaContent) and cont.need_send:
-                    yield cont
-
     async def _handle_immediate_media(
         self, cont: MediaContent
     ) -> AsyncGenerator[UniMessage[Any], None]:
