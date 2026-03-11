@@ -12,20 +12,11 @@
 
 <body>
   {% macro render_card(result, is_repost=False) %}
-  {# --- 封面区域 --- #}
-  {% set cover_url = result.cover_path %}
-
   <div class="card">
     {% if not is_repost %}
     <div class="decorative-stripe"></div>
     {% endif %}
 
-    {% if cover_url %}
-    <div class="cover-section">
-      <img src="{{ cover_url }}" class="cover-image" alt="Cover">
-      <div class="cover-overlay"></div>
-    </div>
-    {% endif %}
     <div class="content-section">
       {# Header #} {% if result.author %}
       <div class="header">
@@ -61,7 +52,7 @@
       <div class="title">{{ result.title }}</div>
       {% endif %}
 
-      {# Text #}
+      {# Content #}
       <div>{{ result.content | safe }}</div>
       {# Repost #} {% if result.repost %} {{
       render_card(result.repost, is_repost=True) }} {% endif %}

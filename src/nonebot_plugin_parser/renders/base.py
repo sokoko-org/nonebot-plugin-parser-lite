@@ -16,6 +16,7 @@ from ..parsers.data import (
     AudioContent,
     GraphicContent,
     ImageContent,
+    LivePhotoContent,
     MediaContent,
     ParseResult,
     VideoContent,
@@ -87,12 +88,13 @@ class Renderer:
         if forwardable_segs:
             self._append_forward_text_segments(result, forwardable_segs)
 
-            if pconfig.need_forward_contents or len(forwardable_segs) > 4:
+            if pconfig.need_forward_contents:  # or len(forwardable_segs) > 4:
                 forward_msg = UniHelper.construct_forward_message(forwardable_segs)
                 yield UniMessage(forward_msg)
             else:
                 # 直接按顺序发出若干段（视平台实现为合并转发或多条消息）
-                yield UniMessage(forwardable_segs)
+                for seg in forwardable_segs:
+                    yield UniMessage(seg)
 
         # 汇总下载失败信息
         if failed_count > 0:
@@ -146,6 +148,9 @@ class Renderer:
             if cont.alt:
                 seg = seg + cont.alt
             return seg
+        if isinstance(cont, LivePhotoContent):
+            path = await cont.get_live()
+            return UniHelper.video_seg(path)
 
         return None
 

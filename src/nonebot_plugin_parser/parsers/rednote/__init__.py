@@ -100,7 +100,11 @@ class RedNoteParser(BaseParser):
         note_data = init_state.note.noteDetailMap[note_id]
         note_data.comments_list = convert(com_data, CommentList)
 
-        return self._build_result(note_data)
+        result = self._build_result(note_data)
+        result.url = (
+            f"https://www.xiaohongshu.com/explore/{note_id}?xsec_token={xsec_token}"
+        )
+        return result
 
     async def _fetch_init_state(self, client: AsyncClient, url: str) -> str:
         """获取并提取页面中的 __INITIAL_STATE__ 原始 JSON 字符串"""

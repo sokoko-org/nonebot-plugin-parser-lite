@@ -15,24 +15,6 @@
             border-left: 3px solid var(--primary-color);
         }
 
-        /* 播放按钮装饰 */
-        .play-btn-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 64px;
-            height: 64px;
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: var(--primary-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
         /* 作者信息与二维码区域 */
         .author-qr-row {
             display: flex;
@@ -164,14 +146,7 @@
         <div class="decorative-stripe"></div>
         {% endif %}
 
-        {# --- 封面区域 --- #}
-        {% set cover_url = result.cover_path %}
-
-        {% if cover_url %}
         <div class="cover-section">
-            <img src="{{ cover_url }}" class="cover-image" alt="Cover">
-            <div class="cover-overlay"></div>
-
             {% if extra.type_tag %}
             <div class="tag type-tag">
                 <i class="fa-solid {{ extra.type_icon }}"></i>
@@ -190,7 +165,6 @@
             </div>
             {% endif %}
         </div>
-        {% endif %}
 
         <div class="content-section">
             {# --- 作者信息行 --- #}

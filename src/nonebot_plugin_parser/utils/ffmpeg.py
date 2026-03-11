@@ -1,5 +1,4 @@
 import hashlib
-import os
 from pathlib import Path
 
 from nonebot import logger
@@ -196,23 +195,26 @@ class FFmpeg:
             "-loop",
             "1",
             "-t",
-            "2.5",
+            "0.5",
             "-i",
             str(image_path),
         ]
 
         # 模拟 iPhone 质感的核心滤镜：
-        # - scale: 统一分辨率，补齐偶数行
-        # - setsar: 消除比例畸变
-        # - fade: 模拟 Live 播放结束后的静止感
+        # - 主视频作为参考尺寸
+        # - 静态图用 scale2ref 缩放到与主视频一致
+        # - 对静态图做淡入，再与主视频 concat
+        #
+        # 这样可以避免手动算尺寸导致 concat 报尺寸不一致。
         filter_v = (
-            "[1:v]scale='iw-mod(iw,2)':'ih-mod(ih,2)',setsar=1,"
-            "fade=t=in:st=0:d=0.4,fade=t=out:st=2.1:d=0.4[v_still];"
-            "[0:v]setsar=1[v_main];"
-            "[v_main][v_still]concat=n=2:v=1:a=0[outv]"
+            "[1:v][0:v]scale2ref=flags=bicubic[v_still_raw][v_main];"
+            "[v_main]setsar=1[v_main_sar];"
+            "[v_still_raw]setsar=1,"
+            "fade=t=in:st=0:d=0.2[v_still];"
+            "[v_main_sar][v_still]concat=n=2:v=1:a=0[outv]"
         )
 
-        if bgm_path and os.path.exists(bgm_path):
+        if bgm_path and bgm_path.exists():
             inputs += ["-i", str(bgm_path)]
             # amix: 混合原音与BGM，duration=first 保证不因BGM太长而导致视频变长
             filter_a = ";[0:a][2:a]amix=inputs=2:duration=first[outa]"
@@ -244,7 +246,6 @@ class FFmpeg:
             "aac",
             "-movflags",
             "+faststart",
-            "-shortest",
             str(output_path),
         ]
 
