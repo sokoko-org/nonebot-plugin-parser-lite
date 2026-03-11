@@ -1,6 +1,11 @@
 from typing import Any, Optional
 
 from msgspec import Struct, convert
+from ..data import MediaContent
+from ..creator import (
+    create_image,
+    create_live_photo,
+)
 
 
 class AuthorInfo(Struct):
@@ -28,6 +33,8 @@ class OpusImage(Struct):
     """图文动态图片信息"""
 
     url: str
+    live_url: str | None = None
+    """iPhone Live Photo 视频流（如果有）"""
 
 
 class OpusSummary(Struct):
@@ -103,13 +110,41 @@ class DynamicMajor(Struct):
         return []
 
     @property
-    def cover_url(self) -> str | None:
-        """获取封面URL"""
-        if self.type == "MAJOR_TYPE_ARCHIVE" and self.archive:
-            return self.archive.cover
-        # 如果是图文动态，返回第一张图片作为封面
-        image_urls = self.image_urls
-        return image_urls[0] if image_urls else None
+    def medias(self) -> list[MediaContent]:
+        """
+        获取媒体资源列表（图片 + Live Photo）
+        说明:
+            - 对于 opus.pics:
+                - 如果有 live_url -> 视为 Live Photo
+                - 否则 -> 普通图片
+            - 对于 draw.pictures:
+                - 当前只有普通图片（没有 live）
+        """
+        items: list[MediaContent] = []
+
+        # 优先处理 opus 图文里的图片 / livephoto
+        if self.type == "MAJOR_TYPE_OPUS" and self.opus:
+            for pic in self.opus.pics:
+                if pic.live_url:
+                    items.append(
+                        create_live_photo(video_url=pic.live_url, image_url=pic.url)
+                    )
+                else:
+                    items.append(create_image(url=pic.url))
+
+        # draw 类型图片动态
+        if self.type == "MAJOR_TYPE_DRAW" and self.draw:
+            pictures = self.draw.get("pictures", [])
+            for pic in pictures:
+                if img_src := pic.get("img_src"):
+                    items.append(create_image(url=img_src))
+
+        # 视频封面作为普通图片补充（如果前面没有任何媒体）
+        if not items and self.type == "MAJOR_TYPE_ARCHIVE" and self.archive:
+            if cover := self.archive.cover:
+                items.append(create_image(url=cover))
+
+        return items
 
 
 class DynamicModule(Struct):
@@ -211,51 +246,51 @@ class DynamicInfo(Struct):
         return None
 
     @property
-    def image_urls(self) -> list[str]:
-        """获取图片URL列表"""
+    def medias(self) -> list[MediaContent]:
+        """
+        统一获取当前动态的媒体资源（图片 + Live Photo）
+
+        优先从 major 结构中解析（标准路径），
+        对于部分老数据 / 特殊分享结构，再从 module_dynamic 兜底
+        """
+        # 1. 标准 major 结构
         if major_info := self.modules.major_info:
             major = convert(major_info, DynamicMajor)
-            if major_images := major.image_urls:
-                return major_images
+            if medias := major.medias:
+                return medias
 
-        # 2. 处理分享图片的动态，可能直接包含图片信息
-        # 检查是否为图文动态类型
+        # 2. 处理旧式 / 特殊图文结构：直接从 module_dynamic 中兜底
         if self.type == "DYNAMIC_TYPE_DRAW" and self.modules.module_dynamic:
-            # 从module_dynamic中查找图片信息
             dynamic_data = self.modules.module_dynamic
-
-            # 检查是否有pictures字段
             if isinstance(dynamic_data, dict):
-                # 尝试从不同位置获取图片
+                # 2.1 直接 pics: [{url: ...}]
                 if "pics" in dynamic_data:
-                    # 直接的pics字段
-                    return [pic.get("url", "") for pic in dynamic_data["pics"] if pic.get("url")]
-                elif "major" in dynamic_data:
-                    major = dynamic_data["major"]
-                    if isinstance(major, dict):
-                        # 检查major是否包含图片信息
-                        if "pics" in major:
-                            return [pic.get("url", "") for pic in major["pics"] if pic.get("url")]
-                        elif "draw" in major and isinstance(major["draw"], dict):
-                            draw = major["draw"]
-                            if "pictures" in draw:
-                                return [pic.get("img_src", "") for pic in draw["pictures"] if pic.get("img_src")]
+                    return [
+                        create_image(url=pic.get("url"))
+                        for pic in dynamic_data["pics"]
+                        if pic.get("url")
+                    ]
 
-        # 3. 转发动态时，如果主体没有图片，不再从orig获取图片
-        # 直接返回空列表，后续会使用默认图片
+                # 2.2 major 下的 pics / draw.pictures
+                if "major" in dynamic_data and isinstance(
+                    (major := dynamic_data["major"]), dict
+                ):
+                    if "pics" in major:
+                        return [
+                            create_image(url=pic.get("url"))
+                            for pic in major["pics"]
+                            if pic.get("url")
+                        ]
+                    draw = major.get("draw")
+                    if isinstance(draw, dict) and "pictures" in draw:
+                        return [
+                            create_image(url=pic.get("img_src"))
+                            for pic in draw["pictures"]
+                            if pic.get("img_src")
+                        ]
+
+        # 3. 转发动态 / 无图动态：不再从 orig 递归取图，交由上游用默认封面兜底
         return []
-
-    @property
-    def cover_url(self) -> str | None:
-        """获取封面URL"""
-        if major_info := self.modules.major_info:
-            major = convert(major_info, DynamicMajor)
-            if cover := major.cover_url:
-                return cover
-
-        # 2. 从图片列表中获取第一张作为封面
-        image_urls = self.image_urls
-        return image_urls[0] if image_urls else None
 
 
 class DynamicData(Struct):

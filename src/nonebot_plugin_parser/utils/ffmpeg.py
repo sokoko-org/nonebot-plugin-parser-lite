@@ -188,14 +188,14 @@ class FFmpeg:
         if output_path.exists():
             return output_path
         # 2. 构建指令：单进程一次性完成
-        # 逻辑：视频 + 底图(2.5s) + 淡入淡出
+        # 逻辑：视频 + 底图(0.6s) + 淡入
         inputs = [
             "-i",
             str(video_path),
             "-loop",
             "1",
             "-t",
-            "0.5",
+            "0.6",
             "-i",
             str(image_path),
         ]

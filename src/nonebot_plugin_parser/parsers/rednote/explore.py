@@ -1,8 +1,8 @@
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ...parsers.data import MediaContent
-from ...parsers.creator import (
+from ..data import MediaContent
+from ..creator import (
     create_image,
     create_live_photo,
     create_video,

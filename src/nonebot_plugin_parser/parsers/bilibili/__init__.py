@@ -356,7 +356,7 @@ class BilibiliParser(BaseParser):
         - 表情与图片保持独立元素
         """
         rich_nodes = dynamic_info.rich_text_nodes
-        if not rich_nodes and not dynamic_info.image_urls:
+        if not rich_nodes:
             return []
 
         contents: list[MediaContent | str] = []
@@ -385,8 +385,7 @@ class BilibiliParser(BaseParser):
 
         flush_text_buffer()
 
-        if dynamic_info.image_urls:
-            contents.extend(self.create_images(dynamic_info.image_urls))
+        contents.extend(dynamic_info.medias)
 
         return contents
 
@@ -427,11 +426,6 @@ class BilibiliParser(BaseParser):
 
         # 尝试解析转发的主体类型信息
         major_type, opus_jump_url, archive_bvid = self._get_repost_major_type(orig_item)
-
-        # 目前封面只是预留，暂无使用
-        _ = orig_item.cover_url or (
-            orig_item.image_urls[0] if orig_item.image_urls else None
-        )
 
         # 图文 / 专栏
         # if major_type == "OPUS" and opus_jump_url:
