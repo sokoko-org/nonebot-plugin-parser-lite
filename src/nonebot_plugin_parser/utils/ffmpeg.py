@@ -47,7 +47,7 @@ class FFmpeg:
 
         :param v_path: 视频文件路径
         :param a_path: 音频文件路径
-        :param output_path: 输出文件路径
+        :param file_name: 输出文件名
         """
         file_name = file_name or cls.generate_file_name(v_path, a_path)
         output_path = pconfig.cache_dir / f"{file_name}.mp4"
@@ -91,7 +91,7 @@ class FFmpeg:
 
         :param v_path: 视频文件路径
         :param a_path: 音频文件路径
-        :param output_path: 输出文件路径
+        :param file_name: 输出文件名
         """
         file_name = file_name or cls.generate_file_name(v_path, a_path)
         output_path = pconfig.cache_dir / f"{file_name}.mp4"
@@ -173,12 +173,16 @@ class FFmpeg:
         cls,
         image_path: Path,
         video_path: Path,
-        file_name: str,
         bgm_path: Path | None = None,
+        file_name: str | None = None,
     ):
         """
-        输入：底图、过程视频、BGM
-        输出：模拟 iPhone Live Photo 效果的 MP4
+        合并图片和视频为 iPhone Live Photo 视频
+
+        :param image_path: 图片文件路径
+        :param video_path: 视频文件路径
+        :param bgm_path: 背景音乐文件路径
+        :param file_name: 输出文件名
         """
         file_name = file_name or cls.generate_file_name(image_path, video_path)
         output_path = pconfig.cache_dir / f"{file_name}.mp4"

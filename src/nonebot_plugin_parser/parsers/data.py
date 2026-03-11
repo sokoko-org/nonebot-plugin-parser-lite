@@ -4,6 +4,8 @@ from datetime import datetime
 from dataclasses import field, dataclass
 from collections.abc import Sequence
 
+from ..utils.ffmpeg import FFmpeg
+
 from ..download.task import DownloadTaskWrapper
 
 
@@ -14,7 +16,7 @@ def repr_path_task(path_task: DownloadTaskWrapper[Path]) -> str:
 @dataclass(repr=False, slots=True)
 class MediaContent:
     path_task: DownloadTaskWrapper[Path]
-    need_send: bool = True
+    need_send: bool = field(default=True, init=False)
     """是否发送"""
 
     @overload
@@ -90,6 +92,34 @@ class StickerContent(MediaContent):
     """
     desc: str | None = None
     """贴纸描述"""
+
+
+@dataclass(repr=False, slots=True)
+class LivePhotoContent(MediaContent):
+    """iPhone Live Photo 内容"""
+
+    base_image: DownloadTaskWrapper[Path]
+    """iPhone Live Photo 底图"""
+    bgm: DownloadTaskWrapper[Path] | None = None
+    """iPhone Live Photo 背景音乐"""
+
+    @overload
+    async def get_base(self) -> Path | None: ...
+    @overload
+    async def get_base(self, download: Literal[True]) -> Path | None: ...
+    @overload
+    async def get_base(self, download: Literal[False]) -> str | None: ...
+    async def get_base(self, download: bool = True) -> Path | str | None:
+        """获取 iPhone Live Photo 底图"""
+        return await self.base_image if download else self.base_image.url
+
+    async def get_live(self) -> Path:
+        """获取 iPhone Live Photo 视频"""
+
+        bgm = await self.bgm if self.bgm else None
+        return await FFmpeg.merge_to_live_mp4(
+            await self.base_image, await self.path_task, bgm
+        )
 
 
 @dataclass(slots=True)

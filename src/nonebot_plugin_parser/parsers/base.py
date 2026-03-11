@@ -4,7 +4,7 @@ import asyncio
 from pathlib import Path
 from re import Match, Pattern, compile
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Literal, Sequence, TypeVar, ClassVar, cast
+from typing import TYPE_CHECKING, Any, Literal, Sequence, TypeVar, ClassVar, cast, final
 from collections.abc import Callable, Coroutine
 from typing_extensions import Unpack, ParamSpec
 from ..utils.http_utils import get_async_client
@@ -30,6 +30,7 @@ from .creator import (
     create_sticker,
     create_video,
     create_videos,
+    create_live_photo,
 )
 from ..config import pconfig as pconfig
 from ..download import DOWNLOADER as DOWNLOADER
@@ -155,6 +156,7 @@ class BaseParser:
         """获取所有已注册的 Parser 类"""
         return cls._registry
 
+    @final
     async def parse(self, keyword: str, searched: Match[str]) -> ParseResult:
         """解析 URL 提取信息
 
@@ -378,6 +380,28 @@ class BaseParser:
 
         return create_sticker(url=url, size=size, desc=desc)
 
+    def create_live_photo(
+        self,
+        video_url: str,
+        image_url: str,
+        bgm_url: str | None = None,
+        need_send: bool = True,
+    ):
+        """
+        创建  iPhone Live Photo 内容
+
+        :param video_url: iPhone Live Photo 变化过程视频
+        :param image_url: iPhone Live Photo 底图
+        :param bgm_url: iPhone Live Photo 背景音乐
+        :param need_send: 是否发送
+        """
+        return create_live_photo(
+            video_url=video_url,
+            image_url=image_url,
+            bgm_url=bgm_url,
+            need_send=need_send,
+        )
+
     def create_stats(
         self,
         view_count: str | None = None,
@@ -415,7 +439,6 @@ class BaseParser:
         location: str | None = None,
         replies: list[Comment] | None = None,
         parent_author: Author | None = None,
-        download: bool = False,
     ):
         """
         创建评论内容
@@ -427,7 +450,6 @@ class BaseParser:
         :param location: 评论位置
         :param replies: 评论回复
         :param parent_author: 评论的父级作者
-        :param download: 是否下载评论资源并发送
         """
 
         return create_comment(

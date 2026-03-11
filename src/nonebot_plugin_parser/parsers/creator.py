@@ -13,6 +13,7 @@ from .data import (
     MediaContent,
     VideoContent,
     StickerContent,
+    LivePhotoContent,
 )
 from ..utils.common import keep_zh_en_num
 from ..config import pconfig as pconfig
@@ -94,12 +95,13 @@ def create_video(
             kwargs={},
             url=f"<custom-download:{video_name or 'video'}>",
         )
-    return VideoContent(
+    vid = VideoContent(
         path_task=video_task,
         cover=cover_task,
         duration=duration,
-        need_send=need_send,
     )
+    vid.need_send = need_send
+    return vid
 
 
 def create_videos(
@@ -127,7 +129,9 @@ def create_image(
 
     task = DOWNLOADER.download_img(url, ext_headers=headers)
 
-    return ImageContent(path_task=task, need_send=need_send)
+    img = ImageContent(path_task=task)
+    img.need_send = need_send
+    return img
 
 
 def create_images(
@@ -167,7 +171,9 @@ def create_audio(
 
     task = DOWNLOADER.download_audio(url, audio_name=audio_name, ext_headers=headers)
 
-    return AudioContent(path_task=task, duration=duration, need_send=need_send)
+    aud = AudioContent(path_task=task, duration=duration)
+    aud.need_send = need_send
+    return aud
 
 
 def create_graphic(
@@ -184,7 +190,9 @@ def create_graphic(
     """
 
     image_task = DOWNLOADER.download_img(image_url, ext_headers=headers)
-    return GraphicContent(path_task=image_task, alt=alt, need_send=need_send)
+    gra = GraphicContent(path_task=image_task, alt=alt)
+    gra.need_send = need_send
+    return gra
 
 
 def create_sticker(
@@ -204,6 +212,28 @@ def create_sticker(
 
     image_task = DOWNLOADER.download_img(url, ext_headers=headers)
     return StickerContent(path_task=image_task, size=size, desc=desc)
+
+
+def create_live_photo(
+    video_url: str, image_url: str, bgm_url: str | None = None, need_send: bool = True
+):
+    """
+    创建  iPhone Live Photo 内容
+
+    :param video_url: iPhone Live Photo 变化过程视频
+    :param image_url: iPhone Live Photo 底图
+    :param bgm_url: iPhone Live Photo 背景音乐
+    :param need_send: 是否发送
+    """
+    video_task = DOWNLOADER.download_video(video_url, ext_headers=headers)
+    image_task = DOWNLOADER.download_img(image_url, ext_headers=headers)
+    if bgm_url:
+        bgm_task = DOWNLOADER.download_audio(bgm_url, ext_headers=headers)
+    else:
+        bgm_task = None
+    liv = LivePhotoContent(video_task, image_task, bgm_task)
+    liv.need_send = need_send
+    return liv
 
 
 def create_stats(
