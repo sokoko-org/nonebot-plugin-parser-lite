@@ -22,7 +22,7 @@ from rich.progress import (
 from ..config import pconfig
 from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
-from ..utils.common import generate_file_name, safe_unlink
+from ..utils.common import generate_file_name, safe_unlink, keep_zh_en_num
 from ..utils.ffmpeg import FFmpeg
 from .task import auto_task
 
@@ -54,8 +54,7 @@ class StreamDownloader:
         :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
         :raises DownloadException: 重试多次仍失败时抛出
         """
-        if not file_name:
-            file_name = generate_file_name(url)
+        file_name = keep_zh_en_num(file_name) if file_name else generate_file_name(url)
         file_path = self.cache_dir / file_name
 
         # 已有缓存文件，直接返回
@@ -188,6 +187,7 @@ class StreamDownloader:
         """
         if video_name is None:
             video_name = generate_file_name(url, ".mp4")
+
         return await self.streamd(url, file_name=video_name, ext_headers=ext_headers)
 
     @auto_task

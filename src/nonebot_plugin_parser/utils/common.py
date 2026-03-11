@@ -1,3 +1,4 @@
+import re
 import asyncio
 import hashlib
 from typing import TypeVar
@@ -25,6 +26,13 @@ class LimitedSizeDict(OrderedDict[K, V]):
         super().__setitem__(key, value)
         if len(self) > self.max_size:
             self.popitem(last=False)  # 移除最早添加的项
+
+
+def keep_zh_en_num(text: str) -> str:
+    """
+    保留字符串中的中英文和数字
+    """
+    return re.sub(r"[^\u4e00-\u9fa5a-zA-Z0-9\-_]", "", text.replace(" ", "_"))
 
 
 async def safe_unlink(path: Path):
