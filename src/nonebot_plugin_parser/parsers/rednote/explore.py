@@ -29,7 +29,7 @@ class Stream(Struct):
     @property
     def url(self) -> str:
         """
-        获取第一个非空流列表中的第一个可用 URL。
+        获取第一个非空流列表中的第一个可用 URL
 
         优先级: h264 > h265 > h266 > av1
 
@@ -157,14 +157,14 @@ class Comment(Struct):
 
 
 class CommentList(Struct):
-    comments: list[Comment]
+    comments: list[Comment] = field(default_factory=list)
 
 
 class NoteDetailWrapper(Struct):
     """Wrapper for note detail, represents the value in noteDetailMap[xhs_id]"""
 
     note: NoteDetail
-    comments_list: CommentList
+    comments_list: CommentList = field(default_factory=CommentList)
 
 
 class Note(Struct):
