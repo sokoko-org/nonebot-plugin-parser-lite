@@ -348,16 +348,44 @@ class BilibiliParser(BaseParser):
     async def _build_dynamic_contents(
         self, dynamic_info: DynamicInfo
     ) -> list[MediaContent | str]:
-        """构建动态主体 contents：文字 + 图片"""
+        """构建动态主体 contents：文字 + 图片。
+
+        - 连续文本节点合并为一个字符串
+        - 表情与图片保持独立元素
+        """
+        rich_nodes = dynamic_info.rich_text_nodes
+        if not rich_nodes and not dynamic_info.image_urls:
+            return []
+
         contents: list[MediaContent | str] = []
-        for node in dynamic_info.rich_text_nodes:
-            if node["type"] == "RICH_TEXT_NODE_TYPE_EMOJI":
+        text_buffer: list[str] = []
+
+        contents_append = contents.append
+        buffer_append = text_buffer.append
+
+        def flush_text_buffer() -> None:
+            if text_buffer:
+                contents_append("".join(text_buffer))
+                text_buffer.clear()
+
+        for node in rich_nodes:
+            node_type = node.get("type")
+            if node_type == "RICH_TEXT_NODE_TYPE_EMOJI":
+                flush_text_buffer()
                 e = node["emoji"]
                 size = "small" if e["size"] == 1 else "medium"
-                contents.append(self.create_sticker(e["icon_url"], size, e["text"]))
-            else:
-                contents.append(node.get("text", ""))
-        contents.extend(self.create_images(dynamic_info.image_urls))
+                contents_append(self.create_sticker(e["icon_url"], size, e["text"]))
+                continue
+
+            text = node.get("text")
+            if text:
+                buffer_append(text)
+
+        flush_text_buffer()
+
+        if dynamic_info.image_urls:
+            contents.extend(self.create_images(dynamic_info.image_urls))
+
         return contents
 
     def _extract_dynamic_stats(self, dynamic_info: DynamicInfo) -> Stats:
