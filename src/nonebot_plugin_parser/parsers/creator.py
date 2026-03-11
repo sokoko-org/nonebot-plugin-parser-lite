@@ -1,25 +1,23 @@
 from collections.abc import Callable, Coroutine
-import os
 from pathlib import Path
 from typing import Any, Literal, Sequence
 
-from .data import (
-    GraphicContent,
-    Stats,
-    Author,
-    Comment,
-    AudioContent,
-    ImageContent,
-    MediaContent,
-    VideoContent,
-    StickerContent,
-    LivePhotoContent,
-)
-from ..utils.common import keep_zh_en_num
 from ..config import pconfig as pconfig
+from ..constants import COMMON_HEADER
 from ..download import DOWNLOADER
 from ..download.task import DownloadTaskWrapper
-from ..constants import COMMON_HEADER
+from .data import (
+    AudioContent,
+    Author,
+    Comment,
+    GraphicContent,
+    ImageContent,
+    LivePhotoContent,
+    MediaContent,
+    Stats,
+    StickerContent,
+    VideoContent,
+)
 
 headers = COMMON_HEADER.copy()
 
@@ -69,13 +67,6 @@ def create_video(
     :param need_send: 是否发送
     """
 
-    # 清理文件名，只保留安全字符
-    if video_name:
-        # 保留文件名中的后缀
-        base_name, ext = os.path.splitext(video_name)
-        cleaned_base = keep_zh_en_num(base_name)
-        video_name = f"{cleaned_base}{ext}"
-
     cover_task = None
     if cover_url:
         cover_task = DOWNLOADER.download_img(cover_url, ext_headers=headers)
@@ -120,16 +111,18 @@ def create_videos(
 
 def create_image(
     url: str,
+    img_name: str | None = None,
     need_send: bool = True,
 ):
     """
     创建图片内容
 
     :param url: 图片 URL
+    :param img_name: 图片名称
     :param need_send: 是否发送
     """
 
-    task = DOWNLOADER.download_img(url, ext_headers=headers)
+    task = DOWNLOADER.download_img(url, img_name=img_name, ext_headers=headers)
 
     return _with_need_send(ImageContent(path_task=task), need_send)
 
@@ -161,14 +154,6 @@ def create_audio(
     :param need_send: 是否发送
     """
 
-    # 清理文件名，只保留安全字符
-    if audio_name:
-        # 保留文件名中的后缀
-
-        base_name, ext = os.path.splitext(audio_name)
-        cleaned_base = keep_zh_en_num(base_name)
-        audio_name = f"{cleaned_base}{ext}"
-
     task = DOWNLOADER.download_audio(url, audio_name=audio_name, ext_headers=headers)
 
     return _with_need_send(AudioContent(path_task=task, duration=duration), need_send)
@@ -176,6 +161,7 @@ def create_audio(
 
 def create_graphic(
     image_url: str,
+    img_name: str | None = None,
     alt: str | None = None,
     need_send: bool = True,
 ):
@@ -183,11 +169,14 @@ def create_graphic(
     图片,此图片不参与九宫格
 
     :param image_url: 图片 URL
+    :param img_name: 图片名称
     :param alt: 图片描述
     :param need_send: 是否发送
     """
 
-    image_task = DOWNLOADER.download_img(image_url, ext_headers=headers)
+    image_task = DOWNLOADER.download_img(
+        image_url, img_name=img_name, ext_headers=headers
+    )
     return _with_need_send(GraphicContent(path_task=image_task, alt=alt), need_send)
 
 

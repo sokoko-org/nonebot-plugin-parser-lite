@@ -1,48 +1,49 @@
 """Parser 基类定义"""
 
 import asyncio
+from abc import ABC
+from collections.abc import Callable, Coroutine
 from pathlib import Path
 from re import Match, Pattern, compile
-from abc import ABC
-from typing import TYPE_CHECKING, Any, Literal, Sequence, TypeVar, ClassVar, cast, final
-from collections.abc import Callable, Coroutine
-from typing_extensions import Unpack, ParamSpec
-from ..utils.http_utils import get_async_client
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Sequence, TypeVar, cast, final
 
+from typing_extensions import ParamSpec, Unpack
+
+from ..config import pconfig as pconfig
+from ..constants import ANDROID_HEADER, COMMON_HEADER, IOS_HEADER
+from ..constants import DOWNLOAD_TIMEOUT as DOWNLOAD_TIMEOUT
+from ..constants import PlatformEnum as PlatformEnum
+from ..download import DOWNLOADER as DOWNLOADER
 from ..download.task import DownloadTaskWrapper
-from .data import (
-    Author,
-    MediaContent,
-    ParseResult,
-    ParseResultKwargs,
-    Platform,
-    Comment,
-    Stats,
-)
+from ..exception import DownloadException as DownloadException
+from ..exception import DurationLimitException as DurationLimitException
+from ..exception import ParseException as ParseException
+from ..exception import SizeLimitException as SizeLimitException
+from ..exception import TipException as TipException
+from ..exception import ZeroSizeException as ZeroSizeException
+from ..utils.http_utils import get_async_client
 from .creator import (
-    create_author,
     create_audio,
+    create_author,
     create_comment,
     create_graphic,
     create_image,
     create_images,
+    create_live_photo,
     create_stats,
     create_sticker,
     create_video,
     create_videos,
-    create_live_photo,
 )
-from ..config import pconfig as pconfig
-from ..download import DOWNLOADER as DOWNLOADER
-from ..constants import IOS_HEADER, COMMON_HEADER, ANDROID_HEADER
-from ..constants import DOWNLOAD_TIMEOUT as DOWNLOAD_TIMEOUT
-from ..constants import PlatformEnum as PlatformEnum
-from ..exception import TipException as TipException
-from ..exception import ParseException as ParseException
-from ..exception import DownloadException as DownloadException
-from ..exception import ZeroSizeException as ZeroSizeException
-from ..exception import SizeLimitException as SizeLimitException
-from ..exception import DurationLimitException as DurationLimitException
+from .data import (
+    Author,
+    Comment,
+    MediaContent,
+    ParseResult,
+    ParseResultKwargs,
+    Platform,
+    Stats,
+)
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -313,16 +314,18 @@ class BaseParser:
     def create_image(
         self,
         url: str,
+        img_name: str | None = None,
         need_send: bool = True,
     ):
         """
         创建图片内容
 
         :param url: 图片 URL
+        :param img_name: 图片名称
         :param need_send: 是否发送
         """
 
-        return create_image(url=url, need_send=need_send)
+        return create_image(url=url, img_name=img_name, need_send=need_send)
 
     def create_audio(
         self,
@@ -350,6 +353,7 @@ class BaseParser:
     def create_graphic(
         self,
         image_url: str,
+        img_name: str | None = None,
         alt: str | None = None,
         need_send: bool = True,
     ):
@@ -357,11 +361,14 @@ class BaseParser:
         图片,此图片不参与九宫格
 
         :param image_url: 图片 URL
+        :param img_name: 图片名称
         :param alt: 图片描述
         :param need_send: 是否发送
         """
 
-        return create_graphic(image_url=image_url, alt=alt, need_send=need_send)
+        return create_graphic(
+            image_url=image_url, img_name=img_name, alt=alt, need_send=need_send
+        )
 
     def create_sticker(
         self,
