@@ -356,7 +356,8 @@ class BilibiliParser(BaseParser):
         - 表情与图片保持独立元素
         """
         rich_nodes = dynamic_info.rich_text_nodes
-        if not rich_nodes:
+        medias = dynamic_info.medias
+        if not rich_nodes and not medias:
             return []
 
         contents: list[MediaContent | str] = []
@@ -385,7 +386,7 @@ class BilibiliParser(BaseParser):
 
         flush_text_buffer()
 
-        contents.extend(dynamic_info.medias)
+        contents.extend(medias)
 
         return contents
 
