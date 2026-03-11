@@ -24,6 +24,11 @@ from ..constants import COMMON_HEADER
 headers = COMMON_HEADER.copy()
 
 
+def _with_need_send(obj: MediaContent, need_send: bool) -> MediaContent:
+    obj.need_send = need_send
+    return obj
+
+
 def create_author(
     name: str,
     avatar_url: str | None = None,
@@ -95,13 +100,10 @@ def create_video(
             kwargs={},
             url=f"<custom-download:{video_name or 'video'}>",
         )
-    vid = VideoContent(
-        path_task=video_task,
-        cover=cover_task,
-        duration=duration,
+    return _with_need_send(
+        VideoContent(path_task=video_task, cover=cover_task, duration=duration),
+        need_send,
     )
-    vid.need_send = need_send
-    return vid
 
 
 def create_videos(
@@ -129,9 +131,7 @@ def create_image(
 
     task = DOWNLOADER.download_img(url, ext_headers=headers)
 
-    img = ImageContent(path_task=task)
-    img.need_send = need_send
-    return img
+    return _with_need_send(ImageContent(path_task=task), need_send)
 
 
 def create_images(
@@ -171,9 +171,7 @@ def create_audio(
 
     task = DOWNLOADER.download_audio(url, audio_name=audio_name, ext_headers=headers)
 
-    aud = AudioContent(path_task=task, duration=duration)
-    aud.need_send = need_send
-    return aud
+    return _with_need_send(AudioContent(path_task=task, duration=duration), need_send)
 
 
 def create_graphic(
@@ -190,9 +188,7 @@ def create_graphic(
     """
 
     image_task = DOWNLOADER.download_img(image_url, ext_headers=headers)
-    gra = GraphicContent(path_task=image_task, alt=alt)
-    gra.need_send = need_send
-    return gra
+    return _with_need_send(GraphicContent(path_task=image_task, alt=alt), need_send)
 
 
 def create_sticker(
@@ -231,9 +227,10 @@ def create_live_photo(
         bgm_task = DOWNLOADER.download_audio(bgm_url, ext_headers=headers)
     else:
         bgm_task = None
-    liv = LivePhotoContent(video_task, image_task, bgm_task)
-    liv.need_send = need_send
-    return liv
+    return _with_need_send(
+        LivePhotoContent(video_task, image_task, bgm_task),
+        need_send,
+    )
 
 
 def create_stats(

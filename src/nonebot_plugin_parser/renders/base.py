@@ -88,7 +88,7 @@ class Renderer:
         if forwardable_segs:
             self._append_forward_text_segments(result, forwardable_segs)
 
-            if pconfig.need_forward_contents:  # or len(forwardable_segs) > 4:
+            if pconfig.need_forward_contents or len(forwardable_segs) > 4:
                 forward_msg = UniHelper.construct_forward_message(forwardable_segs)
                 yield UniMessage(forward_msg)
             else:
