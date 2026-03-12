@@ -4,11 +4,11 @@ from msgspec import Struct
 from enum import IntEnum
 from bs4 import BeautifulSoup
 from ...parsers.data import MediaContent
-from ...parsers.creator import create_images
+from ...parsers.creator import create_image
 
 
 class PostType(IntEnum):
-    DODUMENT = 1
+    DOCUMENT = 1
     """文档"""
     PHOTO = 2
     """含有图片"""
@@ -36,6 +36,8 @@ class PostCount(Struct):
     """点赞数"""
     shareCount: int
     """分享数"""
+    reblogCount: int
+    """转载数"""
     postHot: int
     """热度"""
 
@@ -73,4 +75,4 @@ class Post(Struct):
 
     @property
     def medias(self) -> list[MediaContent]:
-        return create_images([photo["raw"] for photo in json.loads(self.photoLinks)])
+        return [create_image(photo["orign"]) for photo in json.loads(self.photoLinks)]
