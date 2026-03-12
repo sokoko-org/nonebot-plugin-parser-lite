@@ -33,7 +33,7 @@
 
 ## 💿 安装
 
-把`src/nonebot_plugin_parser`文件夹复制到插件加载目录(比如`plugins`)
+把`src/nonebot_plugin_parser_lite`文件夹复制到插件加载目录(比如`plugins`)
 
 ## 🎈 特性
 
