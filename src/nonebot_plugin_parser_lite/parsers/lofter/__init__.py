@@ -64,11 +64,9 @@ class LofterParser(BaseParser):
         # 解析评论
         if com_data.get("code") != 0:
             logger.warning(f"Lofter 获取评论失败: {com_data.get('msg')}")
-            com_list: dict = {}
+            comment_list = CommentList(hotList=[], default=[])
         else:
-            com_list = com_data.get("data") or {}
-
-        comment_list = convert(com_list, CommentList)
+            comment_list = convert(com_data.get("data") or {}, CommentList)
 
         # 构建正文内容：文本 + 媒体
         contents: list[MediaContent | str] = [post.text]
