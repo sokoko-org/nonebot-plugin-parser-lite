@@ -69,4 +69,4 @@ def generate_file_name(url: str, default_suffix: str = "") -> str:
     # 只用  netloc + path 作为稳定 key，忽略 query / fragment
     stable_url = f"{parsed.netloc}{parsed.path}"
     url_hash = hashlib.md5(stable_url.encode("utf-8")).hexdigest()[:16]
-    return f"{url_hash}{suffix}"
+    return f"{url_hash}.{suffix}"
