@@ -117,6 +117,10 @@ plite_download_command=["xz"]
 
 # [可选] 浏览器程序路径，如果无法识别浏览器请填写此配置
 plite_browser_path=None
+
+# [可选] 是否使用 ffmpeg 转码 Live Photo，若设备配置不佳，请禁用此功能
+# 禁用后将分别 Live Photo 底图和过程
+plite_live_photo: bool = True
 ```
 
 </details>

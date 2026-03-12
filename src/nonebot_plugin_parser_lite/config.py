@@ -51,6 +51,8 @@ class Config(BaseModel):
     """在懒下载模式中用户请求下载视频时的命令列表"""
     plite_browser_path: str | None = None
     """浏览器程序路径，如果无法识别浏览器请填写此配置"""
+    plite_live_photo: bool = True
+    """是否使用 ffmpeg 转码 Live Photo"""
 
     @property
     def nickname(self) -> str:
@@ -161,6 +163,10 @@ class Config(BaseModel):
     def browser_path(self) -> str | None:
         """浏览器程序路径"""
         return self.plite_browser_path
+
+    @property
+    def live_photo(self) -> bool:
+        return self.plite_live_photo
 
 
 # 初始化配置实例

@@ -81,8 +81,8 @@ class Renderer:
                 failed_count += 1
                 continue
 
-            if seg is not None:
-                forwardable_segs.append(seg)
+            if seg:
+                forwardable_segs.extend(seg)
 
         # 处理图文转发部分
         if forwardable_segs:
@@ -135,24 +135,35 @@ class Renderer:
 
     async def _build_forwardable_segment(
         self, cont: MediaContent
-    ) -> ForwardNodeInner | None:
-        """构建可加入转发消息的片段（图片 / 图文）。"""
-        # 只有图片和图文会进入可转发段
+    ) -> list[ForwardNodeInner]:
+        """构建可加入转发消息的片段（图片 / 图文 / LivePhoto）。"""
+
+        # 图片
         if isinstance(cont, ImageContent):
             path = await cont.get_path()
-            return UniHelper.img_seg(path)
+            return [UniHelper.img_seg(path)]
 
+        # 图文：图片 + 可选文字说明
         if isinstance(cont, GraphicContent):
             path = await cont.get_path()
-            seg = UniHelper.img_seg(path)
+            seg: ForwardNodeInner = UniHelper.img_seg(path)
             if cont.alt:
                 seg = seg + cont.alt
-            return seg
-        if isinstance(cont, LivePhotoContent):
-            path = await cont.get_live()
-            return UniHelper.video_seg(path)
+            return [seg]
 
-        return None
+        # Live Photo：根据配置决定用视频还是图+视频
+        if isinstance(cont, LivePhotoContent):
+            if pconfig.live_photo:
+                live_path = await cont.get_live()
+                return [UniHelper.video_seg(live_path)]
+            base_path = await cont.get_base()
+            live_path = await cont.get_path()
+            return [
+                UniHelper.img_seg(base_path),
+                UniHelper.video_seg(live_path),
+            ]
+
+        return []
 
     def _append_forward_text_segments(
         self,
