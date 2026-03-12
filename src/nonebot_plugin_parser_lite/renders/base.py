@@ -86,14 +86,14 @@ class Renderer:
 
         # 处理图文转发部分
         if forwardable_segs:
-            self._append_forward_text_segments(result, forwardable_segs)
+            # 根据“当前 + 转发”的文本/媒体顺序构建完整列表
+            ordered_segs = self._build_ordered_forward_segs(result, forwardable_segs)
 
-            if pconfig.need_forward_contents or len(forwardable_segs) > 4:
-                forward_msg = UniHelper.construct_forward_message(forwardable_segs)
+            if pconfig.need_forward_contents or len(ordered_segs) > 4:
+                forward_msg = UniHelper.construct_forward_message(ordered_segs)
                 yield UniMessage(forward_msg)
             else:
-                # 直接按顺序发出若干段（视平台实现为合并转发或多条消息）
-                for seg in forwardable_segs:
+                for seg in ordered_segs:
                     yield UniMessage(seg)
 
         # 汇总下载失败信息
@@ -165,45 +165,52 @@ class Renderer:
 
         return []
 
-    def _append_forward_text_segments(
+    def _build_ordered_forward_segs(
         self,
         result: ParseResult,
-        forwardable_segs: list[ForwardNodeInner],
-    ) -> None:
-        """追加转发消息中的文本片段（作者、转发信息等）。"""
-        if not forwardable_segs or not result.content:
-            return
+        media_segs: list[ForwardNodeInner],
+    ) -> list[ForwardNodeInner]:
+        """根据当前内容和转发内容构造有序的转发段列表。
 
+        顺序：
+        1. 当前帖子的纯文本（作者：文本）
+        2. 当前帖子的所有媒体片段
+        3. 若有转发：
+           3.1 一条“作者[转发原作者]：当前文本”说明
+           3.2 原帖文本（原作者[被转作者]：原帖标题+内容）
+        """
+        ordered: list[ForwardNodeInner] = []
         author_name = result.author.name if result.author else "未知用户"
 
-        if result.repost:
-            self._build_result_with_repost(result, forwardable_segs, author_name)
-        elif plain := build_plain_text(list(result.content)):
-            forwardable_segs.append(f"{author_name}：{plain}")
+        # 1. 当前文本
+        if plain := build_plain_text(list(result.content)):
+            ordered.append(f"{author_name}：{plain}")
 
-    def _build_result_with_repost(
-        self,
-        result: ParseResult,
-        forwardable_segs: list[ForwardNodeInner],
-        author_name: str,
-    ):
-        assert result.repost
-        repost_author = (
-            result.repost.author.name if result.repost.author else "未知用户"
-        )
-        forwardable_segs.append(
-            f"{author_name}[转发{repost_author}]：{build_plain_text(list(result.content))}"
-        )
+        # 2. 当前媒体
+        ordered.extend(media_segs)
 
-        repost_text: list[str] = []
-        if result.repost.title:
-            repost_text.append(result.repost.title)
-        if plain := build_plain_text(list(result.repost.content)):
-            repost_text.append(plain)
+        # 3. 转发内容
+        if not result.repost:
+            return ordered
 
-        if repost_text:
-            repost_content = "\n".join(repost_text)
-            forwardable_segs.append(f"{repost_author}[被转作者]：{repost_content}")
+        repost = result.repost
+        repost_author = repost.author.name if repost.author else "未知用户"
+
+        # 3.1 当前作者带“转发”说明 + 自己的文字
+        current_plain = build_plain_text(list(result.content))
+        ordered.append(f"{repost_author}[转发{author_name}]：{current_plain}")
+
+        # 3.2 原帖文字：标题 + 内容
+        repost_text_parts: list[str] = []
+        if repost.title:
+            repost_text_parts.append(repost.title)
+        if plain_repost := build_plain_text(list(repost.content)):
+            repost_text_parts.append(plain_repost)
+        if repost_text_parts:
+            repost_text = "\n".join(repost_text_parts)
+            ordered.append(f"{repost_author}[被转作者]：{repost_text}")
+
+        return ordered
 
     @property
     def append_url(self) -> bool:
