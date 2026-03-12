@@ -15,8 +15,6 @@ from .kugou import KuGouParser
 from .tieba import TiebaParser
 from .weibo import WeiBoParser
 from .douyin import DouyinParser
-
-# from .taptap import TapTapParser
 from .netease import NCMParser
 from .qsmusic import QSMusicParser
 from .toutiao import ToutiaoParser
@@ -27,6 +25,7 @@ from .rednote import RedNoteParser
 from .zhihu import ZhiHuParser
 from .duitang import DuiTangParser
 from .heybox import HeyBoxParser
+from .lofter import LofterParser
 
 __all__ = [
     "AcfunParser",
@@ -44,7 +43,6 @@ __all__ = [
     "ParseResult",
     "Platform",
     "QSMusicParser",
-    # "TapTapParser",
     "TiebaParser",
     "ToutiaoParser",
     "XParser",
@@ -54,5 +52,6 @@ __all__ = [
     "ZhiHuParser",
     "DuiTangParser",
     "HeyBoxParser",
+    "LofterParser",
     "handle",
 ]
