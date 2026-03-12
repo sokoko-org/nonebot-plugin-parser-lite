@@ -92,7 +92,7 @@ class RedNoteParser(BaseParser):
 
     async def parse_explore(self, url: str, note_id: str, xsec_token: str):
         """解析小红书笔记详情页"""
-        async with get_async_client() as client:
+        async with get_async_client(headers=self.headers) as client:
             raw = await self._fetch_init_state(client, url)
             com_data = await self._fetch_comments(client, note_id, xsec_token)
 
