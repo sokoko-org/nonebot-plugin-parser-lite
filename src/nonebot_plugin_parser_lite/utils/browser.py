@@ -121,9 +121,8 @@ co = ChromiumOptions()
 co.mute(True)
 co.incognito(True)
 co.no_imgs(True)
-co.headless(
-    False
-)  # 无头模式会被检测到，不能无头 | 如果 Linux 没有桌面环境，就把这个设置为 True
+co.headless(pconfig.headless)
+co.set_argument("--no-sandbox")
 co.set_browser_path(browser_path)
 # 浏览器数据缓存路径 C:\Users\用户名\AppData\Local\Temp\DrissionPage\userData\9222
 BROWSER = Chromium(co)

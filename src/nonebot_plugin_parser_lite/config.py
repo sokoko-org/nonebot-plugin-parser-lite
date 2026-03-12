@@ -53,6 +53,8 @@ class Config(BaseModel):
     """浏览器程序路径，如果无法识别浏览器请填写此配置"""
     plite_live_photo: bool = True
     """是否使用 ffmpeg 转码 Live Photo"""
+    plite_headless: bool = False
+    """是否使用无头浏览器"""
 
     @property
     def nickname(self) -> str:
@@ -166,7 +168,13 @@ class Config(BaseModel):
 
     @property
     def live_photo(self) -> bool:
+        """是否使用 iPhone Live Photo 功能"""
         return self.plite_live_photo
+    
+    @property
+    def headless(self) -> bool:
+        """是否无头模式"""
+        return self.plite_headless
 
 
 # 初始化配置实例
