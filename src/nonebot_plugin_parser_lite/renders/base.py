@@ -22,6 +22,7 @@ from ..parsers.data import (
     VideoContent,
 )
 from .utils import build_comments, build_html, build_plain_text
+import traceback
 
 
 class Renderer:
@@ -40,8 +41,8 @@ class Renderer:
             # 复用 cache_or_render_image 方法获取图片段，同时确保图片已保存
             image_seg = await self.cache_or_render_image(result)
             # 获取图片路径
-        except Exception as e:
-            logger.error(f"获取图片路径失败: {type(e)}:{e!r}")
+        except Exception:
+            logger.error(f"获取图片路径失败: {traceback.format_exc()}")
             image_seg = None
 
         # 尝试直接发送图片

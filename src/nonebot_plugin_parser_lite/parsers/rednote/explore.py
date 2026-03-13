@@ -1,12 +1,17 @@
+import re
+
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ..data import MediaContent
+from ...utils.format import replace_placeholder_to_sticker
 from ..creator import (
     create_image,
     create_live_photo,
     create_video,
 )
+from ..data import MediaContent
+
+REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
 
 
 class StreamUrl(Struct):
@@ -68,6 +73,10 @@ class Image(Struct):
     """是否为 iPhone Live Photo"""
     stream: Stream = field(default_factory=Stream)
     """iPhone Live Photo 视频流"""
+
+
+class CommentImage(Struct):
+    url_default: str
 
 
 class User(Struct):
@@ -148,17 +157,23 @@ class NoteDetail(Struct):
 class CommentUser(Struct):
     nickname: str
     image: str
-    userId: str
+    user_id: str
 
 
 class Comment(Struct):
-    userInfo: CommentUser
-    createTime: int
-    content: str
-    likeCount: str
-    ipLocation: str
-    pictures: list[Image] = field(default_factory=list)
-    subComments: list["Comment"] = field(default_factory=list)
+    user_info: CommentUser
+    create_time: int
+    like_count: str
+    ip_location: str
+    text: str = field(name="content")
+    pictures: list[CommentImage] = field(default_factory=list)
+    sub_comments: list["Comment"] = field(default_factory=list)
+
+    @property
+    def content(self) -> list[MediaContent | str]:
+        content = replace_placeholder_to_sticker(self.text, REDNOTE_PATTERN, "rednote")
+        content.extend(create_image(pic.url_default) for pic in self.pictures)
+        return content
 
 
 class CommentList(Struct):

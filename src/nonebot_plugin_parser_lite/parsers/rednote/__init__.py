@@ -4,9 +4,9 @@ from urllib.parse import parse_qsl
 
 from msgspec import convert
 from nonebot.log import logger
+from xhshow import SessionManager, Xhshow
 
-from ...utils.format import replace_placeholder_to_sticker
-from ...utils.http_utils import get_async_client, AsyncSession
+from ...utils.http_utils import AsyncSession, get_async_client
 from ..base import (
     BaseParser,
     Comment,
@@ -19,12 +19,10 @@ from ..base import (
 )
 from .explore import CommentList, NoteDetailWrapper
 from .explore import decoder as exploreDecoder
-from xhshow import Xhshow, SessionManager
 
 CLIENT = Xhshow()
 SESSION = SessionManager()
 
-REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
 
 INITIAL_STATE = re.compile(
     pattern=r"window\.__INITIAL_STATE__=(.*?)</script>",
@@ -187,33 +185,29 @@ class RedNoteParser(BaseParser):
         for c in note_data.comments_list.comments:
             comment = self.create_comment(
                 author=self.create_author(
-                    name=c.userInfo.nickname,
-                    avatar_url=c.userInfo.image,
+                    name=c.user_info.nickname,
+                    avatar_url=c.user_info.image,
                 ),
-                content=replace_placeholder_to_sticker(
-                    c.content, REDNOTE_PATTERN, "rednote"
-                ),
-                timestamp=c.createTime,
+                content=c.content,
+                timestamp=c.create_time // 1000,
                 stats=self.create_stats(
-                    like_count=c.likeCount,
-                    comment_count=str(len(c.subComments)),
+                    like_count=c.like_count,
+                    comment_count=str(len(c.sub_comments)),
                 ),
-                location=c.ipLocation,
+                location=c.ip_location,
             )
 
-            for sub in c.subComments:
+            for sub in c.sub_comments:
                 comment.replies.append(
                     self.create_comment(
                         author=self.create_author(
-                            name=sub.userInfo.nickname,
-                            avatar_url=sub.userInfo.image,
+                            name=sub.user_info.nickname,
+                            avatar_url=sub.user_info.image,
                         ),
-                        content=replace_placeholder_to_sticker(
-                            sub.content, REDNOTE_PATTERN, "rednote"
-                        ),
-                        timestamp=sub.createTime,
+                        content=sub.content,
+                        timestamp=sub.create_time // 1000,
                         stats=self.create_stats(
-                            like_count=sub.likeCount,
+                            like_count=sub.like_count,
                         ),
                     )
                 )
