@@ -164,8 +164,8 @@ class Comment(Struct):
     user_info: CommentUser
     create_time: int
     like_count: str
-    ip_location: str
     text: str = field(name="content")
+    ip_location: str = ""
     pictures: list[CommentImage] = field(default_factory=list)
     sub_comments: list["Comment"] = field(default_factory=list)
 
