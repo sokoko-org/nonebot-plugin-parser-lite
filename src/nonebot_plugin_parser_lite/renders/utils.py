@@ -10,6 +10,7 @@ from ..parsers.data import (
     GraphicContent,
     VideoContent,
 )
+from ..config import pconfig
 
 
 def build_images(img_list: list[str]) -> str:
@@ -166,7 +167,7 @@ def build_plain_text(content: list[MediaContent | str | None]) -> str:
 
 async def build_comments(comment_list: list[Comment]) -> list[dict[str, Any]]:
     comments: list[dict[str, Any]] = []
-    for comment in comment_list:
+    for comment in comment_list[: pconfig.max_comments]:
         avatar_path = await comment.author.get_avatar_path(download=False)
         comments.append(
             {

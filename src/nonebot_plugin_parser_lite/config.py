@@ -55,6 +55,8 @@ class Config(BaseModel):
     """是否使用 ffmpeg 转码 Live Photo"""
     plite_headless: bool = False
     """是否使用无头浏览器"""
+    plite_max_comments: int = 5
+    """最大评论数量"""
 
     @property
     def nickname(self) -> str:
@@ -170,11 +172,16 @@ class Config(BaseModel):
     def live_photo(self) -> bool:
         """是否使用 iPhone Live Photo 功能"""
         return self.plite_live_photo
-    
+
     @property
     def headless(self) -> bool:
         """是否无头模式"""
         return self.plite_headless
+
+    @property
+    def max_comments(self) -> int:
+        """最大评论数量"""
+        return self.plite_max_comments
 
 
 # 初始化配置实例
