@@ -51,18 +51,30 @@ def _find_browser_from_playwright() -> str | None:
     else:
         base = home / ".cache" / "ms-playwright"
 
-    candidates = (
-        base / "chromium" / "chrome-win" / "chrome.exe",
-        base
-        / "chromium"
-        / "chrome-mac"
-        / "Chromium.app"
-        / "Contents"
-        / "MacOS"
-        / "Chromium",
-        base / "chromium" / "chrome-linux" / "chrome",
-    )
-    return next((str(exe) for exe in candidates if exe.is_file()), None)
+    chromium_dirs = list(base.glob("chromium-*"))
+
+    # 按名称排序，通常最新的版本会在最后
+    chromium_dirs.sort()
+
+    for chromium_dir in reversed(chromium_dirs):
+        if system == "Windows":
+            exe_path = chromium_dir / "chrome-win" / "chrome.exe"
+        elif system == "Darwin":
+            exe_path = (
+                chromium_dir
+                / "chrome-mac"
+                / "Chromium.app"
+                / "Contents"
+                / "MacOS"
+                / "Chromium"
+            )
+        else:  # Linux
+            exe_path = chromium_dir / "chrome-linux" / "chrome"
+
+        if exe_path.is_file():
+            return str(exe_path)
+
+    return None
 
 
 def _find_browser_from_puppeteer() -> str | None:
