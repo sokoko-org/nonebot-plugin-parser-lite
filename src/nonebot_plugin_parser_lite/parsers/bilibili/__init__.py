@@ -19,12 +19,11 @@ from bilibili_api.video import (
     VideoDownloadURLDataDetecter,
     VideoStreamDownloadURL,
 )
-from httpx import AsyncClient
 from msgspec import convert
 from nonebot import logger
 
 from ...utils.format import format_num
-from ...utils.http_utils import get_async_client
+from ...utils.http_utils import get_async_client, AsyncSession
 from ..base import (
     DOWNLOADER,
     Author,
@@ -277,7 +276,7 @@ class BilibiliParser(BaseParser):
             title=page_info.title,
             timestamp=page_info.timestamp,
             author=author,
-            content=[text, video_content],
+            content=[video_content, text],
             stats=stats,
             comments=processed_comments,
             extra=extra_data,
@@ -969,7 +968,7 @@ class BilibiliParser(BaseParser):
 
     async def _request_comment_api(
         self,
-        client: AsyncClient,
+        client: AsyncSession,
         *,
         api_url: str,
         params: dict[str, Any],
