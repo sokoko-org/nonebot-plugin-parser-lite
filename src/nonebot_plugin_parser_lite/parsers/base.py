@@ -265,6 +265,7 @@ class BaseParser:
         duration: float = 0.0,
         video_name: str | None = None,
         need_send: bool = True,
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         创建视频内容
@@ -274,6 +275,7 @@ class BaseParser:
         :param duration: 视频时长
         :param video_name: 视频名称
         :param need_send: 是否发送
+        :param extra_headers: 额外请求头
         """
 
         return create_video(
@@ -282,37 +284,43 @@ class BaseParser:
             duration=duration,
             video_name=video_name,
             need_send=need_send,
+            extra_headers=extra_headers,
         )
 
     def create_videos(
         self,
         video_urls: list[str],
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         创建视频内容列表
 
         :param video_urls: 视频 URL 列表
+        :param extra_headers: 额外请求头
         """
 
-        return create_videos(video_urls)
+        return create_videos(video_urls=video_urls, extra_headers=extra_headers)
 
     def create_images(
         self,
         image_urls: list[str],
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         创建图片内容列表
 
         :param image_urls: 图片 URL 列表
+        :param extra_headers: 额外请求头
         """
 
-        return create_images(image_urls)
+        return create_images(image_urls=image_urls, extra_headers=extra_headers)
 
     def create_image(
         self,
         url: str,
         img_name: str | None = None,
         need_send: bool = True,
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         创建图片内容
@@ -320,9 +328,12 @@ class BaseParser:
         :param url: 图片 URL
         :param img_name: 图片名称
         :param need_send: 是否发送
+        :param extra_headers: 额外请求头
         """
 
-        return create_image(url=url, img_name=img_name, need_send=need_send)
+        return create_image(
+            url=url, img_name=img_name, need_send=need_send, extra_headers=extra_headers
+        )
 
     def create_audio(
         self,
@@ -330,6 +341,7 @@ class BaseParser:
         duration: float = 0.0,
         audio_name: str | None = None,
         need_send: bool = True,
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         创建音频内容
@@ -338,6 +350,7 @@ class BaseParser:
         :param duration: 音频时长
         :param audio_name: 音频名称
         :param need_send: 是否发送
+        :param extra_headers: 额外请求头
         """
 
         return create_audio(
@@ -345,6 +358,7 @@ class BaseParser:
             duration=duration,
             audio_name=audio_name,
             need_send=need_send,
+            extra_headers=extra_headers,
         )
 
     def create_graphic(
@@ -353,6 +367,7 @@ class BaseParser:
         img_name: str | None = None,
         alt: str | None = None,
         need_send: bool = True,
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         图片,此图片不参与九宫格
@@ -361,10 +376,15 @@ class BaseParser:
         :param img_name: 图片名称
         :param alt: 图片描述
         :param need_send: 是否发送
+        :param extra_headers: 额外请求头
         """
 
         return create_graphic(
-            image_url=image_url, img_name=img_name, alt=alt, need_send=need_send
+            image_url=image_url,
+            img_name=img_name,
+            alt=alt,
+            need_send=need_send,
+            extra_headers=extra_headers,
         )
 
     def create_sticker(
@@ -372,6 +392,7 @@ class BaseParser:
         url: str,
         size: Literal["small", "medium"] = "medium",
         desc: str | None = None,
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         创建贴纸内容
@@ -380,9 +401,13 @@ class BaseParser:
         :param size: 贴纸大小
             - small: 比文字大一点
             - medium: 文字大小的两倍大一点
+        :param desc: 贴纸描述
+        :param extra_headers: 额外请求头
         """
 
-        return create_sticker(url=url, size=size, desc=desc)
+        return create_sticker(
+            url=url, size=size, desc=desc, extra_headers=extra_headers
+        )
 
     def create_live_photo(
         self,
@@ -390,6 +415,7 @@ class BaseParser:
         image_url: str,
         bgm_url: str | None = None,
         need_send: bool = True,
+        extra_headers: dict[str, str] | None = None,
     ):
         """
         创建  iPhone Live Photo 内容
@@ -398,12 +424,14 @@ class BaseParser:
         :param image_url: iPhone Live Photo 底图
         :param bgm_url: iPhone Live Photo 背景音乐
         :param need_send: 是否发送
+        :param extra_headers: 额外请求头
         """
         return create_live_photo(
             video_url=video_url,
             image_url=image_url,
             bgm_url=bgm_url,
             need_send=need_send,
+            extra_headers=extra_headers,
         )
 
     def create_stats(
