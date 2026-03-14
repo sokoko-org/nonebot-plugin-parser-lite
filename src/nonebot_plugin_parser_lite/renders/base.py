@@ -63,8 +63,11 @@ class Renderer:
         """
         forwardable_segs: list[ForwardNodeInner] = []
         failed_count = 0
-
-        async for cont in self._iter_all_media(result):
+        media_contents = [
+            cont for cont in result.content 
+            if isinstance(cont, MediaContent) and cont.need_send
+        ]
+        for cont in media_contents:
             # 先处理需要立即发送的音视频
             try:
                 async for msg in self._handle_immediate_media(cont):
@@ -94,23 +97,13 @@ class Renderer:
                 forward_msg = UniHelper.construct_forward_message(ordered_segs)
                 yield UniMessage(forward_msg)
             else:
-                for seg in ordered_segs:
-                    yield UniMessage(seg)
+                yield UniMessage(ordered_segs)
 
         # 汇总下载失败信息
         if failed_count > 0:
             message = f"{failed_count} 项媒体下载失败"
             yield UniMessage(message)
             raise DownloadException(message)
-
-    async def _iter_all_media(
-        self, result: ParseResult
-    ) -> AsyncGenerator[MediaContent, None]:
-        """统一遍历主体内容和需要下载的评论里的 MediaContent。"""
-        # 主内容
-        for cont in result.content:
-            if isinstance(cont, MediaContent) and cont.need_send:
-                yield cont
 
     async def _handle_immediate_media(
         self, cont: MediaContent
@@ -190,26 +183,26 @@ class Renderer:
         # 2. 当前媒体
         ordered.extend(media_segs)
 
-        # 3. 转发内容
-        if not result.repost:
-            return ordered
+        # # 3. 转发内容
+        # if not result.repost:
+        #     return ordered
 
-        repost = result.repost
-        repost_author = repost.author.name if repost.author else "未知用户"
+        # repost = result.repost
+        # repost_author = repost.author.name if repost.author else "未知用户"
 
-        # 3.1 当前作者带“转发”说明 + 自己的文字
-        current_plain = build_plain_text(list(result.content))
-        ordered.append(f"{repost_author}[转发{author_name}]：{current_plain}")
+        # # 3.1 当前作者带“转发”说明 + 自己的文字
+        # current_plain = build_plain_text(list(result.content))
+        # ordered.append(f"{repost_author}[转发{author_name}]：{current_plain}")
 
-        # 3.2 原帖文字：标题 + 内容
-        repost_text_parts: list[str] = []
-        if repost.title:
-            repost_text_parts.append(repost.title)
-        if plain_repost := build_plain_text(list(repost.content)):
-            repost_text_parts.append(plain_repost)
-        if repost_text_parts:
-            repost_text = "\n".join(repost_text_parts)
-            ordered.append(f"{repost_author}[被转作者]：{repost_text}")
+        # # 3.2 原帖文字：标题 + 内容
+        # repost_text_parts: list[str] = []
+        # if repost.title:
+        #     repost_text_parts.append(repost.title)
+        # if plain_repost := build_plain_text(list(repost.content)):
+        #     repost_text_parts.append(plain_repost)
+        # if repost_text_parts:
+        #     repost_text = "\n".join(repost_text_parts)
+        #     ordered.append(f"{repost_author}[被转作者]：{repost_text}")
 
         return ordered
 
@@ -241,28 +234,28 @@ class Renderer:
                 if (self.templates_dir / file_name).exists():
                     template_name = file_name
 
-            #    from jinja2 import FileSystemLoader, Environment
+            # from jinja2 import FileSystemLoader, Environment
 
-            #    # 创建一个包加载器对象
-            #    env = Environment(loader=FileSystemLoader(self.templates_dir))
-            #    template = env.get_template(template_name)
-            #    # 渲染
-            #    with open(
-            #        f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html",
-            #        "w",
-            #        encoding="utf8",
-            #    ) as f:  # noqa: E501
-            #        f.write(
-            #            template.render(
-            #                **{
-            #                    "result": template_data,
-            #                    "rendering_time": datetime.datetime.now().strftime(
-            #                        "%Y-%m-%d %H:%M:%S"
-            #                    ),
-            #                    "bot_name": _nickname,
-            #                }
-            #            )
-            #        )
+            # # 创建一个包加载器对象
+            # env = Environment(loader=FileSystemLoader(self.templates_dir))
+            # template = env.get_template(template_name)
+            # # 渲染
+            # with open(
+            #     f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html",
+            #     "w",
+            #     encoding="utf8",
+            # ) as f:  # noqa: E501
+            #     f.write(
+            #         template.render(
+            #             **{
+            #                 "result": template_data,
+            #                 "rendering_time": datetime.datetime.now().strftime(
+            #                     "%Y-%m-%d %H:%M:%S"
+            #                 ),
+            #                 "bot_name": _nickname,
+            #             }
+            #         )
+            #     )
 
         return await template_to_pic(
             template_path=str(self.templates_dir),
