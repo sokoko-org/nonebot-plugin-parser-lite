@@ -138,7 +138,7 @@ class WeiBoParser(BaseParser):
         post_content = 'data={"Component_Play_Playinfo":{"oid":"' + fid + '"}}'
 
         async with get_async_client(headers=headers) as client:
-            response = await client.post(req_url, content=post_content)
+            response = await client.post(req_url, data=post_content)
             response.raise_for_status()
 
         data = show.decoder.decode(response.content).data
@@ -181,7 +181,7 @@ class WeiBoParser(BaseParser):
         # 关键：不带 cookie、不跟随重定向（避免二跳携 cookie）
         async with get_async_client(
             headers=headers,
-            follow_redirects=False,
+            allow_redirects=False,
         ) as client:
             response = await client.get(url)
             if response.status_code != 200:

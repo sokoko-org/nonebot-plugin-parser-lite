@@ -65,7 +65,7 @@ class DouyinParser(BaseParser):
     async def parse_video(self, url: str):
         async with get_async_client(
             headers=self.ios_headers,
-            follow_redirects=False,
+            allow_redirects=False,
         ) as client:
             response = await client.get(url)
             if response.status_code != 200:

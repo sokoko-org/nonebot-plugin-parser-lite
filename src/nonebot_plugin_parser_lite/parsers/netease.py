@@ -27,7 +27,7 @@ class NCMParser(BaseParser):
     async def _get_redirect_url(self, url: str) -> str:
         """获取重定向后的URL"""
 
-        async with get_async_client(follow_redirects=True) as client:
+        async with get_async_client(allow_redirects=True) as client:
             response = await client.get(url)
             response.raise_for_status()
             return str(response.url)
