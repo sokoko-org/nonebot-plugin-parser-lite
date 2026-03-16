@@ -66,7 +66,7 @@ def create_video(
     :param duration: 视频时长
     :param video_name: 视频名称
     :param need_send: 是否发送
-    :extra_headers: 额外请求头
+    :param extra_headers: 额外请求头
     """
     headers.update(extra_headers or {})
 
@@ -108,7 +108,7 @@ def create_videos(
     创建视频内容列表
 
     :param video_urls: 视频 URL 列表
-    :extra_headers: 额外请求头
+    :param extra_headers: 额外请求头
     """
 
     return [
@@ -145,7 +145,7 @@ def create_images(
     创建图片内容列表
 
     :param image_urls: 图片 URL 列表
-    :extra_headers: 额外请求头
+    :param extra_headers: 额外请求头
     """
 
     return [create_image(url=url, extra_headers=extra_headers) for url in image_urls]
@@ -234,7 +234,7 @@ def create_live_photo(
     :param image_url: iPhone Live Photo 底图
     :param bgm_url: iPhone Live Photo 背景音乐
     :param need_send: 是否发送
-    :extra_headers: 额外请求头
+    :param extra_headers: 额外请求头
     """
     headers.update(extra_headers or {})
 
