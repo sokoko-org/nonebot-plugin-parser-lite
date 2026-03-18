@@ -1,5 +1,4 @@
 from curl_cffi import AsyncSession
-from ..constants import COMMON_TIMEOUT
 
 
 def get_async_client(**kwargs) -> AsyncSession:
@@ -37,6 +36,6 @@ def get_async_client(**kwargs) -> AsyncSession:
         raise_for_status: automatically raise an HTTPError for 4xx and 5xx
             status codes.
     """
-    timeout = kwargs.pop("timeout", COMMON_TIMEOUT)
+    timeout = kwargs.pop("timeout", 15)
 
-    return AsyncSession(timeout=timeout, **kwargs, impersonate="edge")
+    return AsyncSession(timeout=timeout, **kwargs, impersonate="chrome131")

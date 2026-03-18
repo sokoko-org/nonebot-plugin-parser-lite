@@ -11,7 +11,6 @@ from typing_extensions import ParamSpec, Unpack
 
 from ..config import pconfig as pconfig
 from ..constants import ANDROID_HEADER, COMMON_HEADER, IOS_HEADER
-from ..constants import DOWNLOAD_TIMEOUT as DOWNLOAD_TIMEOUT
 from ..constants import PlatformEnum as PlatformEnum
 from ..download import DOWNLOADER as DOWNLOADER
 from ..download.task import DownloadTaskWrapper

@@ -7,7 +7,6 @@ from typing import Generator
 from urllib.parse import urljoin
 
 import aiofiles
-from httpx import AsyncClient, HTTPError
 from nonebot import logger
 from rich.progress import (
     BarColumn,
@@ -20,10 +19,11 @@ from rich.progress import (
 )
 
 from ..config import pconfig
-from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
+from ..constants import COMMON_HEADER
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
 from ..utils.common import generate_file_name, make_filename, safe_unlink
 from ..utils.ffmpeg import FFmpeg
+from curl_cffi import CurlError, AsyncSession, Response
 from .task import auto_task
 
 
@@ -33,7 +33,7 @@ class StreamDownloader:
     def __init__(self):
         self.headers: dict[str, str] = COMMON_HEADER.copy()
         self.cache_dir: Path = pconfig.cache_dir
-        self.client: AsyncClient = AsyncClient(timeout=DOWNLOAD_TIMEOUT, verify=False)
+        self.client: AsyncSession = AsyncSession(timeout=15, verify=False)
 
     @auto_task
     async def streamd(
@@ -74,7 +74,7 @@ class StreamDownloader:
                 )
                 # 成功即跳出重试循环
                 break
-            except (HTTPError, ConnectionError, TimeoutError, OSError) as e:
+            except (CurlError, ConnectionError, TimeoutError, OSError) as e:
                 retry_count += 1
                 await safe_unlink(file_path)
                 if retry_count > max_retries:
@@ -119,7 +119,7 @@ class StreamDownloader:
                 raise SizeLimitException
 
         async with self.client.stream(
-            "GET", url, headers=headers, follow_redirects=True
+            "GET", url, headers=headers, allow_redirects=True
         ) as response:
             response.raise_for_status()
             content_length = parse_content_length(
@@ -137,7 +137,7 @@ class StreamDownloader:
 
     async def _write_stream_to_file(
         self,
-        response,
+        response: Response,
         file_path: Path,
         desc: str,
         declared_length: int | None,
@@ -148,7 +148,7 @@ class StreamDownloader:
             downloaded_bytes = 0
 
             async with aiofiles.open(file_path, "wb") as file:
-                async for chunk in response.aiter_bytes(1024 * 1024):
+                async for chunk in response.aiter_content(1024 * 1024):
                     if not chunk:
                         continue
 
@@ -279,7 +279,7 @@ class StreamDownloader:
                         ts_url,
                         headers=headers,
                         timeout=15,
-                        follow_redirects=True,
+                        allow_redirects=True,
                     ) as resp:
                         if resp.status_code != 200:
                             raise DownloadException(
@@ -419,7 +419,7 @@ class StreamDownloader:
 
         # 使用 get 方法获取完整响应
         resp = await self.client.get(
-            url, headers=fetch_headers, timeout=10, follow_redirects=True
+            url, headers=fetch_headers, timeout=10, allow_redirects=True
         )
         if resp.status_code != 200:
             raise DownloadException(f"请求失败: {resp.status_code}")

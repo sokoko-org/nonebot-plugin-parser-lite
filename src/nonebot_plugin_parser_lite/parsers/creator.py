@@ -72,7 +72,7 @@ def create_video(
 
     cover_task = None
     if cover_url:
-        cover_task = DOWNLOADER.download_img(cover_url, ext_headers=headers)
+        cover_task = DOWNLOADER.download_img(url=cover_url, ext_headers=headers)
     # 1) 传入 URL: 使用默认下载逻辑
     if isinstance(url_or_task, str):
         video_task = DOWNLOADER.download_video(
