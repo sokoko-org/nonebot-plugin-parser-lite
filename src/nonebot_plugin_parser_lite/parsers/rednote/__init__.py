@@ -2,9 +2,9 @@ import re
 from typing import ClassVar
 from urllib.parse import parse_qsl
 
-from msgspec import convert
-from nonebot.log import logger
-from xhshow import SessionManager, Xhshow
+# from msgspec import convert
+# from nonebot.log import logger
+# from xhshow import SessionManager, Xhshow
 
 from ...utils.http_utils import AsyncSession, get_async_client
 from ..base import (
@@ -17,11 +17,11 @@ from ..base import (
     handle,
     pconfig,
 )
-from .explore import CommentList, NoteDetailWrapper
+from .explore import NoteDetailWrapper
 from .explore import decoder as exploreDecoder
 
-CLIENT = Xhshow()
-SESSION = SessionManager()
+# CLIENT = Xhshow()
+# SESSION = SessionManager()
 
 
 INITIAL_STATE = re.compile(
@@ -89,11 +89,11 @@ class RedNoteParser(BaseParser):
         """解析小红书笔记详情页"""
         async with get_async_client(headers=self.headers) as client:
             raw = await self._fetch_init_state(client, url)
-            com_data = await self._fetch_comments(client, note_id, xsec_token)
+            # com_data = await self._fetch_comments(client, note_id, xsec_token)
 
         init_state = exploreDecoder.decode(raw)
         note_data = init_state.note.noteDetailMap[note_id]
-        note_data.comments_list = convert(com_data, CommentList)
+        # note_data.comments_list = convert(com_data, CommentList)
 
         result = self._build_result(note_data)
         result.url = (
@@ -113,42 +113,42 @@ class RedNoteParser(BaseParser):
 
         raise ParseException("小红书分享链接失效或内容已删除")
 
-    async def _fetch_comments(
-        self, client: AsyncSession, note_id: str, xsec_token: str
-    ) -> dict:
-        """获取笔记评论原始数据字典形式"""
-        self.comment_headers.update(
-            CLIENT.sign_headers_get(
-                "https://edith.xiaohongshu.com/api/sns/web/v2/comment/page",
-                cookies=pconfig.xhs_ck or "",
-                params={
-                    "note_id": note_id,
-                    "cursor": "",
-                    "top_comment_id": "",
-                    "image_formats": "jpg,webp,avif",
-                    "xsec_token": xsec_token,
-                },
-                session=SESSION,
-            )
-        )
-        response = await client.get(
-            "https://edith.xiaohongshu.com/api/sns/web/v2/comment/page",
-            params={
-                "note_id": note_id,
-                "cursor": "",
-                "top_comment_id": "",
-                "image_formats": "jpg,webp,avif",
-                "xsec_token": xsec_token,
-            },
-            headers=self.comment_headers,
-        )
-        data = response.json()
-        if data.get("code") != 0:
-            logger.warning("获取小红书评论数据失败")
-            logger.error(response.text)
-            return {"comments": []}
+    # async def _fetch_comments(
+    #     self, client: AsyncSession, note_id: str, xsec_token: str
+    # ) -> dict:
+    #     """获取笔记评论原始数据字典形式"""
+    #     self.comment_headers.update(
+    #         CLIENT.sign_headers_get(
+    #             "https://edith.xiaohongshu.com/api/sns/web/v2/comment/page",
+    #             cookies=pconfig.xhs_ck or "",
+    #             params={
+    #                 "note_id": note_id,
+    #                 "cursor": "",
+    #                 "top_comment_id": "",
+    #                 "image_formats": "jpg,webp,avif",
+    #                 "xsec_token": xsec_token,
+    #             },
+    #             session=SESSION,
+    #         )
+    #     )
+    #     response = await client.get(
+    #         "https://edith.xiaohongshu.com/api/sns/web/v2/comment/page",
+    #         params={
+    #             "note_id": note_id,
+    #             "cursor": "",
+    #             "top_comment_id": "",
+    #             "image_formats": "jpg,webp,avif",
+    #             "xsec_token": xsec_token,
+    #         },
+    #         headers=self.comment_headers,
+    #     )
+    #     data = response.json()
+    #     if data.get("code") != 0:
+    #         logger.warning("获取小红书评论数据失败")
+    #         logger.error(response.text)
+    #         return {"comments": []}
 
-        return data.get("data", {"comments": []})
+    #     return data.get("data", {"comments": []})
 
     def _build_result(self, note_data: NoteDetailWrapper):
         """从 note_data 构建最终解析结果"""
