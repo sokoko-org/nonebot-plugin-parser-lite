@@ -142,8 +142,8 @@ class UniHelper:
 
     EMOJI_MAP: ClassVar[dict[str, tuple[str, str]]] = {
         "fail": ("10060", "❌"),
-        "resolving": ("424", "👀"),
-        "done": ("144", "🎉"),
+        "resolving": ("38", "🔨"),
+        "done": ("148", "🍼"),
     }
 
     @classmethod
