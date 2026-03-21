@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator
 from io import BytesIO
 from pathlib import Path
 from typing import Any, ClassVar
-
+import aiofiles
 import qrcode
 from nonebot import logger
 from nonebot_plugin_htmlrender import template_to_pic
@@ -343,7 +343,7 @@ class Renderer:
             "content": result.content,
             "cover_path": await result.get_cover_path(),
             "stats": result.stats,
-            "comments": result.comments,
+            "comments": result.comments[: pconfig.max_comments],
             "author": {
                 "name": result.author.name,
                 "id": result.author.id,
@@ -359,7 +359,7 @@ class Renderer:
             # 生成二维码
             qr = qrcode.QRCode(
                 version=1,
-                error_correction=1,  # ERROR_CORRECT_L 的数值
+                error_correction=1,
                 box_size=10,
                 border=4,
             )
@@ -410,7 +410,6 @@ class Renderer:
         Returns:
             Path: 图片路径
         """
-        import aiofiles
 
         file_name = f"{uuid.uuid4().hex}.png"
         image_path = pconfig.cache_dir / file_name
