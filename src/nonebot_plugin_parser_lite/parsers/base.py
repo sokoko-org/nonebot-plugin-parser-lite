@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, Sequence, TypeVar, cas
 from typing_extensions import ParamSpec, Unpack
 
 from ..config import pconfig as pconfig
-from ..constants import ANDROID_HEADER, COMMON_HEADER, IOS_HEADER
+from ..constants import ANDROID_HEADER, COMMON_HEADER, COMMON_TIMEOUT, IOS_HEADER
 from ..constants import PlatformEnum as PlatformEnum
 from ..download import DOWNLOADER as DOWNLOADER
 from ..download.task import DownloadTaskWrapper
@@ -128,6 +128,7 @@ class BaseParser:
         self.headers = COMMON_HEADER.copy()
         self.ios_headers = IOS_HEADER.copy()
         self.android_headers = ANDROID_HEADER.copy()
+        self.timeout = COMMON_TIMEOUT
 
     def __init_subclass__(cls, **kwargs):
         """自动注册子类到 _registry"""
