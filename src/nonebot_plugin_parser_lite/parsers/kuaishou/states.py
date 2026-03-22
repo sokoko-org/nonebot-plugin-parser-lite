@@ -43,8 +43,6 @@ class Photo(Struct):
     """评论数"""
     viewCount: int = 0
     """浏览数"""
-    shareCount: int = 0
-    """分享数"""
     coverUrls: list[CdnUrl] = field(default_factory=list)
     mainMvUrls: list[CdnUrl] = field(default_factory=list)
     ext_params: ExtParams = field(default_factory=ExtParams)
@@ -71,16 +69,6 @@ class Photo(Struct):
 
 class Info(Struct):
     photo: Photo | None = None
-
-
-# class EmotionConfigList(Struct):
-#     emojiCode: str
-#     emojiUrlList: list[str]
-
-
-# class SystemStartup(Struct):
-#     emotionConfigList: list[EmotionConfigList]
-#     """贴纸映射列表(不全)"""
 
 
 class KsComment(Struct):

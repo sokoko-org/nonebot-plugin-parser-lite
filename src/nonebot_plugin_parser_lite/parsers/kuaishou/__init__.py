@@ -35,13 +35,7 @@ class KuaiShouParser(BaseParser):
     async def _parse_v_kuaishou(self, searched: re.Match[str]):
         # 从匹配对象中获取原始URL
         url = f"https://{searched.group(0)}"
-        real_url = await self.get_redirect_url(url, headers=self.ios_headers)
 
-        if len(real_url) <= 0:
-            raise ParseException("failed to get location url from url")
-
-        # /fw/long-video/ 返回结果不一样, 统一替换为 /fw/photo/ 请求
-        real_url = real_url.replace("/fw/long-video/", "/fw/photo/")
         tab = BROWSER.new_tab()
         tab.set.user_agent(
             self.ios_headers["User-Agent"],
@@ -49,7 +43,7 @@ class KuaiShouParser(BaseParser):
         )
         tab.set.load_mode.none()
         tab.listen.start("/rest/wd/photo/comment/list")
-        tab.get(real_url)
+        tab.get(url)
         cms = tab.listen.wait()
         assert isinstance(cms, DataPacket)
         tab.listen.stop()
@@ -88,7 +82,6 @@ class KuaiShouParser(BaseParser):
                 view_count=format_num(photo.viewCount),
                 like_count=format_num(photo.likeCount),
                 comment_count=format_num(photo.commentCount),
-                share_count=format_num(photo.shareCount),
             ),
             timestamp=photo.timestamp // 1000,
             comments=comments,
