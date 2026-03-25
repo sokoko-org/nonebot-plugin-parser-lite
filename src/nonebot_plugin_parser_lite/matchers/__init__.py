@@ -12,7 +12,7 @@ from ..config import pconfig
 from ..download import DOWNLOADER
 from ..helper import UniHelper, UniMessage
 from ..parsers import BaseParser, BilibiliParser, ParseResult
-from ..renders import RENDERER
+from ..render import RENDERER
 from ..utils.common import LimitedSizeDict
 from .rule import SUPER_PRIVATE, Searched, SearchResult, on_keyword_regex
 
