@@ -382,11 +382,7 @@ class Renderer:
     async def cache_or_render_image(self, result: ParseResult):
         """获取缓存图片
 
-        Args:
-            result (ParseResult): 解析结果
-
-        Returns:
-            Image: 图片 Segment
+        :param result: 解析结果
         """
         if result.render_image is None:
             image_raw = await self.render_image(result)
@@ -403,11 +399,7 @@ class Renderer:
     async def save_img(cls, raw: bytes) -> Path:
         """保存图片
 
-        Args:
-            raw (bytes): 图片字节
-
-        Returns:
-            Path: 图片路径
+        :param raw: 图片字节
         """
 
         file_name = f"{uuid.uuid4().hex}.png"

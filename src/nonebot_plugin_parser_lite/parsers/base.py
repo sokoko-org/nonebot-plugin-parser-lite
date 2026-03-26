@@ -58,9 +58,8 @@ def retry(max_retries: int = 3, delay: float = 1.0):
     """
     通用重试装饰器
 
-    Args:
-        max_retries: 最大重试次数
-        delay: 初始重试延迟（秒）
+    :param max_retries: 最大重试次数
+    :param delay: 初始重试延迟（秒）
     """
 
     def decorator(
@@ -161,15 +160,12 @@ class BaseParser:
     async def parse(self, keyword: str, searched: Match[str]) -> ParseResult:
         """解析 URL 提取信息
 
-        Args:
-            keyword: 关键词
-            searched: 正则表达式匹配对象，由平台对应的模式匹配得到
+        :param keyword: 关键词
+        :param searched: 正则表达式匹配对象，由平台对应的模式匹配得到
 
-        Returns:
-            ParseResult: 解析结果
+        :return: 解析结果
 
-        Raises:
-            ParseException: 解析失败时抛出
+        :raise: 解析失败时抛出
         """
         return await self._handlers[keyword](self, searched)
 

@@ -64,44 +64,10 @@ class VideoInfo(Struct):
     pages: list[Page] | None = None
     """分集信息"""
 
-    @property
-    def title_with_part(self) -> str:
-        if self.pages and len(self.pages) > 1:
-            return f"{self.title} - {self.pages[0].part}"
-        return self.title
-
-    @property
-    def formatted_stats_info(self) -> str:
-        """
-        格式化视频信息
-        """
-        # 定义需要展示的数据及其显示名称
-        stats_mapping = [
-            ("👍", self.stat.like),
-            ("🪙", self.stat.coin),
-            ("⭐", self.stat.favorite),
-            ("↩️", self.stat.share),
-            ("💬", self.stat.reply),
-            ("👀", self.stat.view),
-            ("💭", self.stat.danmaku),
-        ]
-
-        # 构建结果字符串
-        result_parts = []
-        for display_name, value in stats_mapping:
-            # 数值超过10000时转换为万为单位
-            formatted_value = f"{value / 10000:.1f}万" if value > 10000 else str(value)
-            result_parts.append(f"{display_name} {formatted_value}")
-
-        return " ".join(result_parts)
-
     def extract_info_with_page(self, page_num: int = 1) -> PageInfo:
         """获取视频信息，包含页索引、标题、时长、封面
-        Args:
-            page_num (int): 页索引. Defaults to 1.
 
-        Returns:
-            tuple[int, str, int, str | None]: 页索引、标题、时长、封面
+        :param page_num: 页索引. Defaults to 1.
         """
         page_idx = page_num - 1
         title = self.title

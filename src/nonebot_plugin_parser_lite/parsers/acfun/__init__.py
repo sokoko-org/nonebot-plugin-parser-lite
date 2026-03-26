@@ -53,11 +53,7 @@ class AcfunParser(BaseParser):
     async def parse_video_info(self, url: str):
         """解析acfun链接获取详细信息
 
-        Args:
-            url (str): 链接
-
-        Returns:
-            video.VideoInfo
+        :param url: 链接
         """
 
         # 拼接查询参数

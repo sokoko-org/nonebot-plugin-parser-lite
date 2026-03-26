@@ -164,10 +164,9 @@ class BilibiliParser(BaseParser):
     ):
         """解析视频信息
 
-        Args:
-            bvid (str | None): bvid
-            avid (int | None): avid
-            page_num (int): 页码
+        :param bvid: bvid
+        :param avid: avid
+        :param page_num: 页码
         """
 
         video = await self._get_video(bvid=bvid, avid=avid)
@@ -552,9 +551,8 @@ class BilibiliParser(BaseParser):
     async def parse_opus(self, opus_id: int):
         """解析图文信息
 
-        Args:
-            opus_id (int): 图文动态 id
-            is_repost (bool, optional): 是否为转发动态. 转发则使用九宫格排版图片
+        :param opus_id: 图文动态 id
+        :param is_repost: 是否为转发动态. 转发则使用九宫格排版图片
         """
         opus = Opus(opus_id, await self.credential)
         logger.debug(f"B站OPUS解析 图文 原始：{opus}")
@@ -563,8 +561,7 @@ class BilibiliParser(BaseParser):
     async def parse_read(self, read_id: int):
         """解析专栏信息, 使用 Opus 接口
 
-        Args:
-            read_id (int): 专栏 id
+        :param read_id: 专栏 id
         """
 
         article = Article(read_id)
@@ -575,10 +572,7 @@ class BilibiliParser(BaseParser):
     async def _parse_opus_obj(self, bili_opus: Opus):
         """解析图文信息
 
-        Args:
-            opus_id (int): 图文 id
-        Returns:
-            ParseResult: 解析结果
+        :param opus_id: 图文 id
         """
 
         opus_info = await bili_opus.get_info()
@@ -717,11 +711,7 @@ class BilibiliParser(BaseParser):
     async def parse_live(self, room_id: int):
         """解析直播信息
 
-        Args:
-            room_id (int): 直播 id
-
-        Returns:
-            ParseResult: 解析结果
+        :param room_id: 直播 id
         """
 
         room = LiveRoom(room_display_id=room_id, credential=await self.credential)
@@ -766,11 +756,7 @@ class BilibiliParser(BaseParser):
     async def parse_favlist(self, fav_id: int):
         """解析收藏夹信息
 
-        Args:
-            fav_id (int): 收藏夹 id
-
-        Returns:
-            list[GraphicsContent]: 图文内容列表
+        :param fav_id (int): 收藏夹 id
         """
 
         # 只会取一页，20 个
@@ -797,9 +783,8 @@ class BilibiliParser(BaseParser):
     ) -> Video:
         """解析视频信息
 
-        Args:
-            bvid (str | None): bvid
-            avid (int | None): avid
+        :param bvid: bvid
+        :param avid: avid
         """
         if avid:
             return Video(aid=avid, credential=await self.credential)
@@ -818,10 +803,9 @@ class BilibiliParser(BaseParser):
     ) -> tuple[str, str | None]:
         """解析视频下载链接
 
-        Args:
-            bvid (str | None): bvid
-            avid (int | None): avid
-            page_index (int): 页索引 = 页码 - 1
+        :param bvid: bvid
+        :param avid: avid
+        :param page_index: 页索引 = 页码 - 1
         """
 
         if video is None:
