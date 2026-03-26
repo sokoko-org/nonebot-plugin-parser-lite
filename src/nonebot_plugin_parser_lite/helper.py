@@ -1,4 +1,4 @@
-from typing import Any, Literal, ClassVar
+from typing import Any, Literal
 from pathlib import Path
 from functools import wraps
 from collections.abc import Callable, Sequence, Awaitable
@@ -20,7 +20,7 @@ from nonebot_plugin_alconna.uniseg import (
 )
 
 from .config import pconfig
-
+from .constants import EMOJI_MAP
 # from .exception import TipException
 
 ForwardNodeInner = str | Segment | UniMessage
@@ -124,12 +124,6 @@ class UniHelper:
         else:
             return File(path=file, name=display_name)
 
-    EMOJI_MAP: ClassVar[dict[str, tuple[str, str]]] = {
-        "fail": ("10060", "❌"),
-        "resolving": ("38", "🔨"),
-        "done": ("148", "🍼"),
-    }
-
     @classmethod
     async def message_reaction(
         cls,
@@ -149,9 +143,9 @@ class UniHelper:
             SupportAdapter.qq,
             SupportAdapter.milky,
         ):
-            emoji = cls.EMOJI_MAP[status][0]
+            emoji = EMOJI_MAP[status][0]
         else:
-            emoji = cls.EMOJI_MAP[status][1]
+            emoji = EMOJI_MAP[status][1]
 
         try:
             await uniseg.message_reaction(emoji, message_id=message_id)

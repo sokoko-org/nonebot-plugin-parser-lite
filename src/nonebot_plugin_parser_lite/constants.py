@@ -53,3 +53,10 @@ class PlatformEnum(str, Enum):
 
     def __str__(self) -> str:
         return self.value
+
+
+EMOJI_MAP: Final[dict[str, tuple[str, str]]] = {
+    "fail": ("10060", "❌"),
+    "resolving": ("38", "🔨"),
+    "done": ("148", "🍼"),
+}
