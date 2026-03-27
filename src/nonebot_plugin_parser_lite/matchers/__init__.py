@@ -6,7 +6,6 @@ from typing import ClassVar, TypeVar
 from nonebot import get_driver, logger
 from nonebot_plugin_alconna import Alconna, Args, Match, on_alconna
 from nonebot_plugin_uninfo import Uninfo
-from nonebot.adapters import Event
 
 from ..config import pconfig
 from ..download import DOWNLOADER
@@ -44,10 +43,11 @@ class LazyManager:
         cls.SESSIONS[user_id] = session
 
     @classmethod
-    def get(cls, user_id: str) -> ParseResult | None:
-        """获取用户当前的懒下载解析结果。"""
+    def get(cls, user_id: str) -> ParseResult:
+        """获取用户当前的懒下载解析结果（调用方保证一定存在）。"""
         session = cls.SESSIONS.get(user_id)
-        return session.result if session else None
+        assert session is not None, "LazyManager.get: session should exist"
+        return session.result
 
     @classmethod
     def has(cls, user_id: str) -> bool:
@@ -71,17 +71,13 @@ class LazyManager:
     async def _timeout_handler(cls, user_id: str) -> None:
         """会话超时自动清理。"""
         self_task = asyncio.current_task()
-
         await asyncio.sleep(cls.TIMEOUT_SECONDS)
 
-        # 理论上 current_task 不会为 None，这里仅做防御性处理
+        # 会话已被手动清理
         if user_id not in cls.SESSIONS:
             return
 
-        if self_task is None:
-            cls.remove(user_id)
-        else:
-            cls.remove(user_id, current_task=self_task)
+        cls.remove(user_id, current_task=self_task)
 
 
 def _get_enabled_parser_classes() -> list[type[BaseParser]]:
@@ -144,20 +140,20 @@ def clear_result_cache():
 
 
 async def _send_parse_result(session: Uninfo, result: ParseResult) -> None:
-    """根据配置发送解析结果："""
+    """根据配置发送解析结果：先发总结图，再根据懒下载配置决定是否发送媒体。"""
     summary_msg = await RENDERER.render_messages(result)
     await summary_msg.send()
-    lazy_mode = pconfig.lazy_download
-    is_all_text = all(isinstance(c, str) for c in result.content)
-    if is_all_text:
+    # 全文本内容，无需再发送媒体
+    if all(isinstance(c, str) for c in result.content):
         return
-    if lazy_mode:
+    if pconfig.lazy_download:
         download_cmd = ", ".join(pconfig.download_command)
         await UniMessage(
             f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: \n{download_cmd}"
         ).send()
         LazyManager.add(session.user.id, result)
         return
+
     async for content_msg in RENDERER.send_content(result):
         await content_msg.send()
 
@@ -238,16 +234,13 @@ if pconfig.lazy_download:
     )
 
     @lazy_matcher.handle()
-    async def _(event: Event, session: Uninfo):
+    @UniHelper.with_reaction
+    async def _(session: Uninfo):
+        """懒下载命令：发送上次解析结果中的媒体内容。"""
+        user_id = session.user.id
+        result = LazyManager.get(user_id)
         try:
-            result = LazyManager.get(session.user.id)
-            if not result:
-                return
-            await UniHelper.message_reaction(event, "resolving")
             async for message in RENDERER.send_content(result):
                 await message.send()
-            await UniHelper.message_reaction(event, "done")
-            LazyManager.remove(session.user.id)
-        except Exception:
-            await UniHelper.message_reaction(event, "fail")
-            LazyManager.remove(session.user.id)
+        finally:
+            LazyManager.remove(user_id)

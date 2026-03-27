@@ -183,7 +183,9 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 下载完成后的视频文件路径
-        :raises DownloadException: 下载过程中发生错误时抛出
+        :raises ZeroSizeException: 资源大小为 0 时抛出
+        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
+        :raises DownloadException: 重试多次仍失败时抛出
         """
         if video_name is None:
             video_name = generate_file_name(url, ".mp4")

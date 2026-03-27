@@ -11,7 +11,7 @@ from nonebot import logger
 from nonebot_plugin_htmlrender import template_to_pic
 
 from ..config import _nickname, pconfig
-from ..exception import DownloadException, SizeLimitException, ZeroSizeException
+from ..exception import DownloadException, DownloadLimitException
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..parsers.data import (
     AudioContent,
@@ -114,10 +114,7 @@ class Renderer:
             try:
                 async for msg in self._handle_immediate_media(cont):
                     yield msg
-            except SizeLimitException:
-                yield UniMessage("媒体大小超过限制，取消下载")
-                continue
-            except ZeroSizeException:
+            except DownloadLimitException:
                 continue
             except DownloadException:
                 failed_count += 1
@@ -153,24 +150,31 @@ class Renderer:
     async def _handle_immediate_media(
         self, cont: MediaContent
     ) -> AsyncGenerator[UniMessage[Any], None]:
-        # sourcery skip: merge-duplicate-blocks, remove-redundant-if
-        """处理需要立即发送的音视频媒体，返回对应的消息段。"""
+        """
+        处理需要立即发送的音视频媒体，返回对应的消息段
+
+        :raises ZeroSizeException: 资源大小为 0 时抛出
+        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
+        :raises DownloadException: 重试多次仍失败时抛出
+        """
         if not isinstance(cont, (VideoContent, AudioContent)):
             return
 
         path = await cont.get_path()
         logger.debug(f"立即发送{type(cont).__name__}: {path}")
 
-        if isinstance(cont, VideoContent):
-            if pconfig.need_upload_video:
-                yield UniMessage(UniHelper.file_seg(path))
-            else:
-                yield UniMessage(UniHelper.video_seg(path))
+        if (
+            isinstance(cont, VideoContent)
+            and pconfig.need_upload_video
+            or not isinstance(cont, VideoContent)
+            and isinstance(cont, AudioContent)
+            and pconfig.need_upload_audio
+        ):
+            yield UniMessage(UniHelper.file_seg(path))
+        elif isinstance(cont, VideoContent):
+            yield UniMessage(UniHelper.video_seg(path))
         elif isinstance(cont, AudioContent):
-            if pconfig.need_upload_audio:
-                yield UniMessage(UniHelper.file_seg(path))
-            else:
-                yield UniMessage(UniHelper.record_seg(path))
+            yield UniMessage(UniHelper.record_seg(path))
 
     async def _build_forwardable_segment(
         self, cont: MediaContent
