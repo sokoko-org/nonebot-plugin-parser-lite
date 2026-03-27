@@ -45,7 +45,9 @@ class User(Struct):
     """用户名"""
     profile_image_url_https: str
     is_blue_verified: bool = False
-    """是否认证"""
+    """是否蓝标认证"""
+    verified: bool = False
+    """是否官方认证"""
 
     @property
     def avatar_url(self):
