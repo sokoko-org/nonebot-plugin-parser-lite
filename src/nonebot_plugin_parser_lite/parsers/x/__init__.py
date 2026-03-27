@@ -12,10 +12,6 @@ from .model import Tweet
 class XParser(BaseParser):
     platform: ClassVar[Platform] = Platform(name=PlatformEnum.X, display_name="X")
 
-    def __init__(self):
-        super().__init__()
-        self.headers["Referer"] = "https://platform.twitter.com/"
-
     def collect_data(self, tweet: Tweet, is_repost: bool = False) -> ParseResult:
         """从 Tweet 模型构造 ParseResult，可递归处理转推内容。"""
         contents: list[MediaContent | str] = [tweet.text, *tweet.medias]
