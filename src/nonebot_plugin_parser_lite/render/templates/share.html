@@ -370,14 +370,29 @@
   }
 
 
+  /* 视频封面容器：宽度占满，限制最大高度，居中内容 */
   .video-cover {
-    max-height: 1440px;
     position: relative;
-    background: #eee;
+    max-width: 100%;
+    max-height: 1440px;
+    /* 控制竖图时的最高高度 */
     margin: 20px 0;
-    justify-content: center;
-    overflow: hidden;
+    background: #eee;
     border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 封面图片：保持原始比例，自适应容器 */
+  .video-cover img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
   }
 
   /* 竖屏图 */
