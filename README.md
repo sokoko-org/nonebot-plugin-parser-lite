@@ -152,12 +152,12 @@ plite_max_comments=5
 
 ## 🎉 致谢
 
-- [nonebot-plugin-resolver](https://github.com/zhiyu1998/nonebot-plugin-resolver) 本插件的上游的上游的上游
-- [nonebot-plugin-parser](https://github.com/fllesser/nonebot-plugin-parser) 本插件的上游的上游(时不时从此版本同步一些功能)
-- [nonebot-plugin-parser-m](https://github.com/LoCCai/nonebot-plugin-parser-m) 本插件的上游(由此版本修改)
+- [nonebot-plugin-resolver](https://github.com/zhiyu1998/nonebot-plugin-resolver) 适用于nonebot2 链接分享解析视频、图片链接/小程序插件，tiktok、bilibili、twitter等实时发送！
+- [nonebot-plugin-parser](https://github.com/fllesser/nonebot-plugin-parser) 社交媒体分享链接解析插件
+- [nonebot-plugin-parser-m](https://github.com/LoCCai/nonebot-plugin-parser-m) 社交媒体分享链接解析插件
 - [parse-video-py](https://github.com/wujunwei928/parse-video-py) Python短视频去水印爬虫
 - [Spider_XHS](https://github.com/cv-cat/Spider_XHS) 小红书爬虫数据采集，小红书全域运营解决方案
 - [aiotieba](https://github.com/lumina37/aiotieba) 贴吧接口合集✨可用于工具箱/吧务管理/数据采集
 - [xhs](https://github.com/ReaJason/xhs) 基于小红书 Web 端进行的请求封装。
 - [xhshow](https://github.com/Cloxl/xhshow) 小红书xs纯算 小红书x-s x-s-common xsc 等字段 纯算逆向
-- 神通广大的群友们
+- 致2026年的你们
