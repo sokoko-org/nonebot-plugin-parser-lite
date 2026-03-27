@@ -115,7 +115,8 @@ class Renderer:
             try:
                 async for msg in self._handle_immediate_media(cont):
                     yield msg
-            except DownloadLimitException:
+            except DownloadLimitException as e:
+                yield UniMessage(str(e))
                 continue
             except DownloadException:
                 failed_count += 1
