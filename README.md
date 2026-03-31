@@ -148,7 +148,7 @@ plite_max_comments=5
 | 开启解析 | SUPERUSER/OWNER/ADMIN |  是   | 群聊 |     开启解析      |
 | 关闭解析 | SUPERUSER/OWNER/ADMIN |  是   | 群聊 |     关闭解析      |
 |    bm    |           -           |  否   | 群聊 |   下载 B 站音频   |
-|  blogin  |       SUPERUSER       |  否   | 私聊 | 扫码获取 B 站凭证 |
+|  blogin  |       SUPERUSER       |  是   | 全部 | 扫码获取 B 站凭证 |
 
 ## 🎉 致谢
 
