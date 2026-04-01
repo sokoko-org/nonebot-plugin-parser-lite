@@ -183,6 +183,10 @@ class Renderer:
     ) -> list[ForwardNodeInner]:
         """构建可加入转发消息的片段（图片 / 图文 / LivePhoto）。"""
 
+        # 视频封面
+        if isinstance(cont, VideoContent):
+            path = await cont.get_cover_path()
+            return [UniHelper.img_seg(path)] if path else []
         # 图片
         if isinstance(cont, ImageContent):
             path = await cont.get_path()
@@ -346,7 +350,7 @@ class Renderer:
                 "logo_path": f"https://emoji.awkchan.top/assets/logo/{result.platform.name}.png",
             },
             "content": result.content,
-            "cover_path": await result.get_cover_path(),
+            "cover_path": await safe_path(result, "get_cover_path"),
             "stats": result.stats,
             "comments": result.comments[: pconfig.max_comments],
             "author": {
