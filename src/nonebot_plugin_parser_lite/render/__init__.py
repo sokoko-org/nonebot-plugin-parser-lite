@@ -185,7 +185,13 @@ class Renderer:
 
         # 视频封面
         if isinstance(cont, VideoContent):
-            path = await cont.get_cover_path()
+            try:
+                path = await cont.get_cover_path()
+            except Exception as e:
+                logger.warning(
+                    f"get_cover_path() failed for {type(cont).__name__}: {e}"
+                )
+                return []
             return [UniHelper.img_seg(path)] if path else []
         # 图片
         if isinstance(cont, ImageContent):
