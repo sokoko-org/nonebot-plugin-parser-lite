@@ -60,20 +60,28 @@ class KuaiShouParser(BaseParser):
 
         # 简洁的构建方式
         contents: list[MediaContent | str] = [photo.caption]
+        video_url = photo.video_url
+        img_urls = photo.img_urls
+        cover_url = photo.cover_url
 
         # 添加视频内容
-        if video_url := photo.video_url:
+        if video_url:
             contents.append(
                 self.create_video(
                     url_or_task=video_url,
-                    cover_url=photo.cover_url,
+                    cover_url=cover_url,
                     duration=photo.duration,
                 )
             )
 
         # 添加图片内容
-        if img_urls := photo.img_urls:
+        if img_urls:
             contents.extend(self.create_images(img_urls))
+
+        # 既没有视频也没有图集时，兜底使用封面图
+        if not video_url and not img_urls and cover_url:
+            contents.append(self.create_image(url=cover_url))
+
 
         # 构建作者
         author = self.create_author(name=photo.name, avatar_url=photo.headUrl)
