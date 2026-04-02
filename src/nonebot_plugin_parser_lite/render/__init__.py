@@ -193,6 +193,11 @@ class Renderer:
                 )
                 return []
             return [UniHelper.img_seg(path)] if path else []
+
+        # 文本
+        if isinstance(cont, str):
+            return [cont]
+
         # 图片
         if isinstance(cont, ImageContent):
             path = await cont.get_path()
