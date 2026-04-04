@@ -48,6 +48,13 @@ async def safe_src(obj: Any, method: str = "get_path") -> str:
 
         # 获取方法并调用
         method_func = getattr(obj, method)
+        if not callable(method_func):
+            logger.warning(
+                f"Attribute '{method}' of {type(obj).__name__} on object "
+                f"{type(obj).__name__} is not callable"
+            )
+            return PLACEHOLDER_IMAGE
+
         src = method_func()
 
         # 如果是 coroutine，需要 await
