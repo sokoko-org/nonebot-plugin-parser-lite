@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator
 from io import BytesIO
 from itertools import chain
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any, Awaitable, ClassVar
 
 import aiofiles
 import qrcode
@@ -41,39 +41,22 @@ async def safe_src(obj: Any, method: str = "get_path") -> str:
         {{ author | safe_src("get_avatar_path") }} # 调用 get_avatar_path()
     """
     try:
-        # 检查对象是否有指定方法
         if not hasattr(obj, method):
-            logger.warning(f"Object {type(obj).__name__} has no method '{method}'")
+            logger.warning(f"对象 {type(obj).__name__} 不存在方法 '{method}'")
             return PLACEHOLDER_IMAGE
 
-        # 获取方法并调用
-        method_func = getattr(obj, method)
-        if not callable(method_func):
-            logger.warning(
-                f"Attribute '{method}' of {type(obj).__name__} on object "
-                f"{type(obj).__name__} is not callable"
-            )
+        method_attr = getattr(obj, method)
+
+        if not callable(method_attr):
+            logger.warning(f"{type(obj).__name__} 的属性 '{method}' 不是可调用对象")
             return PLACEHOLDER_IMAGE
 
-        src = method_func()
+        call_result: Path | Awaitable[Path] = method_attr()  # type: ignore[assignment]
 
-        # 如果是 coroutine，需要 await
-        if hasattr(src, "__await__"):
-            src = await src
-
-        # 处理 None 或空值
-        if not src:
-            return PLACEHOLDER_IMAGE
-
-        # 自动执行 as_uri() 转换
-        if isinstance(src, Path) or hasattr(src, "as_uri"):
-            return src.as_uri()
-
-        # 已经是字符串，直接返回
-        return str(src)
-
+        src = await call_result if isinstance(call_result, Awaitable) else call_result
+        return src.as_uri() if src else PLACEHOLDER_IMAGE
     except Exception as e:
-        logger.warning(f"safe_src({method}) failed for {type(obj).__name__}: {e}")
+        logger.warning(f"safe_src({method}) 处理 {type(obj).__name__} 时失败: {e}")
         return PLACEHOLDER_IMAGE
 
 
