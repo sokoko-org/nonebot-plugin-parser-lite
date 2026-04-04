@@ -62,11 +62,11 @@
         {% set next_is_sticker = loop.nextitem is defined and loop.nextitem.__class__.__name__ == 'StickerContent' %}
         {# 1. 图片类：积累，最后统一 flush 成宫格 #}
         {% if cls == 'ImageContent' %}
-            {% set src = cont | safe_path if ns.current_img_index < MAX_VISIBLE_IMAGES else "" %}
+            {% set src = cont | safe_src if ns.current_img_index < MAX_VISIBLE_IMAGES else "" %}
             {% set _ = ns.current_imgs.append({'src': src, 'is_live' : false}) %}
             {% set ns.current_img_index = ns.current_img_index + 1 %}
         {% elif cls=='LivePhotoContent' %}
-            {% set src = cont | safe_path("get_base") if ns.current_img_index <MAX_VISIBLE_IMAGES else "" %}
+            {% set src = cont | safe_src("get_base") if ns.current_img_index <MAX_VISIBLE_IMAGES else "" %}
             {% set _ = ns.current_imgs.append({'src': src, 'is_live' : true}) %}
             {% set ns.current_img_index = ns.current_img_index + 1 %}
             {# 2. 文本：遇到非图片前先 flush，避免跨段 #}
@@ -83,7 +83,7 @@
             {# 3. Graphic 图文 #}
         {% elif cls == 'GraphicContent' %}
             {% set _ = flush_images() %}
-            {% set src = cont | safe_path %}
+            {% set src = cont | safe_src %}
             {% set alt = cont.alt or "" %}
             {% set _ = html_parts.append(
                             '<div class="images-container">'
@@ -98,7 +98,7 @@
             {# 4. 贴纸 #}
         {% elif cls == 'StickerContent' %}
             {% set _ = flush_images() %}
-            {% set src = cont | safe_path %}
+            {% set src = cont | safe_src %}
             {% set size = cont.size %}
             {% set _ = html_parts.append(
                             '<img class="sticker ' ~ size ~ '" src="' ~ src ~ '" />'
@@ -106,7 +106,7 @@
             {# 5. 视频封面 + 播放按钮 #}
         {% elif cls == 'VideoContent' %}
             {% set _ = flush_images() %}
-            {% set src = cont | safe_path("get_cover_path") %}
+            {% set src = cont | safe_src("get_cover_path") %}
             {% set _ = html_parts.append(
                             '<div class="video-cover">'
                             '<img src="' ~ src ~ '" />'
@@ -133,7 +133,7 @@
     {% set container_class = 'reply' if is_reply else 'comment' %}
     <div class="{{ container_class }}-container">
         <div class="{{ container_class }}-avatar-wrapper">
-            <img src="{{ comment.author | safe_path('get_avatar_path') }}"
+            <img src="{{ comment.author | safe_src('get_avatar_path') }}"
                  class="{{ container_class }}-avatar" />
         </div>
         <div class="{{ container_class }}-content-wrapper">
