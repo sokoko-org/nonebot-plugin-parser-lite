@@ -351,7 +351,7 @@ class Renderer:
             "platform": {
                 "display_name": result.platform.display_name,
                 "name": result.platform.name,
-                "logo_path": f"https://emoji.awkchan.top/assets/logo/{result.platform.name}.png",
+                "logo_path": f"https://image.baidu.com/search/down?url=https://emoji.awkchan.top/assets/logo/{result.platform.name}.png",
             },
             "content": result.content,
             "cover_path": await safe_src(result, "get_cover_path"),

@@ -54,7 +54,7 @@ class CommentItem(Struct):
         if self.is_cy:
             content.append(
                 create_sticker(
-                    url="https://emoji.awkchan.top/assets/heybox/cy.png",
+                    url="https://image.baidu.com/search/down?url=https://emoji.awkchan.top/assets/heybox/cy.png",
                     size="small",
                     desc="插眼",
                 )

@@ -39,7 +39,7 @@ def replace_placeholder_to_sticker(
         size = size_resolver(name) if size_resolver is not None else "small"
         result.append(
             create_sticker(
-                url=f"https://emoji.awkchan.top/assets/{platform}/{name}.png",
+                url=f"https://image.baidu.com/search/down?url=https://emoji.awkchan.top/assets/{platform}/{name}.png",
                 size=size,
                 desc=name,
             )
