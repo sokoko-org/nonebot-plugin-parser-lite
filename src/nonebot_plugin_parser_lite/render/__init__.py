@@ -25,22 +25,26 @@ from ..parsers.data import (
     VideoContent,
 )
 
+PLACEHOLDER_IMAGE = (
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+)
 
-async def safe_path(obj: Any, method: str = "get_path") -> str:
+
+async def safe_src(obj: Any, method: str = "get_path") -> str:
     """
-    通用安全路径获取过滤器
+    通用安全资源获取过滤器
 
     用法：
-        {{ cont | safe_path }}                    # 默认调用 get_path()
-        {{ cont | safe_path("get_base") }}        # 调用 get_base()
-        {{ cont | safe_path("get_cover_path") }}  # 调用 get_cover_path()
-        {{ author | safe_path("get_avatar_path") }} # 调用 get_avatar_path()
+        {{ cont | safe_src }}                    # 默认调用 get_path()
+        {{ cont | safe_src("get_base") }}        # 调用 get_base()
+        {{ cont | safe_src("get_cover_path") }}  # 调用 get_cover_path()
+        {{ author | safe_src("get_avatar_path") }} # 调用 get_avatar_path()
     """
     try:
         # 检查对象是否有指定方法
         if not hasattr(obj, method):
             logger.warning(f"Object {type(obj).__name__} has no method '{method}'")
-            return ""
+            return PLACEHOLDER_IMAGE
 
         # 获取方法并调用
         method_func = getattr(obj, method)
@@ -52,7 +56,7 @@ async def safe_path(obj: Any, method: str = "get_path") -> str:
 
         # 处理 None 或空值
         if not src:
-            return ""
+            return PLACEHOLDER_IMAGE
 
         # 自动执行 as_uri() 转换
         if isinstance(src, Path) or hasattr(src, "as_uri"):
@@ -62,8 +66,8 @@ async def safe_path(obj: Any, method: str = "get_path") -> str:
         return str(src)
 
     except Exception as e:
-        logger.warning(f"safe_path({method}) failed for {type(obj).__name__}: {e}")
-        return ""
+        logger.warning(f"safe_src({method}) failed for {type(obj).__name__}: {e}")
+        return PLACEHOLDER_IMAGE
 
 
 class Renderer:
@@ -309,7 +313,7 @@ class Renderer:
         #     loader=FileSystemLoader(self.templates_dir),
         #     enable_async=True,
         # )
-        # env.filters["safe_path"] = safe_path
+        # env.filters["safe_src"] = safe_src
         # template = env.get_template(template_name)
         # # 渲染
         # with open(
@@ -332,7 +336,6 @@ class Renderer:
         return await template_to_pic(
             template_path=str(self.templates_dir),
             template_name=template_name,
-            screenshot_timeout=60000,
             templates={
                 "result": template_data,
                 "rendering_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -342,7 +345,7 @@ class Renderer:
                 "viewport": {"width": 800, "height": 100},
                 "base_url": f"file://{self.templates_dir}",
             },
-            filters={"safe_path": safe_path},
+            filters={"safe_src": safe_src},
             type="jpeg",
             quality=85,
         )
@@ -350,8 +353,6 @@ class Renderer:
     async def _resolve_parse_result(self, result: ParseResult) -> dict[str, Any]:
         """解析 ParseResult 为模板可用的字典数据"""
 
-        avatar_path = await result.author.get_avatar_path()
-        # 这些是一定会有的字段
         data: dict[str, Any] = {
             "title": result.title,
             "formatted_datetime": result.formatted_datetime,
@@ -363,13 +364,13 @@ class Renderer:
                 "logo_path": f"https://emoji.awkchan.top/assets/logo/{result.platform.name}.png",
             },
             "content": result.content,
-            "cover_path": await safe_path(result, "get_cover_path"),
+            "cover_path": await safe_src(result, "get_cover_path"),
             "stats": result.stats,
             "comments": result.comments[: pconfig.max_comments],
             "author": {
                 "name": result.author.name,
                 "id": result.author.id,
-                "avatar_path": avatar_path,
+                "avatar_path": await safe_src(result.author, "get_avatar_path"),
             },
         }
 
