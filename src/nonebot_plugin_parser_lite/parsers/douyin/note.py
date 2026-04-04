@@ -47,14 +47,6 @@ class Image(Struct):
     """Live Photo 视频"""
 
 
-class Detail(Struct):
-    authorInfo: AuthorInfo
-    desc: str
-    createTime: int
-    stats: Stats = field(default_factory=Stats)
-    images: list[Image] = field(default_factory=list)
-
-
 class PlayUrl(Struct):
     uri: str
 
@@ -63,9 +55,18 @@ class Music(Struct):
     playUrl: PlayUrl
 
 
+class Detail(Struct):
+    authorInfo: AuthorInfo
+    desc: str
+    createTime: int
+    stats: Stats = field(default_factory=Stats)
+    images: list[Image] = field(default_factory=list)
+    music: Music | None = field(default=None)
+
+
 class Aweme(Struct):
     detail: Detail
-    music: Music
+    music: Music | None = field(default=None)
 
     @property
     def content(self) -> list[MediaContent | str]:
@@ -86,10 +87,10 @@ class Aweme(Struct):
                         ext_headers={"Referer": "https://www.douyin.com/"},
                     )
                 )
-        if music := self.music.playUrl.uri:
+        if music := (self.music or self.detail.music):
             content.append(
                 create_audio(
-                    url=music,
+                    url=music.playUrl.uri,
                 )
             )
         return content
