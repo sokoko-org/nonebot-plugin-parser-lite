@@ -3,87 +3,78 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Media Card</title>
-    {% include "share.html" %}
-    {% from "macros.jinja" import render_comments, render_content %}
-    {% from "stats.jinja" import render_stats %}
+    <title>Media Card · New</title>
+    <meta name="referrer" content="no-referrer" />
+    <link rel="preconnect" href="https://emoji.awkchan.top" crossorigin />
+    <link rel="dns-prefetch" href="https://emoji.awkchan.top" />
+    <link rel="stylesheet"
+          href="https://cdn.bootcss.com/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="tailwind.css" />
+    {% from "macros.jinja" import render_content %}
+    <style>
+        body {
+            font-family: "PingFang SC", sans-serif;
+            background-color: #e2e8f0;
+            -webkit-font-smoothing: antialiased;
+            margin: 15px;
+        }
+
+        .square-img {
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .live-tag-strict {
+            height: 19px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 2px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            color: #fff;
+            border: none;
+            outline: none;
+        }
+
+        .repost-env {
+            background-color: #f7f7f7;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
   </head>
-  <body>
-    {% macro render_card(result, is_repost=False) %}
-      {% set comments = result.comments %}
-      <div class="card"
-           {% if is_repost %}style="width: 100%; margin-bottom: 0;" {% endif %}>
-        {% if not is_repost %}<div class="decorative-stripe"></div>{% endif %}
-        <div class="content-section">
-          {# Header #}
-          {% if result.author %}
-            <div class="header">
-              {% if result.author.avatar_path %}<img src="{{ result.author.avatar_path }}" class="avatar" alt="avatar" />{% endif %}
-              <div class="user-info">
-                <div class="username">{{ result.author.name }}</div>
-                {% if result.formatted_datetime %}<div class="time">{{ result.formatted_datetime }}</div>{% endif %}
-              </div>
-              {# Platform Logo #}
-              {% if not is_repost %}
-                <div class="tag platform-tag">
-                  <img src="{{ result.platform.logo_path }}"
-                       style="height: 16px;
-                              margin-right: 6px" />
-                  <span>{{ result.platform.display_name }}</span>
-                </div>
-              {% endif %}
-              {# QR Code #}
-              {% if not is_repost and result.qr_code_path %}
-                <img src="{{ result.qr_code_path }}"
-                     class="qrcode"
-                     alt="QR Code"
-                     style="width: 40px;
-                            height: 40px;
-                            border-radius: 4px;
-                            margin-left: auto" />
-              {% endif %}
-            </div>
-          {% endif %}
-          {# --- 统计数据 --- #}
-          {{ render_stats(result.stats) }}
-          {# Title #}
-          {% if result.title %}<div class="title">{{ result.title }}</div>{% endif %}
-          {# Content #}
-          <div>{{ render_content(result.content) }}</div>
-          {# Repost #}
-          {% if result.repost %}
-            <div style="margin-top: 20px;
-                        border: 1px solid #eee;
-                        background-color: #fafbfc;
-                        border-radius: 8px;
-                        padding: 15px">
-              <div style="margin-bottom:10px;
-                          color:#666;
-                          font-size:14px;
-                          font-weight:600">
-                <i class="fas fa-share" style="margin-right:5px;"></i>
-              </div>
-              <div style="width: 100%; overflow: hidden;">{{ render_card(result.repost, is_repost=True) }}</div>
-            </div>
-          {% endif %}
-        </div>
-        {# --- 评论区 --- #}
-        {{ render_comments(comments) }}
-        {# --- 底部 --- #}
-        {% if not is_repost %}
-          <div class="footer-section">
-            <div class="footer-brand">
-              <i class="fas fa-layer-group"></i>
-              <span>{{ bot_name }} Parser</span>
-            </div>
-            <div class="footer-info">
-              <i class="fas fa-clock" style="margin-right: 1px;"></i>
-              <span>Rendering at {{ rendering_time }}</span>
-            </div>
-          </div>
-        {% endif %}
-      </div>
-    {% endmacro %}
-    {{ render_card(result) }}
-  </body>
+  <body class="flex justify-center break-all">{{ render_content(result) }}</body>
+  <script defer>
+      document.addEventListener("DOMContentLoaded", function() {
+          document
+              .querySelectorAll(".comment .single-image")
+              .forEach((img) => {
+                  const applyStyle = () => {
+                      const h = img.naturalHeight;
+                      const w = img.naturalWidth;
+                      if (!h || !w || !isFinite(h / w)) return;
+
+                      const aspectRatio = h / w;
+
+                      if (aspectRatio >= 0.9) {
+                          // 竖图：限制宽度，放高
+                          img.classList.add("max-w-36");
+                      } else {
+                          // 横图：限制高度，放宽
+                          img.classList.add("max-h-36");
+                      }
+                  };
+
+                  if (img.complete) {
+                      applyStyle();
+                  } else {
+                      img.onload = applyStyle;
+                  }
+              });
+      });
+  </script>
 </html>

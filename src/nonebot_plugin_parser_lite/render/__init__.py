@@ -332,7 +332,7 @@ class Renderer:
                 "bot_name": _nickname,
             },
             pages={
-                "viewport": {"width": 800, "height": 100},
+                "viewport": {"width": 620, "height": 100},
                 "base_url": f"file://{self.templates_dir}",
             },
             filters={"safe_src": safe_src},
