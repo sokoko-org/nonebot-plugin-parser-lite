@@ -51,7 +51,7 @@
   <script defer>
       document.addEventListener("DOMContentLoaded", function() {
           document
-              .querySelectorAll(".comment .content img")
+              .querySelectorAll(".comment .single-image")
               .forEach((img) => {
                   const applyStyle = () => {
                       const h = img.naturalHeight;
@@ -62,10 +62,10 @@
 
                       if (aspectRatio >= 0.9) {
                           // 竖图：限制宽度，放高
-                          img.classList.add("max-w-36", "h-auto");
+                          img.classList.add("max-w-36");
                       } else {
                           // 横图：限制高度，放宽
-                          img.classList.add("max-h-36", "w-auto");
+                          img.classList.add("max-h-36");
                       }
                   };
 
