@@ -211,7 +211,7 @@
                   <img src="{{ src if src else ' ' }}" class="square-img" />
                   {% if is_live and loop.index < MAX_VISIBLE_IMAGES %}
                     <div class="live-tag-strict absolute bottom-1.5 right-1.5 scale-90 origin-bottom-right">
-                      <span class="text-[9px] font-bold uppercase tracking-widest">Live</span>
+                      <span class="text-[9px] font-bold uppercase tracking-widest">实况</span>
                     </div>
                   {% endif %}
                 </div>
@@ -300,6 +300,9 @@
                           '<i class="fas fa-play ml-1"></i>'
                           '</div>'
                           '</div>'
+                          {# '<div class="absolute bottom-2 right-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">'
+                          '05:24'
+                          '</div>' #}
                           '</div>'
                         ) %}
           {% endif %}
