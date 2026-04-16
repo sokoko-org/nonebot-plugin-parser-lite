@@ -740,6 +740,24 @@
   .mt-1 {
     margin-top: calc(var(--spacing) * 1);
   }
+  .mb-4 {
+    margin-bottom: calc(var(--spacing) * 4);
+  }
+  .h-px {
+    height: 1px;
+  }
+  .max-w-36 {
+    max-width: calc(var(--spacing) * 36);
+  }
+  .max-h-36 {
+    max-height: calc(var(--spacing) * 36);
+  }
+  .h-auto {
+    height: auto;
+  }
+  .w-auto {
+    width: auto;
+  }
   .uppercase {
     text-transform: uppercase;
   }

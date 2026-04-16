@@ -67,7 +67,7 @@
                             {% endif %}
                         </div>
                         {% if comment.replies and comment.replies|length > 0 %}
-                            <div class="comment-items mt-3 space-y-3">
+                            <div class="comment mt-3 space-y-3">
                                 {% for reply in comment.replies[:5] %}
                                     <div class="space-y-1.5 flex space-x-2">
                                         <img src="{{ reply.author | safe_src('get_avatar_path') }}"
@@ -255,11 +255,13 @@
                             '<i class="fas fa-play ml-1"></i>'
                             '</div>'
                             '</div>'
-                            {# '<div class="absolute bottom-2 right-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">'
-                                                                    '05:24'
-                                                                '</div>' #}
                             '</div>'
                         ) %}
+            {#
+              <div class="absolute bottom-2 right-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">
+                05:24
+              </div>
+            #}
         {% endif %}
     {% endfor %}
     {% set _ = flush_images() %}
@@ -300,6 +302,12 @@
         {% if result.repost %}
             <div class="quoue shadow-sm m-8 mt-0 rounded-xl outline-1 outline-slate-200">
                 <div class="repost-env">{{ render_content(result.repost, True) }}</div>
+            </div>
+        {% endif %}
+        {# 主体内容和评论之间的间隔 #}
+        {% if comments and comments|length > 0 %}
+            <div class="px-8 mt-2 mb-4">
+                <div class="h-px bg-slate-100"></div>
             </div>
         {% endif %}
         {{ render_comments(comments) }}

@@ -48,4 +48,33 @@
     </style>
   </head>
   <body class="flex justify-center break-all">{{ render_content(result) }}</body>
+  <script defer>
+      document.addEventListener("DOMContentLoaded", function() {
+          document
+              .querySelectorAll(".comment .content img")
+              .forEach((img) => {
+                  const applyStyle = () => {
+                      const h = img.naturalHeight;
+                      const w = img.naturalWidth;
+                      if (!h || !w || !isFinite(h / w)) return;
+
+                      const aspectRatio = h / w;
+
+                      if (aspectRatio >= 0.9) {
+                          // 竖图：限制宽度，放高
+                          img.classList.add("max-w-36", "h-auto");
+                      } else {
+                          // 横图：限制高度，放宽
+                          img.classList.add("max-h-36", "w-auto");
+                      }
+                  };
+
+                  if (img.complete) {
+                      applyStyle();
+                  } else {
+                      img.onload = applyStyle;
+                  }
+              });
+      });
+  </script>
 </html>
