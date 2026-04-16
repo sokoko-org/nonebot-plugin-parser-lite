@@ -47,7 +47,13 @@
         }
     </style>
   </head>
-  <body class="flex justify-center break-all">{{ render_content(result) }}</body>
+  <body class="flex justify-center break-all">
+    {{ render_content(result) }}
+    <footer class="px-8 py-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center text-[10px] font-black text-gray-300 uppercase tracking-widest antialiased">
+      <span>{{ bot_name }} Parser · Design negichan</span>
+      <span>Rendering at {{ rendering_time }}</span>
+    </footer>
+  </body>
   <script defer>
       document.addEventListener("DOMContentLoaded", function() {
           document
