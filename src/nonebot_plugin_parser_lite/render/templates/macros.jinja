@@ -4,43 +4,43 @@
          style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr))">
         {% if stats.view_count and stats.view_count != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-eye text-lime-500 text-xl"></i>
+                <i class="fa-icon fa-eye text-lime-500 text-xl"></i>
                 <div class="text-md mb-0.5 font-bold text-gray-800">{{ stats.view_count }}</div>
             </div>
         {% endif %}
         {% if stats.extra.danmaku and stats.extra.danmaku != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-comment-dots text-teal-500 text-xl"></i>
+                <i class="fa-icon fa-comment-dots text-teal-500 text-xl"></i>
                 <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.extra.danmaku }}</span>
             </div>
         {% endif %}
         {% if stats.extra.coin and stats.extra.coin != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-coins text-orange-500 text-xl"></i>
+                <i class="fa-icon fa-coins text-orange-500 text-xl"></i>
                 <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.extra.coin }}</span>
             </div>
         {% endif %}
         {% if stats.like_count and stats.like_count != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-heart text-red-500 text-xl"></i>
+                <i class="fa-icon fa-heart text-red-500 text-xl"></i>
                 <div class="text-md mb-0.5 font-bold text-gray-800">{{ stats.like_count }}</div>
             </div>
         {% endif %}
         {% if stats.comment_count and stats.comment_count != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-message text-sky-500 text-xl"></i>
+                <i class="fa-icon fa-message text-sky-500 text-xl"></i>
                 <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.comment_count }}</span>
             </div>
         {% endif %}
         {% if stats.collect_count and stats.collect_count != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-star text-yellow-500 text-xl"></i>
+                <i class="fa-icon fa-star text-yellow-500 text-xl"></i>
                 <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.collect_count }}</span>
             </div>
         {% endif %}
         {% if stats.share_count and stats.share_count != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-share text-emerald-500 text-xl"></i>
+                <i class="fa-icon fa-share-nodes text-emerald-500 text-xl"></i>
                 <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.share_count }}</span>
             </div>
         {% endif %}
@@ -63,7 +63,7 @@
                             {% if comment.location %}<span>{{ comment.location }}</span>{% endif %}
                             {% if comment.stats.like_count %}
                                 <span class="flex items-center">
-                                    <i class="fas fa-heart mr-1 mt-0.5"></i> {{ comment.stats.like_count }}
+                                    <i class="fa-icon fa-heart mr-1 mt-0.5"></i> {{ comment.stats.like_count }}
                                 </span>
                             {% endif %}
                         </div>
@@ -81,7 +81,7 @@
                                                 {% if reply.location %}<span>{{ reply.location }}</span>{% endif %}
                                                 {% if reply.stats.like_count %}
                                                     <span class="flex items-center">
-                                                        <i class="fas fa-heart mr-1 mt-0.5"></i> {{ reply.stats.like_count }}
+                                                        <i class="fa-icon fa-heart mr-1 mt-0.5"></i> {{ reply.stats.like_count }}
                                                     </span>
                                                 {% endif %}
                                             </div>
@@ -253,7 +253,7 @@
                             '<img src="' ~ src ~ '" class="w-full h-full object-cover opacity-80" />'
                             '<div class="absolute inset-0 flex items-center justify-center">'
                             '<div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 text-white text-xl">'
-                            '<i class="fas fa-play ml-1"></i>'
+                            '<i class="fa-icon fa-play ml-1"></i>'
                             '</div>'
                             '</div>'
                             '</div>'
@@ -307,7 +307,7 @@
             <div class="px-8 pb-4">
                 <div class="flex items-start space-x-2.5 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5">
                     <div class="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500 text-white shadow-sm">
-                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                        <i class="fa-icon fa-wand-magic-sparkles text-sm"></i>
                     </div>
                     <div class="flex-1">
                         <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 mb-0.5">AI 总结</div>
