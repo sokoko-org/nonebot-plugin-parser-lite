@@ -655,7 +655,8 @@ class BilibiliParser(BaseParser):
                     author_mid = module.module_author.mid
                     break
 
-        await self.raise_if_in_black_list(author_mid)
+        if author_mid:
+            await self.raise_if_in_black_list(author_mid)
 
         if not author_name and hasattr(opus_data, "name_avatar"):
             author_name, author_face = opus_data.name_avatar
