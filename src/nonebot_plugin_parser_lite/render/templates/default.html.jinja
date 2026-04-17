@@ -1,80 +1,79 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Media Card · New</title>
-    <meta name="referrer" content="no-referrer" />
-    <link rel="preconnect" href="https://emoji.awkchan.top" crossorigin />
-    <link rel="dns-prefetch" href="https://emoji.awkchan.top" />
-    <link rel="stylesheet"
-          href="https://cdn.bootcss.com/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="tailwind.css" />
-    {% from "macros.jinja" import render_content %}
-    <style>
-        body {
-            font-family: "PingFang SC", sans-serif;
-            background-color: #e2e8f0;
-            -webkit-font-smoothing: antialiased;
-            margin: 15px;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Media Card · New</title>
+        <meta name="referrer" content="no-referrer" />
+        <link rel="preconnect" href="https://emoji.awkchan.top" crossorigin />
+        <link rel="dns-prefetch" href="https://emoji.awkchan.top" />
+        <link rel="stylesheet" href="icon.css" />
+        <link rel="stylesheet" href="tailwind.css" />
+        {% from "macros.jinja" import render_content %}
+        <style>
+            body {
+                font-family: "PingFang SC", sans-serif;
+                background-color: #e2e8f0;
+                -webkit-font-smoothing: antialiased;
+                margin: 15px;
+            }
 
-        .square-img {
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+            .square-img {
+                aspect-ratio: 1 / 1;
+                object-fit: cover;
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
 
-        .live-tag-strict {
-            height: 19px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 2px;
-            padding: 0 5px;
-            display: flex;
-            align-items: center;
-            color: #fff;
-            border: none;
-            outline: none;
-        }
+            .live-tag-strict {
+                height: 19px;
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: 2px;
+                padding: 0 5px;
+                display: flex;
+                align-items: center;
+                color: #fff;
+                border: none;
+                outline: none;
+            }
 
-        .repost-env {
-            background-color: #f7f7f7;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            border: 1px solid #e5e7eb;
-        }
-    </style>
-  </head>
-  <body class="flex justify-center break-all">{{ render_content(result) }}</body>
-  <script defer>
-      document.addEventListener("DOMContentLoaded", function() {
-          document
-              .querySelectorAll(".comment .single-image")
-              .forEach((img) => {
-                  const applyStyle = () => {
-                      const h = img.naturalHeight;
-                      const w = img.naturalWidth;
-                      if (!h || !w || !isFinite(h / w)) return;
+            .repost-env {
+                background-color: #f7f7f7;
+                padding: 1rem;
+                border-radius: 0.75rem;
+                border: 1px solid #e5e7eb;
+            }
+        </style>
+    </head>
+    <body class="flex justify-center break-all">{{ render_content(result) }}</body>
+    <script defer>
+        document.addEventListener("DOMContentLoaded", function() {
+            document
+                .querySelectorAll(".comment .single-image")
+                .forEach((img) => {
+                    const applyStyle = () => {
+                        const h = img.naturalHeight;
+                        const w = img.naturalWidth;
+                        if (!h || !w || !isFinite(h / w)) return;
 
-                      const aspectRatio = h / w;
+                        const aspectRatio = h / w;
 
-                      if (aspectRatio >= 0.9) {
-                          // 竖图：限制宽度，放高
-                          img.classList.add("max-w-36");
-                      } else {
-                          // 横图：限制高度，放宽
-                          img.classList.add("max-h-36");
-                      }
-                  };
+                        if (aspectRatio >= 0.9) {
+                            // 竖图：限制宽度，放高
+                            img.classList.add("max-w-36");
+                        } else {
+                            // 横图：限制高度，放宽
+                            img.classList.add("max-h-36");
+                        }
+                    };
 
-                  if (img.complete) {
-                      applyStyle();
-                  } else {
-                      img.onload = applyStyle;
-                  }
-              });
-      });
-  </script>
+                    if (img.complete) {
+                        applyStyle();
+                    } else {
+                        img.onload = applyStyle;
+                    }
+                });
+        });
+    </script>
 </html>
