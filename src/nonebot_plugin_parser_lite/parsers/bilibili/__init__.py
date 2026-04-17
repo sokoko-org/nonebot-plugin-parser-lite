@@ -116,7 +116,7 @@ class BilibiliParser(BaseParser):
             await self.load_black_list()
             assert self.black_mids is not None
         if mid in self.black_mids:
-            raise TipException("用户在黑名单中，请勿使用")
+            raise TipException("该up属于黑名单")
 
     @handle("b23.tv", r"b23\.tv/[0-9a-zA-Z._?%&+\-=/#]+")
     @handle("bili2233", r"bili2233\.cn/[0-9a-zA-Z._?%&+\-=/#]+")
