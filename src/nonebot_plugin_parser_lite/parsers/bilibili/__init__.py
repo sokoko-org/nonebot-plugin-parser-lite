@@ -30,6 +30,7 @@ from ..base import (
     BaseParser,
     Comment,
     DownloadException,
+    TipException,
     DurationLimitException,
     MediaContent,
     ParseException,
@@ -63,6 +64,59 @@ class BilibiliParser(BaseParser):
         self.headers = HEADERS.copy()
         self._credential: Credential | None = None
         self._cookies_file = pconfig.config_dir / "bilibili_cookies.json"
+        self.black_mids: list[int] | None = None
+        """黑名单作者列表"""
+
+    async def load_black_list(self) -> None:
+        """初始化黑名单"""
+        ck = await self.credential
+        if not ck:
+            logger.info("B站未登录，跳过黑名单加载")
+            self.black_mids = []
+            return
+
+        cookies = ck.get_cookies()
+        if not cookies:
+            logger.info("B站 Cookie 为空，跳过黑名单加载")
+            self.black_mids = []
+            return
+
+        request_headers = self.headers.copy()
+        request_headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
+
+        url = "https://api.bilibili.com/x/relation/blacks"
+        try:
+            async with AsyncClient() as client:
+                response = await client.get(url, headers=request_headers)
+            response.raise_for_status()
+            data: dict[str, Any] = response.json() or {}
+
+            code = data.get("code")
+            if code != 0:
+                logger.error(f"获取B站黑名单列表失败: code={code}, data={data}")
+                self.black_mids = []
+                return
+
+            black_list = data.get("data", {}).get("list") or []
+            self.black_mids = [obj["mid"] for obj in black_list if "mid" in obj]
+            logger.debug(f"B站黑名单列表: {black_list}")
+            logger.info(f"已加载 {len(self.black_mids)} 个 B 站黑名单用户")
+        except Exception as e:
+            logger.exception(f"请求 B 站黑名单接口异常: {e}")
+            if self.black_mids is None:
+                self.black_mids = []
+
+    async def raise_if_in_black_list(self, mid: int):
+        """
+        检查用户是否在黑名单中
+
+        :raise TipException: 用户在黑名单中
+        """
+        if self.black_mids is None:
+            await self.load_black_list()
+            assert self.black_mids is not None
+        if mid in self.black_mids:
+            raise TipException("用户在黑名单中，请勿使用")
 
     @handle("b23.tv", r"b23\.tv/[0-9a-zA-Z._?%&+\-=/#]+")
     @handle("bili2233", r"bili2233\.cn/[0-9a-zA-Z._?%&+\-=/#]+")
@@ -172,6 +226,9 @@ class BilibiliParser(BaseParser):
         video = await self._get_video(bvid=bvid, avid=avid)
         # 转换为 msgspec struct
         video_info = convert(await video.get_info(), VideoInfo)
+
+        await self.raise_if_in_black_list(video_info.owner.mid)
+
         # 获取简介
         text = f"简介: {video_info.desc}" if video_info.desc else ""
         # up
@@ -295,6 +352,8 @@ class BilibiliParser(BaseParser):
         dynamic_info_data = await dynamic.get_info()
         logger.debug(f"B站动态链接 dynamic_info_data 原始：{dynamic_info_data}")
         dynamic_info = convert(dynamic_info_data, DynamicData).item
+
+        await self.raise_if_in_black_list(dynamic_info.modules.module_author.mid)
 
         # 作者
         author = self.create_author(
@@ -586,21 +645,23 @@ class BilibiliParser(BaseParser):
         # 提取作者信息
         author_name = ""
         author_face = ""
-        author_mid = ""
+        author_mid = 0
 
         if hasattr(opus_data.item, "modules"):
             for module in opus_data.item.modules:
                 if module.module_type == "MODULE_TYPE_AUTHOR" and module.module_author:
                     author_name = module.module_author.name
                     author_face = module.module_author.face
-                    author_mid = str(module.module_author.mid)
+                    author_mid = module.module_author.mid
                     break
+
+        await self.raise_if_in_black_list(author_mid)
 
         if not author_name and hasattr(opus_data, "name_avatar"):
             author_name, author_face = opus_data.name_avatar
 
         author = self.create_author(
-            name=author_name, id=author_mid, avatar_url=author_face
+            name=author_name, id=str(author_mid), avatar_url=author_face
         )
 
         # 按顺序处理图文内容（参考 parse_read 的逻辑）
@@ -719,6 +780,9 @@ class BilibiliParser(BaseParser):
         info_dict = await room.get_room_info()
 
         room_data = convert(info_dict, RoomData)
+
+        await self.raise_if_in_black_list(room_data.mid)
+
         contents: list[MediaContent | str] = [room_data.detail]
         # 下载封面
         if cover := room_data.cover:
@@ -728,7 +792,9 @@ class BilibiliParser(BaseParser):
         if keyframe := room_data.keyframe:
             contents.append(self.create_image(keyframe))
 
-        author = self.create_author(name=room_data.name, avatar_url=room_data.avatar)
+        author = self.create_author(
+            name=room_data.name, avatar_url=room_data.avatar, id=str(room_data.mid)
+        )
 
         url = f"https://www.bilibili.com/blackboard/live/live-activity-player.html?enterTheRoom=0&cid={room_id}"
 
@@ -767,11 +833,15 @@ class BilibiliParser(BaseParser):
 
         favdata = convert(fav_dict, FavData)
 
+        await self.raise_if_in_black_list(favdata.info.upper.mid)
+
         return self.result(
             title=favdata.title,
             timestamp=favdata.timestamp,
             author=self.create_author(
-                name=favdata.info.upper.name, avatar_url=favdata.info.upper.face
+                name=favdata.info.upper.name,
+                avatar_url=favdata.info.upper.face,
+                id=str(favdata.info.upper.mid),
             ),
             content=[
                 self.create_graphic(fav.cover, fav.desc) for fav in favdata.medias

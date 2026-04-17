@@ -2,6 +2,10 @@ from msgspec import Struct
 
 
 class RoomInfo(Struct):
+    uid: int
+    """主播mid"""
+    room_id: int
+    """直播间id"""
     title: str
     """标题"""
     cover: str
@@ -70,3 +74,11 @@ class RoomData(Struct):
     @property
     def avatar(self) -> str:
         return self.anchor_info.base_info.face
+
+    @property
+    def mid(self) -> int:
+        return self.room_info.uid
+
+    @property
+    def room_id(self) -> int:
+        return self.room_info.room_id
