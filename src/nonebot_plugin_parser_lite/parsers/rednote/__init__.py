@@ -4,6 +4,8 @@ from urllib.parse import parse_qsl
 
 from httpx import AsyncClient
 
+from ...utils.format import replace_placeholder_to_sticker
+
 from ..base import (
     BaseParser,
     Comment,
@@ -15,7 +17,7 @@ from ..base import (
     pconfig,
 )
 from ..cookie import ck2dict
-from .discovery import NoteDetailWrapper, decoder as discoveryDecoder
+from .discovery import NoteDetailWrapper, decoder as discoveryDecoder, REDNOTE_PATTERN
 
 INITIAL_STATE = re.compile(
     pattern=r"window\.__INITIAL_STATE__=(.*?)</script>",
@@ -93,7 +95,9 @@ class RedNoteParser(BaseParser):
         """从 note_data 构建最终解析结果"""
         note_detail = note_data.noteData
 
-        contents: list[MediaContent | str] = [note_detail.desc]
+        contents = replace_placeholder_to_sticker(
+            note_detail.desc, REDNOTE_PATTERN, "rednote"
+        )
         contents.extend(note_detail.medias)
 
         author = self.create_author(
