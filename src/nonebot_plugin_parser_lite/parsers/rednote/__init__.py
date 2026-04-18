@@ -9,7 +9,6 @@ from ...utils.format import replace_placeholder_to_sticker
 from ..base import (
     BaseParser,
     Comment,
-    MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
