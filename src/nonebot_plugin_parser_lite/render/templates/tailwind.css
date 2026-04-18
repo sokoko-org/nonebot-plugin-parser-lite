@@ -382,8 +382,8 @@
   .w-14 {
     width: calc(var(--spacing) * 14);
   }
-  .w-\[540px\] {
-    width: 540px;
+  .w-\[536px\] {
+    width: 536px;
   }
   .w-\[600px\] {
     width: 600px;
@@ -601,6 +601,9 @@
         transparent
       );
     }
+  }
+  .bg-\[\#f7f7f7\] {
+    background-color: #f7f7f7;
   }
   .object-cover {
     object-fit: cover;
