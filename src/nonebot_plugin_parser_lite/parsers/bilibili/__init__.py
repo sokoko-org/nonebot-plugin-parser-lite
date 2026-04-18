@@ -495,6 +495,7 @@ class BilibiliParser(BaseParser):
                 contents.append(self.create_sticker(e["icon_url"], size, e["text"]))
                 continue
             if node_type == "RICH_TEXT_NODE_TYPE_VIEW_PICTURE":
+                flush_text_buffer()
                 for pic in node["pics"]:
                     medias.append(self.create_image(pic["src"]))
                 continue
