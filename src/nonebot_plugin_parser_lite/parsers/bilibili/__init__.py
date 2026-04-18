@@ -47,7 +47,6 @@ from .live import RoomData
 from .opus import ImageNode, OpusItem, TextNode
 from .video import AIConclusion, VideoInfo
 
-from nonebot_plugin_apscheduler import scheduler
 
 # 选择客户端
 select_client("curl_cffi")
@@ -68,6 +67,7 @@ class BilibiliParser(BaseParser):
         self._cookies_file = pconfig.config_dir / "bilibili_cookies.json"
         self.black_mids: list[int] | None = None
         """黑名单作者列表"""
+        self._black_list_job_added: bool = False
 
     async def load_black_list(self) -> None:
         """初始化黑名单"""
@@ -144,6 +144,23 @@ class BilibiliParser(BaseParser):
                 f"已加载 {len(self.black_mids)} 个 B 站黑名单用户 (pages={pages})"
             )
 
+            # 首次成功加载黑名单后，注册定时刷新任务（最多注册一次）
+            if not self._black_list_job_added:
+                try:
+                    from nonebot_plugin_apscheduler import scheduler
+
+                    scheduler.add_job(
+                        self.load_black_list,
+                        "interval",
+                        hours=1,
+                        id="sync-bili-black-list",
+                        replace_existing=True,
+                    )
+                    self._black_list_job_added = True
+                    logger.info("已注册 B 站黑名单定时同步任务（每 1 小时刷新一次）")
+                except Exception as e:  # noqa: BLE001
+                    logger.warning(f"注册 B 站黑名单定时任务失败: {e}")
+
         except Exception as e:
             logger.exception(f"请求 B 站黑名单接口异常: {e}")
             if self.black_mids is None:
@@ -158,9 +175,6 @@ class BilibiliParser(BaseParser):
         if self.black_mids is None:
             await self.load_black_list()
             assert self.black_mids is not None
-            scheduler.add_job(
-                self.load_black_list, "interval", hours=1, id="sync-bili-black-list"
-            )
         if mid in self.black_mids:
             raise TipException("该up属于黑名单")
 
@@ -976,6 +990,7 @@ class BilibiliParser(BaseParser):
                     yield "登录成功"
                     self._credential = self._qr_login.get_credential()
                     self._save_credential()
+                    await self.load_black_list()
                     break
                 case QrCodeLoginEvents.CONF:
                     if scan_tip_pending:
