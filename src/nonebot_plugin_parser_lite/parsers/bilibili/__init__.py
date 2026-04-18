@@ -84,23 +84,64 @@ class BilibiliParser(BaseParser):
         request_headers = self.headers.copy()
         request_headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
-        url = "https://api.bilibili.com/x/relation/blacks"
+        base_url = "https://api.bilibili.com/x/relation/blacks"
+        page_size = 50
+        black_mids: list[int] = []
+
         try:
             async with AsyncClient() as client:
-                response = await client.get(url, headers=request_headers)
-            response.raise_for_status()
-            data: dict[str, Any] = response.json() or {}
+                resp = await client.get(
+                    base_url,
+                    headers=request_headers,
+                    params={"ps": page_size, "pn": 1},
+                )
+                resp.raise_for_status()
+                data: dict[str, Any] = resp.json()
 
-            code = data.get("code")
-            if code != 0:
-                logger.error(f"获取B站黑名单列表失败: code={code}, data={data}")
-                self.black_mids = []
-                return
+                code = data.get("code")
+                if code != 0:
+                    logger.error(f"获取B站黑名单列表失败: code={code}, data={data}")
+                    self.black_mids = []
+                    return
 
-            black_list = data.get("data", {}).get("list") or []
-            self.black_mids = [obj["mid"] for obj in black_list if "mid" in obj]
-            logger.debug(f"B站黑名单列表: {black_list}")
-            logger.info(f"已加载 {len(self.black_mids)} 个 B 站黑名单用户")
+                data_root = data.get("data", {})
+                first_list = data_root.get("list", [])
+                total = data_root.get("total", 0)
+
+                black_mids.extend(obj["mid"] for obj in first_list)
+
+                # 计算剩余页数
+                pages = (total + page_size - 1) // page_size if total > page_size else 1
+                for pn in range(2, pages + 1):
+                    try:
+                        resp = await client.get(
+                            base_url,
+                            headers=request_headers,
+                            params={"ps": page_size, "pn": pn},
+                        )
+                        resp.raise_for_status()
+                        page_data: dict[str, Any] = resp.json()
+                        if page_data.get("code") != 0:
+                            logger.warning(
+                                f"获取B站黑名单第 {pn} 页失败: {page_data!r}"
+                            )
+                            continue
+                        page_list = page_data.get("data", {}).get("list", [])
+                        black_mids.extend(obj["mid"] for obj in page_list)
+                        logger.debug(
+                            f"[BiliParser] 黑名单第 {pn} 页加载完成, 当前共 {len(black_mids)} 个"
+                        )
+                        await asyncio.sleep(0.2)
+                    except Exception as e:  # noqa: BLE001
+                        logger.warning(f"请求B站黑名单第 {pn} 页异常: {e}")
+                        continue
+
+            self.black_mids = black_mids
+            logger.debug(f"B站黑名单列表: {black_mids}")
+            logger.info(
+                f"已加载 {len(self.black_mids)} 个 B 站黑名单用户 (pages={pages})"
+            )
+
         except Exception as e:
             logger.exception(f"请求 B 站黑名单接口异常: {e}")
             if self.black_mids is None:
