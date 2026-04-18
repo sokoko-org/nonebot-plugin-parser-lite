@@ -57,7 +57,7 @@
                          class="w-10 h-10 rounded-full object-cover shadow-sm" />
                     <div class="content">
                         <div class="text-sm font-black text-gray-500">{{ comment.author.name }}</div>
-                        <p class="text-sm text-gray-700 leading-relaxed">{{ render_content_items(comment.content) }}</p>
+                        <div class="text-sm text-gray-700 leading-relaxed">{{ render_content_items(comment.content) }}</div>
                         <div class="flex items-center space-x-2 text-xs text-gray-400 uppercase tracking-tight">
                             <span>{{ comment.formatted_datetime }}</span>
                             {% if comment.location %}<span>{{ comment.location }}</span>{% endif %}
@@ -75,7 +75,7 @@
                                              class="w-6 h-6 rounded-full object-cover" />
                                         <div class="content">
                                             <div class="text-sm font-bold text-gray-500">{{ reply.author.name }}</div>
-                                            <p class="text-sm text-gray-600 leading-snug">{{ render_content_items(reply.content) }}</p>
+                                            <div class="text-sm text-gray-600 leading-snug">{{ render_content_items(reply.content) }}</div>
                                             <div class="flex items-center space-x-3 text-xs text-gray-400 uppercase">
                                                 <span>{{ reply.formatted_datetime }}</span>
                                                 {% if reply.location %}<span>{{ reply.location }}</span>{% endif %}
@@ -215,9 +215,9 @@
             {% set text = cont | e %}
             {# 第一段或紧邻贴纸时，直接作为内联 span；否则仍作为段落 span，但交给外层包 <p> #}
             {% if not state.first_text_seen or prev_is_sticker or next_is_sticker %}
-                {% set _ = html_parts.append('<span class="text-sm text-slate-800">' ~ text ~ '</span>') %}
+                {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800">' ~ text ~ '</span>') %}
             {% else %}
-                {% set _ = html_parts.append('<p class="text-sm text-slate-800 leading-relaxed mt-1">' ~ text ~ '</p>') %}
+                {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 leading-relaxed mt-1">' ~ text ~ '</span><br>') %}
             {% endif %}
             {% set state.first_text_seen = true %}
             {# 3. Graphic 图文 #}
