@@ -47,6 +47,8 @@ from .live import RoomData
 from .opus import ImageNode, OpusItem, TextNode
 from .video import AIConclusion, VideoInfo
 
+from nonebot_plugin_apscheduler import scheduler
+
 # 选择客户端
 select_client("curl_cffi")
 # 模拟浏览器，第二参数数值参考 curl_cffi 文档
@@ -156,6 +158,9 @@ class BilibiliParser(BaseParser):
         if self.black_mids is None:
             await self.load_black_list()
             assert self.black_mids is not None
+            scheduler.add_job(
+                self.load_black_list, "interval", hours=1, id="sync-bili-black-list"
+            )
         if mid in self.black_mids:
             raise TipException("该up属于黑名单")
 
