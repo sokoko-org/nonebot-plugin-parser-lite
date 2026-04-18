@@ -95,7 +95,7 @@ class RedNoteParser(BaseParser):
         """从 note_data 构建最终解析结果"""
         note_detail = note_data.noteData
 
-        contents: list[MediaContent | str] = replace_placeholder_to_sticker(
+        contents = replace_placeholder_to_sticker(
             note_detail.desc, REDNOTE_PATTERN, "rednote"
         )
         contents.extend(note_detail.medias)
