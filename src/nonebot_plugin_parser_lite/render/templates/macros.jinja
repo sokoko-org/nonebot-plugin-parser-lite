@@ -112,9 +112,12 @@
                 <img src="{{ src }}" class="w-full h-auto max-h-[400px] object-cover" />
                 {% if is_live %}
                     <div class="live-tag-strict absolute bottom-2 right-2 flex items-center">
-                        <i class="live-icon inline-block" style="width: 16px; height: 16px;" aria-hidden="true"></i>
+                        <i class="live-icon"
+                           style="width: 16px;
+                                  height: 17px"
+                           aria-hidden="true"></i>
                         <span class="text-[9px] font-bold uppercase tracking-widest"
-                              style="padding-bottom: 1.3px">Live</span>
+                              style="padding-left: 1.3px">Live</span>
                     </div>
                 {% endif %}
             </div>
@@ -154,8 +157,13 @@
                         <div class="relative w-full h-full">
                             <img src="{{ src }}" class="square-img" />
                             {% if is_live and loop.index < MAX_VISIBLE_IMAGES %}
-                                <div class="live-tag-strict absolute bottom-1.5 right-1.5 scale-90 origin-bottom-right">
-                                    <span class="text-[9px] font-bold uppercase tracking-widest">实况</span>
+                                <div class="live-tag-strict absolute bottom-2 right-2 flex items-center">
+                                    <i class="live-icon"
+                                       style="width: 16px;
+                                              height: 17px"
+                                       aria-hidden="true"></i>
+                                    <span class="text-[9px] font-bold uppercase tracking-widest"
+                                          style="padding-left: 1.3px">Live</span>
                                 </div>
                             {% endif %}
                         </div>
