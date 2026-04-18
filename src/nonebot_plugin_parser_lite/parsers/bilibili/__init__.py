@@ -481,12 +481,9 @@ class BilibiliParser(BaseParser):
         contents: list[MediaContent | str] = []
         text_buffer: list[str] = []
 
-        contents_append = contents.append
-        buffer_append = text_buffer.append
-
         def flush_text_buffer() -> None:
             if text_buffer:
-                contents_append("".join(text_buffer))
+                contents.append("".join(text_buffer))
                 text_buffer.clear()
 
         for node in rich_nodes:
@@ -495,12 +492,16 @@ class BilibiliParser(BaseParser):
                 flush_text_buffer()
                 e = node["emoji"]
                 size = "small" if e["size"] == 1 else "medium"
-                contents_append(self.create_sticker(e["icon_url"], size, e["text"]))
+                contents.append(self.create_sticker(e["icon_url"], size, e["text"]))
+                continue
+            if node_type == "RICH_TEXT_NODE_TYPE_VIEW_PICTURE":
+                for pic in node["pics"]:
+                    medias.append(self.create_image(pic["src"]))
                 continue
 
             text = node.get("text")
             if text:
-                buffer_append(text)
+                text_buffer.append(text)
 
         flush_text_buffer()
 

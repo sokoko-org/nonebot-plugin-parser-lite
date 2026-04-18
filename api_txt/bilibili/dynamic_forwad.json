@@ -1,0 +1,538 @@
+{
+    "code": 0,
+    "message": "0",
+    "ttl": 1,
+    "data": {
+        "item": {
+            "basic": {
+                "comment_id_str": "1192594181946605592",
+                "comment_type": 17,
+                "like_icon": {
+                    "action_url": "",
+                    "end_url": "",
+                    "id": 0,
+                    "start_url": ""
+                },
+                "rid_str": "1192594181946605592"
+            },
+            "id_str": "1192594181946605592",
+            "modules": {
+                "module_author": {
+                    "avatar": {
+                        "container_size": {
+                            "height": 1.375,
+                            "width": 1.375
+                        },
+                        "fallback_layers": {
+                            "is_critical_group": true,
+                            "layers": [
+                                {
+                                    "general_spec": {
+                                        "pos_spec": {
+                                            "axis_x": 0.6875,
+                                            "axis_y": 0.6875,
+                                            "coordinate_pos": 2
+                                        },
+                                        "render_spec": {
+                                            "opacity": 1
+                                        },
+                                        "size_spec": {
+                                            "height": 0.787,
+                                            "width": 0.787
+                                        }
+                                    },
+                                    "layer_config": {
+                                        "is_critical": true,
+                                        "tags": {
+                                            "AVATAR_LAYER": {},
+                                            "GENERAL_CFG": {
+                                                "config_type": 1,
+                                                "general_config": {
+                                                    "web_css_style": {
+                                                        "borderRadius": "50%"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "resource": {
+                                        "res_image": {
+                                            "image_src": {
+                                                "placeholder": 6,
+                                                "remote": {
+                                                    "bfs_style": "widget-layer-avatar",
+                                                    "url": "https://i0.hdslb.com/bfs/face/5ff81080e82c2086f27fd922575039adc0a2d4d3.jpg"
+                                                },
+                                                "src_type": 1
+                                            }
+                                        },
+                                        "res_type": 3
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "general_spec": {
+                                        "pos_spec": {
+                                            "axis_x": 0.6875,
+                                            "axis_y": 0.6875,
+                                            "coordinate_pos": 2
+                                        },
+                                        "render_spec": {
+                                            "opacity": 1
+                                        },
+                                        "size_spec": {
+                                            "height": 1.375,
+                                            "width": 1.375
+                                        }
+                                    },
+                                    "layer_config": {
+                                        "tags": {
+                                            "PENDENT_LAYER": {}
+                                        }
+                                    },
+                                    "resource": {
+                                        "res_image": {
+                                            "image_src": {
+                                                "remote": {
+                                                    "bfs_style": "widget-layer-avatar",
+                                                    "url": "https://i0.hdslb.com/bfs/face/a959c72407b2ac553d4328fd76d55d0134e20f65.png"
+                                                },
+                                                "src_type": 1
+                                            }
+                                        },
+                                        "res_type": 3
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "general_spec": {
+                                        "pos_spec": {
+                                            "axis_x": 0.7560000000000001,
+                                            "axis_y": 0.7726666666666667,
+                                            "coordinate_pos": 1
+                                        },
+                                        "render_spec": {
+                                            "opacity": 1
+                                        },
+                                        "size_spec": {
+                                            "height": 0.41666666666666663,
+                                            "width": 0.41666666666666663
+                                        }
+                                    },
+                                    "layer_config": {
+                                        "tags": {
+                                            "GENERAL_CFG": {
+                                                "config_type": 1,
+                                                "general_config": {
+                                                    "web_css_style": {
+                                                        "background-color": "rgb(255,255,255)",
+                                                        "border": "2px solid rgba(255,255,255,1)",
+                                                        "borderRadius": "50%",
+                                                        "boxSizing": "border-box"
+                                                    }
+                                                }
+                                            },
+                                            "ICON_LAYER": {}
+                                        }
+                                    },
+                                    "resource": {
+                                        "res_image": {
+                                            "image_src": {
+                                                "local": 1,
+                                                "src_type": 2
+                                            }
+                                        },
+                                        "res_type": 3
+                                    },
+                                    "visible": true
+                                }
+                            ]
+                        },
+                        "mid": "437270664"
+                    },
+                    "face": "https://i0.hdslb.com/bfs/face/5ff81080e82c2086f27fd922575039adc0a2d4d3.jpg",
+                    "face_nft": false,
+                    "following": null,
+                    "jump_url": "//space.bilibili.com/437270664/dynamic",
+                    "label": "",
+                    "mid": 437270664,
+                    "name": "小问号Official",
+                    "official_verify": {
+                        "desc": "",
+                        "type": -1
+                    },
+                    "pendant": {
+                        "expire": 0,
+                        "image": "https://i0.hdslb.com/bfs/face/a959c72407b2ac553d4328fd76d55d0134e20f65.png",
+                        "image_enhance": "https://i0.hdslb.com/bfs/face/a959c72407b2ac553d4328fd76d55d0134e20f65.png",
+                        "image_enhance_frame": "",
+                        "n_pid": 460,
+                        "name": "异常生物",
+                        "pid": 460
+                    },
+                    "pub_action": "",
+                    "pub_location_text": "",
+                    "pub_time": "2026年04月18日 19:14",
+                    "pub_ts": 1776510871,
+                    "type": "AUTHOR_TYPE_NORMAL",
+                    "vip": {
+                        "avatar_subscript": 1,
+                        "avatar_subscript_url": "",
+                        "due_date": 1801756800000,
+                        "label": {
+                            "bg_color": "#FB7299",
+                            "bg_style": 1,
+                            "border_color": "",
+                            "img_label_uri_hans": "",
+                            "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/8d4f8bfc713826a5412a0a27eaaac4d6b9ede1d9.png",
+                            "img_label_uri_hant": "",
+                            "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png",
+                            "label_theme": "annual_vip",
+                            "path": "http://i0.hdslb.com/bfs/vip/label_annual.png",
+                            "text": "年度大会员",
+                            "text_color": "#FFFFFF",
+                            "use_img_label": true
+                        },
+                        "nickname_color": "#FB7299",
+                        "status": 1,
+                        "theme_type": 0,
+                        "type": 2
+                    }
+                },
+                "module_dynamic": {
+                    "additional": null,
+                    "desc": {
+                        "rich_text_nodes": [
+                            {
+                                "orig_text": "作者来了",
+                                "text": "作者来了",
+                                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                            },
+                            {
+                                "emoji": {
+                                    "icon_url": "https://i0.hdslb.com/bfs/emote/8188ddf95bace929d382c7a83214afde79d83bfc.png",
+                                    "id": 4259,
+                                    "package_id": 1,
+                                    "size": 1,
+                                    "text": "[原神_哇]",
+                                    "type": 1
+                                },
+                                "orig_text": "[原神_哇]",
+                                "text": "[原神_哇]",
+                                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+                            },
+                            {
+                                "orig_text": "欢迎大家来玩驴马杀啊！",
+                                "text": "欢迎大家来玩驴马杀啊！",
+                                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                            },
+                            {
+                                "emoji": {
+                                    "icon_url": "https://i0.hdslb.com/bfs/emote/1597302b98827463f5b75c7cac1f29ea6ce572c4.png",
+                                    "id": 3302,
+                                    "package_id": 1,
+                                    "size": 1,
+                                    "text": "[给心心]",
+                                    "type": 1
+                                },
+                                "orig_text": "[给心心]",
+                                "text": "[给心心]",
+                                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+                            },
+                            {
+                                "emoji": {
+                                    "icon_url": "https://i0.hdslb.com/bfs/emote/1597302b98827463f5b75c7cac1f29ea6ce572c4.png",
+                                    "id": 3302,
+                                    "package_id": 1,
+                                    "size": 1,
+                                    "text": "[给心心]",
+                                    "type": 1
+                                },
+                                "orig_text": "[给心心]",
+                                "text": "[给心心]",
+                                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+                            },
+                            {
+                                "jump_url": "//www.bilibili.com/read/cv/",
+                                "orig_text": "查看图片",
+                                "pics": [
+                                    {
+                                        "height": 1170,
+                                        "size": 751.36,
+                                        "src": "http://i0.hdslb.com/bfs/new_dyn/91eece6764c677194cb37866e4141236437270664.jpg",
+                                        "width": 1200
+                                    }
+                                ],
+                                "rid": "1192594181946605592",
+                                "text": "查看图片",
+                                "type": "RICH_TEXT_NODE_TYPE_VIEW_PICTURE"
+                            }
+                        ],
+                        "text": "作者来了[原神_哇]欢迎大家来玩驴马杀啊！[给心心][给心心]查看图片"
+                    },
+                    "major": null,
+                    "topic": null
+                },
+                "module_more": {
+                    "three_point_items": [
+                        {
+                            "label": "举报",
+                            "type": "THREE_POINT_REPORT"
+                        }
+                    ]
+                },
+                "module_stat": {
+                    "comment": {
+                        "count": 2,
+                        "forbidden": false
+                    },
+                    "forward": {
+                        "count": 0,
+                        "forbidden": false
+                    },
+                    "like": {
+                        "count": 143,
+                        "forbidden": false,
+                        "status": false
+                    }
+                }
+            },
+            "orig": {
+                "basic": {
+                    "comment_id_str": "",
+                    "comment_type": 0,
+                    "like_icon": {
+                        "action_url": "",
+                        "end_url": "",
+                        "id": 0,
+                        "start_url": ""
+                    },
+                    "rid_str": ""
+                },
+                "id_str": "1192482272291323928",
+                "modules": {
+                    "module_author": {
+                        "avatar": {
+                            "container_size": {
+                                "height": 1.35,
+                                "width": 1.35
+                            },
+                            "fallback_layers": {
+                                "is_critical_group": true,
+                                "layers": [
+                                    {
+                                        "general_spec": {
+                                            "pos_spec": {
+                                                "axis_x": 0.675,
+                                                "axis_y": 0.675,
+                                                "coordinate_pos": 2
+                                            },
+                                            "render_spec": {
+                                                "opacity": 1
+                                            },
+                                            "size_spec": {
+                                                "height": 1,
+                                                "width": 1
+                                            }
+                                        },
+                                        "layer_config": {
+                                            "is_critical": true,
+                                            "tags": {
+                                                "AVATAR_LAYER": {},
+                                                "GENERAL_CFG": {
+                                                    "config_type": 1,
+                                                    "general_config": {
+                                                        "web_css_style": {
+                                                            "borderRadius": "50%"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "resource": {
+                                            "res_image": {
+                                                "image_src": {
+                                                    "placeholder": 6,
+                                                    "remote": {
+                                                        "bfs_style": "widget-layer-avatar",
+                                                        "url": "https://i0.hdslb.com/bfs/face/77d9167e4e75a26ce5f5b6fe49f6ef278d48a329.jpg"
+                                                    },
+                                                    "src_type": 1
+                                                }
+                                            },
+                                            "res_type": 3
+                                        },
+                                        "visible": true
+                                    },
+                                    {
+                                        "general_spec": {
+                                            "pos_spec": {
+                                                "axis_x": 0.8000000000000002,
+                                                "axis_y": 0.8000000000000002,
+                                                "coordinate_pos": 1
+                                            },
+                                            "render_spec": {
+                                                "opacity": 1
+                                            },
+                                            "size_spec": {
+                                                "height": 0.41666666666666663,
+                                                "width": 0.41666666666666663
+                                            }
+                                        },
+                                        "layer_config": {
+                                            "tags": {
+                                                "GENERAL_CFG": {
+                                                    "config_type": 1,
+                                                    "general_config": {
+                                                        "web_css_style": {
+                                                            "background-color": "rgb(255,255,255)",
+                                                            "border": "2px solid rgba(255,255,255,1)",
+                                                            "borderRadius": "50%",
+                                                            "boxSizing": "border-box"
+                                                        }
+                                                    }
+                                                },
+                                                "ICON_LAYER": {}
+                                            }
+                                        },
+                                        "resource": {
+                                            "res_image": {
+                                                "image_src": {
+                                                    "local": 4,
+                                                    "src_type": 2
+                                                }
+                                            },
+                                            "res_type": 3
+                                        },
+                                        "visible": true
+                                    }
+                                ]
+                            },
+                            "mid": "3546889200863460"
+                        },
+                        "face": "https://i0.hdslb.com/bfs/face/77d9167e4e75a26ce5f5b6fe49f6ef278d48a329.jpg",
+                        "face_nft": false,
+                        "following": null,
+                        "jump_url": "//space.bilibili.com/3546889200863460/dynamic",
+                        "label": "",
+                        "mid": 3546889200863460,
+                        "name": "原神千星奇域",
+                        "official_verify": {
+                            "desc": "",
+                            "type": 1
+                        },
+                        "pendant": {
+                            "expire": 0,
+                            "image": "",
+                            "image_enhance": "",
+                            "image_enhance_frame": "",
+                            "n_pid": 0,
+                            "name": "",
+                            "pid": 0
+                        },
+                        "pub_action": "投稿了视频",
+                        "pub_time": "",
+                        "pub_ts": 1776484815,
+                        "type": "AUTHOR_TYPE_NORMAL",
+                        "vip": {
+                            "avatar_subscript": 1,
+                            "avatar_subscript_url": "",
+                            "due_date": 1792166400000,
+                            "label": {
+                                "bg_color": "#FB7299",
+                                "bg_style": 1,
+                                "border_color": "",
+                                "img_label_uri_hans": "",
+                                "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/8d4f8bfc713826a5412a0a27eaaac4d6b9ede1d9.png",
+                                "img_label_uri_hant": "",
+                                "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png",
+                                "label_theme": "annual_vip",
+                                "path": "http://i0.hdslb.com/bfs/vip/label_annual.png",
+                                "text": "年度大会员",
+                                "text_color": "#FFFFFF",
+                                "use_img_label": true
+                            },
+                            "nickname_color": "#FB7299",
+                            "status": 1,
+                            "theme_type": 0,
+                            "type": 2
+                        }
+                    },
+                    "module_dynamic": {
+                        "additional": null,
+                        "desc": {
+                            "rich_text_nodes": [
+                                {
+                                    "jump_url": "//search.bilibili.com/all?keyword=%E5%8E%9F%E7%A5%9E",
+                                    "orig_text": "#原神#",
+                                    "style": null,
+                                    "text": "#原神#",
+                                    "type": "RICH_TEXT_NODE_TYPE_TOPIC"
+                                },
+                                {
+                                    "orig_text": " ",
+                                    "text": " ",
+                                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                                },
+                                {
+                                    "jump_url": "//search.bilibili.com/all?keyword=%E5%8E%9F%E7%A5%9E%E5%8D%83%E6%98%9F%E5%A5%87%E5%9F%9F",
+                                    "orig_text": "#原神千星奇域#",
+                                    "style": null,
+                                    "text": "#原神千星奇域#",
+                                    "type": "RICH_TEXT_NODE_TYPE_TOPIC"
+                                },
+                                {
+                                    "orig_text": " ",
+                                    "text": " ",
+                                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                                },
+                                {
+                                    "jump_url": "//search.bilibili.com/all?keyword=%E5%8D%83%E6%98%9F%E5%A5%87%E5%9F%9F%E5%85%B3%E5%8D%A1%E6%8E%A8%E8%8D%90",
+                                    "orig_text": "#千星奇域关卡推荐#",
+                                    "style": null,
+                                    "text": "#千星奇域关卡推荐#",
+                                    "type": "RICH_TEXT_NODE_TYPE_TOPIC"
+                                },
+                                {
+                                    "orig_text": "\n真心换真心...马？——「千星奇域关卡推荐」",
+                                    "text": "\n真心换真心...马？——「千星奇域关卡推荐」",
+                                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                                }
+                            ],
+                            "text": "#原神# #原神千星奇域# #千星奇域关卡推荐#\n真心换真心...马？——「千星奇域关卡推荐」"
+                        },
+                        "major": {
+                            "archive": {
+                                "aid": "116419350042399",
+                                "badge": {
+                                    "bg_color": "#FB7299",
+                                    "color": "#FFFFFF",
+                                    "icon_url": null,
+                                    "text": "投稿视频"
+                                },
+                                "bvid": "BV1KXdBBoERw",
+                                "cover": "http://i0.hdslb.com/bfs/archive/d7b1204d3d863c83818fbe4310c3c73b1a02db51.jpg",
+                                "desc": "「千星奇域关卡推荐」第十期\n\n《驴马杀》——小问号Official\n《图寻提瓦特》——图研奇匠\n《拼豆家园》——宗王晓艺\n《我在海上当大厨！》——清清吃点药\n《梦境回廊（景观图）》——夏伊蝉鸣\n\n更多奇域，未完待续~",
+                                "disable_preview": 0,
+                                "duration_text": "01:09",
+                                "jump_url": "//www.bilibili.com/video/BV1KXdBBoERw/",
+                                "stat": {
+                                    "danmaku": "6",
+                                    "play": "1.9万"
+                                },
+                                "title": "真心换真心...马？——「千星奇域关卡推荐」",
+                                "type": 1
+                            },
+                            "type": "MAJOR_TYPE_ARCHIVE"
+                        },
+                        "topic": null
+                    }
+                },
+                "type": "DYNAMIC_TYPE_AV",
+                "visible": true
+            },
+            "type": "DYNAMIC_TYPE_FORWARD",
+            "visible": true
+        }
+    }
+}
