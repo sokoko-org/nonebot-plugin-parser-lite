@@ -239,7 +239,7 @@
             {% set size_class = 'h-6' if size == 'small' else 'h-12' %}
             {% set _ = html_parts.append(
                             '<img class="inline-block align-text-bottom ' ~ size_class ~ '"
-                 src="' ~ src ~ '" />'
+                 src="' ~ src ~ '" alt="' ~ cont.desc ~ '"/>'
                         ) %}
             {# 5. 视频封面 + 播放按钮 #}
         {% elif cls == 'VideoContent' %}
