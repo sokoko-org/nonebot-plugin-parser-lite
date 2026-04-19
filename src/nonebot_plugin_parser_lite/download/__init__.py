@@ -23,7 +23,7 @@ from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
 from ..utils.common import generate_file_name, make_filename, safe_unlink
 from ..utils.ffmpeg import FFmpeg
-from httpx import AsyncClient, HTTPError, Response
+from httpx import AsyncClient, Response
 from .task import auto_task
 
 
@@ -41,13 +41,11 @@ class StreamDownloader:
         url: str,
         file_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
-        max_retries: int = 1,
     ) -> Path:
         """
         :param url: 下载文件的链接地址
         :param file_name: 保存到本地的文件名，为空时根据 url 自动生成
         :param ext_headers: 额外的请求头，会与默认请求头合并
-        :param max_retries: 下载失败时的最大重试次数
 
         :return: 下载完成后的本地文件路径
         :raises ZeroSizeException: 资源大小为 0 时抛出
@@ -63,32 +61,12 @@ class StreamDownloader:
 
         headers = {**self.headers, **(ext_headers or {})}
 
-        retry_count = 0
-        while retry_count <= max_retries:
-            try:
-                await self._download_with_stream(
-                    url=url,
-                    file_path=file_path,
-                    headers=headers,
-                    desc=file_name,
-                )
-                # 成功即跳出重试循环
-                break
-            except (HTTPError, ConnectionError, TimeoutError, OSError) as e:
-                retry_count += 1
-                await safe_unlink(file_path)
-                if retry_count > max_retries:
-                    logger.exception(
-                        f"下载失败，已重试 {max_retries} 次 | url: {url}, file_path: {file_path}"
-                    )
-                    raise DownloadException(f"媒体下载失败: {e}") from e
-
-                logger.warning(
-                    f"下载失败，正在重试 ({retry_count}/{max_retries}) | url: {url}, "
-                    f"error: {e}, 重试文件名: {file_name}"
-                )
-                # 简单退避
-                await asyncio.sleep(retry_count)
+        await self._download_with_stream(
+            url=url,
+            file_path=file_path,
+            headers=headers,
+            desc=file_name,
+        )
 
         return file_path
 
