@@ -119,12 +119,12 @@ class TrackPage(Struct):
     audioWithLyricsOption: AudioWithLyricsOption
 
 
-class loaderData(Struct):
+class LoaderData(Struct):
     track_page: TrackPage
 
 
 class RouterData(Struct):
-    loaderData: loaderData
+    loaderData: LoaderData
 
 
 decoder = Decoder(RouterData)

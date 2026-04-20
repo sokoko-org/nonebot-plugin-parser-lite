@@ -3,7 +3,6 @@ from re import Match
 from typing import ClassVar
 
 from httpx import AsyncClient
-from nonebot import logger
 
 from ..base import (
     BaseParser,
@@ -53,8 +52,8 @@ class QSMusicParser(BaseParser):
             )
         ]
         text = f"专辑: {music_data.trackInfo.album.name}"
-        text += f"\n歌词:\n{music_data.lyrics}"
-
+        lyrics = (music_data.lyrics or "").strip()
+        text += f"\n歌词:\n{lyrics}" if lyrics else "\n歌词: 暂无"
         # 构建额外信息
         extra = {
             "lyric": text,
