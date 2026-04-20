@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from itertools import chain
 import re
 from typing import ClassVar, TypeVar
 
@@ -146,7 +147,10 @@ async def _send_parse_result(session: Uninfo, result: ParseResult) -> None:
     summary_msg = await RENDERER.render_messages(result)
     await summary_msg.send()
     # 全文本内容，无需再发送媒体
-    if all(isinstance(c, str) for c in result.content):
+    if all(
+        isinstance(c, str)
+        for c in chain(result.content, result.repost.content if result.repost else [])
+    ):
         return
     if pconfig.lazy_download:
         download_cmd = ", ".join(pconfig.download_command)

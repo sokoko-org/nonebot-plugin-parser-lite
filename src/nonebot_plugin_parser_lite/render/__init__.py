@@ -22,6 +22,7 @@ from ..parsers.data import (
     LivePhotoContent,
     MediaContent,
     ParseResult,
+    StickerContent,
     VideoContent,
 )
 
@@ -73,9 +74,7 @@ class Renderer:
         """
         # 尝试获取图片路径，以便在直接发送失败时使用文件发送
         try:
-            # 复用 cache_or_render_image 方法获取图片段，同时确保图片已保存
             image_seg = await self.cache_or_render_image(result)
-            # 获取图片路径
         except Exception:
             logger.error(f"获取图片路径失败: {traceback.format_exc()}")
             image_seg = None
@@ -96,7 +95,6 @@ class Renderer:
         - 需要立即发送的音视频（逐条 yield）
         - 可合并转发的图文 / 图片（统一收集后一次发送）
         """
-        forwardable_segs: list[ForwardNodeInner] = []
         failed_count = 0
         repost_medias = result.repost.content if result.repost else []
         media_contents = [
@@ -107,7 +105,7 @@ class Renderer:
         for cont in media_contents:
             # 先处理需要立即发送的音视频
             try:
-                async for msg in self._handle_immediate_media(cont):
+                async for msg in self.__handle_immediate_media(cont):
                     yield msg
             except DownloadLimitException as e:
                 yield UniMessage(str(e))
@@ -116,21 +114,9 @@ class Renderer:
                 failed_count += 1
                 continue
 
-            # 再尝试构建可转发的图文 / 图片片段
-            try:
-                seg = await self._build_forwardable_segment(cont)
-            except DownloadException:
-                failed_count += 1
-                continue
-
-            if seg:
-                forwardable_segs.extend(seg)
-
-        # 处理图文转发部分
-        if forwardable_segs:
-            # 根据“当前 + 转发”的文本/媒体顺序构建完整列表
-            ordered_segs = self._build_ordered_forward_segs(result, forwardable_segs)
-
+        # 2构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
+        ordered_segs = await self.__build_forward_segs(result)
+        if ordered_segs:
             if pconfig.need_forward_contents or len(ordered_segs) > 4:
                 forward_msg = UniHelper.construct_forward_message(ordered_segs)
                 yield UniMessage(forward_msg)
@@ -143,7 +129,7 @@ class Renderer:
             yield UniMessage(message)
             raise DownloadException(message)
 
-    async def _handle_immediate_media(
+    async def __handle_immediate_media(
         self, cont: MediaContent
     ) -> AsyncGenerator[UniMessage[Any], None]:
         """
@@ -157,8 +143,6 @@ class Renderer:
             return
 
         path = await cont.get_path()
-        logger.debug(f"立即发送{type(cont).__name__}: {path}")
-
         if (
             isinstance(cont, VideoContent)
             and pconfig.need_upload_video
@@ -172,100 +156,106 @@ class Renderer:
         elif isinstance(cont, AudioContent):
             yield UniMessage(UniHelper.record_seg(path))
 
-    async def _build_forwardable_segment(
-        self, cont: MediaContent
-    ) -> list[ForwardNodeInner]:
-        """构建可加入转发消息的片段（图片 / 图文 / LivePhoto）。"""
-
-        # 视频封面
-        if isinstance(cont, VideoContent):
-            try:
-                path = await cont.get_cover_path()
-            except Exception as e:
-                logger.warning(
-                    f"get_cover_path() failed for {type(cont).__name__}: {e}"
-                )
-                return []
-            return [UniHelper.img_seg(path)] if path else []
-
-        # 文本
-        if isinstance(cont, str):
-            return [cont]
-
-        # 图片
-        if isinstance(cont, ImageContent):
-            path = await cont.get_path()
-            return [UniHelper.img_seg(path)]
-
-        # 图文：图片 + 可选文字说明
-        if isinstance(cont, GraphicContent):
-            path = await cont.get_path()
-            seg: ForwardNodeInner = UniHelper.img_seg(path)
-            if cont.alt:
-                seg = seg + cont.alt
-            return [seg]
-
-        # Live Photo：根据配置决定用视频还是图+视频
-        if isinstance(cont, LivePhotoContent):
-            if pconfig.live_photo:
-                live_path = await cont.get_live()
-                return [UniHelper.video_seg(live_path)]
-            base_path = await cont.get_base()
-            live_path = await cont.get_path()
-            return [
-                UniHelper.img_seg(base_path),
-                UniHelper.video_seg(live_path),
-            ]
-
-        return []
-
-    def _build_ordered_forward_segs(
+    async def __build_forward_segs(
         self,
         result: ParseResult,
-        media_segs: list[ForwardNodeInner],
     ) -> list[ForwardNodeInner]:
-        """根据当前内容和转发内容构造有序的转发段列表。
+        """根据当前内容和转发内容构造有序的转发段列表（文本 + 媒体，保持顺序）
 
-        顺序：
-        1. 当前帖子的纯文本（作者：文本）
-        2. 当前帖子的所有媒体片段
-        3. 若有转发：
-           3.1 一条“作者[转发原作者]：当前文本”说明
-           3.2 原帖文本（原作者[被转作者]：原帖标题+内容）
+        规则：
+        - 主帖：
+          - 文本片段按顺序聚合，输出 "作者：文本" 节点
+          - 媒体片段（Image/Graphic/LivePhoto/Video 封面等）按出现顺序插入对应消息段
+        - 如有转发：
+          - 插入一条说明
+          - 然后对转发 ParseResult 做同样处理
         """
+
+        async def build_nodes(pr: ParseResult) -> list[ForwardNodeInner]:
+            author_name = pr.author.name
+            nodes: list[ForwardNodeInner] = []
+            text_buffer: list[str] = []
+
+            async def flush_text() -> None:
+                nonlocal text_buffer
+                if text_buffer:
+                    text = "\n".join(text_buffer).strip()
+                    if text:
+                        nodes.append(f"{author_name}：{text}")
+                    text_buffer = []
+
+            async def append_media(cont: MediaContent) -> None:
+                """将单个媒体内容转换为若干 ForwardNodeInner，并追加到 nodes"""
+                try:
+                    # 视频：使用封面图作为转发节点
+                    if isinstance(cont, VideoContent):
+                        path = await cont.get_cover_path()
+                        if path:
+                            nodes.append(UniHelper.img_seg(path))
+                        return
+
+                    # 图片
+                    if isinstance(cont, ImageContent):
+                        path = await cont.get_path()
+                        nodes.append(UniHelper.img_seg(path))
+                        return
+
+                    # 图文：图片 + 可选文字说明
+                    if isinstance(cont, GraphicContent):
+                        path = await cont.get_path()
+                        seg: ForwardNodeInner = UniHelper.img_seg(path)
+                        if cont.alt:
+                            seg = seg + cont.alt
+                        nodes.append(seg)
+                        return
+
+                    # Live Photo
+                    if isinstance(cont, LivePhotoContent):
+                        if pconfig.live_photo:
+                            live_path = await cont.get_live()
+                            nodes.append(UniHelper.video_seg(live_path))
+                        else:
+                            base_path = await cont.get_base()
+                            live_path = await cont.get_path()
+                            nodes.append(UniHelper.img_seg(base_path))
+                            nodes.append(UniHelper.video_seg(live_path))
+                        return
+                except Exception as e:
+                    # 统一当作媒体构建失败处理
+                    logger.warning(f"构建转发媒体片段失败: {type(cont).__name__}: {e}")
+                    nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
+
+            # 按 content 顺序遍历
+            for item in pr.content:
+                if isinstance(item, str):
+                    # 文本：缓冲，遇到媒体或结束时 flush
+                    if item:
+                        text_buffer.append(item)
+                elif isinstance(item, StickerContent):
+                    text_buffer.append(item.desc or "[表情]")
+                elif isinstance(item, MediaContent) and item.need_send:
+                    # 媒体：先输出之前的文本，再输出媒体段
+                    await flush_text()
+                    await append_media(item)
+                else:
+                    # 其他类型暂不处理
+                    continue
+
+            # 收尾文本
+            await flush_text()
+            return nodes
+
         ordered: list[ForwardNodeInner] = []
-        author_name = result.author.name if result.author else "未知用户"
-
-        # 1. 当前文本
-        if plain := "".join(
-            f"\n{c}" for c in result.content if isinstance(c, str) and c
-        ):
-            ordered.append(f"{author_name}：{plain}")
-
-        # 2. 当前媒体
-        ordered.extend(media_segs)
-
-        # # 3. 转发内容
-        # if not result.repost:
-        #     return ordered
-
-        # repost = result.repost
-        # repost_author = repost.author.name if repost.author else "未知用户"
-
-        # # 3.1 当前作者带“转发”说明 + 自己的文字
-        # current_plain = build_plain_text(list(result.content))
-        # ordered.append(f"{repost_author}[转发{author_name}]：{current_plain}")
-
-        # # 3.2 原帖文字：标题 + 内容
-        # repost_text_parts: list[str] = []
-        # if repost.title:
-        #     repost_text_parts.append(repost.title)
-        # if plain_repost := build_plain_text(list(repost.content)):
-        #     repost_text_parts.append(plain_repost)
-        # if repost_text_parts:
-        #     repost_text = "\n".join(repost_text_parts)
-        #     ordered.append(f"{repost_author}[被转作者]：{repost_text}")
-
+        # 1. 主帖节点
+        ordered.extend(await build_nodes(result))
+        # 2. 转发内容
+        repost = result.repost
+        if not repost:
+            return ordered
+        # 2.1 转发说明
+        ordered.append(">>>>>原帖<<<<<")
+        # 2.2 原帖节点
+        ordered.extend(await build_nodes(repost))
         return ordered
 
     @property
@@ -279,7 +269,7 @@ class Renderer:
     async def render_image(self, result: ParseResult) -> bytes:
         """使用 HTML 绘制通用社交媒体帖子卡片"""
         # 准备模板数据
-        template_data = await self._resolve_parse_result(result)
+        template_data = await self.resolve_parse_result(result)
 
         # 处理模板针对
         template_name = "default.html.jinja"
@@ -338,7 +328,7 @@ class Renderer:
             quality=85,
         )
 
-    async def _resolve_parse_result(self, result: ParseResult) -> dict[str, Any]:
+    async def resolve_parse_result(self, result: ParseResult) -> dict[str, Any]:
         """解析 ParseResult 为模板可用的字典数据"""
 
         data: dict[str, Any] = {
@@ -366,7 +356,7 @@ class Renderer:
         }
 
         if result.repost:
-            data["repost"] = await self._resolve_parse_result(result.repost)
+            data["repost"] = await self.resolve_parse_result(result.repost)
 
         # 添加二维码支持
         if pconfig.append_qrcode and result.url:
