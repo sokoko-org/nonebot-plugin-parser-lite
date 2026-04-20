@@ -48,11 +48,8 @@
                     const applyStyle = () => {
                         const h = img_container.offsetHeight;
                         const w = img_container.offsetWidth;
-                        console.log(h, w, isFinite(h / w))
                         if (!h || !w || !isFinite(h / w)) return;
-
                         const aspectRatio = h / w;
-
                         if (aspectRatio >= 0.9) {
                             // 竖图：限制宽度，放高
                             img_container.classList.add("max-w-36");
