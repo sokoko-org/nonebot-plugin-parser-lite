@@ -783,12 +783,6 @@
   .text-lime-500 {
     color: var(--color-lime-500);
   }
-  .text-teal-500 {
-    color: var(--color-teal-500);
-  }
-  .text-orange-500 {
-    color: var(--color-orange-500);
-  }
   .bg-slate-50 {
     background-color: var(--color-slate-50);
   }

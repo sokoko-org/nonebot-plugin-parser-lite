@@ -8,18 +8,6 @@
                 <div class="text-md mb-0.5 font-bold text-gray-800">{{ stats.view_count }}</div>
             </div>
         {% endif %}
-        {% if stats.extra.danmaku and stats.extra.danmaku != '-' %}
-            <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-icon fa-comment-dots text-teal-500 text-xl"></i>
-                <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.extra.danmaku }}</span>
-            </div>
-        {% endif %}
-        {% if stats.extra.coin and stats.extra.coin != '-' %}
-            <div class="text-center flex items-center justify-center space-x-1.5">
-                <i class="fa-icon fa-coins text-orange-500 text-xl"></i>
-                <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.extra.coin }}</span>
-            </div>
-        {% endif %}
         {% if stats.like_count and stats.like_count != '-' %}
             <div class="text-center flex items-center justify-center space-x-1.5">
                 <i class="fa-icon fa-heart text-red-500 text-xl"></i>
@@ -43,6 +31,17 @@
                 <i class="fa-icon fa-share-nodes text-emerald-500 text-xl"></i>
                 <span class="text-md mb-0.5 font-bold text-gray-800">{{ stats.share_count }}</span>
             </div>
+        {% endif %}
+        {# 遍历 extra：图标类名 fa-字段名，值为 stats.extra[key] #}
+        {% if stats.extra %}
+            {% for key, value in stats.extra.items() %}
+                {% if value and value != '-' %}
+                    <div class="text-center flex items-center justify-center space-x-1.5">
+                        <i class="fa-icon fa-{{ key }} text-xl"></i>
+                        <span class="text-md mb-0.5 font-bold text-gray-800">{{ value }}</span>
+                    </div>
+                {% endif %}
+            {% endfor %}
         {% endif %}
     </div>
 {% endmacro %}
@@ -239,7 +238,8 @@
             {% set size_class = 'h-6' if size == 'small' else 'h-12' %}
             {% set _ = html_parts.append(
                             '<img class="inline-block align-text-bottom ' ~ size_class ~ '"
-                 src="' ~ src ~ '" alt="' ~ (cont.desc|e) ~ '"/>'
+                 src="' ~ src ~ '"
+                 alt="' ~ (cont.desc|e) ~ '" />'
                         ) %}
             {# 5. 视频封面 + 播放按钮 #}
         {% elif cls == 'VideoContent' %}
