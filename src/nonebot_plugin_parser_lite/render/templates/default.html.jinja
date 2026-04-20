@@ -44,28 +44,24 @@
         document.addEventListener("DOMContentLoaded", function() {
             document
                 .querySelectorAll(".comment .single-image")
-                .forEach((img) => {
+                .forEach((img_container) => {
                     const applyStyle = () => {
-                        const h = img.naturalHeight;
-                        const w = img.naturalWidth;
+                        const h = img_container.offsetHeight;
+                        const w = img_container.offsetWidth;
+                        console.log(h, w, isFinite(h / w))
                         if (!h || !w || !isFinite(h / w)) return;
 
                         const aspectRatio = h / w;
 
                         if (aspectRatio >= 0.9) {
                             // 竖图：限制宽度，放高
-                            img.classList.add("max-w-36");
+                            img_container.classList.add("max-w-36");
                         } else {
                             // 横图：限制高度，放宽
-                            img.classList.add("max-h-36");
+                            img_container.classList.add("max-h-36");
                         }
                     };
-
-                    if (img.complete) {
-                        applyStyle();
-                    } else {
-                        img.onload = applyStyle;
-                    }
+                    applyStyle();
                 });
         });
     </script>
