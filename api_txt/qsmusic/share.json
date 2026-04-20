@@ -1,0 +1,2587 @@
+{
+  "loaderData": {
+    "track_layout": null,
+    "track_page": {
+      "track_id": "7387697402612500481",
+      "audioWithLyricsOption": {
+        "hasCopyright": true,
+        "artistIdStr": "7351740515311765521",
+        "status_code": 0,
+        "track_id": "7387697402612500481",
+        "gradientBackgroundColor": "linear-gradient(158deg, rgba(182,161,165,0.35) 4%, rgba(18,18,18,0) 62%)",
+        "backgroundColor": "linear-gradient(180deg, #010101 0%, #313131 100%)",
+        "vid": "v10ad6g50000cq3648nog65jphnequ8g",
+        "kid": "",
+        "url": "https://v5-luna.douyinvod.com/cbc48abb37d91833619599a651a85611/69e71439/video/tos/cn/tos-cn-ve-2774/o4eFRtBaIQZQOIbiifnmGMm3miyYNDUyhHEgCB/?a=8478&ch=0&cr=5&dr=0&cd=0%7C0%7C0%7C5&br=126&bt=126&ft=H6XWy4BeHuuD.5XONg2VvjpDt1q-TrK7_T4nRkaHIBO9UjVhWL6&mime_type=audio_mp4&qs=6&rc=OjxoaDg7ZDpoZjYzaThnNkBpanhoa205cjs5dDMzODlkNEBjYDQwYGBeX2ExLWFjY2FiYSM1bmttMmRrMTBgLS1kYS1zcw%3D%3D&btag=80000e00018000&dy_q=1776661643&l=2026042013072313B3F74737D48077D752",
+        "songMakerTeamSentences": [
+          "作曲：黄义达",
+          "作词：纪如璟"
+        ],
+        "lyrics": {
+          "lyricType": "krc",
+          "sentences": [
+            {
+              "startMs": 0,
+              "endMs": 990,
+              "text": "作曲：黄义达",
+              "words": [
+                {
+                  "text": "作曲：黄义达",
+                  "startMs": 0,
+                  "endMs": 990
+                }
+              ],
+              "type": "lrc"
+            },
+            {
+              "startMs": 990,
+              "endMs": 1980,
+              "text": "作词：纪如璟",
+              "words": [
+                {
+                  "text": "作词：纪如璟",
+                  "startMs": 990,
+                  "endMs": 1980
+                }
+              ],
+              "type": "lrc"
+            },
+            {
+              "text": "风扬起时繁花落尽",
+              "startMs": 1980,
+              "endMs": 3970,
+              "words": [
+                {
+                  "startMs": 1980,
+                  "endMs": 2240,
+                  "text": "风"
+                },
+                {
+                  "startMs": 2240,
+                  "endMs": 2480,
+                  "text": "扬"
+                },
+                {
+                  "startMs": 2480,
+                  "endMs": 2720,
+                  "text": "起"
+                },
+                {
+                  "startMs": 2720,
+                  "endMs": 2960,
+                  "text": "时"
+                },
+                {
+                  "startMs": 2960,
+                  "endMs": 3100,
+                  "text": "繁"
+                },
+                {
+                  "startMs": 3100,
+                  "endMs": 3250,
+                  "text": "花"
+                },
+                {
+                  "startMs": 3660,
+                  "endMs": 3820,
+                  "text": "落"
+                },
+                {
+                  "startMs": 3820,
+                  "endMs": 3970,
+                  "text": "尽"
+                }
+              ]
+            },
+            {
+              "text": "谁执笔为你绘丹青",
+              "startMs": 5740,
+              "endMs": 8170,
+              "words": [
+                {
+                  "startMs": 5740,
+                  "endMs": 6010,
+                  "text": "谁"
+                },
+                {
+                  "startMs": 6020,
+                  "endMs": 6260,
+                  "text": "执"
+                },
+                {
+                  "startMs": 6260,
+                  "endMs": 6490,
+                  "text": "笔"
+                },
+                {
+                  "startMs": 6500,
+                  "endMs": 6760,
+                  "text": "为"
+                },
+                {
+                  "startMs": 6760,
+                  "endMs": 7010,
+                  "text": "你"
+                },
+                {
+                  "startMs": 7100,
+                  "endMs": 7370,
+                  "text": "绘"
+                },
+                {
+                  "startMs": 7500,
+                  "endMs": 7770,
+                  "text": "丹"
+                },
+                {
+                  "startMs": 7900,
+                  "endMs": 8170,
+                  "text": "青"
+                }
+              ]
+            },
+            {
+              "text": "月下独影泪湿青衣",
+              "startMs": 9500,
+              "endMs": 11450,
+              "words": [
+                {
+                  "startMs": 9500,
+                  "endMs": 9760,
+                  "text": "月"
+                },
+                {
+                  "startMs": 9760,
+                  "endMs": 10000,
+                  "text": "下"
+                },
+                {
+                  "startMs": 10000,
+                  "endMs": 10140,
+                  "text": "独"
+                },
+                {
+                  "startMs": 10140,
+                  "endMs": 10290,
+                  "text": "影"
+                },
+                {
+                  "startMs": 10460,
+                  "endMs": 10730,
+                  "text": "泪"
+                },
+                {
+                  "startMs": 10820,
+                  "endMs": 11090,
+                  "text": "湿"
+                },
+                {
+                  "startMs": 11140,
+                  "endMs": 11300,
+                  "text": "青"
+                },
+                {
+                  "startMs": 11300,
+                  "endMs": 11450,
+                  "text": "衣"
+                }
+              ]
+            },
+            {
+              "text": "流水不付一世深情",
+              "startMs": 13220,
+              "endMs": 15650,
+              "words": [
+                {
+                  "startMs": 13220,
+                  "endMs": 13490,
+                  "text": "流"
+                },
+                {
+                  "startMs": 13500,
+                  "endMs": 13740,
+                  "text": "水"
+                },
+                {
+                  "startMs": 13740,
+                  "endMs": 13970,
+                  "text": "不"
+                },
+                {
+                  "startMs": 13980,
+                  "endMs": 14240,
+                  "text": "付"
+                },
+                {
+                  "startMs": 14240,
+                  "endMs": 14380,
+                  "text": "一"
+                },
+                {
+                  "startMs": 14380,
+                  "endMs": 14530,
+                  "text": "世"
+                },
+                {
+                  "startMs": 14940,
+                  "endMs": 15210,
+                  "text": "深"
+                },
+                {
+                  "startMs": 15380,
+                  "endMs": 15650,
+                  "text": "情"
+                }
+              ]
+            },
+            {
+              "text": "只身回望太匆匆",
+              "startMs": 16980,
+              "endMs": 18610,
+              "words": [
+                {
+                  "startMs": 16980,
+                  "endMs": 17250,
+                  "text": "只"
+                },
+                {
+                  "startMs": 17260,
+                  "endMs": 17500,
+                  "text": "身"
+                },
+                {
+                  "startMs": 17500,
+                  "endMs": 17730,
+                  "text": "回"
+                },
+                {
+                  "startMs": 17740,
+                  "endMs": 18000,
+                  "text": "望"
+                },
+                {
+                  "startMs": 18000,
+                  "endMs": 18240,
+                  "text": "太"
+                },
+                {
+                  "startMs": 18240,
+                  "endMs": 18420,
+                  "text": "匆"
+                },
+                {
+                  "startMs": 18420,
+                  "endMs": 18610,
+                  "text": "匆"
+                }
+              ]
+            },
+            {
+              "text": "此生多少情与仇",
+              "startMs": 18860,
+              "endMs": 20810,
+              "words": [
+                {
+                  "startMs": 18860,
+                  "endMs": 19020,
+                  "text": "此"
+                },
+                {
+                  "startMs": 19020,
+                  "endMs": 19170,
+                  "text": "生"
+                },
+                {
+                  "startMs": 19340,
+                  "endMs": 19500,
+                  "text": "多"
+                },
+                {
+                  "startMs": 19500,
+                  "endMs": 19650,
+                  "text": "少"
+                },
+                {
+                  "startMs": 19860,
+                  "endMs": 20130,
+                  "text": "情"
+                },
+                {
+                  "startMs": 20180,
+                  "endMs": 20450,
+                  "text": "与"
+                },
+                {
+                  "startMs": 20540,
+                  "endMs": 20810,
+                  "text": "仇"
+                }
+              ]
+            },
+            {
+              "text": "只愿与你长相守",
+              "startMs": 21220,
+              "endMs": 22730,
+              "words": [
+                {
+                  "startMs": 21220,
+                  "endMs": 21480,
+                  "text": "只"
+                },
+                {
+                  "startMs": 21480,
+                  "endMs": 21720,
+                  "text": "愿"
+                },
+                {
+                  "startMs": 21720,
+                  "endMs": 21960,
+                  "text": "与"
+                },
+                {
+                  "startMs": 21960,
+                  "endMs": 22200,
+                  "text": "你"
+                },
+                {
+                  "startMs": 22200,
+                  "endMs": 22440,
+                  "text": "长"
+                },
+                {
+                  "startMs": 22440,
+                  "endMs": 22580,
+                  "text": "相"
+                },
+                {
+                  "startMs": 22580,
+                  "endMs": 22730,
+                  "text": "守"
+                }
+              ]
+            },
+            {
+              "text": "无边丝雨细如愁",
+              "startMs": 24500,
+              "endMs": 26360,
+              "words": [
+                {
+                  "startMs": 24500,
+                  "endMs": 24660,
+                  "text": "无"
+                },
+                {
+                  "startMs": 24660,
+                  "endMs": 24810,
+                  "text": "边"
+                },
+                {
+                  "startMs": 24980,
+                  "endMs": 25240,
+                  "text": "丝"
+                },
+                {
+                  "startMs": 25240,
+                  "endMs": 25480,
+                  "text": "雨"
+                },
+                {
+                  "startMs": 25480,
+                  "endMs": 25730,
+                  "text": "细"
+                },
+                {
+                  "startMs": 25780,
+                  "endMs": 26050,
+                  "text": "如"
+                },
+                {
+                  "startMs": 26100,
+                  "endMs": 26360,
+                  "text": "愁"
+                }
+              ]
+            },
+            {
+              "text": "朝来寒雨几回眸",
+              "startMs": 26360,
+              "endMs": 27930,
+              "words": [
+                {
+                  "startMs": 26360,
+                  "endMs": 26610,
+                  "text": "朝"
+                },
+                {
+                  "startMs": 26620,
+                  "endMs": 26880,
+                  "text": "来"
+                },
+                {
+                  "startMs": 26880,
+                  "endMs": 27120,
+                  "text": "寒"
+                },
+                {
+                  "startMs": 27120,
+                  "endMs": 27360,
+                  "text": "雨"
+                },
+                {
+                  "startMs": 27360,
+                  "endMs": 27610,
+                  "text": "几"
+                },
+                {
+                  "startMs": 27620,
+                  "endMs": 27780,
+                  "text": "回"
+                },
+                {
+                  "startMs": 27780,
+                  "endMs": 27930,
+                  "text": "眸"
+                }
+              ]
+            },
+            {
+              "text": "你在哪一方停留",
+              "startMs": 28740,
+              "endMs": 30650,
+              "words": [
+                {
+                  "startMs": 28740,
+                  "endMs": 29000,
+                  "text": "你"
+                },
+                {
+                  "startMs": 29000,
+                  "endMs": 29240,
+                  "text": "在"
+                },
+                {
+                  "startMs": 29240,
+                  "endMs": 29460,
+                  "text": "哪"
+                },
+                {
+                  "startMs": 29460,
+                  "endMs": 29680,
+                  "text": "一"
+                },
+                {
+                  "startMs": 29680,
+                  "endMs": 29930,
+                  "text": "方"
+                },
+                {
+                  "startMs": 29980,
+                  "endMs": 30250,
+                  "text": "停"
+                },
+                {
+                  "startMs": 30380,
+                  "endMs": 30650,
+                  "text": "留"
+                }
+              ]
+            },
+            {
+              "text": "天若有情亦无情",
+              "startMs": 32020,
+              "endMs": 33970,
+              "words": [
+                {
+                  "startMs": 32020,
+                  "endMs": 32280,
+                  "text": "天"
+                },
+                {
+                  "startMs": 32280,
+                  "endMs": 32520,
+                  "text": "若"
+                },
+                {
+                  "startMs": 32520,
+                  "endMs": 32740,
+                  "text": "有"
+                },
+                {
+                  "startMs": 32740,
+                  "endMs": 32970,
+                  "text": "情"
+                },
+                {
+                  "startMs": 32980,
+                  "endMs": 33250,
+                  "text": "亦"
+                },
+                {
+                  "startMs": 33660,
+                  "endMs": 33820,
+                  "text": "无"
+                },
+                {
+                  "startMs": 33820,
+                  "endMs": 33970,
+                  "text": "情"
+                }
+              ]
+            },
+            {
+              "text": "爱到最后要分离",
+              "startMs": 35540,
+              "endMs": 37330,
+              "words": [
+                {
+                  "startMs": 35540,
+                  "endMs": 35810,
+                  "text": "爱"
+                },
+                {
+                  "startMs": 35980,
+                  "endMs": 36240,
+                  "text": "到"
+                },
+                {
+                  "startMs": 36240,
+                  "endMs": 36380,
+                  "text": "最"
+                },
+                {
+                  "startMs": 36380,
+                  "endMs": 36530,
+                  "text": "后"
+                },
+                {
+                  "startMs": 36700,
+                  "endMs": 36970,
+                  "text": "要"
+                },
+                {
+                  "startMs": 37020,
+                  "endMs": 37180,
+                  "text": "分"
+                },
+                {
+                  "startMs": 37180,
+                  "endMs": 37330,
+                  "text": "离"
+                }
+              ]
+            },
+            {
+              "text": "你轮回的印记",
+              "startMs": 39260,
+              "endMs": 40490,
+              "words": [
+                {
+                  "startMs": 39260,
+                  "endMs": 39520,
+                  "text": "你"
+                },
+                {
+                  "startMs": 39520,
+                  "endMs": 39760,
+                  "text": "轮"
+                },
+                {
+                  "startMs": 39760,
+                  "endMs": 40000,
+                  "text": "回"
+                },
+                {
+                  "startMs": 40000,
+                  "endMs": 40220,
+                  "text": "的"
+                },
+                {
+                  "startMs": 40220,
+                  "endMs": 40340,
+                  "text": "印"
+                },
+                {
+                  "startMs": 40340,
+                  "endMs": 40490,
+                  "text": "记"
+                }
+              ]
+            },
+            {
+              "text": "落在我眉宇",
+              "startMs": 41180,
+              "endMs": 42610,
+              "words": [
+                {
+                  "startMs": 41180,
+                  "endMs": 41450,
+                  "text": "落"
+                },
+                {
+                  "startMs": 41620,
+                  "endMs": 41860,
+                  "text": "在"
+                },
+                {
+                  "startMs": 41860,
+                  "endMs": 42060,
+                  "text": "我"
+                },
+                {
+                  "startMs": 42060,
+                  "endMs": 42290,
+                  "text": "眉"
+                },
+                {
+                  "startMs": 42340,
+                  "endMs": 42610,
+                  "text": "宇"
+                }
+              ]
+            },
+            {
+              "text": "直到有一天不能呼吸",
+              "startMs": 43260,
+              "endMs": 45250,
+              "words": [
+                {
+                  "startMs": 43260,
+                  "endMs": 43520,
+                  "text": "直"
+                },
+                {
+                  "startMs": 43520,
+                  "endMs": 43760,
+                  "text": "到"
+                },
+                {
+                  "startMs": 43760,
+                  "endMs": 43980,
+                  "text": "有"
+                },
+                {
+                  "startMs": 43980,
+                  "endMs": 44160,
+                  "text": "一"
+                },
+                {
+                  "startMs": 44160,
+                  "endMs": 44370,
+                  "text": "天"
+                },
+                {
+                  "startMs": 44460,
+                  "endMs": 44720,
+                  "text": "不"
+                },
+                {
+                  "startMs": 44720,
+                  "endMs": 44960,
+                  "text": "能"
+                },
+                {
+                  "startMs": 44960,
+                  "endMs": 45100,
+                  "text": "呼"
+                },
+                {
+                  "startMs": 45100,
+                  "endMs": 45250,
+                  "text": "吸"
+                }
+              ]
+            },
+            {
+              "text": "月下独影泪湿青衣",
+              "startMs": 48900,
+              "endMs": 50890,
+              "words": [
+                {
+                  "startMs": 48900,
+                  "endMs": 49170,
+                  "text": "月"
+                },
+                {
+                  "startMs": 49180,
+                  "endMs": 49420,
+                  "text": "下"
+                },
+                {
+                  "startMs": 49420,
+                  "endMs": 49640,
+                  "text": "独"
+                },
+                {
+                  "startMs": 49640,
+                  "endMs": 49880,
+                  "text": "影"
+                },
+                {
+                  "startMs": 49880,
+                  "endMs": 50130,
+                  "text": "泪"
+                },
+                {
+                  "startMs": 50220,
+                  "endMs": 50490,
+                  "text": "湿"
+                },
+                {
+                  "startMs": 50540,
+                  "endMs": 50720,
+                  "text": "青"
+                },
+                {
+                  "startMs": 50720,
+                  "endMs": 50890,
+                  "text": "衣"
+                }
+              ]
+            },
+            {
+              "text": "流水不付一世深情",
+              "startMs": 52660,
+              "endMs": 55050,
+              "words": [
+                {
+                  "startMs": 52660,
+                  "endMs": 52920,
+                  "text": "流"
+                },
+                {
+                  "startMs": 52920,
+                  "endMs": 53160,
+                  "text": "水"
+                },
+                {
+                  "startMs": 53160,
+                  "endMs": 53380,
+                  "text": "不"
+                },
+                {
+                  "startMs": 53380,
+                  "endMs": 53600,
+                  "text": "付"
+                },
+                {
+                  "startMs": 53600,
+                  "endMs": 53740,
+                  "text": "一"
+                },
+                {
+                  "startMs": 53740,
+                  "endMs": 53890,
+                  "text": "世"
+                },
+                {
+                  "startMs": 54300,
+                  "endMs": 54570,
+                  "text": "深"
+                },
+                {
+                  "startMs": 54780,
+                  "endMs": 55050,
+                  "text": "情"
+                }
+              ]
+            },
+            {
+              "text": "只身回望太匆匆",
+              "startMs": 56420,
+              "endMs": 58010,
+              "words": [
+                {
+                  "startMs": 56420,
+                  "endMs": 56680,
+                  "text": "只"
+                },
+                {
+                  "startMs": 56680,
+                  "endMs": 56900,
+                  "text": "身"
+                },
+                {
+                  "startMs": 56900,
+                  "endMs": 57120,
+                  "text": "回"
+                },
+                {
+                  "startMs": 57120,
+                  "endMs": 57370,
+                  "text": "望"
+                },
+                {
+                  "startMs": 57380,
+                  "endMs": 57640,
+                  "text": "太"
+                },
+                {
+                  "startMs": 57640,
+                  "endMs": 57820,
+                  "text": "匆"
+                },
+                {
+                  "startMs": 57820,
+                  "endMs": 58010,
+                  "text": "匆"
+                }
+              ]
+            },
+            {
+              "text": "此生多少情与仇",
+              "startMs": 58260,
+              "endMs": 60130,
+              "words": [
+                {
+                  "startMs": 58260,
+                  "endMs": 58420,
+                  "text": "此"
+                },
+                {
+                  "startMs": 58420,
+                  "endMs": 58570,
+                  "text": "生"
+                },
+                {
+                  "startMs": 58740,
+                  "endMs": 58900,
+                  "text": "多"
+                },
+                {
+                  "startMs": 58900,
+                  "endMs": 59050,
+                  "text": "少"
+                },
+                {
+                  "startMs": 59220,
+                  "endMs": 59490,
+                  "text": "情"
+                },
+                {
+                  "startMs": 59580,
+                  "endMs": 59850,
+                  "text": "与"
+                },
+                {
+                  "startMs": 59860,
+                  "endMs": 60130,
+                  "text": "仇"
+                }
+              ]
+            },
+            {
+              "text": "只愿与你长相守",
+              "startMs": 60660,
+              "endMs": 62130,
+              "words": [
+                {
+                  "startMs": 60660,
+                  "endMs": 60920,
+                  "text": "只"
+                },
+                {
+                  "startMs": 60920,
+                  "endMs": 61140,
+                  "text": "愿"
+                },
+                {
+                  "startMs": 61140,
+                  "endMs": 61360,
+                  "text": "与"
+                },
+                {
+                  "startMs": 61360,
+                  "endMs": 61580,
+                  "text": "你"
+                },
+                {
+                  "startMs": 61580,
+                  "endMs": 61810,
+                  "text": "长"
+                },
+                {
+                  "startMs": 61820,
+                  "endMs": 61980,
+                  "text": "相"
+                },
+                {
+                  "startMs": 61980,
+                  "endMs": 62130,
+                  "text": "守"
+                }
+              ]
+            },
+            {
+              "text": "无边丝雨细如愁",
+              "startMs": 63900,
+              "endMs": 65800,
+              "words": [
+                {
+                  "startMs": 63900,
+                  "endMs": 64060,
+                  "text": "无"
+                },
+                {
+                  "startMs": 64060,
+                  "endMs": 64210,
+                  "text": "边"
+                },
+                {
+                  "startMs": 64380,
+                  "endMs": 64640,
+                  "text": "丝"
+                },
+                {
+                  "startMs": 64640,
+                  "endMs": 64880,
+                  "text": "雨"
+                },
+                {
+                  "startMs": 64880,
+                  "endMs": 65130,
+                  "text": "细"
+                },
+                {
+                  "startMs": 65220,
+                  "endMs": 65490,
+                  "text": "如"
+                },
+                {
+                  "startMs": 65540,
+                  "endMs": 65800,
+                  "text": "愁"
+                }
+              ]
+            },
+            {
+              "text": "朝来寒雨几回眸",
+              "startMs": 65800,
+              "endMs": 67370,
+              "words": [
+                {
+                  "startMs": 65800,
+                  "endMs": 66040,
+                  "text": "朝"
+                },
+                {
+                  "startMs": 66040,
+                  "endMs": 66280,
+                  "text": "来"
+                },
+                {
+                  "startMs": 66280,
+                  "endMs": 66520,
+                  "text": "寒"
+                },
+                {
+                  "startMs": 66520,
+                  "endMs": 66760,
+                  "text": "雨"
+                },
+                {
+                  "startMs": 66760,
+                  "endMs": 67010,
+                  "text": "几"
+                },
+                {
+                  "startMs": 67060,
+                  "endMs": 67220,
+                  "text": "回"
+                },
+                {
+                  "startMs": 67220,
+                  "endMs": 67370,
+                  "text": "眸"
+                }
+              ]
+            },
+            {
+              "text": "你在哪一方停留",
+              "startMs": 68140,
+              "endMs": 70050,
+              "words": [
+                {
+                  "startMs": 68140,
+                  "endMs": 68400,
+                  "text": "你"
+                },
+                {
+                  "startMs": 68400,
+                  "endMs": 68620,
+                  "text": "在"
+                },
+                {
+                  "startMs": 68620,
+                  "endMs": 68840,
+                  "text": "哪"
+                },
+                {
+                  "startMs": 68840,
+                  "endMs": 69080,
+                  "text": "一"
+                },
+                {
+                  "startMs": 69080,
+                  "endMs": 69320,
+                  "text": "方"
+                },
+                {
+                  "startMs": 69320,
+                  "endMs": 69570,
+                  "text": "停"
+                },
+                {
+                  "startMs": 69780,
+                  "endMs": 70050,
+                  "text": "留"
+                }
+              ]
+            },
+            {
+              "text": "天若有情亦无情",
+              "startMs": 71380,
+              "endMs": 73810,
+              "words": [
+                {
+                  "startMs": 71380,
+                  "endMs": 71650,
+                  "text": "天"
+                },
+                {
+                  "startMs": 71660,
+                  "endMs": 71900,
+                  "text": "若"
+                },
+                {
+                  "startMs": 71900,
+                  "endMs": 72120,
+                  "text": "有"
+                },
+                {
+                  "startMs": 72120,
+                  "endMs": 72370,
+                  "text": "情"
+                },
+                {
+                  "startMs": 72380,
+                  "endMs": 72650,
+                  "text": "亦"
+                },
+                {
+                  "startMs": 73060,
+                  "endMs": 73330,
+                  "text": "无"
+                },
+                {
+                  "startMs": 73540,
+                  "endMs": 73810,
+                  "text": "情"
+                }
+              ]
+            },
+            {
+              "text": "爱到最后要分离",
+              "startMs": 74940,
+              "endMs": 76770,
+              "words": [
+                {
+                  "startMs": 74940,
+                  "endMs": 75210,
+                  "text": "爱"
+                },
+                {
+                  "startMs": 75380,
+                  "endMs": 75640,
+                  "text": "到"
+                },
+                {
+                  "startMs": 75640,
+                  "endMs": 75780,
+                  "text": "最"
+                },
+                {
+                  "startMs": 75780,
+                  "endMs": 75930,
+                  "text": "后"
+                },
+                {
+                  "startMs": 76100,
+                  "endMs": 76370,
+                  "text": "要"
+                },
+                {
+                  "startMs": 76460,
+                  "endMs": 76620,
+                  "text": "分"
+                },
+                {
+                  "startMs": 76620,
+                  "endMs": 76770,
+                  "text": "离"
+                }
+              ]
+            },
+            {
+              "text": "你轮回的印记落在我眉宇",
+              "startMs": 78660,
+              "endMs": 82010,
+              "words": [
+                {
+                  "startMs": 78660,
+                  "endMs": 78920,
+                  "text": "你"
+                },
+                {
+                  "startMs": 78920,
+                  "endMs": 79160,
+                  "text": "轮"
+                },
+                {
+                  "startMs": 79160,
+                  "endMs": 79410,
+                  "text": "回"
+                },
+                {
+                  "startMs": 79420,
+                  "endMs": 79640,
+                  "text": "的"
+                },
+                {
+                  "startMs": 79640,
+                  "endMs": 79740,
+                  "text": "印"
+                },
+                {
+                  "startMs": 79740,
+                  "endMs": 79890,
+                  "text": "记"
+                },
+                {
+                  "startMs": 80580,
+                  "endMs": 80850,
+                  "text": "落"
+                },
+                {
+                  "startMs": 81020,
+                  "endMs": 81280,
+                  "text": "在"
+                },
+                {
+                  "startMs": 81280,
+                  "endMs": 81500,
+                  "text": "我"
+                },
+                {
+                  "startMs": 81500,
+                  "endMs": 81730,
+                  "text": "眉"
+                },
+                {
+                  "startMs": 81740,
+                  "endMs": 82010,
+                  "text": "宇"
+                }
+              ]
+            },
+            {
+              "text": "直到有一天不能呼吸",
+              "startMs": 82620,
+              "endMs": 84570,
+              "words": [
+                {
+                  "startMs": 82620,
+                  "endMs": 82890,
+                  "text": "直"
+                },
+                {
+                  "startMs": 82900,
+                  "endMs": 83160,
+                  "text": "到"
+                },
+                {
+                  "startMs": 83160,
+                  "endMs": 83380,
+                  "text": "有"
+                },
+                {
+                  "startMs": 83380,
+                  "endMs": 83560,
+                  "text": "一"
+                },
+                {
+                  "startMs": 83560,
+                  "endMs": 83770,
+                  "text": "天"
+                },
+                {
+                  "startMs": 83860,
+                  "endMs": 84100,
+                  "text": "不"
+                },
+                {
+                  "startMs": 84100,
+                  "endMs": 84300,
+                  "text": "能"
+                },
+                {
+                  "startMs": 84300,
+                  "endMs": 84420,
+                  "text": "呼"
+                },
+                {
+                  "startMs": 84420,
+                  "endMs": 84570,
+                  "text": "吸"
+                }
+              ]
+            },
+            {
+              "text": "天若有情亦无情",
+              "startMs": 86420,
+              "endMs": 88770,
+              "words": [
+                {
+                  "startMs": 86420,
+                  "endMs": 86680,
+                  "text": "天"
+                },
+                {
+                  "startMs": 86680,
+                  "endMs": 86900,
+                  "text": "若"
+                },
+                {
+                  "startMs": 86900,
+                  "endMs": 87120,
+                  "text": "有"
+                },
+                {
+                  "startMs": 87120,
+                  "endMs": 87370,
+                  "text": "情"
+                },
+                {
+                  "startMs": 87380,
+                  "endMs": 87650,
+                  "text": "亦"
+                },
+                {
+                  "startMs": 88060,
+                  "endMs": 88330,
+                  "text": "无"
+                },
+                {
+                  "startMs": 88500,
+                  "endMs": 88770,
+                  "text": "情"
+                }
+              ]
+            },
+            {
+              "text": "万丈红尘我等你",
+              "startMs": 89980,
+              "endMs": 92050,
+              "words": [
+                {
+                  "startMs": 89980,
+                  "endMs": 90140,
+                  "text": "万"
+                },
+                {
+                  "startMs": 90140,
+                  "endMs": 90290,
+                  "text": "丈"
+                },
+                {
+                  "startMs": 90620,
+                  "endMs": 90780,
+                  "text": "红"
+                },
+                {
+                  "startMs": 90780,
+                  "endMs": 90930,
+                  "text": "尘"
+                },
+                {
+                  "startMs": 91100,
+                  "endMs": 91370,
+                  "text": "我"
+                },
+                {
+                  "startMs": 91460,
+                  "endMs": 91730,
+                  "text": "等"
+                },
+                {
+                  "startMs": 91780,
+                  "endMs": 92050,
+                  "text": "你"
+                }
+              ]
+            },
+            {
+              "text": "用你的牵挂染尽我白发",
+              "startMs": 93900,
+              "endMs": 96650,
+              "words": [
+                {
+                  "startMs": 93900,
+                  "endMs": 94170,
+                  "text": "用"
+                },
+                {
+                  "startMs": 94180,
+                  "endMs": 94420,
+                  "text": "你"
+                },
+                {
+                  "startMs": 94420,
+                  "endMs": 94620,
+                  "text": "的"
+                },
+                {
+                  "startMs": 94620,
+                  "endMs": 94740,
+                  "text": "牵"
+                },
+                {
+                  "startMs": 94740,
+                  "endMs": 94890,
+                  "text": "挂"
+                },
+                {
+                  "startMs": 95780,
+                  "endMs": 96040,
+                  "text": "染"
+                },
+                {
+                  "startMs": 96040,
+                  "endMs": 96260,
+                  "text": "尽"
+                },
+                {
+                  "startMs": 96260,
+                  "endMs": 96420,
+                  "text": "我"
+                },
+                {
+                  "startMs": 96420,
+                  "endMs": 96500,
+                  "text": "白"
+                },
+                {
+                  "startMs": 96500,
+                  "endMs": 96650,
+                  "text": "发"
+                }
+              ]
+            },
+            {
+              "text": "咫尺天涯你终未远离",
+              "startMs": 97660,
+              "endMs": 99610,
+              "words": [
+                {
+                  "startMs": 97660,
+                  "endMs": 97820,
+                  "text": "咫"
+                },
+                {
+                  "startMs": 97820,
+                  "endMs": 97970,
+                  "text": "尺"
+                },
+                {
+                  "startMs": 98140,
+                  "endMs": 98300,
+                  "text": "天"
+                },
+                {
+                  "startMs": 98300,
+                  "endMs": 98450,
+                  "text": "涯"
+                },
+                {
+                  "startMs": 98500,
+                  "endMs": 98770,
+                  "text": "你"
+                },
+                {
+                  "startMs": 98820,
+                  "endMs": 99080,
+                  "text": "终"
+                },
+                {
+                  "startMs": 99080,
+                  "endMs": 99320,
+                  "text": "未"
+                },
+                {
+                  "startMs": 99320,
+                  "endMs": 99460,
+                  "text": "远"
+                },
+                {
+                  "startMs": 99460,
+                  "endMs": 99610,
+                  "text": "离"
+                }
+              ]
+            },
+            {
+              "text": "天若有情亦无情",
+              "startMs": 101380,
+              "endMs": 103810,
+              "words": [
+                {
+                  "startMs": 101380,
+                  "endMs": 101650,
+                  "text": "天"
+                },
+                {
+                  "startMs": 101660,
+                  "endMs": 101900,
+                  "text": "若"
+                },
+                {
+                  "startMs": 101900,
+                  "endMs": 102120,
+                  "text": "有"
+                },
+                {
+                  "startMs": 102120,
+                  "endMs": 102370,
+                  "text": "情"
+                },
+                {
+                  "startMs": 102380,
+                  "endMs": 102650,
+                  "text": "亦"
+                },
+                {
+                  "startMs": 103060,
+                  "endMs": 103330,
+                  "text": "无"
+                },
+                {
+                  "startMs": 103540,
+                  "endMs": 103810,
+                  "text": "情"
+                }
+              ]
+            },
+            {
+              "text": "爱到最后要分离",
+              "startMs": 104940,
+              "endMs": 106770,
+              "words": [
+                {
+                  "startMs": 104940,
+                  "endMs": 105210,
+                  "text": "爱"
+                },
+                {
+                  "startMs": 105420,
+                  "endMs": 105660,
+                  "text": "到"
+                },
+                {
+                  "startMs": 105660,
+                  "endMs": 105780,
+                  "text": "最"
+                },
+                {
+                  "startMs": 105780,
+                  "endMs": 105930,
+                  "text": "后"
+                },
+                {
+                  "startMs": 106140,
+                  "endMs": 106410,
+                  "text": "要"
+                },
+                {
+                  "startMs": 106460,
+                  "endMs": 106620,
+                  "text": "分"
+                },
+                {
+                  "startMs": 106620,
+                  "endMs": 106770,
+                  "text": "离"
+                }
+              ]
+            },
+            {
+              "text": "你轮回的印记落在我眉宇",
+              "startMs": 108660,
+              "endMs": 112050,
+              "words": [
+                {
+                  "startMs": 108660,
+                  "endMs": 108920,
+                  "text": "你"
+                },
+                {
+                  "startMs": 108920,
+                  "endMs": 109160,
+                  "text": "轮"
+                },
+                {
+                  "startMs": 109160,
+                  "endMs": 109400,
+                  "text": "回"
+                },
+                {
+                  "startMs": 109400,
+                  "endMs": 109640,
+                  "text": "的"
+                },
+                {
+                  "startMs": 109640,
+                  "endMs": 109780,
+                  "text": "印"
+                },
+                {
+                  "startMs": 109780,
+                  "endMs": 109930,
+                  "text": "记"
+                },
+                {
+                  "startMs": 110580,
+                  "endMs": 110850,
+                  "text": "落"
+                },
+                {
+                  "startMs": 111020,
+                  "endMs": 111290,
+                  "text": "在"
+                },
+                {
+                  "startMs": 111300,
+                  "endMs": 111520,
+                  "text": "我"
+                },
+                {
+                  "startMs": 111520,
+                  "endMs": 111730,
+                  "text": "眉"
+                },
+                {
+                  "startMs": 111780,
+                  "endMs": 112050,
+                  "text": "宇"
+                }
+              ]
+            },
+            {
+              "text": "直到有一天不能呼吸",
+              "startMs": 112660,
+              "endMs": 114570,
+              "words": [
+                {
+                  "startMs": 112660,
+                  "endMs": 112930,
+                  "text": "直"
+                },
+                {
+                  "startMs": 112940,
+                  "endMs": 113180,
+                  "text": "到"
+                },
+                {
+                  "startMs": 113180,
+                  "endMs": 113380,
+                  "text": "有"
+                },
+                {
+                  "startMs": 113380,
+                  "endMs": 113560,
+                  "text": "一"
+                },
+                {
+                  "startMs": 113560,
+                  "endMs": 113770,
+                  "text": "天"
+                },
+                {
+                  "startMs": 113820,
+                  "endMs": 114090,
+                  "text": "不"
+                },
+                {
+                  "startMs": 114100,
+                  "endMs": 114320,
+                  "text": "能"
+                },
+                {
+                  "startMs": 114320,
+                  "endMs": 114420,
+                  "text": "呼"
+                },
+                {
+                  "startMs": 114420,
+                  "endMs": 114570,
+                  "text": "吸"
+                }
+              ]
+            },
+            {
+              "text": "天若有情亦无情",
+              "startMs": 116420,
+              "endMs": 118810,
+              "words": [
+                {
+                  "startMs": 116420,
+                  "endMs": 116680,
+                  "text": "天"
+                },
+                {
+                  "startMs": 116680,
+                  "endMs": 116900,
+                  "text": "若"
+                },
+                {
+                  "startMs": 116900,
+                  "endMs": 117120,
+                  "text": "有"
+                },
+                {
+                  "startMs": 117120,
+                  "endMs": 117370,
+                  "text": "情"
+                },
+                {
+                  "startMs": 117380,
+                  "endMs": 117650,
+                  "text": "亦"
+                },
+                {
+                  "startMs": 118060,
+                  "endMs": 118330,
+                  "text": "无"
+                },
+                {
+                  "startMs": 118540,
+                  "endMs": 118810,
+                  "text": "情"
+                }
+              ]
+            },
+            {
+              "text": "万丈红尘我等你",
+              "startMs": 119980,
+              "endMs": 122090,
+              "words": [
+                {
+                  "startMs": 119980,
+                  "endMs": 120140,
+                  "text": "万"
+                },
+                {
+                  "startMs": 120140,
+                  "endMs": 120290,
+                  "text": "丈"
+                },
+                {
+                  "startMs": 120620,
+                  "endMs": 120780,
+                  "text": "红"
+                },
+                {
+                  "startMs": 120780,
+                  "endMs": 120930,
+                  "text": "尘"
+                },
+                {
+                  "startMs": 121100,
+                  "endMs": 121370,
+                  "text": "我"
+                },
+                {
+                  "startMs": 121460,
+                  "endMs": 121730,
+                  "text": "等"
+                },
+                {
+                  "startMs": 121820,
+                  "endMs": 122090,
+                  "text": "你"
+                }
+              ]
+            },
+            {
+              "text": "用你的牵挂染尽我白发",
+              "startMs": 123860,
+              "endMs": 126690,
+              "words": [
+                {
+                  "startMs": 123860,
+                  "endMs": 124130,
+                  "text": "用"
+                },
+                {
+                  "startMs": 124140,
+                  "endMs": 124380,
+                  "text": "你"
+                },
+                {
+                  "startMs": 124380,
+                  "endMs": 124600,
+                  "text": "的"
+                },
+                {
+                  "startMs": 124600,
+                  "endMs": 124740,
+                  "text": "牵"
+                },
+                {
+                  "startMs": 124740,
+                  "endMs": 124890,
+                  "text": "挂"
+                },
+                {
+                  "startMs": 125780,
+                  "endMs": 125940,
+                  "text": "染"
+                },
+                {
+                  "startMs": 125940,
+                  "endMs": 126090,
+                  "text": "尽"
+                },
+                {
+                  "startMs": 126220,
+                  "endMs": 126440,
+                  "text": "我"
+                },
+                {
+                  "startMs": 126440,
+                  "endMs": 126540,
+                  "text": "白"
+                },
+                {
+                  "startMs": 126540,
+                  "endMs": 126690,
+                  "text": "发"
+                }
+              ]
+            },
+            {
+              "text": "咫尺天涯你终未远离",
+              "startMs": 127660,
+              "endMs": 9007199254740991,
+              "words": [
+                {
+                  "startMs": 127660,
+                  "endMs": 127820,
+                  "text": "咫"
+                },
+                {
+                  "startMs": 127820,
+                  "endMs": 127970,
+                  "text": "尺"
+                },
+                {
+                  "startMs": 128100,
+                  "endMs": 128260,
+                  "text": "天"
+                },
+                {
+                  "startMs": 128260,
+                  "endMs": 128410,
+                  "text": "涯"
+                },
+                {
+                  "startMs": 128500,
+                  "endMs": 128770,
+                  "text": "你"
+                },
+                {
+                  "startMs": 128820,
+                  "endMs": 129090,
+                  "text": "终"
+                },
+                {
+                  "startMs": 129100,
+                  "endMs": 129340,
+                  "text": "未"
+                },
+                {
+                  "startMs": 129340,
+                  "endMs": 129460,
+                  "text": "远"
+                },
+                {
+                  "startMs": 129460,
+                  "endMs": 131350,
+                  "text": "离"
+                }
+              ]
+            }
+          ]
+        },
+        "uuid": "v10ad6g50000cq3648nog65jphnequ8g",
+        "duration": 131.346,
+        "encrypt": false,
+        "artistName": "Zxxy",
+        "trackName": "天若有情(DJ版)",
+        "trackInfo": {
+          "id": "7387697402612500481",
+          "album": {
+            "id": "7387697268574832656",
+            "name": "来自天堂的魔鬼",
+            "release_date": 1720108800,
+            "url_cover": {
+              "uri": "tos-cn-v-2774c002/ooAEgi2AZfAEmCXfGAahCl6i1WdBtBiWQm0BQI",
+              "urls": [
+                "https://p3-luna.douyinpic.com/img/",
+                "https://p6-luna.douyinpic.com/img/"
+              ],
+              "template_prefix": "tplv-b829550vbb"
+            },
+            "url_player_bg": {
+              "uri": "tos-cn-v-2774c002/ooAEgi2AZfAEmCXfGAahCl6i1WdBtBiWQm0BQI",
+              "urls": [
+                "https://p3-luna.douyinpic.com/img/",
+                "https://p6-luna.douyinpic.com/img/"
+              ],
+              "template": "background:${width}:${height}:30:90:0",
+              "template_prefix": "tplv-b829550vbb"
+            },
+            "cover_gradient_effect_color": [
+              {
+                "rgb": "b6a1a5"
+              },
+              {
+                "rgb": "917a7e"
+              }
+            ],
+            "playing_wave_color": null,
+            "paused_wave_color": null
+          },
+          "artists": [
+            {
+              "id": "7351740515311765521",
+              "name": "Zxxy",
+              "url_avatar": {
+                "uri": "tos-cn-v-2774c002/o4DXAE1AhIeBoFAtdQifAIbGbFAYBZgEMmInCB",
+                "urls": [
+                  "https://p3-luna.douyinpic.com/img/",
+                  "https://p6-luna.douyinpic.com/img/"
+                ],
+                "template_prefix": "tplv-b829550vbb"
+              },
+              "state": {
+                "blocked_by_me": false
+              },
+              "user_info": {
+                "id": "64229713379884",
+                "nickname": "Zxxy（加勒比Music）",
+                "medium_avatar_url": {
+                  "urls": [
+                    "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-avt-0015_ee0abe536fa65feef6eb09b17e7391a4.jpeg?from=3782654143",
+                    "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-avt-0015_ee0abe536fa65feef6eb09b17e7391a4.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-avt-0015_ee0abe536fa65feef6eb09b17e7391a4.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "thumb_avatar_url": {
+                  "urls": [
+                    "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_ee0abe536fa65feef6eb09b17e7391a4.jpeg?from=3782654143",
+                    "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_ee0abe536fa65feef6eb09b17e7391a4.jpeg?from=3782654143",
+                    "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_ee0abe536fa65feef6eb09b17e7391a4.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "artist_id": "7351740515311765521",
+                "secret": false,
+                "test_tag": 0,
+                "vip_stage": "",
+                "is_vip": false,
+                "is_luna_user": true
+              },
+              "simple_display_name": "Zxxy",
+              "user_artist_type": 2
+            }
+          ],
+          "duration": 131346,
+          "name": "天若有情(DJ版)",
+          "preview": {
+            "duration": 30001,
+            "start": 32064,
+            "vid": "v10ad6g50000cq3648nog65jphnequ8g",
+            "bit_rates": [
+              {
+                "br": 132718,
+                "size": 497696,
+                "quality": "higher"
+              }
+            ]
+          },
+          "state": {},
+          "stats": {
+            "count_collected": 3193515,
+            "count_comment": 9181,
+            "count_shared": 41449
+          },
+          "vid": "v10ad6g50000cq35vbnog65u3f6tou60",
+          "label_info": {
+            "only_vip_download": true,
+            "only_vip_playable": true,
+            "quality_only_vip_can_download": [
+              "medium",
+              "higher",
+              "highest",
+              "lossless"
+            ],
+            "quality_only_vip_can_play": [
+              "lossless"
+            ],
+            "quality_map": {
+              "higher": {
+                "play_detail": {
+                  "condition": "benefit_play_higher",
+                  "need_vip": false,
+                  "need_purchase": false
+                },
+                "download_detail": {
+                  "condition": "benefit_download_higher",
+                  "need_vip": true,
+                  "need_purchase": false
+                }
+              },
+              "highest": {
+                "play_detail": {
+                  "condition": "benefit_play_highest",
+                  "need_vip": false,
+                  "need_purchase": false
+                },
+                "download_detail": {
+                  "condition": "benefit_download_highest",
+                  "need_vip": true,
+                  "need_purchase": false
+                }
+              },
+              "lossless": {
+                "play_detail": {
+                  "condition": "benefit_play_lossless",
+                  "need_vip": true,
+                  "need_purchase": false
+                },
+                "download_detail": {
+                  "condition": "benefit_download_lossless",
+                  "need_vip": true,
+                  "need_purchase": false
+                }
+              },
+              "spatial": {
+                "play_detail": {
+                  "condition": "benefit_play_spatial",
+                  "need_vip": true,
+                  "need_purchase": false
+                },
+                "download_detail": {
+                  "condition": "benefit_download_spatial",
+                  "need_vip": true,
+                  "need_purchase": false
+                }
+              },
+              "hi_res": {
+                "play_detail": {
+                  "condition": "benefit_play_hi_res",
+                  "need_vip": true,
+                  "need_purchase": false
+                },
+                "download_detail": null
+              },
+              "medium": {
+                "play_detail": {
+                  "condition": "benefit_play_medium",
+                  "need_vip": false,
+                  "need_purchase": false
+                },
+                "download_detail": {
+                  "condition": "benefit_download_medium",
+                  "need_vip": true,
+                  "need_purchase": false
+                }
+              }
+            }
+          },
+          "sim_id": 7108795446302083000,
+          "bit_rates": [
+            {
+              "br": 132275,
+              "size": 2171725,
+              "quality": "higher"
+            },
+            {
+              "br": 260301,
+              "size": 4273699,
+              "quality": "highest"
+            },
+            {
+              "br": 1742688,
+              "size": 28611903,
+              "quality": "lossless"
+            },
+            {
+              "br": 324304,
+              "size": 5324916,
+              "quality": "spatial"
+            },
+            {
+              "br": 322083,
+              "size": 5288570,
+              "quality": "hi_res"
+            },
+            {
+              "br": 66212,
+              "size": 1087088,
+              "quality": "medium"
+            }
+          ],
+          "audition_info": {
+            "vid": "v10ad6g50000cq3648nog65jphnequ8g",
+            "start_time_ms": 32064,
+            "duration_ms": 30001
+          },
+          "song_maker_team": {
+            "composers": [
+              {
+                "name": "黄义达"
+              }
+            ],
+            "lyricists": [
+              {
+                "name": "纪如璟"
+              }
+            ]
+          },
+          "media_type": "track",
+          "chorus": {
+            "duration": 0,
+            "start": 32064
+          },
+          "colors": {
+            "cover_gradient_effect_color": [
+              {
+                "rgb": "b6a1a5"
+              },
+              {
+                "rgb": "917a7e"
+              }
+            ],
+            "normal_lyric_color": {
+              "rgb": "d9c4c8"
+            },
+            "playing_lyric_color": {
+              "rgb": "fde8ec"
+            },
+            "recommend_reason_background_color": {
+              "rgb": "79676a",
+              "alpha": "8c"
+            },
+            "featured_comment_tag_color": {
+              "rgb": "ebe0e2"
+            },
+            "background_color": {
+              "rgb": "917a7e"
+            },
+            "playing_wave_color": {
+              "rgb": "bda8ac"
+            },
+            "paused_wave_color": {
+              "rgb": "837c7d",
+              "alpha": "bf"
+            },
+            "comment_share_additional_color": {
+              "rgb": "917a7e"
+            },
+            "base_colors": [
+              {
+                "rgb": "f6eff0"
+              },
+              {
+                "rgb": "e7dadc"
+              },
+              {
+                "rgb": "d7c7c9"
+              },
+              {
+                "rgb": "c7b4b7"
+              },
+              {
+                "rgb": "b6a1a5"
+              },
+              {
+                "rgb": "937b7f"
+              },
+              {
+                "rgb": "6d585c"
+              },
+              {
+                "rgb": "453739"
+              },
+              {
+                "rgb": "1d1617"
+              }
+            ],
+            "non_interactive_anchor_background": {
+              "rgb": "948387",
+              "alpha": "8c"
+            }
+          },
+          "limited_free_info": {
+            "queue_types": [],
+            "expire_time": 0,
+            "sign": "",
+            "sign_version": "",
+            "limited_free_type": "",
+            "rewind_prev_intercept_type": "",
+            "intercept_type": ""
+          },
+          "vocal": 1,
+          "lang_codes": [
+            "ZH"
+          ],
+          "first_vocal": {
+            "duration": 32064,
+            "start": 0
+          },
+          "sharable_platforms": [
+            "link",
+            "aweme",
+            "aweme_publish",
+            "wechat_zone",
+            "wechat",
+            "weibo",
+            "qq_zone",
+            "qq"
+          ],
+          "playable_range": {
+            "duration": 16704,
+            "start": 32064
+          },
+          "sim_id_v3": 24456194,
+          "plug_status": {
+            "can_plug": false,
+            "is_plugged": false
+          },
+          "tags": [
+            {
+              "category": {
+                "tag_id": 1,
+                "tag_name": "Genre"
+              },
+              "first_level_tag": {
+                "tag_id": 6920130282687318000,
+                "tag_name": "Others"
+              },
+              "second_level_tag": {
+                "tag_id": 6826164174565935000,
+                "tag_name": "DJ"
+              }
+            },
+            {
+              "category": {
+                "tag_id": 1,
+                "tag_name": "Genre"
+              },
+              "first_level_tag": {
+                "tag_id": 6920130282687318000,
+                "tag_name": "Others"
+              }
+            }
+          ],
+          "nodes": [
+            {
+              "type": 2,
+              "start": 32064,
+              "duration": 0,
+              "priority": 1,
+              "opacity": 1
+            }
+          ],
+          "is_support_bell": true,
+          "check_context": "{\"req_time\":1776661643}"
+        },
+        "previewStart": 32.064,
+        "previewEnd": 62.065,
+        "offsetStart": 32.064,
+        "offsetDuration": 30.001,
+        "coverURL": "https://p3-luna.douyinpic.com/img/tos-cn-v-2774c002/ooAEgi2AZfAEmCXfGAahCl6i1WdBtBiWQm0BQI~c5_375x375.jpg",
+        "group_playable_level": "pay",
+        "group_download_level": "pay",
+        "album_id": "7387697268574832656",
+        "genre_tag": "DJ",
+        "commentsStruct": {
+          "comments": [
+            {
+              "id": "7402531441181262632",
+              "content": "我爸问我为什么爱听这种歌[尬笑][比心]",
+              "count_digged": 990,
+              "time_created": 1723612586,
+              "user": {
+                "id": "1433384829066272",
+                "nickname": "网易炸了",
+                "medium_avatar_url": {
+                  "urls": [
+                    "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                    "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "thumb_avatar_url": {
+                  "urls": [
+                    "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                    "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "secret": false,
+                "test_tag": 0,
+                "vip_stage": "free",
+                "is_vip": false,
+                "public_name": "网易炸了",
+                "is_luna_user": true
+              },
+              "count_reply": 108,
+              "user_artist_info": {
+                "user_artist_type": 0,
+                "user_brief": {
+                  "id": "1433384829066272",
+                  "nickname": "网易炸了",
+                  "medium_avatar_url": {
+                    "urls": [
+                      "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                      "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "thumb_avatar_url": {
+                    "urls": [
+                      "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                      "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/douyin-user-image-file_104536b43f2a5969905df614697addc6.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "secret": false,
+                  "test_tag": 0,
+                  "vip_stage": "free",
+                  "is_vip": false,
+                  "public_name": "网易炸了",
+                  "is_luna_user": true
+                }
+              },
+              "service_id": "luna",
+              "ip_label": "宁夏"
+            },
+            {
+              "id": "7387991694921089801",
+              "content": "好听啊 为什么没人点赞[微笑]",
+              "count_digged": 4349,
+              "time_created": 1720331664,
+              "user": {
+                "id": "111453960286",
+                "nickname": "睡不着的泡泡糖：💤",
+                "medium_avatar_url": {
+                  "urls": [
+                    "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                    "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "thumb_avatar_url": {
+                  "urls": [
+                    "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                    "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "secret": false,
+                "test_tag": 0,
+                "vip_stage": "free",
+                "is_vip": false,
+                "public_name": "睡不着的泡泡糖：💤",
+                "is_luna_user": true
+              },
+              "count_reply": 195,
+              "featured": true,
+              "visibility": 1,
+              "featured_tags": [
+                "我的青春记忆"
+              ],
+              "hashtags": [
+                {
+                  "id": "7245131118894088229",
+                  "text": "我的青春记忆",
+                  "prompt": "青春不留遗憾，把你想说的都记在音乐里～"
+                }
+              ],
+              "user_artist_info": {
+                "user_artist_type": 0,
+                "user_brief": {
+                  "id": "111453960286",
+                  "nickname": "睡不着的泡泡糖：💤",
+                  "medium_avatar_url": {
+                    "urls": [
+                      "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                      "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "thumb_avatar_url": {
+                    "urls": [
+                      "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                      "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_ecfbaff9263647009d400edd47634925.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "secret": false,
+                  "test_tag": 0,
+                  "vip_stage": "free",
+                  "is_vip": false,
+                  "public_name": "睡不着的泡泡糖：💤",
+                  "is_luna_user": true
+                }
+              },
+              "service_id": "luna",
+              "ip_label": "甘肃"
+            },
+            {
+              "id": "7404747160006689576",
+              "content": "作者的歌真的很好听，下单以后立马去试了一下，发现布料防汗，遮阳，性价比超高，我家的狗子吃了以后也是狂长30斤，钓鱼的时候鱼也是狂口，我家的妹妹天天吃，他说很好吃，我就一直买，[感谢]商家真的很良心，一袋泡面50元，西伯利亚进口的，上高速的时候车跑的也很快，喝了酒，警察也不抓，非常建议大家听",
+              "count_digged": 599,
+              "time_created": 1724126417,
+              "user": {
+                "id": "96247390949",
+                "nickname": "895057467",
+                "medium_avatar_url": {
+                  "urls": [
+                    "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                    "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                    "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "thumb_avatar_url": {
+                  "urls": [
+                    "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                    "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "secret": true,
+                "test_tag": 0,
+                "vip_stage": "free",
+                "is_vip": false,
+                "public_name": "895057467",
+                "is_luna_user": true
+              },
+              "count_reply": 62,
+              "featured": true,
+              "visibility": 1,
+              "featured_tags": [
+                "音乐推荐"
+              ],
+              "user_artist_info": {
+                "user_artist_type": 0,
+                "user_brief": {
+                  "id": "96247390949",
+                  "nickname": "895057467",
+                  "medium_avatar_url": {
+                    "urls": [
+                      "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                      "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                      "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "thumb_avatar_url": {
+                    "urls": [
+                      "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143",
+                      "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ocjDFERCxAgAnFDfIAAOEf0oeEvvpQAGtEN9wO.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "secret": true,
+                  "test_tag": 0,
+                  "vip_stage": "free",
+                  "is_vip": false,
+                  "public_name": "895057467",
+                  "is_luna_user": true
+                }
+              },
+              "service_id": "luna",
+              "ip_label": "河北"
+            },
+            {
+              "id": "7404753653616296730",
+              "content": "这歌好像是什么电视剧的主题曲吧。好像是《锦绣未央》不知道是不是，但是真的很好看",
+              "count_digged": 687,
+              "time_created": 1724209324,
+              "user": {
+                "id": "67473315206",
+                "nickname": "橘灿",
+                "medium_avatar_url": {
+                  "urls": [
+                    "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                    "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "thumb_avatar_url": {
+                  "urls": [
+                    "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                    "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "secret": false,
+                "test_tag": 0,
+                "vip_stage": "free",
+                "is_vip": false,
+                "public_name": "橘灿",
+                "is_luna_user": true
+              },
+              "count_reply": 72,
+              "featured": true,
+              "visibility": 1,
+              "featured_tags": [
+                "音乐推荐"
+              ],
+              "user_artist_info": {
+                "user_artist_type": 0,
+                "user_brief": {
+                  "id": "67473315206",
+                  "nickname": "橘灿",
+                  "medium_avatar_url": {
+                    "urls": [
+                      "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                      "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "thumb_avatar_url": {
+                    "urls": [
+                      "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                      "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oQpBUIb7PCzAAAiMiOyEiwuAMPAaBqyds9wcA.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "secret": false,
+                  "test_tag": 0,
+                  "vip_stage": "free",
+                  "is_vip": false,
+                  "public_name": "橘灿",
+                  "is_luna_user": true
+                }
+              },
+              "service_id": "luna",
+              "ip_label": "内蒙古"
+            },
+            {
+              "id": "7402880386416067343",
+              "content": "女人至死是少年.",
+              "count_digged": 1111,
+              "time_created": 1723731382,
+              "user": {
+                "id": "1695898918460345",
+                "nickname": "左箭头",
+                "medium_avatar_url": {
+                  "urls": [
+                    "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                    "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "thumb_avatar_url": {
+                  "urls": [
+                    "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                    "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                    "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143"
+                  ],
+                  "need_complete_url": true
+                },
+                "secret": false,
+                "test_tag": 0,
+                "vip_stage": "free",
+                "is_vip": false,
+                "public_name": "左箭头",
+                "is_luna_user": true
+              },
+              "count_reply": 277,
+              "user_artist_info": {
+                "user_artist_type": 0,
+                "user_brief": {
+                  "id": "1695898918460345",
+                  "nickname": "左箭头",
+                  "medium_avatar_url": {
+                    "urls": [
+                      "https://p26.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                      "https://p11.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "thumb_avatar_url": {
+                    "urls": [
+                      "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                      "https://p26.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143",
+                      "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_osjAjhAMiQUDPy9OBIRLaS1iEApAI5orPjIAP.jpeg?from=3782654143"
+                    ],
+                    "need_complete_url": true
+                  },
+                  "secret": false,
+                  "test_tag": 0,
+                  "vip_stage": "free",
+                  "is_vip": false,
+                  "public_name": "左箭头",
+                  "is_luna_user": true
+                }
+              },
+              "service_id": "luna",
+              "ip_label": "河南"
+            }
+          ],
+          "count": 9181
+        },
+        "albumTracks": [],
+        "artistTracks": [],
+        "relatedTracks": [],
+        "chartTracks": [],
+        "create_time": "1726096008",
+        "update_time": "1776645318",
+        "already_upload": true
+      },
+      "isWindows": false,
+      "metaData": {},
+      "isMobile": true,
+      "isSEO": false,
+      "seoParams": { },
+      "isTablet": false,
+      "enable_ssr_cache": false,
+      "happenError": false,
+      "testTime": "2026-04-20 13:07",
+      "luna_share_node_vid": ""
+    }
+  },
+  "errors": null
+}
