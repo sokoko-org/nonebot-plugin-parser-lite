@@ -1045,80 +1045,40 @@ class BilibiliParser(BaseParser):
                 )
 
         async with AsyncClient() as client:
-            # 1. 热评接口
-            hot_url = "https://api.bilibili.com/x/v2/reply/hot"
-            hot_params = {
-                "oid": oid,
-                "type": type,
-                "root": 0,
-                "ps": 10,
-                "pn": 1,
-            }
             try:
-                comments = await self._request_comment_api(
-                    client,
-                    api_url=hot_url,
-                    params=hot_params,
+                response = await client.get(
+                    "https://api.bilibili.com/x/v2/reply",
+                    params={
+                        "oid": oid,
+                        "type": type,
+                        "sort": 1,  # 按点赞数排序
+                        "ps": 20,
+                        "pn": 1,
+                        "nohot": 0,
+                    },
                     headers=request_headers,
-                    desc="[Bilibili] 热评API",
                 )
-                if comments:
-                    return comments
-            except Exception as e:
-                logger.error(f"[Bilibili] 获取热评失败: {e!r}")
+                response.raise_for_status()
+                data = response.json()
+                logger.debug(f"bili评论返回: {data}")
 
-            # 2. 兜底普通评论接口
-            fallback_url = "https://api.bilibili.com/x/v2/reply"
-            fallback_params = {
-                "oid": oid,
-                "type": type,
-                "sort": 1,  # 按点赞数排序
-                "ps": 20,
-                "pn": 1,
-            }
-            try:
-                comments = await self._request_comment_api(
-                    client,
-                    api_url=fallback_url,
-                    params=fallback_params,
-                    headers=request_headers,
-                    desc="[Bilibili] 兜底评论API",
+                if data.get("code") != 0 or not data.get("data"):
+                    logger.debug(
+                        f"bili评论返回数据为空或错误: code={data.get('code')}, message={data.get('message')}"
+                    )
+                    return []
+
+                replies = (
+                    data["data"].get("upper", {}).get("top", [])
+                    + data["data"].get("hots", [])
+                    + data["data"].get("replies", [])
                 )
-                # 如果兜底接口返回空列表，也视作“没有评论”，而不是错误
-                return comments
+
+                logger.debug(f"bili获得评论: {len(replies)} 条")
+                return self._process_reply_list(replies)
             except Exception as e:
-                logger.error(f"[Bilibili] 获取兜底评论失败: {e!r}")
+                logger.error(f"[Bilibili] 获取评论失败: {e!r}")
                 return []
-
-    async def _request_comment_api(
-        self,
-        client: AsyncClient,
-        *,
-        api_url: str,
-        params: dict[str, Any],
-        headers: dict[str, str],
-        desc: str,
-    ) -> list[Comment]:
-        """请求指定评论 API，并解析为标准评论列表格式。"""
-        logger.debug(f"{desc}: url={api_url}, 参数={params}")
-        response = await client.get(api_url, params=params, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        logger.debug(f"{desc} 返回: {data}")
-
-        if data.get("code") != 0 or not data.get("data"):
-            logger.debug(
-                f"{desc} 返回数据为空或错误: code={data.get('code')}, message={data.get('message')}"
-            )
-            return []
-
-        replies = data["data"].get("replies")
-        if not isinstance(replies, list):
-            logger.debug(f"{desc} 返回的 replies 不是列表类型")
-            return []
-
-        logger.debug(f"{desc} 获得评论: {len(replies)} 条")
-        return self._process_reply_list(replies)
 
     def _format_content_with_emote(
         self, raw: str, emote: dict[str, Any]
