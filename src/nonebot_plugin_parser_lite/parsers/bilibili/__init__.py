@@ -1261,9 +1261,10 @@ class BilibiliParser(BaseParser):
                 try:
                     await self._credential.refresh()
                 except CookiesRefreshException as e:
+                    logger.warning(f"刷新哔哩哔哩凭证失败: {e.msg}")
                     if "correspondPath" in e.msg:
                         raise TipException(
-                            "刷新哔哩哔哩凭证失败, 请检查设备时间是否正确"
+                            "刷新哔哩哔哩凭证失败, 可能是设备时间不正确"
                         ) from e
                     raise TipException(f"刷新哔哩哔哩凭证失败: {e.msg}") from e
                 logger.info(f"哔哩哔哩凭证刷新成功, 保存到 {self._cookies_file}")
