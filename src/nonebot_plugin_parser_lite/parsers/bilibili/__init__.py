@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import json
 import re
+import aiofiles
 from collections.abc import AsyncGenerator
 from re import Match
 from typing import Any, ClassVar
@@ -972,9 +973,8 @@ class BilibiliParser(BaseParser):
         if self._credential is None:
             return
 
-        self._cookies_file.write_text(
-            json.dumps(await self._credential.get_buvid_cookies())
-        )
+        async with aiofiles.open(self._cookies_file, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(await self._credential.get_buvid_cookies()))
 
     async def login_with_qrcode(self) -> bytes:
         """通过二维码登录获取哔哩哔哩登录凭证"""
@@ -1017,7 +1017,10 @@ class BilibiliParser(BaseParser):
         """
         if self._cookies_file.exists():
             try:
-                cookies_raw = self._cookies_file.read_text()
+                async with aiofiles.open(
+                    self._cookies_file, encoding="utf-8"
+                ) as f:
+                    cookies_raw = await f.read()
                 cookies = json.loads(cookies_raw)
                 self._credential = Credential.from_cookies(cookies)
                 return
@@ -1252,9 +1255,8 @@ class BilibiliParser(BaseParser):
         if await self._credential.check_refresh():
             logger.info("哔哩哔哩凭证需要刷新")
             if self._credential.has_ac_time_value() and self._credential.has_bili_jct():
-                if (
-                    not self._credential.has_buvid3()
-                    or not self._credential.has_buvid4()
+                if not (
+                    self._credential.has_buvid3() and self._credential.has_buvid4()
                 ):
                     self._credential.buvid3, self._credential.buvid4 = await get_buvid()
                 await self._credential.refresh()
