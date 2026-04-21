@@ -1068,20 +1068,53 @@ class BilibiliParser(BaseParser):
                     )
                     return []
 
-                upper_top = data["data"].get("upper", {}).get("top")
-                if upper_top is None:
-                    upper_top_list = []
-                elif isinstance(upper_top, list):
-                    upper_top_list = upper_top
+                data_root = data["data"] or {}
+                upper_top = data_root.get("upper", {}).get("top")
+                hots: list[dict[str, Any]] = data_root.get("hots") or []
+                replies_raw: list[dict[str, Any]] = data_root.get("replies") or []
+
+                upper_list: list[dict[str, Any]] = [upper_top] if upper_top else []
+
+                def _append_unique(
+                    src: list[dict[str, Any]], out: list[dict[str, Any]], seen: set[int]
+                ) -> None:
+                    for item in src:
+                        try:
+                            rpid: int = item["rpid"]
+                        except Exception:
+                            # 没有 rpid 的异常项直接跳过
+                            continue
+                        if rpid in seen:
+                            continue
+                        seen.add(rpid)
+                        out.append(item)
+
+                merged: list[dict[str, Any]] = []
+                seen_rpids: set[int] = set()
+
+                has_upper = bool(upper_list)
+                has_hots = bool(hots)
+
+                if has_upper and has_hots:
+                    # 置顶 + 热评
+                    _append_unique(upper_list, merged, seen_rpids)
+                    _append_unique(hots, merged, seen_rpids)
+                elif has_upper and not has_hots:
+                    # 置顶 + 普通
+                    _append_unique(upper_list, merged, seen_rpids)
+                    _append_unique(replies_raw, merged, seen_rpids)
+                elif has_hots and not has_upper:
+                    # 只有热评
+                    _append_unique(hots, merged, seen_rpids)
                 else:
-                    upper_top_list = [upper_top]
+                    # 没有置顶也没有热评 → 普通
+                    _append_unique(replies_raw, merged, seen_rpids)
 
-                hots = data["data"].get("hots") or []
-                replies_raw = data["data"].get("replies") or []
+                logger.debug(
+                    f"bili获得评论: upper={len(upper_list)}, hots={len(hots)}, replies={len(replies_raw)}, merged={len(merged)}",
+                )
+                return self._process_reply_list(merged)
 
-                replies = upper_top_list + hots + replies_raw
-                logger.debug(f"bili获得评论: {len(replies)} 条")
-                return self._process_reply_list(replies)
             except Exception as e:
                 logger.error(f"[Bilibili] 获取评论失败: {e!r}")
                 return []
