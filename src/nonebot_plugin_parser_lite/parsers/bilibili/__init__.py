@@ -21,6 +21,7 @@ from bilibili_api.video import (
     VideoDownloadURLDataDetecter,
     VideoStreamDownloadURL,
 )
+from bilibili_api.exceptions import CookiesRefreshException
 from httpx import AsyncClient
 from msgspec import convert
 from nonebot import logger
@@ -1017,9 +1018,7 @@ class BilibiliParser(BaseParser):
         """
         if self._cookies_file.exists():
             try:
-                async with aiofiles.open(
-                    self._cookies_file, encoding="utf-8"
-                ) as f:
+                async with aiofiles.open(self._cookies_file, encoding="utf-8") as f:
                     cookies_raw = await f.read()
                 cookies = json.loads(cookies_raw)
                 self._credential = Credential.from_cookies(cookies)
@@ -1259,7 +1258,14 @@ class BilibiliParser(BaseParser):
                     self._credential.has_buvid3() and self._credential.has_buvid4()
                 ):
                     self._credential.buvid3, self._credential.buvid4 = await get_buvid()
-                await self._credential.refresh()
+                try:
+                    await self._credential.refresh()
+                except CookiesRefreshException as e:
+                    if "correspondPath" in e.msg:
+                        raise TipException(
+                            "刷新哔哩哔哩凭证失败, 请检查设备时间是否正确"
+                        ) from e
+                    raise TipException(f"刷新哔哩哔哩凭证失败: {e.msg}") from e
                 logger.info(f"哔哩哔哩凭证刷新成功, 保存到 {self._cookies_file}")
                 await self._save_credential()
             else:
