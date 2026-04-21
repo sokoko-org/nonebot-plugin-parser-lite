@@ -1052,7 +1052,7 @@ class BilibiliParser(BaseParser):
                         "oid": oid,
                         "type": type,
                         "sort": 1,  # 按点赞数排序
-                        "ps": 20,
+                        "ps": 7,
                         "pn": 1,
                         "nohot": 0,
                     },
@@ -1068,12 +1068,18 @@ class BilibiliParser(BaseParser):
                     )
                     return []
 
-                replies = (
-                    data["data"].get("upper", {}).get("top", [])
-                    + data["data"].get("hots", [])
-                    + data["data"].get("replies", [])
-                )
+                upper_top = data["data"].get("upper", {}).get("top")
+                if upper_top is None:
+                    upper_top_list = []
+                elif isinstance(upper_top, list):
+                    upper_top_list = upper_top
+                else:
+                    upper_top_list = [upper_top]
 
+                hots = data["data"].get("hots") or []
+                replies_raw = data["data"].get("replies") or []
+
+                replies = upper_top_list + hots + replies_raw
                 logger.debug(f"bili获得评论: {len(replies)} 条")
                 return self._process_reply_list(replies)
             except Exception as e:
