@@ -199,10 +199,8 @@
             {% set alt = cont.alt or "" %}
             {% set _ = html_parts.append(
                             '<div class="mt-3 space-y-1">'
-                            '<div class="grid grid-cols-1 gap-1">'
-                            '<div class="relative overflow-hidden rounded-md bg-slate-100">'
-                            '<img src="' ~ src ~ '" class="w-full h-full object-cover block" />'
-                            '</div>'
+                            '<div class="single-image relative rounded-2xl overflow-hidden border border-gray-100 shadow-sm">'
+                            '<img src="' ~ src ~ '" class="w-full h-auto max-h-[400px] object-cover" />'
                             '</div>'
                             '<p class="text-xs text-slate-500">' ~ (alt|e) ~ '</p>'
                             '</div>'
