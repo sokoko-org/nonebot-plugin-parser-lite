@@ -1,5 +1,3 @@
-# TODO: 解析似乎坏了
-
 import json
 from math import ceil
 from re import Match
@@ -8,7 +6,6 @@ from typing import ClassVar
 from uuid import uuid4
 
 from bs4 import BeautifulSoup, Tag
-from httpx import AsyncClient
 
 from ..base import (
     BaseParser,
@@ -22,6 +19,9 @@ from .article import decoder as articleDecoder
 from .common import WeiboData
 from .common import decoder as commonDecoder
 from .show import decoder as showDecoder
+from curl_cffi import AsyncSession
+
+SESSION = AsyncSession(impersonate="chrome131")
 
 
 class WeiBoParser(BaseParser):
@@ -166,44 +166,17 @@ class WeiBoParser(BaseParser):
         )
 
     async def parse_weibo_id(self, weibo_id: str):
-        """解析微博 id (无 Cookie + 伪装 XHR + 不跟随重定向)"""
+        """解析微博 id"""
         headers = {
-            "accept": "application/json, text/plain, */*",
-            "referer": f"https://m.weibo.cn/detail/{weibo_id}",
-            "origin": "https://m.weibo.cn",
-            "x-requested-with": "XMLHttpRequest",
-            "mweibo-pwa": "1",
-            "sec-fetch-site": "same-origin",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-dest": "empty",
+            "referer": "https://weibo.com/",
             **self.headers,
         }
-
-        # 加时间戳参数，减少被缓存/规则命中的概率
-        ts = int(time() * 1000)
-        url = f"https://www.weibo.cn/statuses/show?id={weibo_id}&_={ts}"
-
         # 关键：不带 cookie、不跟随重定向（避免二跳携 cookie）
-        async with AsyncClient(
+        response = await SESSION.get(
+            "https://weibo.com/ajax/statuses/show",
+            params={"id": weibo_id},
             headers=headers,
-            follow_redirects=False,
-        ) as client:
-            response = await client.get(url)
-            if response.status_code != 200:
-                if response.status_code in (403, 418):
-                    raise ParseException(
-                        f"被风控拦截({response.status_code}), 可尝试更换 UA/Referer 或稍后重试"
-                    )
-                raise ParseException(
-                    f"获取数据失败 {response.status_code} {response.reason_phrase}"
-                )
-
-            ctype = response.headers.get("content-type", "")
-            if "application/json" not in ctype:
-                raise ParseException(
-                    f"获取数据失败 content-type is not application/json (got: {ctype})"
-                )
-
+        )
         weibo_data = commonDecoder.decode(response.content).data
 
         return self._collect_result(weibo_data)
