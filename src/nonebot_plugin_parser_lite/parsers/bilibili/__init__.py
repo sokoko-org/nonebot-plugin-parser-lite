@@ -1049,7 +1049,7 @@ class BilibiliParser(BaseParser):
                     "sort": 1,  # 按点赞数排序
                     "ps": 7,
                     "pn": 1,
-                    "nohot": 0,
+                    "nohot": 1,
                 },
             )
             response.raise_for_status()
@@ -1064,7 +1064,6 @@ class BilibiliParser(BaseParser):
 
             data_root = data["data"] or {}
             upper_top = data_root.get("upper", {}).get("top")
-            hots: list[dict[str, Any]] = data_root.get("hots") or []
             replies_raw: list[dict[str, Any]] = data_root.get("replies") or []
 
             upper_list: list[dict[str, Any]] = [upper_top] if upper_top else []
@@ -1087,25 +1086,17 @@ class BilibiliParser(BaseParser):
             seen_rpids: set[int] = set()
 
             has_upper = bool(upper_list)
-            has_hots = bool(hots)
 
-            if has_upper and has_hots:
-                # 置顶 + 热评
-                _append_unique(upper_list, merged, seen_rpids)
-                _append_unique(hots, merged, seen_rpids)
-            elif has_upper and not has_hots:
+            if has_upper:
                 # 置顶 + 普通
                 _append_unique(upper_list, merged, seen_rpids)
                 _append_unique(replies_raw, merged, seen_rpids)
-            elif has_hots and not has_upper:
-                # 只有热评
-                _append_unique(hots, merged, seen_rpids)
             else:
                 # 没有置顶也没有热评 → 普通
                 _append_unique(replies_raw, merged, seen_rpids)
 
             logger.debug(
-                f"bili获得评论: upper={len(upper_list)}, hots={len(hots)}, replies={len(replies_raw)}, merged={len(merged)}",
+                f"bili获得评论: upper={len(upper_list)}, replies={len(replies_raw)}, merged={len(merged)}",
             )
             return self._process_reply_list(merged)
 
