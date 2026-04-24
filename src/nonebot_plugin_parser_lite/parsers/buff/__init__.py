@@ -65,19 +65,24 @@ class BuffParser(BaseParser):
         )
 
     async def fetch_comments(self, comment_type: int, type_id: str) -> list[Comment]:
-        async with AsyncClient(headers=self.headers) as client:
-            resp = await client.get(
-                "https://buff.163.com/api/comment/share/detail",
-                params={"comment_type": comment_type, "type_id": type_id},
-            )
-            data = resp.json()
+        try:
+            async with AsyncClient(headers=self.headers) as client:
+                resp = await client.get(
+                    "https://buff.163.com/api/comment/share/detail",
+                    params={"comment_type": comment_type, "type_id": type_id},
+                )
+                resp.raise_for_status()
+                data = resp.json()
 
-        if data.get("code") != "OK":
-            logger.warning(f"buff 评论获取失败: {data}")
+            if data.get("code") != "OK":
+                logger.warning(f"buff 评论获取失败: {data}")
+                return []
+
+            raw = convert(data.get("data") or {}, Comments)
+            return [self._to_comment(c) for c in raw.items]
+        except Exception as e:
+            logger.warning(f"buff 评论获取失败: {e}")
             return []
-
-        raw = convert(data.get("data") or {}, Comments)
-        return [self._to_comment(c) for c in raw.items]
 
     # https://buff.163.com/s/news-detail_share.html?article_id=87832&comment_type=228
     @handle(
