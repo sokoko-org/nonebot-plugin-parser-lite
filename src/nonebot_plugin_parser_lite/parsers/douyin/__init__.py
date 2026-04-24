@@ -4,7 +4,6 @@ from typing import ClassVar
 from msgspec import convert
 from nonebot import logger
 
-from httpx import AsyncClient
 from ...utils.browser import BROWSER
 
 from ..base import (
@@ -125,14 +124,12 @@ class DouyinParser(BaseParser):
         )
 
     async def parse_video_or_article(self, url: str):
-        async with AsyncClient(
-            headers=self.ios_headers,
-            follow_redirects=False,
-        ) as client:
-            response = await client.get(url)
-            if response.status_code != 200:
-                raise ParseException(f"status: {response.status_code}")
-            text = response.text
+        response = await self.httpx.get(
+            url, headers=self.ios_headers, follow_redirects=False
+        )
+        if response.status_code != 200:
+            raise ParseException(f"status: {response.status_code}")
+        text = response.text
 
         matched = ROUTER_PATTERN.search(text)
 

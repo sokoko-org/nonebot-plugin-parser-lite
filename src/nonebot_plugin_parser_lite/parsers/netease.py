@@ -2,7 +2,6 @@ import re
 from re import Match
 from typing import ClassVar
 
-from httpx import AsyncClient
 from nonebot import logger
 
 from .base import (
@@ -24,20 +23,12 @@ class NCMParser(BaseParser):
         super().__init__()
         self.short_url_pattern = re.compile(r"(http:|https:)//163cn\.tv/([a-zA-Z0-9]+)")
 
-    async def _get_redirect_url(self, url: str) -> str:
-        """获取重定向后的URL"""
-
-        async with AsyncClient(follow_redirects=True) as client:
-            response = await client.get(url)
-            response.raise_for_status()
-            return str(response.url)
-
     async def parse_ncm(self, ncm_url: str) -> dict:
         """解析网易云音乐链接"""
         # 处理短链接
         if matched := self.short_url_pattern.search(ncm_url):
             ncm_url = matched.group(0)
-            ncm_url = await self._get_redirect_url(ncm_url)
+            ncm_url = await self.get_redirect_url(ncm_url)
 
         # 获取网易云歌曲id
         matched = re.search(r"(?:\?|&)id=(\d+)", ncm_url) or re.search(
@@ -50,47 +41,42 @@ class NCMParser(BaseParser):
         ncm_id = matched.group(1)
         logger.info(f"成功提取ID: {ncm_id} 来自 {ncm_url}")
 
-        # 使用新API解析
-        try:
-            async with AsyncClient() as client:
-                api_url = "https://api.bugpk.com/api/163_music"
-                # 使用GET请求，参数包括ids、level和type
-                params = {"ids": ncm_id, "level": "standard", "type": "json"}
-                resp = await client.get(api_url, params=params)
-                resp.raise_for_status()
-                data = resp.json()
+        resp = await self.httpx.get(
+            "https://api.bugpk.com/api/163_music",
+            params={"ids": ncm_id, "level": "standard", "type": "json"},
+        )
+        resp.raise_for_status()
+        data = resp.json()
 
-                # 检查接口返回状态
-                if data.get("status") != 200:
-                    raise ParseException(f"网易云接口返回错误: {data}")
+        # 检查接口返回状态
+        if data.get("status") != 200:
+            raise ParseException(f"网易云接口返回错误: {data}")
 
-                logger.info(f"解析成功: {data['name']} - {data['ar_name']}")
-                audio_info = f"音质: standard | 大小: {data.get('size', '')}"
+        logger.info(f"解析成功: {data['name']} - {data['ar_name']}")
+        audio_info = f"音质: standard | 大小: {data.get('size', '')}"
 
-                # 提取歌词信息
-                lyric = ""
-                if data.get("lyric"):
-                    lyric = data["lyric"]
-                    logger.info(f"找到歌词，长度: {len(lyric)}字符")
+        # 提取歌词信息
+        lyric = ""
+        if data.get("lyric"):
+            lyric = data["lyric"]
+            logger.info(f"找到歌词，长度: {len(lyric)}字符")
 
-                # 成功获取，返回结果
-                return {
-                    "title": data["name"],
-                    "author": data["ar_name"],
-                    "audio_info": audio_info,
-                    "cover_url": data["pic"],
-                    "audio_url": data["url"],
-                    "mv_info": {},  # 新API没有返回MV信息
-                    "lyric": lyric,
-                }
-        except Exception as e:
-            raise ParseException(f"网易云音乐解析失败: {e}") from e
+        # 成功获取，返回结果
+        return {
+            "title": data["name"],
+            "author": data["ar_name"],
+            "audio_info": audio_info,
+            "cover_url": data["pic"],
+            "audio_url": data["url"],
+            "mv_info": {},  # 新API没有返回MV信息
+            "lyric": lyric,
+        }
 
     @handle("music.163.com", r"https?://[^\s]*?music\.163\.com.*?(?:id=\d+|song/\d+)")
     @handle("163cn.tv", r"https?://[^\s]*?163cn\.tv/[a-zA-Z0-9]+")
     async def _parse_netease(self, searched: Match[str]):
         """解析网易云音乐分享链接"""
-        share_url = searched.group(0)
+        share_url = searched[0]
         logger.debug(f"触发网易云解析: {share_url}")
 
         # 解析网易云音乐

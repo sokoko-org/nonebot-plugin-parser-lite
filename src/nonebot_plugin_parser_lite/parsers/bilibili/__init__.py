@@ -22,7 +22,6 @@ from bilibili_api.video import (
     VideoStreamDownloadURL,
 )
 from bilibili_api.exceptions import CookiesRefreshException
-from httpx import AsyncClient
 from msgspec import convert
 from nonebot import logger
 
@@ -88,58 +87,54 @@ class BilibiliParser(BaseParser):
 
         request_headers = self.headers.copy()
         request_headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
+        self.httpx.headers.update(request_headers)
 
         base_url = "https://api.bilibili.com/x/relation/blacks"
         page_size = 50
         black_mids: list[int] = []
 
         try:
-            async with AsyncClient() as client:
-                resp = await client.get(
-                    base_url,
-                    headers=request_headers,
-                    params={"ps": page_size, "pn": 1},
-                )
-                resp.raise_for_status()
-                data: dict[str, Any] = resp.json()
+            resp = await self.httpx.get(
+                base_url,
+                params={"ps": page_size, "pn": 1},
+            )
+            resp.raise_for_status()
+            data: dict[str, Any] = resp.json()
 
-                code = data.get("code")
-                if code != 0:
-                    logger.error(f"获取B站黑名单列表失败: code={code}, data={data}")
-                    self.black_mids = []
-                    return
+            code = data.get("code")
+            if code != 0:
+                logger.error(f"获取B站黑名单列表失败: code={code}, data={data}")
+                self.black_mids = []
+                return
 
-                data_root = data.get("data", {})
-                first_list = data_root.get("list", [])
-                total = data_root.get("total", 0)
+            data_root = data.get("data", {})
+            first_list = data_root.get("list", [])
+            total = data_root.get("total", 0)
 
-                black_mids.extend(obj["mid"] for obj in first_list)
+            black_mids.extend(obj["mid"] for obj in first_list)
 
-                # 计算剩余页数
-                pages = (total + page_size - 1) // page_size if total > page_size else 1
-                for pn in range(2, pages + 1):
-                    try:
-                        resp = await client.get(
-                            base_url,
-                            headers=request_headers,
-                            params={"ps": page_size, "pn": pn},
-                        )
-                        resp.raise_for_status()
-                        page_data: dict[str, Any] = resp.json()
-                        if page_data.get("code") != 0:
-                            logger.warning(
-                                f"获取B站黑名单第 {pn} 页失败: {page_data!r}"
-                            )
-                            continue
-                        page_list = page_data.get("data", {}).get("list", [])
-                        black_mids.extend(obj["mid"] for obj in page_list)
-                        logger.debug(
-                            f"[BiliParser] 黑名单第 {pn} 页加载完成, 当前共 {len(black_mids)} 个"
-                        )
-                        await asyncio.sleep(0.2)
-                    except Exception as e:  # noqa: BLE001
-                        logger.warning(f"请求B站黑名单第 {pn} 页异常: {e}")
+            # 计算剩余页数
+            pages = (total + page_size - 1) // page_size if total > page_size else 1
+            for pn in range(2, pages + 1):
+                try:
+                    resp = await self.httpx.get(
+                        base_url,
+                        params={"ps": page_size, "pn": pn},
+                    )
+                    resp.raise_for_status()
+                    page_data: dict[str, Any] = resp.json()
+                    if page_data.get("code") != 0:
+                        logger.warning(f"获取B站黑名单第 {pn} 页失败: {page_data!r}")
                         continue
+                    page_list = page_data.get("data", {}).get("list", [])
+                    black_mids.extend(obj["mid"] for obj in page_list)
+                    logger.debug(
+                        f"[BiliParser] 黑名单第 {pn} 页加载完成, 当前共 {len(black_mids)} 个"
+                    )
+                    await asyncio.sleep(0.2)
+                except Exception as e:  # noqa: BLE001
+                    logger.warning(f"请求B站黑名单第 {pn} 页异常: {e}")
+                    continue
 
             self.black_mids = black_mids
             logger.debug(f"B站黑名单列表: {black_mids}")
@@ -1041,88 +1036,79 @@ class BilibiliParser(BaseParser):
 
     async def _fetch_comments(self, oid: int, type: int) -> list[Comment]:
         """从 Bilibili API 获取评论数据，优先热评，失败时兜底普通评论"""
-        # 构造请求头（带 cookie）
-        request_headers = self.headers.copy()
-        if ck := await self.credential:
-            if cookies := ck.get_cookies():
-                request_headers["Cookie"] = "; ".join(
-                    f"{k}={v}" for k, v in cookies.items()
-                )
 
-        async with AsyncClient() as client:
-            try:
-                response = await client.get(
-                    "https://api.bilibili.com/x/v2/reply",
-                    params={
-                        "oid": oid,
-                        "type": type,
-                        "sort": 1,  # 按点赞数排序
-                        "ps": 7,
-                        "pn": 1,
-                        "nohot": 0,
-                    },
-                    headers=request_headers,
-                )
-                response.raise_for_status()
-                data = response.json()
-                logger.debug(f"bili评论返回: {data}")
+        try:
+            response = await self.httpx.get(
+                "https://api.bilibili.com/x/v2/reply",
+                params={
+                    "oid": oid,
+                    "type": type,
+                    "sort": 1,  # 按点赞数排序
+                    "ps": 7,
+                    "pn": 1,
+                    "nohot": 0,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            logger.debug(f"bili评论返回: {data}")
 
-                if data.get("code") != 0 or not data.get("data"):
-                    logger.debug(
-                        f"bili评论返回数据为空或错误: code={data.get('code')}, message={data.get('message')}"
-                    )
-                    return []
-
-                data_root = data["data"] or {}
-                upper_top = data_root.get("upper", {}).get("top")
-                hots: list[dict[str, Any]] = data_root.get("hots") or []
-                replies_raw: list[dict[str, Any]] = data_root.get("replies") or []
-
-                upper_list: list[dict[str, Any]] = [upper_top] if upper_top else []
-
-                def _append_unique(
-                    src: list[dict[str, Any]], out: list[dict[str, Any]], seen: set[int]
-                ) -> None:
-                    for item in src:
-                        try:
-                            rpid: int = item["rpid"]
-                        except Exception:
-                            # 没有 rpid 的异常项直接跳过
-                            continue
-                        if rpid in seen:
-                            continue
-                        seen.add(rpid)
-                        out.append(item)
-
-                merged: list[dict[str, Any]] = []
-                seen_rpids: set[int] = set()
-
-                has_upper = bool(upper_list)
-                has_hots = bool(hots)
-
-                if has_upper and has_hots:
-                    # 置顶 + 热评
-                    _append_unique(upper_list, merged, seen_rpids)
-                    _append_unique(hots, merged, seen_rpids)
-                elif has_upper and not has_hots:
-                    # 置顶 + 普通
-                    _append_unique(upper_list, merged, seen_rpids)
-                    _append_unique(replies_raw, merged, seen_rpids)
-                elif has_hots and not has_upper:
-                    # 只有热评
-                    _append_unique(hots, merged, seen_rpids)
-                else:
-                    # 没有置顶也没有热评 → 普通
-                    _append_unique(replies_raw, merged, seen_rpids)
-
+            if data.get("code") != 0 or not data.get("data"):
                 logger.debug(
-                    f"bili获得评论: upper={len(upper_list)}, hots={len(hots)}, replies={len(replies_raw)}, merged={len(merged)}",
+                    f"bili评论返回数据为空或错误: code={data.get('code')}, message={data.get('message')}"
                 )
-                return self._process_reply_list(merged)
-
-            except Exception as e:
-                logger.error(f"[Bilibili] 获取评论失败: {e!r}")
                 return []
+
+            data_root = data["data"] or {}
+            upper_top = data_root.get("upper", {}).get("top")
+            hots: list[dict[str, Any]] = data_root.get("hots") or []
+            replies_raw: list[dict[str, Any]] = data_root.get("replies") or []
+
+            upper_list: list[dict[str, Any]] = [upper_top] if upper_top else []
+
+            def _append_unique(
+                src: list[dict[str, Any]], out: list[dict[str, Any]], seen: set[int]
+            ) -> None:
+                for item in src:
+                    try:
+                        rpid: int = item["rpid"]
+                    except Exception:
+                        # 没有 rpid 的异常项直接跳过
+                        continue
+                    if rpid in seen:
+                        continue
+                    seen.add(rpid)
+                    out.append(item)
+
+            merged: list[dict[str, Any]] = []
+            seen_rpids: set[int] = set()
+
+            has_upper = bool(upper_list)
+            has_hots = bool(hots)
+
+            if has_upper and has_hots:
+                # 置顶 + 热评
+                _append_unique(upper_list, merged, seen_rpids)
+                _append_unique(hots, merged, seen_rpids)
+            elif has_upper and not has_hots:
+                # 置顶 + 普通
+                _append_unique(upper_list, merged, seen_rpids)
+                _append_unique(replies_raw, merged, seen_rpids)
+            elif has_hots and not has_upper:
+                # 只有热评
+                _append_unique(hots, merged, seen_rpids)
+            else:
+                # 没有置顶也没有热评 → 普通
+                _append_unique(replies_raw, merged, seen_rpids)
+
+            logger.debug(
+                f"bili获得评论: upper={len(upper_list)}, hots={len(hots)}, replies={len(replies_raw)}, merged={len(merged)}",
+            )
+            return self._process_reply_list(merged)
+
+        except Exception as e:
+            logger.error(f"[Bilibili] 获取评论失败: {e!r}")
+            return []
 
     def _format_content_with_emote(
         self, raw: str, emote: dict[str, Any]

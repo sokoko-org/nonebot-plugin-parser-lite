@@ -6,7 +6,6 @@ from nonebot.log import logger
 
 from ...utils.browser import BROWSER
 from ...utils.format import format_num
-from httpx import AsyncClient
 from ..base import BaseParser, Comment, ParseException, Platform, PlatformEnum, handle
 from .encrypt import build_url
 from .model import BaseResult
@@ -44,13 +43,13 @@ class HeyBoxParser(BaseParser):
             logger.info(f"成功获取到小黑盒tokenid: {self.x_xhh_tokenid[:5]}...")
             tab.close()
 
-        async with AsyncClient(
+        response = await self.httpx.get(
+            build_url(link_id),
             headers=self.headers,
             cookies={"x_xhh_tokenid": self.x_xhh_tokenid},
-        ) as client:
-            response = await client.get(build_url(link_id))
-            response.raise_for_status()
-            res = response.json()
+        )
+        response.raise_for_status()
+        res = response.json()
 
         if res.get("status") != "ok":
             raise ParseException(f"小黑盒解析失败: {res}")

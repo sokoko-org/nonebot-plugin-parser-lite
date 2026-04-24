@@ -2,8 +2,6 @@ import re
 from re import Match
 from typing import ClassVar
 
-from httpx import AsyncClient
-
 from ..base import (
     BaseParser,
     PlatformEnum,
@@ -29,14 +27,11 @@ class QSMusicParser(BaseParser):
     @handle("qishui.douyin.com", r"https?://[^\s]*?qishui\.douyin\.com/s/[a-zA-Z0-9]+/")
     async def _parse_qsmusic_share(self, searched: Match[str]):
         """解析汽水音乐分享链接"""
-        share_url = searched.group(0)
+        share_url = searched[0]
 
-        async with AsyncClient(
-            follow_redirects=True, headers=self.ios_headers
-        ) as client:
-            response = await client.get(share_url)
-            response.raise_for_status()
-            html = response.text
+        response = await self.httpx.get(share_url, headers=self.ios_headers)
+        response.raise_for_status()
+        html = response.text
         if matched := ROUTER_DATA.search(html):
             raw = matched[1]
         else:

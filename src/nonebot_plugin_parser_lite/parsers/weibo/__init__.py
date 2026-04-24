@@ -1,3 +1,6 @@
+# TODO: 解析似乎坏了
+
+import json
 from math import ceil
 from re import Match
 from time import time
@@ -39,6 +42,7 @@ class WeiBoParser(BaseParser):
                 "origin": "https://weibo.com",
             }
         )
+        self.httpx.headers.update(self.headers)
 
     # https://weibo.com/tv/show/1034:5007449447661594?mid=5007452630158934
     @handle("weibo.com/tv", r"weibo\.com/tv/show/\d{4}:\d+\?mid=(?P<mid>\d+)")
@@ -80,18 +84,15 @@ class WeiBoParser(BaseParser):
         return await self.parse_article(_id)
 
     async def parse_article(self, _id: str):
-        url = "https://card.weibo.com/article/m/aj/detail"
-        params = {
-            "_rid": str(uuid4()),
-            "id": _id,
-            "_t": int(time() * 1000),
-        }
-
-        async with AsyncClient(
-            headers=self.headers,
-        ) as client:
-            response = await client.get(url, params=params)
-            response.raise_for_status()
+        response = await self.httpx.get(
+            "https://card.weibo.com/article/m/aj/detail",
+            params={
+                "_rid": str(uuid4()),
+                "id": _id,
+                "_t": int(time() * 1000),
+            },
+        )
+        response.raise_for_status()
 
         detail = articleDecoder.decode(response.content)
 
@@ -132,18 +133,18 @@ class WeiBoParser(BaseParser):
     async def parse_fid(self, fid: str):
         """解析 show (带 fid)"""
 
-        req_url = f"https://h5.video.weibo.com/api/component?page=/show/{fid}"
-        headers = {
-            "Referer": f"https://h5.video.weibo.com/show/{fid}",
-            "Content-Type": "application/x-www-form-urlencoded",
-            **self.headers,
-        }
+        payload = {"Component_Play_Playinfo": {"oid": fid}}
 
-        async with AsyncClient(headers=headers) as client:
-            response = await client.post(
-                req_url, data={"data": f'{{Component_Play_Playinfo": {{"oid": {fid}}}'}
-            )
-            response.raise_for_status()
+        response = await self.httpx.post(
+            f"https://h5.video.weibo.com/api/component?page=/show/{fid}",
+            data={"data": json.dumps(payload, ensure_ascii=False)},
+            headers={
+                "Referer": f"https://h5.video.weibo.com/show/{fid}",
+                "Content-Type": "application/x-www-form-urlencoded",
+                **self.headers,
+            },
+        )
+        response.raise_for_status()
 
         data = showDecoder.decode(response.content).data
         play_info = data.Component_Play_Playinfo

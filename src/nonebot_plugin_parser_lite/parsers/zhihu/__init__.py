@@ -1,8 +1,6 @@
 import re
 from typing import ClassVar
 
-from httpx import AsyncClient
-
 
 from ...utils.format import format_num
 
@@ -71,17 +69,16 @@ class ZhiHuParser(BaseParser):
         return answerDecoder.decode(raw)
 
     async def fetch_video(self, video_id: str):
-        async with AsyncClient() as client:
-            res = await client.post(
-                "https://www.zhihu.com/api/v4/video/play_info",
-                json={
-                    "content_id": video_id,
-                    "video_id": video_id,
-                    "content_type_str": "answer",
-                    "is_only_video": True,
-                },
-            )
-            data = res.json()
+        res = await self.httpx.post(
+            "https://www.zhihu.com/api/v4/video/play_info",
+            json={
+                "content_id": video_id,
+                "video_id": video_id,
+                "content_type_str": "answer",
+                "is_only_video": True,
+            },
+        )
+        data = res.json()
         if "video_play" not in data:
             raise ValueError(f"Invalid video data: {data}")
 

@@ -1,7 +1,6 @@
 from re import Match
 from typing import Any, ClassVar, TypeVar
 
-from httpx import AsyncClient
 from msgspec import convert
 from nonebot.log import logger
 
@@ -22,10 +21,9 @@ class BuffParser(BaseParser):
     async def _fetch_ok_json(
         self, url: str, params: dict[str, Any], err_msg: str, model: type[T]
     ) -> T:
-        async with AsyncClient(headers=self.headers) as client:
-            resp = await client.get(url, params=params)
-            resp.raise_for_status()
-            data = resp.json()
+        resp = await self.httpx.get(url, params=params)
+        resp.raise_for_status()
+        data = resp.json()
         if data.get("code") != "OK":
             raise ParseException(f"{err_msg}: {data}")
         return convert(data["data"], model)
@@ -66,13 +64,12 @@ class BuffParser(BaseParser):
 
     async def fetch_comments(self, comment_type: int, type_id: str) -> list[Comment]:
         try:
-            async with AsyncClient(headers=self.headers) as client:
-                resp = await client.get(
-                    "https://buff.163.com/api/comment/share/detail",
-                    params={"comment_type": comment_type, "type_id": type_id},
-                )
-                resp.raise_for_status()
-                data = resp.json()
+            resp = await self.httpx.get(
+                "https://buff.163.com/api/comment/share/detail",
+                params={"comment_type": comment_type, "type_id": type_id},
+            )
+            resp.raise_for_status()
+            data = resp.json()
 
             if data.get("code") != "OK":
                 logger.warning(f"buff 评论获取失败: {data}")

@@ -5,7 +5,6 @@ from msgspec import convert
 from nonebot import logger
 
 from ...utils.format import format_num
-from httpx import AsyncClient
 from ..base import (
     BaseParser,
     MediaContent,
@@ -40,24 +39,23 @@ class LofterParser(BaseParser):
         blog_id = int(searched["blog_hex"], 16)
         post_id = int(searched["post_hex"], 16)
 
-        async with AsyncClient() as client:
-            # 帖子详情
-            post_resp = await client.post(
-                "https://api.lofter.com/oldapi/post/detail.api",
-                params={"product": "lofter-android-8.1.20"},
-                data={
-                    "postid": post_id,
-                    "targetblogid": blog_id,
-                },
-            )
-            post_data = post_resp.json()
+        # 帖子详情
+        post_resp = await self.httpx.post(
+            "https://api.lofter.com/oldapi/post/detail.api",
+            params={"product": "lofter-android-8.1.20"},
+            data={
+                "postid": post_id,
+                "targetblogid": blog_id,
+            },
+        )
+        post_data = post_resp.json()
 
-            # 评论数据
-            com_resp = await client.get(
-                "https://www.lofter.com/comment/l1/hotnew.json",
-                params={"postId": post_id, "blogId": blog_id},
-            )
-            com_data = com_resp.json()
+        # 评论数据
+        com_resp = await self.httpx.get(
+            "https://www.lofter.com/comment/l1/hotnew.json",
+            params={"postId": post_id, "blogId": blog_id},
+        )
+        com_data = com_resp.json()
 
         # 校验帖子状态
         meta = post_data.get("meta") or {}

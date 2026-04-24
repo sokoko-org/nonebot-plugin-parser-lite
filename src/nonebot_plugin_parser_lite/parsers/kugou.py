@@ -5,8 +5,6 @@ import contextlib
 from re import Match
 from typing import ClassVar
 
-from httpx import AsyncClient
-
 from .base import (
     BaseParser,
     PlatformEnum,
@@ -127,87 +125,86 @@ class KuGouParser(BaseParser):
     )
     async def _parse_kugou_share(self, searched: Match[str]):
         """解析酷狗分享链接"""
-        share_url = searched.group(0)
-        async with AsyncClient() as client:
-            response = await client.get(share_url)
-            response.raise_for_status()
-            html_text = response.text
+        share_url = searched[0]
+        response = await self.httpx.get(share_url)
+        response.raise_for_status()
+        html_text = response.text
 
-            # 提取歌曲hash
-            _hash = self._extract_hash(html_text)
+        # 提取歌曲hash
+        _hash = self._extract_hash(html_text)
 
-            if not _hash:
-                raise ParseException("未找到歌曲hash")
+        if not _hash:
+            raise ParseException("未找到歌曲hash")
 
-            # 获取歌曲信息
-            response = await client.get(
-                f"https://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo&hash={_hash}"
-            )
-            playinfo = Decoder(PlayInfo).decode(response.content)
-            if playinfo.errcode != 0:
-                raise ParseException(
-                    f"酷狗音乐解析失败: {playinfo.errcode} {playinfo.error}"
-                )
-
-            # 创建音频内容
-            audio_url = playinfo.url
-            if not audio_url:
-                raise ParseException("未找到音频资源")
-
-            audio_name = f"{playinfo.fileName}.{playinfo.extName}"
-
-            audio_content = self.create_audio(
-                url=audio_url,
-                duration=playinfo.timeLength,
-                audio_name=audio_name,
-            )
-            author = self.create_author(
-                name=playinfo.singerName  # , playinfo.imgUrl.format(size=480)
+        # 获取歌曲信息
+        response = await self.httpx.get(
+            f"https://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo&hash={_hash}"
+        )
+        playinfo = Decoder(PlayInfo).decode(response.content)
+        if playinfo.errcode != 0:
+            raise ParseException(
+                f"酷狗音乐解析失败: {playinfo.errcode} {playinfo.error}"
             )
 
-            # 获取歌词列表
-            response = await client.get(
-                f"https://krcs.kugou.com/search?hash={playinfo.hash}"
-            )
-            krcs = Decoder(KrcsSearch).decode(response.content)
-            if krcs.errcode != 200:
-                raise ParseException(f"酷狗音乐解析失败: 歌词搜索失败: {krcs.errmsg}")
-            if not krcs.candidates:
-                raise ParseException("未找到歌词")
+        # 创建音频内容
+        audio_url = playinfo.url
+        if not audio_url:
+            raise ParseException("未找到音频资源")
 
-            # 获取歌词内容
-            response = await client.get(
-                f"https://lyrics.kugou.com/download?ver=1&id={krcs.candidates[0].id}&accesskey={krcs.candidates[0].accesskey}&fmt=lrc"
-            )
-            lyrics = Decoder(Lyrics).decode(response.content)
-            if lyrics.error_code != 0:
-                raise ParseException(f"酷狗音乐解析失败: 歌词获取失败: {lyrics.info}")
-            # 构建歌词文本
-            lyric = base64.b64decode(lyrics.content).decode(lyrics.charset)
-            text = f"歌词:\n{lyric}"
+        audio_name = f"{playinfo.fileName}.{playinfo.extName}"
 
-            # 创建封面图片内容
-            cover_url = playinfo.album_img.format(size=480)
-            contents: list[MediaContent] = [
-                self.create_image(url=cover_url, need_send=False)
-            ]
+        audio_content = self.create_audio(
+            url=audio_url,
+            duration=playinfo.timeLength,
+            audio_name=audio_name,
+        )
+        author = self.create_author(
+            name=playinfo.singerName  # , playinfo.imgUrl.format(size=480)
+        )
 
-            contents.append(audio_content)
+        # 获取歌词列表
+        response = await self.httpx.get(
+            f"https://krcs.kugou.com/search?hash={playinfo.hash}"
+        )
+        krcs = Decoder(KrcsSearch).decode(response.content)
+        if krcs.errcode != 200:
+            raise ParseException(f"酷狗音乐解析失败: 歌词搜索失败: {krcs.errmsg}")
+        if not krcs.candidates:
+            raise ParseException("未找到歌词")
 
-            # 构建额外信息
-            extra = {
-                "info": f"比特率: {playinfo.bitRate}K | 时长: {int(float(playinfo.timeLength) // 60)}"
-                f":{int(float(playinfo.timeLength) % 60):02d}",
-                "lyric": text,
-                "type": "audio",
-                "type_tag": "音乐",
-                "type_icon": "fa-music",
-            }
+        # 获取歌词内容
+        response = await self.httpx.get(
+            f"https://lyrics.kugou.com/download?ver=1&id={krcs.candidates[0].id}&accesskey={krcs.candidates[0].accesskey}&fmt=lrc"
+        )
+        lyrics = Decoder(Lyrics).decode(response.content)
+        if lyrics.error_code != 0:
+            raise ParseException(f"酷狗音乐解析失败: 歌词获取失败: {lyrics.info}")
+        # 构建歌词文本
+        lyric = base64.b64decode(lyrics.content).decode(lyrics.charset)
+        text = f"歌词:\n{lyric}"
 
-            return self.result(
-                title=playinfo.songName,
-                author=author,
-                url=share_url,
-                content=contents,
-                extra=extra,
-            )
+        # 创建封面图片内容
+        cover_url = playinfo.album_img.format(size=480)
+        contents: list[MediaContent] = [
+            self.create_image(url=cover_url, need_send=False)
+        ]
+
+        contents.append(audio_content)
+
+        # 构建额外信息
+        extra = {
+            "info": f"比特率: {playinfo.bitRate}K | 时长: {int(float(playinfo.timeLength) // 60)}"
+            f":{int(float(playinfo.timeLength) % 60):02d}",
+            "lyric": text,
+            "type": "audio",
+            "type_tag": "音乐",
+            "type_icon": "fa-music",
+        }
+
+        return self.result(
+            title=playinfo.songName,
+            author=author,
+            url=share_url,
+            content=contents,
+            extra=extra,
+        )

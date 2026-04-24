@@ -2,8 +2,6 @@ import re
 from typing import ClassVar
 from urllib.parse import parse_qsl
 
-from httpx import AsyncClient
-
 from ...utils.format import replace_placeholder_to_sticker
 
 from ..base import (
@@ -71,18 +69,18 @@ class RedNoteParser(BaseParser):
 
         url += f"?xsec_token={xsec_token}&xsec_source=pc_share"
 
-        async with AsyncClient(
+        response = await self.httpx.get(
+            url,
             headers=self.ios_headers,
             cookies=ck2dict(pconfig.xhs_ck) if pconfig.xhs_ck else None,
-        ) as client:
-            response = await client.get(url)
-            response.raise_for_status()
-            html = response.text
+        )
+        response.raise_for_status()
+        html = response.text
 
-            if matched := INITIAL_STATE.search(html):
-                raw = matched[1].replace("undefined", "null")
-            else:
-                raise ParseException("小红书分享链接失效或内容已删除")
+        if matched := INITIAL_STATE.search(html):
+            raw = matched[1].replace("undefined", "null")
+        else:
+            raise ParseException("小红书分享链接失效或内容已删除")
         init_state = discoveryDecoder.decode(raw)
         note_data = init_state.noteData.data
 

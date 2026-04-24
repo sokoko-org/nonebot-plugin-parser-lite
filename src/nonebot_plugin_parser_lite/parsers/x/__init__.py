@@ -1,7 +1,6 @@
 from re import Match
 from typing import ClassVar
 
-from httpx import AsyncClient
 from msgspec import convert
 
 from ...utils.format import format_num
@@ -42,7 +41,7 @@ class XParser(BaseParser):
     @handle("t.co", r"t.co/\w+")
     async def _parse_t_co(self, searched: Match[str]):
         url = f"https://{searched[0]}"
-        return await self.parse_with_redirect(url, self.headers)
+        return await self.parse_with_redirect(url)
 
     @handle("twitter.com", r"twitter.com/[0-9-a-zA-Z_]{1,20}/status/([0-9]+)")
     @handle("x.com", r"x.com/[0-9-a-zA-Z_]{1,20}/status/([0-9]+)")
@@ -51,13 +50,12 @@ class XParser(BaseParser):
         token_num = int(tweet_id) / 1e15
         token = str(token_num * 3.141592653589793).replace("0", "").replace(".", "")
 
-        async with AsyncClient(headers=self.headers) as client:
-            resp = await client.get(
-                "https://cdn.syndication.twimg.com/tweet-result",
-                params={"id": tweet_id, "token": token},
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        resp = await self.httpx.get(
+            "https://cdn.syndication.twimg.com/tweet-result",
+            params={"id": tweet_id, "token": token},
+        )
+        resp.raise_for_status()
+        data = resp.json()
 
         tweet = convert(data, Tweet)
         return self.collect_data(tweet)

@@ -1,6 +1,5 @@
 import re
 from typing import ClassVar
-from httpx import AsyncClient
 from ..base import (
     DOWNLOADER,
     BaseParser,
@@ -21,6 +20,7 @@ class AcfunParser(BaseParser):
     def __init__(self):
         super().__init__()
         self.headers["referer"] = "https://www.acfun.cn/"
+        self.httpx.headers.update(self.headers)
 
     @handle("acfun.cn", r"(?:ac=|/ac)(?P<acid>\d+)")
     async def _parse(self, searched: re.Match[str]):
@@ -59,10 +59,9 @@ class AcfunParser(BaseParser):
         # 拼接查询参数
         url = f"{url}?quickViewId=videoInfo_new&ajaxpipe=1"
 
-        async with AsyncClient(headers=self.headers) as client:
-            response = await client.get(url)
-            response.raise_for_status()
-            raw = response.text
+        response = await self.httpx.get(url)
+        response.raise_for_status()
+        raw = response.text
 
         matched = re.search(r"window\.videoInfo =(.*?)</script>", raw)
         if not matched:
