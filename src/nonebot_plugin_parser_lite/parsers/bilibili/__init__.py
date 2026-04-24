@@ -67,6 +67,7 @@ class BilibiliParser(BaseParser):
         self.headers = HEADERS.copy()
         self._credential: Credential | None = None
         self._cookies_file = pconfig.config_dir / "bilibili_cookies.json"
+        self.ck_header: dict[str, str]
         self.black_mids: list[int] | None = None
         """黑名单作者列表"""
         self._black_list_job_added: bool = False
@@ -85,9 +86,8 @@ class BilibiliParser(BaseParser):
             self.black_mids = []
             return
 
-        request_headers = self.headers.copy()
-        request_headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
-        self.httpx.headers.update(request_headers)
+        self.ck_header = self.headers.copy()
+        self.ck_header["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
         base_url = "https://api.bilibili.com/x/relation/blacks"
         page_size = 50
@@ -96,6 +96,7 @@ class BilibiliParser(BaseParser):
         try:
             resp = await self.httpx.get(
                 base_url,
+                headers=self.ck_header,
                 params={"ps": page_size, "pn": 1},
             )
             resp.raise_for_status()
@@ -119,6 +120,7 @@ class BilibiliParser(BaseParser):
                 try:
                     resp = await self.httpx.get(
                         base_url,
+                        headers=self.ck_header,
                         params={"ps": page_size, "pn": pn},
                     )
                     resp.raise_for_status()
@@ -1040,6 +1042,7 @@ class BilibiliParser(BaseParser):
         try:
             response = await self.httpx.get(
                 "https://api.bilibili.com/x/v2/reply",
+                headers=self.ck_header,
                 params={
                     "oid": oid,
                     "type": type,

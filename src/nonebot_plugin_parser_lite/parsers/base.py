@@ -132,6 +132,10 @@ class BaseParser:
             headers=self.headers, timeout=self.timeout, follow_redirects=True
         )
 
+    async def aclose(self) -> None:
+        """关闭底层 HTTP 客户端，释放连接等资源。"""
+        await self.httpx.aclose()
+
     def __init_subclass__(cls, **kwargs):
         """自动注册子类到 _registry"""
         super().__init_subclass__(**kwargs)

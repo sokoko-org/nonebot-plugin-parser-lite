@@ -114,15 +114,19 @@ def get_parser_by_type(parser_type: type[T]) -> T:
 
 driver = get_driver()
 
+ENABLED_PLATFORM: list[BaseParser] = []
+
 
 @driver.on_startup
 def register_parser_matcher() -> None:
     """在启动时注册各平台解析器及其匹配规则。"""
+    global ENABLED_PLATFORM
     enabled_classes = _get_enabled_parser_classes()
 
     enabled_platforms: list[str] = []
     for parser_cls in enabled_classes:
         parser = parser_cls()
+        ENABLED_PLATFORM.append(parser)
         enabled_platforms.append(parser.platform.display_name)
         for keyword, _ in parser_cls._key_patterns:
             KEYWORD_PARSER_MAP[keyword] = parser
@@ -132,6 +136,14 @@ def register_parser_matcher() -> None:
     patterns = [pattern for cls_ in enabled_classes for pattern in cls_._key_patterns]
     matcher = on_keyword_regex(*patterns)
     matcher.append_handler(parser_handler)
+
+
+@driver.on_shutdown
+async def close_httpx() -> None:
+    if not ENABLED_PLATFORM:
+        return
+
+    await asyncio.gather(*(parser.aclose() for parser in ENABLED_PLATFORM))
 
 
 # 缓存结果
