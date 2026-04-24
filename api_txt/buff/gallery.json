@@ -1,0 +1,221 @@
+{
+  "code": "OK",
+  "data": {
+    "goods_infos": {
+      "V1092280822": [
+        {
+          "goods_id": 872086,
+          "goods_name": "鲍伊猎刀（★ StatTrak™） | 传说 (崭新出厂)",
+          "icon_url": "https://market.fp.ps.netease.com/file/65f811b030e3b85ba84c3d1aPige9bb205?fop=imageView/6/f/webp/q/75",
+          "sell_reference_price": "3866"
+        }
+      ],
+      "V1093419092": [
+        {
+          "goods_id": 33883,
+          "goods_name": "AK-47 | 表面淬火 (略有磨损)",
+          "icon_url": "https://market.fp.ps.netease.com/file/65f56f48c1d52fa71488d28fJpSXixGd05?fop=imageView/6/f/webp/q/75",
+          "sell_reference_price": "1809"
+        }
+      ],
+      "V1093423997": [
+        {
+          "goods_id": 40986,
+          "goods_name": "印花 | Titan | 2014年卡托维兹锦标赛",
+          "icon_url": "https://g.fp.ps.netease.com/market/file/5a7b52dc7f9d2a0a19c56048T4q0ho7B?fop=imageView/6/f/webp/q/75",
+          "sell_reference_price": "24999"
+        },
+        {
+          "goods_id": 33883,
+          "goods_name": "AK-47 | 表面淬火 (略有磨损)",
+          "icon_url": "https://market.fp.ps.netease.com/file/65f56f48c1d52fa71488d28fJpSXixGd05?fop=imageView/6/f/webp/q/75",
+          "sell_reference_price": "1809"
+        },
+        {
+          "goods_id": 44999,
+          "goods_name": "运动手套（★） | 潘多拉之盒 (略有磨损)",
+          "icon_url": "https://market.fp.ps.netease.com/file/65f84fdbc1c6b4f981c1a56bEekNZrh605?fop=imageView/6/f/webp/q/75",
+          "sell_reference_price": "39000"
+        }
+      ],
+      "V1093433474": [
+        {
+          "goods_id": 756142,
+          "goods_name": "AWP（纪念品） | 巨龙传说 (略有磨损)",
+          "icon_url": "https://market.fp.ps.netease.com/file/65f58ae9831310d75518738eMzkP12O205?fop=imageView/6/f/webp/q/75",
+          "sell_reference_price": "1400000"
+        }
+      ]
+    },
+    "preview": {
+      "appid": 730,
+      "comment_state": true,
+      "description": "鲍伊猎刀（StatTrak）\n传说（崭新出厂）",
+      "description_sensitive": null,
+      "game": "csgo",
+      "icon_format": "JPEG",
+      "icon_height": 1060,
+      "icon_sensitive": null,
+      "icon_static": 1,
+      "icon_thumbnail_url": null,
+      "icon_url": "https://market.fp.ps.netease.com/file/69e013687607b0a7569c424e1xpy1OXy07?fop=imageView/6/f/webp/q/75",
+      "icon_width": 950,
+      "id": "V1092280822",
+      "publish_time": 1776282555,
+      "recommend": 1,
+      "share_data": {
+        "content": "鲍伊猎刀（StatTrak）\n传说（崭新出厂）",
+        "thumbnail": "https://market.fp.ps.netease.com/file/69e013687607b0a7569c424e1xpy1OXy07?fop=imageView/6/f/webp/q/75?fop=imageView/1/w/200/h/200%7cimageView/4/h/200",
+        "title": "这款CSGO皮肤真好看",
+        "url": "https://buff.163.com/s/preview_share.html?game=csgo&preview_id=V1092280822&from_app=0&comment_type=216"
+      },
+      "state": 1,
+      "state_text": "审核通过",
+      "tags": [],
+      "ups_num": 4,
+      "user_id": "U1083960305"
+    },
+    "previews": [
+      {
+        "appid": 730,
+        "comment_state": true,
+        "description": "手拿12万，腿都飘了",
+        "description_sensitive": null,
+        "game": "csgo",
+        "icon_format": "JPEG",
+        "icon_height": 1080,
+        "icon_sensitive": null,
+        "icon_static": 1,
+        "icon_thumbnail_url": null,
+        "icon_url": "https://g.fp.ps.netease.com/market/file/5c1e35c08b74274f90dae21dWvcBTzKJ?fop=imageView/6/f/webp/q/75",
+        "icon_width": 1920,
+        "id": "V1093433474",
+        "publish_time": 1545473688,
+        "recommend": 1,
+        "share_data": {
+          "content": "手拿12万，腿都飘了",
+          "thumbnail": "https://g.fp.ps.netease.com/market/file/5c1e35c08b74274f90dae21dWvcBTzKJ?fop=imageView/6/f/webp/q/75?fop=imageView/1/w/200/h/200%7cimageView/4/h/200",
+          "title": "这款CSGO皮肤真好看",
+          "url": "https://buff.163.com/s/preview_share.html?game=csgo&preview_id=V1093433474&from_app=0&comment_type=216"
+        },
+        "state": 1,
+        "state_text": "审核通过",
+        "tags": [],
+        "ups_num": 5930,
+        "user_id": "U1093404881"
+      },
+      {
+        "appid": 730,
+        "comment_state": true,
+        "description": "黄金AK！",
+        "description_sensitive": null,
+        "game": "csgo",
+        "icon_format": "JPEG",
+        "icon_height": 1080,
+        "icon_sensitive": null,
+        "icon_static": 1,
+        "icon_thumbnail_url": null,
+        "icon_url": "https://g.fp.ps.netease.com/market/file/5ecddced2786fda9a10f6fbej2Mf2cpi02?fop=imageView/6/f/webp/q/75",
+        "icon_width": 1920,
+        "id": "V1093419092",
+        "publish_time": 1527750801,
+        "recommend": 1,
+        "share_data": {
+          "content": "黄金AK！",
+          "thumbnail": "https://g.fp.ps.netease.com/market/file/5ecddced2786fda9a10f6fbej2Mf2cpi02?fop=imageView/6/f/webp/q/75?fop=imageView/1/w/200/h/200%7cimageView/4/h/200",
+          "title": "这款CSGO皮肤真好看",
+          "url": "https://buff.163.com/s/preview_share.html?game=csgo&preview_id=V1093419092&from_app=0&comment_type=216"
+        },
+        "state": 1,
+        "state_text": "审核通过",
+        "tags": [],
+        "ups_num": 4873,
+        "user_id": "U1094599575"
+      },
+      {
+        "appid": 730,
+        "comment_state": true,
+        "description": "入门淬火",
+        "description_sensitive": null,
+        "game": "csgo",
+        "icon_format": "JPEG",
+        "icon_height": 1200,
+        "icon_sensitive": null,
+        "icon_static": 1,
+        "icon_thumbnail_url": null,
+        "icon_url": "https://g.fp.ps.netease.com/market/file/5ecd18245e60279f42cbd1e5GPa82dD102?fop=imageView/6/f/webp/q/75",
+        "icon_width": 1920,
+        "id": "V1093423997",
+        "publish_time": 1535511803,
+        "recommend": 1,
+        "share_data": {
+          "content": "入门淬火",
+          "thumbnail": "https://g.fp.ps.netease.com/market/file/5ecd18245e60279f42cbd1e5GPa82dD102?fop=imageView/6/f/webp/q/75?fop=imageView/1/w/200/h/200%7cimageView/4/h/200",
+          "title": "这款CSGO皮肤真好看",
+          "url": "https://buff.163.com/s/preview_share.html?game=csgo&preview_id=V1093423997&from_app=0&comment_type=216"
+        },
+        "state": 1,
+        "state_text": "审核通过",
+        "tags": [
+          {
+            "id": 2,
+            "name": "印花搭配"
+          }
+        ],
+        "ups_num": 4778,
+        "user_id": "U1092730852"
+      }
+    ],
+    "user_infos": {
+      "U1083960305": {
+        "avatar": "https://market.fp.ps.netease.com/file/646df4c330422aba697b94fcPdgOdq9K04?fop=imageView/6/f/webp/q/75",
+        "avatar_safe": "https://market.fp.ps.netease.com/file/646df4c330422aba697b94fcPdgOdq9K04?fop=imageView/6/f/webp/q/75",
+        "ip_location": "山东",
+        "is_auto_accept": false,
+        "is_premium_vip": false,
+        "nickname": "低价清仓速发",
+        "seller_level": 0,
+        "shop_id": "1083960305",
+        "user_id": "U1083960305",
+        "v_types": null
+      },
+      "U1092730852": {
+        "avatar": "https://g.fp.ps.netease.com/market/file/5a90ce1816b6d4ca3fe4eddeAdJpdD4g?fop=imageView/6/f/webp/q/75",
+        "avatar_safe": "https://g.fp.ps.netease.com/market/file/5a90ce1816b6d4ca3fe4eddeAdJpdD4g?fop=imageView/6/f/webp/q/75",
+        "ip_location": "辽宁",
+        "is_auto_accept": false,
+        "is_premium_vip": false,
+        "nickname": "阿韬先生",
+        "seller_level": 0,
+        "shop_id": "1092730852",
+        "user_id": "U1092730852",
+        "v_types": null
+      },
+      "U1093404881": {
+        "avatar": "https://g.fp.ps.netease.com/market/file/5a2a963d87814f311b0d5722BjWmlOiU?fop=imageView/6/f/webp/q/75",
+        "avatar_safe": "https://g.fp.ps.netease.com/market/file/5a2a963d87814f311b0d5722BjWmlOiU?fop=imageView/6/f/webp/q/75",
+        "ip_location": "山东",
+        "is_auto_accept": false,
+        "is_premium_vip": false,
+        "nickname": "理想理想有理想",
+        "seller_level": 0,
+        "shop_id": "1093404881",
+        "user_id": "U1093404881",
+        "v_types": null
+      },
+      "U1094599575": {
+        "avatar": "https://g.fp.ps.netease.com/market/file/5b543a385e6027c76dc81e1fPqC6g2s0?fop=imageView/6/f/webp/q/75",
+        "avatar_safe": "https://g.fp.ps.netease.com/market/file/5b543a385e6027c76dc81e1fPqC6g2s0?fop=imageView/6/f/webp/q/75",
+        "ip_location": "湖北",
+        "is_auto_accept": false,
+        "is_premium_vip": false,
+        "nickname": "菲8啾比",
+        "seller_level": 0,
+        "shop_id": "1094599575",
+        "user_id": "U1094599575",
+        "v_types": null
+      }
+    }
+  },
+  "msg": null
+}

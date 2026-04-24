@@ -38,6 +38,7 @@
 | 堆糖       | 链接                              | -    | ✅            | -         | -                 |
 | 小黑盒     | 链接                              | ✅   | ✅            | -         | -                 |
 | LOFTER     | 链接                              | -    | ✅            | -         | -                 |
+| BUFF       | 链接                              | ✅   | ✅            | -         | -                 |
 
 支持的链接，可参考 [测试链接](https://github.com/fllesser/nonebot-plugin-parser/blob/master/tests/others/test_urls.md)
 

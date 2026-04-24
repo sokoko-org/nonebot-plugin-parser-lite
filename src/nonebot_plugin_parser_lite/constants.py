@@ -50,6 +50,7 @@ class PlatformEnum(str, Enum):
     DUITANG = "duitang"
     HEYBOX = "heybox"
     LOFTER = "lofter"
+    BUFF = "buff"
 
     def __str__(self) -> str:
         return self.value
