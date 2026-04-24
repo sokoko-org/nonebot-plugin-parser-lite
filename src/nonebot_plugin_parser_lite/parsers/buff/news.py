@@ -26,35 +26,36 @@ class News(Struct):
         data: list[MediaContent | str] = []
         soup = BeautifulSoup(self.body, "html.parser")
 
-        for element in list(soup.descendants):
+        for element in soup.descendants:
             # 标签节点
             if isinstance(element, Tag):
-                # 视频卡片：整体视为一个单元
+                # 视频容器：结构约定为 <div class="video-content" data-src="..."><div class="video-play"></div><img src="..."></div>
                 if element.name == "div" and "video-content" in (
                     element.get("class") or []
                 ):
-                    # 结构约定：video-content 内必含一个 <img> 封面和 data-src 视频地址
-                    img = element.find("img")
-                    if img is None:
+                    # data-src 一定存在
+                    video = str(element["data-src"])
+                    # div 下面必含一个 img 封面（第一个 img 即封面）
+                    imgs = element.find_all("img")
+                    if not imgs:
                         continue
-                    thumb = str(img.attrs["src"])
-                    video_attr = element.attrs["data-src"]
-                    video = str(video_attr)
+                    cover_img = imgs[0]
+                    thumb = str(cover_img["src"])
+
                     data.append(
                         create_video(
                             url_or_task=video,
                             cover_url=thumb,
                         )
                     )
-                    # 处理完后从 DOM 树移除该节点，避免内部 img 被再次当作普通图处理
+                    # 处理完后从 DOM 树移除该节点，避免内部 img 再被当作普通图处理
                     element.decompose()
                     continue
 
-                # 图片
+                # 普通图片
                 if element.name == "img":
                     if src_attr := element.attrs.get("data-original"):
-                        src = str(src_attr)
-                        data.append(create_graphic(image_url=src))
+                        data.append(create_graphic(image_url=str(src_attr)))
 
             elif isinstance(element, NavigableString):
                 if text := str(element).strip():
