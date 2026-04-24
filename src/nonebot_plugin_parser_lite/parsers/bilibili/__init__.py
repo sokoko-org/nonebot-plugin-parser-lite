@@ -1092,7 +1092,7 @@ class BilibiliParser(BaseParser):
                 _append_unique(upper_list, merged, seen_rpids)
                 _append_unique(replies_raw, merged, seen_rpids)
             else:
-                # 没有置顶也没有热评 → 普通
+                # 没有置顶 → 普通
                 _append_unique(replies_raw, merged, seen_rpids)
 
             logger.debug(
