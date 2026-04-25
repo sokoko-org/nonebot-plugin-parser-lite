@@ -1,6 +1,6 @@
 from msgspec import Struct, field
 
-from ..creator import create_image
+from ..creator import create_image, create_sticker
 
 from ..data import MediaContent
 
@@ -15,6 +15,7 @@ class Author(Struct):
 class Picture(Struct):
     image_url: str
     is_emoji: bool
+    name: str
 
 
 class Comment(Struct):
@@ -27,7 +28,28 @@ class Comment(Struct):
 
     @property
     def content(self) -> list[MediaContent | str]:
-        return [self.message] + [create_image(pic.image_url) for pic in self.pictures]
+        """将原始 message + pictures 转为文本 + 媒体内容列表。"""
+        contents: list[MediaContent | str] = []
+        text = self.message or ""
+
+        for pic in self.pictures:
+            if pic.is_emoji:
+                sticker = create_sticker(
+                    url=pic.image_url,
+                    size="medium",
+                    desc=pic.name,
+                )
+                contents.append(sticker)
+                placeholder = f"[{pic.name}]"
+                if placeholder in text:
+                    text = text.replace(placeholder, "")
+            else:
+                contents.append(create_image(pic.image_url))
+
+        if text:
+            contents.insert(0, text)
+
+        return contents
 
 
 class Comments(Struct):
