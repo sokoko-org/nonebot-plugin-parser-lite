@@ -65,6 +65,8 @@ class BilibiliParser(BaseParser):
 
     def __init__(self):
         super().__init__()
+        self.headers = HEADERS.copy()
+        self.httpx.headers.update(self.headers)
         self._credential: Credential | None = None
         self._cookies_file = pconfig.config_dir / "bilibili_cookies.json"
         self.ck_header: dict[str, str]
