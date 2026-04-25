@@ -42,7 +42,7 @@ class Comment(Struct):
                 contents.append(sticker)
                 placeholder = f"[{pic.name}]"
                 if placeholder in text:
-                    text = text.replace(placeholder, "")
+                    text = text.replace(placeholder, "", 1)
             else:
                 contents.append(create_image(pic.image_url))
 
