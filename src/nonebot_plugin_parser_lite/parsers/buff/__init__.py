@@ -84,7 +84,7 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/news-detail_share.html?article_id=87832&comment_type=228
     @handle(
         "buff.163.com/s/news-detail_share.html",
-        r"(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=228)",
+        r"buff\.163\.com/s/news-detail_share\.html\?(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=228)(?:[^#]*?(?:article_id=[^&]+|comment_type=228)){2}",
     )
     async def parse_video(self, searched: Match[str]):
         article_id = searched["article_id"]
@@ -114,7 +114,7 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/preview_share.html?game=csgo&preview_id=V1092280822&comment_type=216
     @handle(
         "buff.163.com/s/preview_share.html",
-        r"(?=[^#]*game=(?P<game>[^&]+))(?=[^#]*preview_id=(?P<preview_id>[^&]+))(?=[^#]*comment_type=216)",
+        r"buff\.163\.com/s/preview_share\.html\?(?=[^#]*game=(?P<game>[^&]+))(?=[^#]*preview_id=(?P<preview_id>[^&]+))(?=[^#]*comment_type=216).*?(?:game=[^&]+|preview_id=[^&]+|comment_type=216)",
     )
     async def parse_gallery(self, searched: Match[str]):
         preview_id = searched["preview_id"]
@@ -147,7 +147,7 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/news-detail_share.html?article_id=87855&comment_type=211
     @handle(
         "buff.163.com/s/news-detail_share.html",
-        r"(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=211)",
+        r"buff\.163\.com/s/news-detail_share\.html\?(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=211)(?:[^#]*?(?:article_id=[^&]+|comment_type=211)){2}",
     )
     async def parse_news(self, searched: Match[str]):
         article_id = searched["article_id"]
@@ -177,7 +177,7 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/topic-detail_share.html?social_topic_post_id=P1093043595&comment_type=239
     @handle(
         "buff.163.com/s/topic-detail_share.html",
-        r"(?=[^#]*social_topic_post_id=(?P<post_id>[^&]+))(?=[^#]*comment_type=239)",
+        r"buff\.163\.com/s/topic-detail_share\.html\?(?=[^#]*social_topic_post_id=(?P<post_id>[^&]+))(?=[^#]*comment_type=239)(?:[^#]*?(?:social_topic_post_id=[^&]+|comment_type=239)){2}",
     )
     async def parse_topic(self, searched: Match[str]):
         post_id = searched["post_id"]
