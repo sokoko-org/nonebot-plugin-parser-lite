@@ -17,11 +17,11 @@ class Lyrics(Struct):
 
 
 class Stats(Struct):
-    count_collected: int
+    count_collected: int = 0
     """收藏数"""
-    count_comment: int
+    count_comment: int = 0
     """评论数"""
-    count_shared: int
+    count_shared: int = 0
     """分享数"""
 
 class AlbumInfo(Struct):
