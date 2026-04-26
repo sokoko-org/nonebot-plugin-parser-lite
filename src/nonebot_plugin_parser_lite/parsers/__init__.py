@@ -26,6 +26,7 @@ from .zhihu import ZhiHuParser
 from .duitang import DuiTangParser
 from .heybox import HeyBoxParser
 from .lofter import LofterParser
+from .buff import BuffParser
 
 __all__ = [
     "AcfunParser",
@@ -53,5 +54,6 @@ __all__ = [
     "DuiTangParser",
     "HeyBoxParser",
     "LofterParser",
+    "BuffParser",
     "handle",
 ]
