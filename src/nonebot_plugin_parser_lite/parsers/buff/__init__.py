@@ -83,7 +83,7 @@ class BuffParser(BaseParser):
 
     # https://buff.163.com/s/news-detail_share.html?article_id=87832&comment_type=228
     @handle(
-        "https://buff.163.com/s/news-detail_share.html",
+        "buff.163.com/s/news-detail_share.html",
         r"(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=228)",
     )
     async def parse_video(self, searched: Match[str]):
@@ -113,7 +113,7 @@ class BuffParser(BaseParser):
     # parse gallery
     # https://buff.163.com/s/preview_share.html?game=csgo&preview_id=V1092280822&comment_type=216
     @handle(
-        "https://buff.163.com/s/preview_share.html",
+        "buff.163.com/s/preview_share.html",
         r"(?=[^#]*game=(?P<game>[^&]+))(?=[^#]*preview_id=(?P<preview_id>[^&]+))(?=[^#]*comment_type=216)",
     )
     async def parse_gallery(self, searched: Match[str]):
@@ -146,7 +146,7 @@ class BuffParser(BaseParser):
 
     # https://buff.163.com/s/news-detail_share.html?article_id=87855&comment_type=211
     @handle(
-        "https://buff.163.com/s/news-detail_share.html",
+        "buff.163.com/s/news-detail_share.html",
         r"(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=211)",
     )
     async def parse_news(self, searched: Match[str]):
@@ -176,7 +176,7 @@ class BuffParser(BaseParser):
 
     # https://buff.163.com/s/topic-detail_share.html?social_topic_post_id=P1093043595&comment_type=239
     @handle(
-        "https://buff.163.com/s/topic-detail_share.html",
+        "buff.163.com/s/topic-detail_share.html",
         r"(?=[^#]*social_topic_post_id=(?P<post_id>[^&]+))(?=[^#]*comment_type=239)",
     )
     async def parse_topic(self, searched: Match[str]):

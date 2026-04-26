@@ -13,7 +13,7 @@ class Author(Struct):
 
 
 class Picture(Struct):
-    image_url: str
+    icon_url: str
     is_emoji: bool
     name: str
 
@@ -35,7 +35,7 @@ class Comment(Struct):
         for pic in self.pictures:
             if pic.is_emoji:
                 sticker = create_sticker(
-                    url=pic.image_url,
+                    url=pic.icon_url,
                     size="medium",
                     desc=pic.name,
                 )
@@ -44,7 +44,7 @@ class Comment(Struct):
                 if placeholder in text:
                     text = text.replace(placeholder, "", 1)
             else:
-                contents.append(create_image(pic.image_url))
+                contents.append(create_image(pic.icon_url))
 
         if text:
             contents.insert(0, text)
