@@ -195,13 +195,7 @@ async def parser_handler(
         logger.debug(f"命中缓存: {cache_key}, 结果: {result!r}")
 
     # 2. 渲染并发送
-    try:
-        await _send_parse_result(session, result)
-    except Exception as e:
-        # 渲染或发送失败时的兜底日志
-        logger.error(f"渲染或发送失败: {e}", exc_info=True)
-        # 如需可在此补发纯文本提示：
-        # await UniMessage(f"解析成功，但渲染/发送失败: {e!s}").send()
+    await _send_parse_result(session, result)
 
 
 @on_alconna(Alconna("bm", Args["bv?", str, ""]), priority=3, block=True).handle()
