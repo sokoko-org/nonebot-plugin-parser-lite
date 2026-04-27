@@ -8,21 +8,12 @@ from urllib.parse import urljoin
 
 import aiofiles
 from nonebot import logger
-from rich.progress import (
-    BarColumn,
-    DownloadColumn,
-    Progress,
-    TaskID,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
-    TransferSpeedColumn,
-)
-
 from ..config import pconfig
 from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
 from ..utils.common import generate_file_name, make_filename, safe_unlink
 from ..utils.ffmpeg import FFmpeg
+from ..utils.progress import ProgressManager as PM, Progress, TaskID
 from httpx import AsyncClient, Response
 from .task import auto_task
 
@@ -507,17 +498,15 @@ class StreamDownloader:
         :param total: 进度条总长度
         :return: 进度条和任务 ID
         """
-        with Progress(
-            "[progress.description]{task.description}",
-            BarColumn(),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            DownloadColumn(),
-            TransferSpeedColumn(),
-            TimeElapsedColumn(),
-            TimeRemainingColumn(),
-        ) as bar:
-            task_id = bar.add_task(f"[green]{desc}", total=total)
-            yield bar, task_id
+        PM.start_task()
+
+        progress = PM.get_progress()
+        task_id = progress.add_task(f"[green]{desc}", total=total)
+        try:
+            yield progress, task_id
+        finally:
+            progress.remove_task(task_id)
+            PM.stop_task()
 
 
 DOWNLOADER: StreamDownloader = StreamDownloader()
