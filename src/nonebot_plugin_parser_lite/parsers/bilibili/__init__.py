@@ -68,7 +68,7 @@ class BilibiliParser(BaseParser):
         self.headers = HEADERS.copy()
         self._credential: Credential | None = None
         self._cookies_file = pconfig.config_dir / "bilibili_cookies.json"
-        self.ck_header: dict[str, str]
+        self.ck_header = self.headers.copy()
         self.black_mids: list[int] | None = None
         """黑名单作者列表"""
         self._black_list_job_added: bool = False
@@ -87,7 +87,6 @@ class BilibiliParser(BaseParser):
             self.black_mids = []
             return
 
-        self.ck_header = self.headers.copy()
         self.ck_header["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
         base_url = "https://api.bilibili.com/x/relation/blacks"
