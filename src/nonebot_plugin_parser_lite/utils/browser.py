@@ -140,9 +140,15 @@ def _resolve_browser_path() -> str:
 
 
 browser_path = _resolve_browser_path()
+
+if system == "Linux":
+    logger.warning(
+        "You are running on Linux. If there is no desktop environment, please enable headless mode."
+    )
+
 logger.info(f"Launching browser from {browser_path}")
 co = ChromiumOptions()
-# co.mute(True)
+co.mute(True)
 # co.incognito(True)
 # co.no_imgs(True)
 co.auto_port(True)
@@ -155,4 +161,5 @@ BROWSER = Chromium(co)
 
 @driver.on_shutdown
 def close_browser():
+    logger.info("Closing browser launched by Parser Lite")
     BROWSER.quit()
