@@ -143,7 +143,7 @@ plite_browser_path=None
 plite_live_photo=True
 
 # [可选] 浏览器是否使用无头模式，无头模式有可能会被检测到
-plite_headless=False
+plite_headless=""
 
 # [可选] 最大评论数量
 plite_max_comments=5

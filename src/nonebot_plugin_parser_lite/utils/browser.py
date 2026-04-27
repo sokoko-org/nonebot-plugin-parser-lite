@@ -14,7 +14,7 @@ system = platform.system()
 driver = get_driver()
 
 
-def _find_browser_from_system() -> str | None:
+def _find_browser_from_system() -> str:
     """从系统默认安装位置寻找浏览器."""
     if system == "Darwin":
         mac_paths = (
@@ -38,11 +38,11 @@ def _find_browser_from_system() -> str | None:
                 value, _ = winreg.QueryValueEx(key, "")
                 # DefaultIcon 的值通常形如 "C:\\...\\chrome.exe,0"
                 return value.split(",")[0]
-    return None
+    return ""
 
 
-def _find_browser_from_playwright() -> str | None:
-    """从 ms-playwright 默认目录寻找 Chromium."""
+def _find_browser_from_playwright() -> str:
+    """从 ms-playwright 默认目录寻找 Chromium 可执行文件"""
     home = Path.home()
     if system == "Windows":
         base = home / "AppData" / "Local" / "ms-playwright"
@@ -51,29 +51,40 @@ def _find_browser_from_playwright() -> str | None:
     else:
         base = home / ".cache" / "ms-playwright"
 
+    if not base.is_dir():
+        return ""
+
     chromium_dirs = sorted(base.glob("chromium-*"))
     for chromium_dir in reversed(chromium_dirs):
+        if not chromium_dir.is_dir():
+            continue
+
         if system == "Windows":
-            exe_path = chromium_dir / "chrome-win" / "chrome.exe"
+            # 任意 chrome-win*/chrome.exe
+            exe_candidates = chromium_dir.glob("chrome-win*/chrome.exe")
         elif system == "Darwin":
-            exe_path = (
+            # 任意 chrome-mac*/Chromium.app
+            exe_candidates = [
                 chromium_dir
                 / "chrome-mac"
                 / "Chromium.app"
                 / "Contents"
                 / "MacOS"
                 / "Chromium"
-            )
+            ]
         else:  # Linux
-            exe_path = chromium_dir / "chrome-linux" / "chrome"
+            # 任意 chrome-linux*/chrome 或 chrome-linux64*/chrome
+            exe_candidates = chromium_dir.glob("chrome-linux*/chrome")
 
-        if exe_path.is_file():
-            return str(exe_path)
+        for exe_path in exe_candidates:
+            if exe_path.is_file():
+                # 返回绝对路径，避免相对路径带来的工作目录依赖
+                return str(exe_path.resolve())
 
-    return None
+    return ""
 
 
-def _find_browser_from_puppeteer() -> str | None:
+def _find_browser_from_puppeteer() -> str:
     """从 Puppeteer 默认目录寻找 Chromium/Chrome."""
     home = Path.home()
     candidates: list[Path] = []
@@ -102,9 +113,9 @@ def _find_browser_from_puppeteer() -> str | None:
             for app in base.rglob("Chromium.app"):
                 exe = app / "Contents" / "MacOS" / "Chromium"
                 if exe.is_file():
-                    return str(exe)
+                    return str(exe.resolve())
 
-    return None
+    return ""
 
 
 def _resolve_browser_path() -> str:
