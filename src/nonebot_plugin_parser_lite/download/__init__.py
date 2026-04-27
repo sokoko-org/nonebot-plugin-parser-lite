@@ -499,9 +499,13 @@ class StreamDownloader:
         :return: 进度条和任务 ID
         """
         PM.start_task()
-
         progress = PM.get_progress()
-        task_id = progress.add_task(f"[green]{desc}", total=total)
+        try:
+            task_id = progress.add_task(f"[green]{desc}", total=total)
+        except Exception:
+            PM.stop_task()
+            raise
+
         try:
             yield progress, task_id
         finally:
