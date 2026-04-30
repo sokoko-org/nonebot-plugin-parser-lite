@@ -107,7 +107,7 @@
         {% set src = item.src %}
         {% set is_live = item.is_live %}
         <div class="mt-3">
-            <div class="single-image relative rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <div class="single-image relative rounded-2xl overflow-hidden border border-gray-100 shadow-sm inline-block">
                 <img src="{{ src }}" class="w-full h-auto max-h-[400px] object-cover" />
                 {% if is_live %}
                     <div class="live-tag-strict absolute bottom-2 right-2 flex items-center">
@@ -121,7 +121,30 @@
                 {% endif %}
             </div>
         </div>
-        {# 2 张及以上：九宫格 media-grid #}
+        {# 4 张：2×2 四宫格 #}
+    {% elif count == 4 %}
+        <div class="mt-3">
+            <div class="media-grid outline-1 outline-slate-200 rounded-xl overflow-hidden grid grid-cols-2 gap-[2px] shadow-sm">
+                {% for item in visible_imgs %}
+                    {% set src = item.src %}
+                    {% set is_live = item.is_live %}
+                    <div class="relative w-full h-full">
+                        <img src="{{ src }}" class="square-img" />
+                        {% if is_live %}
+                            <div class="live-tag-strict absolute bottom-2 right-2 flex items-center">
+                                <i class="live-icon"
+                                   style="width: 16px;
+                                          height: 17px"
+                                   aria-hidden="true"></i>
+                                <span class="text-[9px] font-bold uppercase tracking-widest"
+                                      style="padding-left: 1.3px">Live</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {# 其他 ≥2 张：九宫格 media-grid #}
     {% else %}
         <div class="mt-3">
             <div class="media-grid outline-1 outline-slate-200 rounded-xl overflow-hidden grid grid-cols-3 gap-[2px] shadow-sm">
