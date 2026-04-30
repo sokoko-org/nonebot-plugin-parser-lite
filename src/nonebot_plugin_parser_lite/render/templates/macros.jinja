@@ -250,13 +250,9 @@
                             '<i class="fa-icon fa-play ml-1"></i>'
                             '</div>'
                             '</div>'
+                            '<div class="absolute bottom-2 right-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">' ~ cont.display_duration ~ '</div>'
                             '</div>'
                         ) %}
-            {#
-              <div class="absolute bottom-2 right-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">
-                05:24
-              </div>
-            #}
         {% endif %}
     {% endfor %}
     {% set _ = flush_images() %}
