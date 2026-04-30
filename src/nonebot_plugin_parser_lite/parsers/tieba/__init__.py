@@ -1,8 +1,10 @@
 from re import Match
 from typing import ClassVar
 
+
 from ..base import BaseParser, handle, Platform, PlatformEnum
 from .utils import get_post, build_comments, build_content
+from ...utils.format import format_num
 
 
 class TiebaParser(BaseParser):
@@ -27,10 +29,10 @@ class TiebaParser(BaseParser):
             avatar_url=f"http://tb.himg.baidu.com/sys/portraith/item/{thread.user.portrait}",
         )
         stats = self.create_stats(
-            view_count=str(thread.view_num),
-            like_count=str(thread.agree),
-            comment_count=str(thread.reply_num),
-            share_count=str(thread.share_num),
+            view_count=format_num(thread.view_num),
+            like_count=format_num(thread.agree),
+            comment_count=format_num(thread.reply_num),
+            share_count=format_num(thread.share_num),
         )
 
         # 主楼正文内容
