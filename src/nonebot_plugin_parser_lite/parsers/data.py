@@ -59,7 +59,7 @@ class VideoContent(MediaContent):
 
             hours, minutes = divmod(minutes, 60)
             return f"{hours}:{minutes:02d}:{seconds:02d}"
-        except Exception:
+        except (TypeError, ValueError):
             return "NaN"
 
 
