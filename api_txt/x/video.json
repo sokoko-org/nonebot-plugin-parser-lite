@@ -1,0 +1,3039 @@
+{
+  "code": 100000,
+  "data": {
+    "data": {
+      "threaded_conversation_with_injections_v2": {
+        "instructions": [
+          {
+            "type": "TimelineClearCache"
+          },
+          {
+            "entries": [
+              {
+                "content": {
+                  "__typename": "TimelineTimelineItem",
+                  "clientEventInfo": {
+                    "component": "tweet",
+                    "element": "tweet"
+                  },
+                  "entryType": "TimelineTimelineItem",
+                  "itemContent": {
+                    "__typename": "TimelineTweet",
+                    "itemType": "TimelineTweet",
+                    "tweetDisplayType": "Tweet",
+                    "tweet_results": {
+                      "result": {
+                        "__typename": "Tweet",
+                        "core": {
+                          "user_results": {
+                            "result": {
+                              "__typename": "User",
+                              "affiliates_highlighted_label": {},
+                              "avatar": {
+                                "image_url": "https://pbs.twimg.com/profile_images/1899005951023427584/F2xL6ZJx_normal.jpg"
+                              },
+                              "core": {
+                                "created_at": "Wed Nov 13 05:52:59 +0000 2024",
+                                "name": "saki ❤︎",
+                                "screen_name": "cakedochi"
+                              },
+                              "dm_permissions": {
+                                "can_dm": false
+                              },
+                              "follow_request_sent": false,
+                              "has_graduated_access": true,
+                              "id": "VXNlcjoxODU2NTc1OTE4ODQxNzIwODMy",
+                              "is_blue_verified": false,
+                              "legacy": {
+                                "default_profile": true,
+                                "default_profile_image": false,
+                                "description": "バカは見る~♡",
+                                "entities": {
+                                  "description": {}
+                                },
+                                "fast_followers_count": 0,
+                                "favourites_count": 5402,
+                                "follow_request_sent": false,
+                                "followers_count": 730,
+                                "friends_count": 59,
+                                "has_custom_timelines": false,
+                                "is_translator": false,
+                                "listed_count": 3,
+                                "media_count": 395,
+                                "needs_phone_verification": false,
+                                "normal_followers_count": 730,
+                                "notifications": false,
+                                "pinned_tweet_ids_str": ["2049411806050013368"],
+                                "possibly_sensitive": false,
+                                "profile_banner_url": "https://pbs.twimg.com/profile_banners/1856575918841720832/1755848741",
+                                "profile_interstitial_type": "",
+                                "statuses_count": 2065,
+                                "time_zone": "",
+                                "translator_type": "none",
+                                "url": "",
+                                "utc_offset": 0,
+                                "want_retweets": false,
+                                "withheld_description": "",
+                                "withheld_scope": ""
+                              },
+                              "location": {
+                                "location": "🍰🦔"
+                              },
+                              "media_permissions": {
+                                "can_media_tag": true
+                              },
+                              "parody_commentary_fan_label": "None",
+                              "privacy": {
+                                "protected": false
+                              },
+                              "profile_bio": {
+                                "description": "バカは見る~♡"
+                              },
+                              "profile_description_language": "ja",
+                              "profile_image_shape": "Circle",
+                              "relationship_perspectives": {
+                                "blocked_by": false,
+                                "blocking": false,
+                                "followed_by": false,
+                                "following": false,
+                                "muting": false
+                              },
+                              "rest_id": "1856575918841720832",
+                              "super_follow_eligible": false,
+                              "super_followed_by": false,
+                              "super_following": false,
+                              "verification": {
+                                "verified": false
+                              }
+                            }
+                          }
+                        },
+                        "edit_control": {
+                          "edit_tweet_ids": ["2050564108114899179"],
+                          "editable_until_msecs": "1777731155000",
+                          "edits_remaining": "5",
+                          "is_edit_eligible": true
+                        },
+                        "grok_analysis_button": true,
+                        "grok_annotations": {
+                          "is_image_editable_by_grok": false
+                        },
+                        "has_birdwatch_notes": false,
+                        "is_translatable": true,
+                        "legacy": {
+                          "bookmark_count": 2144,
+                          "bookmarked": false,
+                          "conversation_id_str": "2050564108114899179",
+                          "created_at": "Sat May 02 13:12:35 +0000 2026",
+                          "display_text_range": [0, 19],
+                          "entities": {
+                            "hashtags": [
+                              {
+                                "indices": [12, 19],
+                                "text": "トモコレさき"
+                              }
+                            ],
+                            "media": [
+                              {
+                                "additional_media_info": {
+                                  "monetizable": true
+                                },
+                                "allow_download_status": {
+                                  "allow_download": true
+                                },
+                                "display_url": "pic.x.com/ufej1TurE2",
+                                "expanded_url": "https://x.com/cakedochi/status/2050564108114899179/video/1",
+                                "ext_media_availability": {
+                                  "status": "Available"
+                                },
+                                "id_str": "2050564048027312128",
+                                "indices": [20, 43],
+                                "media_key": "13_2050564048027312128",
+                                "media_results": {
+                                  "result": {
+                                    "media_key": "13_2050564048027312128"
+                                  }
+                                },
+                                "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2050564048027312128/img/RjcWiKDqZE866SKM.jpg",
+                                "original_info": {
+                                  "focus_rects": [],
+                                  "height": 692,
+                                  "width": 692
+                                },
+                                "sizes": {
+                                  "large": {
+                                    "h": 692,
+                                    "resize": "fit",
+                                    "w": 692
+                                  },
+                                  "medium": {
+                                    "h": 692,
+                                    "resize": "fit",
+                                    "w": 692
+                                  },
+                                  "small": {
+                                    "h": 680,
+                                    "resize": "fit",
+                                    "w": 680
+                                  },
+                                  "thumb": {
+                                    "h": 150,
+                                    "resize": "crop",
+                                    "w": 150
+                                  }
+                                },
+                                "type": "video",
+                                "url": "https://t.co/ufej1TurE2",
+                                "video_info": {
+                                  "aspect_ratio": [1, 1],
+                                  "duration_millis": 6281,
+                                  "variants": [
+                                    {
+                                      "content_type": "application/x-mpegURL",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/pl/SrH0K9aaASd-3w3_.m3u8?tag=27"
+                                    },
+                                    {
+                                      "bitrate": 432000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/vid/avc1/320x320/7dqsudQvUS6X2Fpk.mp4?tag=27"
+                                    },
+                                    {
+                                      "bitrate": 832000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/vid/avc1/540x540/Fb7mDYUnwhoeDGSA.mp4?tag=27"
+                                    },
+                                    {
+                                      "bitrate": 1280000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/vid/avc1/692x692/8KemZz9UMayPwCzs.mp4?tag=27"
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "smarttags": [],
+                            "symbols": [],
+                            "timestamps": [],
+                            "urls": [],
+                            "user_mentions": []
+                          },
+                          "extended_entities": {
+                            "media": [
+                              {
+                                "additional_media_info": {
+                                  "monetizable": true
+                                },
+                                "allow_download_status": {
+                                  "allow_download": true
+                                },
+                                "display_url": "pic.x.com/ufej1TurE2",
+                                "expanded_url": "https://x.com/cakedochi/status/2050564108114899179/video/1",
+                                "ext_media_availability": {
+                                  "status": "Available"
+                                },
+                                "id_str": "2050564048027312128",
+                                "indices": [20, 43],
+                                "media_key": "13_2050564048027312128",
+                                "media_results": {
+                                  "result": {
+                                    "media_key": "13_2050564048027312128"
+                                  }
+                                },
+                                "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2050564048027312128/img/RjcWiKDqZE866SKM.jpg",
+                                "original_info": {
+                                  "focus_rects": [],
+                                  "height": 692,
+                                  "width": 692
+                                },
+                                "sizes": {
+                                  "large": {
+                                    "h": 692,
+                                    "resize": "fit",
+                                    "w": 692
+                                  },
+                                  "medium": {
+                                    "h": 692,
+                                    "resize": "fit",
+                                    "w": 692
+                                  },
+                                  "small": {
+                                    "h": 680,
+                                    "resize": "fit",
+                                    "w": 680
+                                  },
+                                  "thumb": {
+                                    "h": 150,
+                                    "resize": "crop",
+                                    "w": 150
+                                  }
+                                },
+                                "type": "video",
+                                "url": "https://t.co/ufej1TurE2",
+                                "video_info": {
+                                  "aspect_ratio": [1, 1],
+                                  "duration_millis": 6281,
+                                  "variants": [
+                                    {
+                                      "content_type": "application/x-mpegURL",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/pl/SrH0K9aaASd-3w3_.m3u8?tag=27"
+                                    },
+                                    {
+                                      "bitrate": 432000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/vid/avc1/320x320/7dqsudQvUS6X2Fpk.mp4?tag=27"
+                                    },
+                                    {
+                                      "bitrate": 832000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/vid/avc1/540x540/Fb7mDYUnwhoeDGSA.mp4?tag=27"
+                                    },
+                                    {
+                                      "bitrate": 1280000,
+                                      "content_type": "video/mp4",
+                                      "url": "https://video.twimg.com/amplify_video/2050564048027312128/vid/avc1/692x692/8KemZz9UMayPwCzs.mp4?tag=27"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "favorite_count": 12897,
+                          "favorited": false,
+                          "full_text": "진짜 너무너무 귀여워 #トモコレさき https://t.co/ufej1TurE2",
+                          "id_str": "2050564108114899179",
+                          "is_quote_status": false,
+                          "lang": "ko",
+                          "possibly_sensitive": false,
+                          "possibly_sensitive_editable": true,
+                          "quote_count": 75,
+                          "reply_count": 7,
+                          "retweet_count": 1351,
+                          "retweeted": false,
+                          "user_id_str": "1856575918841720832"
+                        },
+                        "quick_promote_eligibility": {
+                          "eligibility": "IneligibleNotProfessional"
+                        },
+                        "rest_id": "2050564108114899179",
+                        "source": "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>",
+                        "unmention_data": {},
+                        "views": {
+                          "count": "170156",
+                          "state": "EnabledWithCount"
+                        }
+                      }
+                    }
+                  }
+                },
+                "entryId": "tweet-2050564108114899179",
+                "sortIndex": "2050819190301917184"
+              },
+              {
+                "content": {
+                  "__typename": "TimelineTimelineModule",
+                  "clientEventInfo": {
+                    "component": "tweet",
+                    "details": {
+                      "conversationDetails": {
+                        "conversationSection": "HighQuality"
+                      },
+                      "timelinesDetails": {
+                        "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                      }
+                    }
+                  },
+                  "displayType": "VerticalConversation",
+                  "entryType": "TimelineTimelineModule",
+                  "items": [
+                    {
+                      "entryId": "conversationthread-2050674825140502988-tweet-2050674825140502988",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "HighQuality"
+                            },
+                            "timelinesDetails": {
+                              "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/2049233881224904704/PvEL-muR_normal.jpg"
+                                    },
+                                    "core": {
+                                      "created_at": "Wed Mar 15 13:28:57 +0000 2017",
+                                      "name": "Lelli está um filho da puta do caralho",
+                                      "screen_name": "PedroLeoCaraio"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": true
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjo4NDIwMDQ2OTMxNjU0NzM3OTM=",
+                                    "is_blue_verified": false,
+                                    "legacy": {
+                                      "default_profile": true,
+                                      "default_profile_image": false,
+                                      "description": "eu jogo uns joguinhos e julgo as pessoas sabendo que sou pior que elas - average persona 3 enjoyer  - Ele/dele - ENFP - 22yo🌛",
+                                      "entities": {
+                                        "description": {}
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 121710,
+                                      "follow_request_sent": false,
+                                      "followers_count": 157,
+                                      "friends_count": 1185,
+                                      "has_custom_timelines": true,
+                                      "is_translator": false,
+                                      "listed_count": 2,
+                                      "media_count": 498,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 157,
+                                      "notifications": false,
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "https://pbs.twimg.com/profile_banners/842004693165473793/1728918368",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 46797,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": "Brasil"
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": true
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "profile_bio": {
+                                      "description": "eu jogo uns joguinhos e julgo as pessoas sabendo que sou pior que elas - average persona 3 enjoyer  - Ele/dele - ENFP - 22yo🌛"
+                                    },
+                                    "profile_description_language": "pt",
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "842004693165473793",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050674825140502988"],
+                                "editable_until_msecs": "1777757552000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": false
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {},
+                              "has_birdwatch_notes": false,
+                              "is_translatable": false,
+                              "legacy": {
+                                "bookmark_count": 1,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050564108114899179",
+                                "created_at": "Sat May 02 20:32:32 +0000 2026",
+                                "display_text_range": [11, 29],
+                                "entities": {
+                                  "hashtags": [],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": [
+                                    {
+                                      "id_str": "1856575918841720832",
+                                      "indices": [0, 10],
+                                      "name": "saki ❤︎",
+                                      "screen_name": "cakedochi"
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 1,
+                                "favorited": false,
+                                "full_text": "@cakedochi is this kaoru hana",
+                                "id_str": "2050674825140502988",
+                                "in_reply_to_screen_name": "cakedochi",
+                                "in_reply_to_status_id_str": "2050564108114899179",
+                                "in_reply_to_user_id_str": "1856575918841720832",
+                                "is_quote_status": false,
+                                "lang": "et",
+                                "quote_count": 0,
+                                "reply_count": 1,
+                                "retweet_count": 0,
+                                "retweeted": false,
+                                "user_id_str": "842004693165473793"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050674825140502988",
+                              "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "2641",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "conversationMetadata": {
+                      "allTweetIds": ["2050674825140502988"],
+                      "enableDeduplication": true
+                    }
+                  }
+                },
+                "entryId": "conversationthread-2050674825140502988",
+                "sortIndex": "2050819190301917174"
+              },
+              {
+                "content": {
+                  "__typename": "TimelineTimelineModule",
+                  "clientEventInfo": {
+                    "component": "tweet",
+                    "details": {
+                      "conversationDetails": {
+                        "conversationSection": "HighQuality"
+                      },
+                      "timelinesDetails": {
+                        "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                      }
+                    }
+                  },
+                  "displayType": "VerticalConversation",
+                  "entryType": "TimelineTimelineModule",
+                  "items": [
+                    {
+                      "entryId": "conversationthread-2050716468149678471-tweet-2050716468149678471",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "HighQuality"
+                            },
+                            "timelinesDetails": {
+                              "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"
+                                    },
+                                    "core": {
+                                      "created_at": "Mon Aug 11 15:08:36 +0000 2025",
+                                      "name": "感謝",
+                                      "screen_name": "8qg1h4I4gb96679"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": true
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjoxOTU0OTIyODEzMzY3OTIyNjg4",
+                                    "is_blue_verified": false,
+                                    "legacy": {
+                                      "default_profile": true,
+                                      "default_profile_image": true,
+                                      "description": "忘れるな",
+                                      "entities": {
+                                        "description": {}
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 12547,
+                                      "follow_request_sent": false,
+                                      "followers_count": 31,
+                                      "friends_count": 1139,
+                                      "has_custom_timelines": false,
+                                      "is_translator": false,
+                                      "listed_count": 0,
+                                      "media_count": 29,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 31,
+                                      "notifications": false,
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 2791,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": "1739"
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": true
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "profile_bio": {
+                                      "description": "忘れるな"
+                                    },
+                                    "profile_description_language": "ja",
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "1954922813367922688",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050716468149678471"],
+                                "editable_until_msecs": "1777767481000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": false
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {},
+                              "has_birdwatch_notes": false,
+                              "is_translatable": true,
+                              "legacy": {
+                                "bookmark_count": 0,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050564108114899179",
+                                "created_at": "Sat May 02 23:18:01 +0000 2026",
+                                "display_text_range": [11, 16],
+                                "entities": {
+                                  "hashtags": [],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": [
+                                    {
+                                      "id_str": "1856575918841720832",
+                                      "indices": [0, 10],
+                                      "name": "saki ❤︎",
+                                      "screen_name": "cakedochi"
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 1,
+                                "favorited": false,
+                                "full_text": "@cakedochi 上手すぎる",
+                                "id_str": "2050716468149678471",
+                                "in_reply_to_screen_name": "cakedochi",
+                                "in_reply_to_status_id_str": "2050564108114899179",
+                                "in_reply_to_user_id_str": "1856575918841720832",
+                                "is_quote_status": false,
+                                "lang": "ja",
+                                "quote_count": 0,
+                                "reply_count": 0,
+                                "retweet_count": 0,
+                                "retweeted": false,
+                                "user_id_str": "1954922813367922688"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050716468149678471",
+                              "source": "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "1800",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "conversationMetadata": {
+                      "allTweetIds": ["2050716468149678471"],
+                      "enableDeduplication": true
+                    }
+                  }
+                },
+                "entryId": "conversationthread-2050716468149678471",
+                "sortIndex": "2050819190301917164"
+              },
+              {
+                "content": {
+                  "__typename": "TimelineTimelineModule",
+                  "clientEventInfo": {
+                    "component": "tweet",
+                    "details": {
+                      "conversationDetails": {
+                        "conversationSection": "HighQuality"
+                      },
+                      "timelinesDetails": {
+                        "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                      }
+                    }
+                  },
+                  "displayType": "VerticalConversation",
+                  "entryType": "TimelineTimelineModule",
+                  "items": [
+                    {
+                      "entryId": "conversationthread-2050742601570218025-tweet-2050742601570218025",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "HighQuality"
+                            },
+                            "timelinesDetails": {
+                              "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/1808086487881469957/zbkSl64p_normal.jpg"
+                                    },
+                                    "core": {
+                                      "created_at": "Sun Oct 14 16:32:46 +0000 2018",
+                                      "name": "𝚐𝚕𝚒𝚝𝚌𝚑𝚗𝚘𝚒𝚜𝚎",
+                                      "screen_name": "glitchnoise1"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": true
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjoxMDUxNTExMTM2OTk3MTkxNjgx",
+                                    "is_blue_verified": true,
+                                    "legacy": {
+                                      "default_profile": false,
+                                      "default_profile_image": false,
+                                      "description": "Infected Mushroomがだいすき\nレバーアクションライフルとサイケデリックトランスとロングスカートのメイド服を愛しています\n\n良いドラムンベースがあったらぜひ教えてください\nサブ垢: @CR_YH85SR",
+                                      "entities": {
+                                        "description": {},
+                                        "url": {
+                                          "urls": [
+                                            {
+                                              "display_url": "pixiv.net/users/15548920",
+                                              "expanded_url": "https://www.pixiv.net/users/15548920",
+                                              "indices": [0, 23],
+                                              "url": "https://t.co/NLfdk0FAHy"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 441728,
+                                      "follow_request_sent": false,
+                                      "followers_count": 1448,
+                                      "friends_count": 2805,
+                                      "has_custom_timelines": true,
+                                      "is_translator": false,
+                                      "listed_count": 18,
+                                      "media_count": 13554,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 1448,
+                                      "notifications": false,
+                                      "pinned_tweet_ids_str": [
+                                        "1961349480273613217"
+                                      ],
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "https://pbs.twimg.com/profile_banners/1051511136997191681/1693317359",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 139938,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "https://t.co/NLfdk0FAHy",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": "日本　名古屋県"
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": true
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "profile_bio": {
+                                      "description": "Infected Mushroomがだいすき\nレバーアクションライフルとサイケデリックトランスとロングスカートのメイド服を愛しています\n\n良いドラムンベースがあったらぜひ教えてください\nサブ垢: @CR_YH85SR"
+                                    },
+                                    "profile_description_language": "ja",
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "1051511136997191681",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050742601570218025"],
+                                "editable_until_msecs": "1777773711000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": false
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {},
+                              "has_birdwatch_notes": false,
+                              "is_translatable": true,
+                              "legacy": {
+                                "bookmark_count": 1,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050564108114899179",
+                                "created_at": "Sun May 03 01:01:51 +0000 2026",
+                                "display_text_range": [11, 43],
+                                "entities": {
+                                  "hashtags": [],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": [
+                                    {
+                                      "id_str": "1856575918841720832",
+                                      "indices": [0, 10],
+                                      "name": "saki ❤︎",
+                                      "screen_name": "cakedochi"
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 0,
+                                "favorited": false,
+                                "full_text": "@cakedochi こんなかわいいメイド服があるの！？\nトモコレ買います(鋼の意志)",
+                                "id_str": "2050742601570218025",
+                                "in_reply_to_screen_name": "cakedochi",
+                                "in_reply_to_status_id_str": "2050564108114899179",
+                                "in_reply_to_user_id_str": "1856575918841720832",
+                                "is_quote_status": false,
+                                "lang": "ja",
+                                "quote_count": 0,
+                                "reply_count": 0,
+                                "retweet_count": 0,
+                                "retweeted": false,
+                                "user_id_str": "1051511136997191681"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050742601570218025",
+                              "source": "<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "1364",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "conversationMetadata": {
+                      "allTweetIds": ["2050742601570218025"],
+                      "enableDeduplication": true
+                    }
+                  }
+                },
+                "entryId": "conversationthread-2050742601570218025",
+                "sortIndex": "2050819190301917154"
+              },
+              {
+                "content": {
+                  "__typename": "TimelineTimelineModule",
+                  "clientEventInfo": {
+                    "component": "tweet",
+                    "details": {
+                      "conversationDetails": {
+                        "conversationSection": "HighQuality"
+                      },
+                      "timelinesDetails": {
+                        "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                      }
+                    }
+                  },
+                  "displayType": "VerticalConversation",
+                  "entryType": "TimelineTimelineModule",
+                  "items": [
+                    {
+                      "entryId": "conversationthread-2050793135811469507-tweet-2050793135811469507",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "HighQuality"
+                            },
+                            "timelinesDetails": {
+                              "controllerData": "DAACDAAEDAABCgABAAAAAAAAAAEKAAIAAAAAAAAAAAoAAwAAAZ3sccNmAAAAAA=="
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/2049809376832327680/NUKlo6Hn_normal.jpg"
+                                    },
+                                    "core": {
+                                      "created_at": "Sat Jul 24 08:01:23 +0000 2021",
+                                      "name": "ezbottt",
+                                      "screen_name": "ezbotxd"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": false
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjoxNDE4ODQzNjkzODQzNDE5MTQ1",
+                                    "is_blue_verified": false,
+                                    "legacy": {
+                                      "default_profile": true,
+                                      "default_profile_image": false,
+                                      "description": "😭😭😭😭😭\na cpk main artist",
+                                      "entities": {
+                                        "description": {},
+                                        "url": {
+                                          "urls": [
+                                            {
+                                              "display_url": "space.bilibili.com/32889258?spm_i…",
+                                              "expanded_url": "https://space.bilibili.com/32889258?spm_id_from=333.1007.0.0",
+                                              "indices": [0, 23],
+                                              "url": "https://t.co/NUQJOzJFHP"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 5731,
+                                      "follow_request_sent": false,
+                                      "followers_count": 494,
+                                      "friends_count": 213,
+                                      "has_custom_timelines": false,
+                                      "is_translator": false,
+                                      "listed_count": 2,
+                                      "media_count": 37,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 494,
+                                      "notifications": false,
+                                      "pinned_tweet_ids_str": [
+                                        "2042534714096128048"
+                                      ],
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "https://pbs.twimg.com/profile_banners/1418843693843419145/1771331946",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 490,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "https://t.co/NUQJOzJFHP",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": ""
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": true
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "profile_bio": {
+                                      "description": "😭😭😭😭😭\na cpk main artist"
+                                    },
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "1418843693843419145",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050793135811469507"],
+                                "editable_until_msecs": "1777785760000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": false
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {},
+                              "has_birdwatch_notes": false,
+                              "is_translatable": false,
+                              "legacy": {
+                                "bookmark_count": 0,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050564108114899179",
+                                "created_at": "Sun May 03 04:22:40 +0000 2026",
+                                "display_text_range": [11, 34],
+                                "entities": {
+                                  "hashtags": [],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": [
+                                    {
+                                      "id_str": "1856575918841720832",
+                                      "indices": [0, 10],
+                                      "name": "saki ❤︎",
+                                      "screen_name": "cakedochi"
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 0,
+                                "favorited": false,
+                                "full_text": "@cakedochi OMG this one is so cute",
+                                "id_str": "2050793135811469507",
+                                "in_reply_to_screen_name": "cakedochi",
+                                "in_reply_to_status_id_str": "2050564108114899179",
+                                "in_reply_to_user_id_str": "1856575918841720832",
+                                "is_quote_status": false,
+                                "lang": "en",
+                                "quote_count": 0,
+                                "reply_count": 0,
+                                "retweet_count": 0,
+                                "retweeted": false,
+                                "user_id_str": "1418843693843419145"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050793135811469507",
+                              "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "489",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "conversationMetadata": {
+                      "allTweetIds": ["2050793135811469507"],
+                      "enableDeduplication": true
+                    }
+                  }
+                },
+                "entryId": "conversationthread-2050793135811469507",
+                "sortIndex": "2050819190301917144"
+              },
+              {
+                "content": {
+                  "__typename": "TimelineTimelineModule",
+                  "clientEventInfo": {
+                    "component": "related_tweet",
+                    "details": {
+                      "conversationDetails": {
+                        "conversationSection": "RelatedTweet"
+                      }
+                    }
+                  },
+                  "displayType": "Vertical",
+                  "entryType": "TimelineTimelineModule",
+                  "header": {
+                    "displayType": "Classic",
+                    "socialContext": {
+                      "contextType": "TextOnly",
+                      "text": "Sourced from across X",
+                      "type": "TimelineGeneralContext"
+                    },
+                    "sticky": true,
+                    "text": "Discover more"
+                  },
+                  "items": [
+                    {
+                      "entryId": "tweetdetailrelatedtweets-2050579274370007423-tweet-2050579274370007423",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "related_tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "RelatedTweet"
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/1946787072917766144/SAF2eEBT_normal.jpg"
+                                    },
+                                    "core": {
+                                      "created_at": "Sun Jul 10 10:25:28 +0000 2022",
+                                      "name": "星乃",
+                                      "screen_name": "hayato_hoshi604"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": true
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjoxNTQ2MDc4MDk2MDIwNzYyNjI1",
+                                    "is_blue_verified": true,
+                                    "legacy": {
+                                      "default_profile": true,
+                                      "default_profile_image": false,
+                                      "description": "建築士兼フリーのillustrator | ほくろフェチです |絵のご依頼(企業/個人様)📨hoshino.neru7@gmail.com まで\nPixiv始めました▷ https://t.co/1557rqbZ4t",
+                                      "entities": {
+                                        "description": {
+                                          "urls": [
+                                            {
+                                              "display_url": "pixiv.net/users/108244848",
+                                              "expanded_url": "https://www.pixiv.net/users/108244848",
+                                              "indices": [85, 108],
+                                              "url": "https://t.co/1557rqbZ4t"
+                                            }
+                                          ]
+                                        },
+                                        "url": {
+                                          "urls": [
+                                            {
+                                              "display_url": "wavebox.me/wave/c1nlns04j…",
+                                              "expanded_url": "https://wavebox.me/wave/c1nlns04jkjlj2un/",
+                                              "indices": [0, 23],
+                                              "url": "https://t.co/DVQLT5EQIP"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 21389,
+                                      "follow_request_sent": false,
+                                      "followers_count": 102578,
+                                      "friends_count": 44,
+                                      "has_custom_timelines": false,
+                                      "is_translator": false,
+                                      "listed_count": 447,
+                                      "media_count": 191,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 102578,
+                                      "notifications": false,
+                                      "pinned_tweet_ids_str": [
+                                        "1992918513082921425"
+                                      ],
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "https://pbs.twimg.com/profile_banners/1546078096020762625/1776846143",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 7676,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "https://t.co/DVQLT5EQIP",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": "照れ顔委員会"
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": false
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "professional": {
+                                      "category": [
+                                        {
+                                          "icon_name": "",
+                                          "id": 1023,
+                                          "name": "Illustrator"
+                                        }
+                                      ],
+                                      "professional_type": "Creator",
+                                      "rest_id": "1908307836515607015"
+                                    },
+                                    "profile_bio": {
+                                      "description": "建築士兼フリーのillustrator | ほくろフェチです |絵のご依頼(企業/個人様)📨hoshino.neru7@gmail.com まで\nPixiv始めました▷ https://t.co/1557rqbZ4t"
+                                    },
+                                    "profile_description_language": "ja",
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "1546078096020762625",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050579274370007423"],
+                                "editable_until_msecs": "1777734771000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": true
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {
+                                "is_image_editable_by_grok": true
+                              },
+                              "has_birdwatch_notes": false,
+                              "is_translatable": true,
+                              "legacy": {
+                                "bookmark_count": 6194,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050579274370007423",
+                                "created_at": "Sat May 02 14:12:51 +0000 2026",
+                                "display_text_range": [0, 14],
+                                "entities": {
+                                  "hashtags": [],
+                                  "media": [
+                                    {
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/L5tJ6SoZzw",
+                                      "expanded_url": "https://x.com/hayato_hoshi604/status/2050579274370007423/photo/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "features": {
+                                        "large": {
+                                          "faces": []
+                                        },
+                                        "medium": {
+                                          "faces": []
+                                        },
+                                        "orig": {
+                                          "faces": []
+                                        },
+                                        "small": {
+                                          "faces": []
+                                        }
+                                      },
+                                      "id_str": "2050579265322897408",
+                                      "indices": [15, 38],
+                                      "media_key": "3_2050579265322897408",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "3_2050579265322897408"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/media/HHUe-jVaUAA4K9T.jpg",
+                                      "original_info": {
+                                        "focus_rects": [
+                                          {
+                                            "h": 1929,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 3445,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 3927,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 4096,
+                                            "w": 2048,
+                                            "x": 1331,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 4096,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          }
+                                        ],
+                                        "height": 4096,
+                                        "width": 3445
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 2048,
+                                          "resize": "fit",
+                                          "w": 1723
+                                        },
+                                        "medium": {
+                                          "h": 1200,
+                                          "resize": "fit",
+                                          "w": 1009
+                                        },
+                                        "small": {
+                                          "h": 680,
+                                          "resize": "fit",
+                                          "w": 572
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "photo",
+                                      "url": "https://t.co/L5tJ6SoZzw"
+                                    }
+                                  ],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": []
+                                },
+                                "extended_entities": {
+                                  "media": [
+                                    {
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/L5tJ6SoZzw",
+                                      "expanded_url": "https://x.com/hayato_hoshi604/status/2050579274370007423/photo/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "features": {
+                                        "large": {
+                                          "faces": []
+                                        },
+                                        "medium": {
+                                          "faces": []
+                                        },
+                                        "orig": {
+                                          "faces": []
+                                        },
+                                        "small": {
+                                          "faces": []
+                                        }
+                                      },
+                                      "id_str": "2050579265322897408",
+                                      "indices": [15, 38],
+                                      "media_key": "3_2050579265322897408",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "3_2050579265322897408"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/media/HHUe-jVaUAA4K9T.jpg",
+                                      "original_info": {
+                                        "focus_rects": [
+                                          {
+                                            "h": 1929,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 3445,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 3927,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 4096,
+                                            "w": 2048,
+                                            "x": 1331,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 4096,
+                                            "w": 3445,
+                                            "x": 0,
+                                            "y": 0
+                                          }
+                                        ],
+                                        "height": 4096,
+                                        "width": 3445
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 2048,
+                                          "resize": "fit",
+                                          "w": 1723
+                                        },
+                                        "medium": {
+                                          "h": 1200,
+                                          "resize": "fit",
+                                          "w": 1009
+                                        },
+                                        "small": {
+                                          "h": 680,
+                                          "resize": "fit",
+                                          "w": 572
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "photo",
+                                      "url": "https://t.co/L5tJ6SoZzw"
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 41321,
+                                "favorited": false,
+                                "full_text": "セイバーとヒッポリュテ似てる https://t.co/L5tJ6SoZzw",
+                                "id_str": "2050579274370007423",
+                                "is_quote_status": false,
+                                "lang": "ja",
+                                "possibly_sensitive": false,
+                                "possibly_sensitive_editable": true,
+                                "quote_count": 15,
+                                "reply_count": 39,
+                                "retweet_count": 2070,
+                                "retweeted": false,
+                                "user_id_str": "1546078096020762625"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050579274370007423",
+                              "source": "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "418515",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "entryId": "tweetdetailrelatedtweets-2050579274370007423-tweet-2050545243481850265",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "related_tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "RelatedTweet"
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/1710257634060996608/wd5AqjHF_normal.jpg"
+                                    },
+                                    "core": {
+                                      "created_at": "Thu Oct 13 06:21:36 +0000 2022",
+                                      "name": "鳴門マキ",
+                                      "screen_name": "naruto___05"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": false
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjoxNTgwNDQzNTgyOTAwNTU1Nzc2",
+                                    "is_blue_verified": false,
+                                    "legacy": {
+                                      "default_profile": true,
+                                      "default_profile_image": false,
+                                      "description": "連絡｜お仕事📮➡️narutomakimakimaki3@gmail.com 🚫ai🚫 中国語と日本語 🅿️ 鸣门卷 https://t.co/dnUWu42qq5",
+                                      "entities": {
+                                        "description": {
+                                          "urls": [
+                                            {
+                                              "display_url": "pixiv.net/users/105726146",
+                                              "expanded_url": "https://www.pixiv.net/users/105726146",
+                                              "indices": [59, 82],
+                                              "url": "https://t.co/dnUWu42qq5"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 1367,
+                                      "follow_request_sent": false,
+                                      "followers_count": 51800,
+                                      "friends_count": 814,
+                                      "has_custom_timelines": false,
+                                      "is_translator": false,
+                                      "listed_count": 404,
+                                      "media_count": 173,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 51800,
+                                      "notifications": false,
+                                      "pinned_tweet_ids_str": [
+                                        "1998038296111538495"
+                                      ],
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "https://pbs.twimg.com/profile_banners/1580443582900555776/1748017086",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 255,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": "Tokyo-to, Japan"
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": true
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "profile_bio": {
+                                      "description": "連絡｜お仕事📮➡️narutomakimakimaki3@gmail.com 🚫ai🚫 中国語と日本語 🅿️ 鸣门卷 https://t.co/dnUWu42qq5"
+                                    },
+                                    "profile_description_language": "ja",
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "1580443582900555776",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050545243481850265"],
+                                "editable_until_msecs": "1777726657000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": true
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {
+                                "is_image_editable_by_grok": true
+                              },
+                              "has_birdwatch_notes": false,
+                              "is_translatable": false,
+                              "legacy": {
+                                "bookmark_count": 7206,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050545243481850265",
+                                "created_at": "Sat May 02 11:57:37 +0000 2026",
+                                "display_text_range": [0, 2],
+                                "entities": {
+                                  "hashtags": [],
+                                  "media": [
+                                    {
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/3u9HgNKKur",
+                                      "expanded_url": "https://x.com/naruto___05/status/2050545243481850265/photo/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "features": {
+                                        "large": {
+                                          "faces": [
+                                            {
+                                              "h": 74,
+                                              "w": 74,
+                                              "x": 312,
+                                              "y": 218
+                                            },
+                                            {
+                                              "h": 76,
+                                              "w": 76,
+                                              "x": 286,
+                                              "y": 334
+                                            },
+                                            {
+                                              "h": 70,
+                                              "w": 70,
+                                              "x": 108,
+                                              "y": 496
+                                            },
+                                            {
+                                              "h": 90,
+                                              "w": 90,
+                                              "x": 74,
+                                              "y": 222
+                                            },
+                                            {
+                                              "h": 88,
+                                              "w": 88,
+                                              "x": 370,
+                                              "y": 470
+                                            },
+                                            {
+                                              "h": 102,
+                                              "w": 102,
+                                              "x": 698,
+                                              "y": 302
+                                            },
+                                            {
+                                              "h": 120,
+                                              "w": 120,
+                                              "x": 642,
+                                              "y": 524
+                                            },
+                                            {
+                                              "h": 148,
+                                              "w": 148,
+                                              "x": 138,
+                                              "y": 784
+                                            }
+                                          ]
+                                        },
+                                        "medium": {
+                                          "faces": [
+                                            {
+                                              "h": 43,
+                                              "w": 43,
+                                              "x": 182,
+                                              "y": 127
+                                            },
+                                            {
+                                              "h": 44,
+                                              "w": 44,
+                                              "x": 167,
+                                              "y": 195
+                                            },
+                                            {
+                                              "h": 40,
+                                              "w": 40,
+                                              "x": 63,
+                                              "y": 290
+                                            },
+                                            {
+                                              "h": 52,
+                                              "w": 52,
+                                              "x": 43,
+                                              "y": 130
+                                            },
+                                            {
+                                              "h": 51,
+                                              "w": 51,
+                                              "x": 216,
+                                              "y": 275
+                                            },
+                                            {
+                                              "h": 59,
+                                              "w": 59,
+                                              "x": 408,
+                                              "y": 176
+                                            },
+                                            {
+                                              "h": 70,
+                                              "w": 70,
+                                              "x": 375,
+                                              "y": 306
+                                            },
+                                            {
+                                              "h": 86,
+                                              "w": 86,
+                                              "x": 80,
+                                              "y": 459
+                                            }
+                                          ]
+                                        },
+                                        "orig": {
+                                          "faces": [
+                                            {
+                                              "h": 74,
+                                              "w": 74,
+                                              "x": 312,
+                                              "y": 218
+                                            },
+                                            {
+                                              "h": 76,
+                                              "w": 76,
+                                              "x": 286,
+                                              "y": 334
+                                            },
+                                            {
+                                              "h": 70,
+                                              "w": 70,
+                                              "x": 108,
+                                              "y": 496
+                                            },
+                                            {
+                                              "h": 90,
+                                              "w": 90,
+                                              "x": 74,
+                                              "y": 222
+                                            },
+                                            {
+                                              "h": 88,
+                                              "w": 88,
+                                              "x": 370,
+                                              "y": 470
+                                            },
+                                            {
+                                              "h": 102,
+                                              "w": 102,
+                                              "x": 698,
+                                              "y": 302
+                                            },
+                                            {
+                                              "h": 120,
+                                              "w": 120,
+                                              "x": 642,
+                                              "y": 524
+                                            },
+                                            {
+                                              "h": 148,
+                                              "w": 148,
+                                              "x": 138,
+                                              "y": 784
+                                            }
+                                          ]
+                                        },
+                                        "small": {
+                                          "faces": [
+                                            {
+                                              "h": 24,
+                                              "w": 24,
+                                              "x": 103,
+                                              "y": 72
+                                            },
+                                            {
+                                              "h": 25,
+                                              "w": 25,
+                                              "x": 95,
+                                              "y": 110
+                                            },
+                                            {
+                                              "h": 23,
+                                              "w": 23,
+                                              "x": 35,
+                                              "y": 164
+                                            },
+                                            {
+                                              "h": 29,
+                                              "w": 29,
+                                              "x": 24,
+                                              "y": 73
+                                            },
+                                            {
+                                              "h": 29,
+                                              "w": 29,
+                                              "x": 122,
+                                              "y": 156
+                                            },
+                                            {
+                                              "h": 33,
+                                              "w": 33,
+                                              "x": 231,
+                                              "y": 100
+                                            },
+                                            {
+                                              "h": 39,
+                                              "w": 39,
+                                              "x": 213,
+                                              "y": 174
+                                            },
+                                            {
+                                              "h": 49,
+                                              "w": 49,
+                                              "x": 45,
+                                              "y": 260
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "id_str": "2050545233495240704",
+                                      "indices": [3, 26],
+                                      "media_key": "3_2050545233495240704",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "3_2050545233495240704"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/media/HHUABo5asAAtMpn.jpg",
+                                      "original_info": {
+                                        "focus_rects": [
+                                          {
+                                            "h": 811,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 772
+                                          },
+                                          {
+                                            "h": 1448,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 453
+                                          },
+                                          {
+                                            "h": 1651,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 352
+                                          },
+                                          {
+                                            "h": 2048,
+                                            "w": 1024,
+                                            "x": 358,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 2048,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 0
+                                          }
+                                        ],
+                                        "height": 2048,
+                                        "width": 1448
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 2048,
+                                          "resize": "fit",
+                                          "w": 1448
+                                        },
+                                        "medium": {
+                                          "h": 1200,
+                                          "resize": "fit",
+                                          "w": 848
+                                        },
+                                        "small": {
+                                          "h": 680,
+                                          "resize": "fit",
+                                          "w": 481
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "photo",
+                                      "url": "https://t.co/3u9HgNKKur"
+                                    }
+                                  ],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": []
+                                },
+                                "extended_entities": {
+                                  "media": [
+                                    {
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/3u9HgNKKur",
+                                      "expanded_url": "https://x.com/naruto___05/status/2050545243481850265/photo/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "features": {
+                                        "large": {
+                                          "faces": [
+                                            {
+                                              "h": 74,
+                                              "w": 74,
+                                              "x": 312,
+                                              "y": 218
+                                            },
+                                            {
+                                              "h": 76,
+                                              "w": 76,
+                                              "x": 286,
+                                              "y": 334
+                                            },
+                                            {
+                                              "h": 70,
+                                              "w": 70,
+                                              "x": 108,
+                                              "y": 496
+                                            },
+                                            {
+                                              "h": 90,
+                                              "w": 90,
+                                              "x": 74,
+                                              "y": 222
+                                            },
+                                            {
+                                              "h": 88,
+                                              "w": 88,
+                                              "x": 370,
+                                              "y": 470
+                                            },
+                                            {
+                                              "h": 102,
+                                              "w": 102,
+                                              "x": 698,
+                                              "y": 302
+                                            },
+                                            {
+                                              "h": 120,
+                                              "w": 120,
+                                              "x": 642,
+                                              "y": 524
+                                            },
+                                            {
+                                              "h": 148,
+                                              "w": 148,
+                                              "x": 138,
+                                              "y": 784
+                                            }
+                                          ]
+                                        },
+                                        "medium": {
+                                          "faces": [
+                                            {
+                                              "h": 43,
+                                              "w": 43,
+                                              "x": 182,
+                                              "y": 127
+                                            },
+                                            {
+                                              "h": 44,
+                                              "w": 44,
+                                              "x": 167,
+                                              "y": 195
+                                            },
+                                            {
+                                              "h": 40,
+                                              "w": 40,
+                                              "x": 63,
+                                              "y": 290
+                                            },
+                                            {
+                                              "h": 52,
+                                              "w": 52,
+                                              "x": 43,
+                                              "y": 130
+                                            },
+                                            {
+                                              "h": 51,
+                                              "w": 51,
+                                              "x": 216,
+                                              "y": 275
+                                            },
+                                            {
+                                              "h": 59,
+                                              "w": 59,
+                                              "x": 408,
+                                              "y": 176
+                                            },
+                                            {
+                                              "h": 70,
+                                              "w": 70,
+                                              "x": 375,
+                                              "y": 306
+                                            },
+                                            {
+                                              "h": 86,
+                                              "w": 86,
+                                              "x": 80,
+                                              "y": 459
+                                            }
+                                          ]
+                                        },
+                                        "orig": {
+                                          "faces": [
+                                            {
+                                              "h": 74,
+                                              "w": 74,
+                                              "x": 312,
+                                              "y": 218
+                                            },
+                                            {
+                                              "h": 76,
+                                              "w": 76,
+                                              "x": 286,
+                                              "y": 334
+                                            },
+                                            {
+                                              "h": 70,
+                                              "w": 70,
+                                              "x": 108,
+                                              "y": 496
+                                            },
+                                            {
+                                              "h": 90,
+                                              "w": 90,
+                                              "x": 74,
+                                              "y": 222
+                                            },
+                                            {
+                                              "h": 88,
+                                              "w": 88,
+                                              "x": 370,
+                                              "y": 470
+                                            },
+                                            {
+                                              "h": 102,
+                                              "w": 102,
+                                              "x": 698,
+                                              "y": 302
+                                            },
+                                            {
+                                              "h": 120,
+                                              "w": 120,
+                                              "x": 642,
+                                              "y": 524
+                                            },
+                                            {
+                                              "h": 148,
+                                              "w": 148,
+                                              "x": 138,
+                                              "y": 784
+                                            }
+                                          ]
+                                        },
+                                        "small": {
+                                          "faces": [
+                                            {
+                                              "h": 24,
+                                              "w": 24,
+                                              "x": 103,
+                                              "y": 72
+                                            },
+                                            {
+                                              "h": 25,
+                                              "w": 25,
+                                              "x": 95,
+                                              "y": 110
+                                            },
+                                            {
+                                              "h": 23,
+                                              "w": 23,
+                                              "x": 35,
+                                              "y": 164
+                                            },
+                                            {
+                                              "h": 29,
+                                              "w": 29,
+                                              "x": 24,
+                                              "y": 73
+                                            },
+                                            {
+                                              "h": 29,
+                                              "w": 29,
+                                              "x": 122,
+                                              "y": 156
+                                            },
+                                            {
+                                              "h": 33,
+                                              "w": 33,
+                                              "x": 231,
+                                              "y": 100
+                                            },
+                                            {
+                                              "h": 39,
+                                              "w": 39,
+                                              "x": 213,
+                                              "y": 174
+                                            },
+                                            {
+                                              "h": 49,
+                                              "w": 49,
+                                              "x": 45,
+                                              "y": 260
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "id_str": "2050545233495240704",
+                                      "indices": [3, 26],
+                                      "media_key": "3_2050545233495240704",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "3_2050545233495240704"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/media/HHUABo5asAAtMpn.jpg",
+                                      "original_info": {
+                                        "focus_rects": [
+                                          {
+                                            "h": 811,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 772
+                                          },
+                                          {
+                                            "h": 1448,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 453
+                                          },
+                                          {
+                                            "h": 1651,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 352
+                                          },
+                                          {
+                                            "h": 2048,
+                                            "w": 1024,
+                                            "x": 358,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 2048,
+                                            "w": 1448,
+                                            "x": 0,
+                                            "y": 0
+                                          }
+                                        ],
+                                        "height": 2048,
+                                        "width": 1448
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 2048,
+                                          "resize": "fit",
+                                          "w": 1448
+                                        },
+                                        "medium": {
+                                          "h": 1200,
+                                          "resize": "fit",
+                                          "w": 848
+                                        },
+                                        "small": {
+                                          "h": 680,
+                                          "resize": "fit",
+                                          "w": 481
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "photo",
+                                      "url": "https://t.co/3u9HgNKKur"
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 41263,
+                                "favorited": false,
+                                "full_text": "oc https://t.co/3u9HgNKKur",
+                                "id_str": "2050545243481850265",
+                                "is_quote_status": false,
+                                "lang": "und",
+                                "possibly_sensitive": false,
+                                "possibly_sensitive_editable": true,
+                                "quote_count": 13,
+                                "reply_count": 49,
+                                "retweet_count": 3548,
+                                "retweeted": false,
+                                "user_id_str": "1580443582900555776"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050545243481850265",
+                              "source": "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "399873",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "entryId": "tweetdetailrelatedtweets-2050579274370007423-tweet-2050533017530081724",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "related_tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "RelatedTweet"
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/1867647850890330112/TAoxKWLc_normal.jpg"
+                                    },
+                                    "core": {
+                                      "created_at": "Mon Oct 14 13:24:43 +0000 2024",
+                                      "name": "上里 空良",
+                                      "screen_name": "Kamisato__Sora"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": false
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjoxODQ1ODE3OTYyNzU5OTIxNjY2",
+                                    "is_blue_verified": true,
+                                    "legacy": {
+                                      "default_profile": true,
+                                      "default_profile_image": false,
+                                      "description": "上里空良です。絵を描くのが好きです",
+                                      "entities": {
+                                        "description": {},
+                                        "url": {
+                                          "urls": [
+                                            {
+                                              "display_url": "pixiv.net/en/users/11047…",
+                                              "expanded_url": "https://www.pixiv.net/en/users/110479938",
+                                              "indices": [0, 23],
+                                              "url": "https://t.co/nPFxLvl9qI"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 5843,
+                                      "follow_request_sent": false,
+                                      "followers_count": 113653,
+                                      "friends_count": 420,
+                                      "has_custom_timelines": false,
+                                      "is_translator": false,
+                                      "listed_count": 584,
+                                      "media_count": 183,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 113653,
+                                      "notifications": false,
+                                      "pinned_tweet_ids_str": [
+                                        "2050533017530081724"
+                                      ],
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "https://pbs.twimg.com/profile_banners/1845817962759921666/1734116922",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 1244,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "https://t.co/nPFxLvl9qI",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": ""
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": true
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "professional": {
+                                      "category": [],
+                                      "professional_type": "Creator",
+                                      "rest_id": "1846225489297338444"
+                                    },
+                                    "profile_bio": {
+                                      "description": "上里空良です。絵を描くのが好きです"
+                                    },
+                                    "profile_description_language": "ja",
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "1845817962759921666",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050533017530081724"],
+                                "editable_until_msecs": "1777723743000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": true
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {
+                                "is_image_editable_by_grok": true
+                              },
+                              "has_birdwatch_notes": false,
+                              "is_translatable": false,
+                              "legacy": {
+                                "bookmark_count": 8582,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050533017530081724",
+                                "created_at": "Sat May 02 11:09:03 +0000 2026",
+                                "display_text_range": [0, 3],
+                                "entities": {
+                                  "hashtags": [],
+                                  "media": [
+                                    {
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/aE9cHYeMWu",
+                                      "expanded_url": "https://x.com/Kamisato__Sora/status/2050533017530081724/photo/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "features": {
+                                        "large": {
+                                          "faces": []
+                                        },
+                                        "medium": {
+                                          "faces": []
+                                        },
+                                        "orig": {
+                                          "faces": []
+                                        },
+                                        "small": {
+                                          "faces": []
+                                        }
+                                      },
+                                      "id_str": "2050533005182074881",
+                                      "indices": [4, 27],
+                                      "media_key": "3_2050533005182074881",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "3_2050533005182074881"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/media/HHT0524XgAEQVvK.jpg",
+                                      "original_info": {
+                                        "focus_rects": [
+                                          {
+                                            "h": 1009,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 416
+                                          },
+                                          {
+                                            "h": 1802,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 19
+                                          },
+                                          {
+                                            "h": 2054,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 3604,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 4096,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 0
+                                          }
+                                        ],
+                                        "height": 4096,
+                                        "width": 1802
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 2048,
+                                          "resize": "fit",
+                                          "w": 901
+                                        },
+                                        "medium": {
+                                          "h": 1200,
+                                          "resize": "fit",
+                                          "w": 528
+                                        },
+                                        "small": {
+                                          "h": 680,
+                                          "resize": "fit",
+                                          "w": 299
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "photo",
+                                      "url": "https://t.co/aE9cHYeMWu"
+                                    }
+                                  ],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": []
+                                },
+                                "extended_entities": {
+                                  "media": [
+                                    {
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/aE9cHYeMWu",
+                                      "expanded_url": "https://x.com/Kamisato__Sora/status/2050533017530081724/photo/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "features": {
+                                        "large": {
+                                          "faces": []
+                                        },
+                                        "medium": {
+                                          "faces": []
+                                        },
+                                        "orig": {
+                                          "faces": []
+                                        },
+                                        "small": {
+                                          "faces": []
+                                        }
+                                      },
+                                      "id_str": "2050533005182074881",
+                                      "indices": [4, 27],
+                                      "media_key": "3_2050533005182074881",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "3_2050533005182074881"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/media/HHT0524XgAEQVvK.jpg",
+                                      "original_info": {
+                                        "focus_rects": [
+                                          {
+                                            "h": 1009,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 416
+                                          },
+                                          {
+                                            "h": 1802,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 19
+                                          },
+                                          {
+                                            "h": 2054,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 3604,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 0
+                                          },
+                                          {
+                                            "h": 4096,
+                                            "w": 1802,
+                                            "x": 0,
+                                            "y": 0
+                                          }
+                                        ],
+                                        "height": 4096,
+                                        "width": 1802
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 2048,
+                                          "resize": "fit",
+                                          "w": 901
+                                        },
+                                        "medium": {
+                                          "h": 1200,
+                                          "resize": "fit",
+                                          "w": 528
+                                        },
+                                        "small": {
+                                          "h": 680,
+                                          "resize": "fit",
+                                          "w": 299
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "photo",
+                                      "url": "https://t.co/aE9cHYeMWu"
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 45158,
+                                "favorited": false,
+                                "full_text": "😘❤️ https://t.co/aE9cHYeMWu",
+                                "id_str": "2050533017530081724",
+                                "is_quote_status": false,
+                                "lang": "qme",
+                                "possibly_sensitive": false,
+                                "possibly_sensitive_editable": true,
+                                "quote_count": 16,
+                                "reply_count": 58,
+                                "retweet_count": 4640,
+                                "retweeted": false,
+                                "user_id_str": "1845817962759921666"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050533017530081724",
+                              "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "364036",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "entryId": "tweetdetailrelatedtweets-2050579274370007423-tweet-2050553392418705697",
+                      "item": {
+                        "clientEventInfo": {
+                          "component": "related_tweet",
+                          "details": {
+                            "conversationDetails": {
+                              "conversationSection": "RelatedTweet"
+                            }
+                          },
+                          "element": "tweet"
+                        },
+                        "itemContent": {
+                          "__typename": "TimelineTweet",
+                          "itemType": "TimelineTweet",
+                          "tweetDisplayType": "Tweet",
+                          "tweet_results": {
+                            "result": {
+                              "__typename": "Tweet",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "affiliates_highlighted_label": {},
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/2048712421754515457/DGD_R2_m_normal.jpg"
+                                    },
+                                    "core": {
+                                      "created_at": "Sun Apr 12 02:56:29 +0000 2026",
+                                      "name": "ファム・スール",
+                                      "screen_name": "pukeygoddess"
+                                    },
+                                    "dm_permissions": {
+                                      "can_dm": false
+                                    },
+                                    "follow_request_sent": false,
+                                    "has_graduated_access": true,
+                                    "id": "VXNlcjoyMDQzMTYxMDg4NzY2NzIyMDQ4",
+                                    "is_blue_verified": true,
+                                    "legacy": {
+                                      "default_profile": true,
+                                      "default_profile_image": false,
+                                      "description": "ダーリン――好き。だぁい好き。愛してる。\nもう帰さない。これからは永遠に一緒だよ？",
+                                      "entities": {
+                                        "description": {},
+                                        "url": {
+                                          "urls": [
+                                            {
+                                              "display_url": "store.steampowered.com/app/4150720/",
+                                              "expanded_url": "https://store.steampowered.com/app/4150720/",
+                                              "indices": [0, 23],
+                                              "url": "https://t.co/yggO1C28s2"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "fast_followers_count": 0,
+                                      "favourites_count": 456,
+                                      "follow_request_sent": false,
+                                      "followers_count": 42306,
+                                      "friends_count": 0,
+                                      "has_custom_timelines": false,
+                                      "is_translator": false,
+                                      "listed_count": 34,
+                                      "media_count": 7,
+                                      "needs_phone_verification": false,
+                                      "normal_followers_count": 42306,
+                                      "notifications": false,
+                                      "possibly_sensitive": false,
+                                      "profile_banner_url": "https://pbs.twimg.com/profile_banners/2043161088766722048/1777286477",
+                                      "profile_interstitial_type": "",
+                                      "statuses_count": 7,
+                                      "time_zone": "",
+                                      "translator_type": "none",
+                                      "url": "https://t.co/yggO1C28s2",
+                                      "utc_offset": 0,
+                                      "want_retweets": false,
+                                      "withheld_description": "",
+                                      "withheld_scope": ""
+                                    },
+                                    "location": {
+                                      "location": "Pandemonium"
+                                    },
+                                    "media_permissions": {
+                                      "can_media_tag": false
+                                    },
+                                    "parody_commentary_fan_label": "None",
+                                    "privacy": {
+                                      "protected": false
+                                    },
+                                    "professional": {
+                                      "category": [
+                                        {
+                                          "icon_name": "",
+                                          "id": 15,
+                                          "name": "Entertainment & Recreation"
+                                        }
+                                      ],
+                                      "professional_type": "Business",
+                                      "rest_id": "2047903729643569376"
+                                    },
+                                    "profile_bio": {
+                                      "description": "ダーリン――好き。だぁい好き。愛してる。\nもう帰さない。これからは永遠に一緒だよ？"
+                                    },
+                                    "profile_description_language": "ja",
+                                    "profile_image_shape": "Circle",
+                                    "relationship_perspectives": {
+                                      "blocked_by": false,
+                                      "blocking": false,
+                                      "followed_by": false,
+                                      "following": false,
+                                      "muting": false
+                                    },
+                                    "rest_id": "2043161088766722048",
+                                    "super_follow_eligible": false,
+                                    "super_followed_by": false,
+                                    "super_following": false,
+                                    "verification": {
+                                      "verified": false
+                                    }
+                                  }
+                                }
+                              },
+                              "edit_control": {
+                                "edit_tweet_ids": ["2050553392418705697"],
+                                "editable_until_msecs": "1777728600000",
+                                "edits_remaining": "5",
+                                "is_edit_eligible": true
+                              },
+                              "grok_analysis_button": true,
+                              "grok_annotations": {
+                                "is_image_editable_by_grok": false
+                              },
+                              "has_birdwatch_notes": false,
+                              "is_translatable": true,
+                              "legacy": {
+                                "bookmark_count": 7825,
+                                "bookmarked": false,
+                                "conversation_id_str": "2050553392418705697",
+                                "created_at": "Sat May 02 12:30:00 +0000 2026",
+                                "display_text_range": [0, 36],
+                                "entities": {
+                                  "hashtags": [],
+                                  "media": [
+                                    {
+                                      "additional_media_info": {
+                                        "monetizable": true
+                                      },
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/fGV7CiFy3o",
+                                      "expanded_url": "https://x.com/pukeygoddess/status/2050553392418705697/video/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "id_str": "2050463378192355328",
+                                      "indices": [37, 60],
+                                      "media_key": "13_2050463378192355328",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "13_2050463378192355328"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2050463378192355328/img/IPXlFEbIplpVBzKi.jpg",
+                                      "original_info": {
+                                        "focus_rects": [],
+                                        "height": 1080,
+                                        "width": 1200
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 1080,
+                                          "resize": "fit",
+                                          "w": 1200
+                                        },
+                                        "medium": {
+                                          "h": 1080,
+                                          "resize": "fit",
+                                          "w": 1200
+                                        },
+                                        "small": {
+                                          "h": 612,
+                                          "resize": "fit",
+                                          "w": 680
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "video",
+                                      "url": "https://t.co/fGV7CiFy3o",
+                                      "video_info": {
+                                        "aspect_ratio": [10, 9],
+                                        "duration_millis": 34282,
+                                        "variants": [
+                                          {
+                                            "content_type": "application/x-mpegURL",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/pl/Xpb0RKLJZxMp54lm.m3u8?tag=27&v=f98"
+                                          },
+                                          {
+                                            "bitrate": 256000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/300x270/Qnt559CnBQjJgiRe.mp4?tag=27"
+                                          },
+                                          {
+                                            "bitrate": 832000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/400x360/ZASxIinwiZ_Y88AC.mp4?tag=27"
+                                          },
+                                          {
+                                            "bitrate": 2176000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/800x720/mv7BZw4x1y57aDXH.mp4?tag=27"
+                                          },
+                                          {
+                                            "bitrate": 10368000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/1200x1080/rCyRhketigle-QOw.mp4?tag=27"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "smarttags": [],
+                                  "symbols": [],
+                                  "timestamps": [],
+                                  "urls": [],
+                                  "user_mentions": []
+                                },
+                                "extended_entities": {
+                                  "media": [
+                                    {
+                                      "additional_media_info": {
+                                        "monetizable": true
+                                      },
+                                      "allow_download_status": {
+                                        "allow_download": true
+                                      },
+                                      "display_url": "pic.x.com/fGV7CiFy3o",
+                                      "expanded_url": "https://x.com/pukeygoddess/status/2050553392418705697/video/1",
+                                      "ext_media_availability": {
+                                        "status": "Available"
+                                      },
+                                      "id_str": "2050463378192355328",
+                                      "indices": [37, 60],
+                                      "media_key": "13_2050463378192355328",
+                                      "media_results": {
+                                        "result": {
+                                          "media_key": "13_2050463378192355328"
+                                        }
+                                      },
+                                      "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2050463378192355328/img/IPXlFEbIplpVBzKi.jpg",
+                                      "original_info": {
+                                        "focus_rects": [],
+                                        "height": 1080,
+                                        "width": 1200
+                                      },
+                                      "sizes": {
+                                        "large": {
+                                          "h": 1080,
+                                          "resize": "fit",
+                                          "w": 1200
+                                        },
+                                        "medium": {
+                                          "h": 1080,
+                                          "resize": "fit",
+                                          "w": 1200
+                                        },
+                                        "small": {
+                                          "h": 612,
+                                          "resize": "fit",
+                                          "w": 680
+                                        },
+                                        "thumb": {
+                                          "h": 150,
+                                          "resize": "crop",
+                                          "w": 150
+                                        }
+                                      },
+                                      "type": "video",
+                                      "url": "https://t.co/fGV7CiFy3o",
+                                      "video_info": {
+                                        "aspect_ratio": [10, 9],
+                                        "duration_millis": 34282,
+                                        "variants": [
+                                          {
+                                            "content_type": "application/x-mpegURL",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/pl/Xpb0RKLJZxMp54lm.m3u8?tag=27&v=f98"
+                                          },
+                                          {
+                                            "bitrate": 256000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/300x270/Qnt559CnBQjJgiRe.mp4?tag=27"
+                                          },
+                                          {
+                                            "bitrate": 832000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/400x360/ZASxIinwiZ_Y88AC.mp4?tag=27"
+                                          },
+                                          {
+                                            "bitrate": 2176000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/800x720/mv7BZw4x1y57aDXH.mp4?tag=27"
+                                          },
+                                          {
+                                            "bitrate": 10368000,
+                                            "content_type": "video/mp4",
+                                            "url": "https://video.twimg.com/amplify_video/2050463378192355328/vid/avc1/1200x1080/rCyRhketigle-QOw.mp4?tag=27"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "favorite_count": 39128,
+                                "favorited": false,
+                                "full_text": "ダーリン。ダーリン。ダーリン。ダーリン。\nいい子で待ってて、くれるよね？ https://t.co/fGV7CiFy3o",
+                                "id_str": "2050553392418705697",
+                                "is_quote_status": false,
+                                "lang": "ja",
+                                "possibly_sensitive": false,
+                                "possibly_sensitive_editable": true,
+                                "quote_count": 193,
+                                "reply_count": 62,
+                                "retweet_count": 4409,
+                                "retweeted": false,
+                                "user_id_str": "2043161088766722048"
+                              },
+                              "quick_promote_eligibility": {
+                                "eligibility": "IneligibleNotProfessional"
+                              },
+                              "rest_id": "2050553392418705697",
+                              "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+                              "unmention_data": {},
+                              "views": {
+                                "count": "818000",
+                                "state": "EnabledWithCount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "entryId": "tweetdetailrelatedtweets-2050579274370007423",
+                "sortIndex": "2050819190301917134"
+              },
+              {
+                "content": {
+                  "__typename": "TimelineTimelineCursor",
+                  "cursorType": "ShowMoreThreads",
+                  "displayTreatment": {
+                    "actionText": "Show probable spam"
+                  },
+                  "entryType": "TimelineTimelineCursor",
+                  "value": "DAAKCgABHHX5MBh__8sLAAIAAAB8RW1QQzZ3QUFBZlEvZ0dKTjB2R3AvQUFBQUFrY2RadkRPeHJ4aHh4MWRlTjJWZ0hNSEhVSGNqUVcwU0VjZFBUcVRoY2h2QngxczRma1duQXBISFVBQ09HYVFaa2NkUkV4SlZxdzZ4eDFIdnhRbWtGL0hIWGhmYy9hSU1NPQgAAwAAAAcLAAQAAAAPU2hvd01vcmVUaHJlYWRzAAA"
+                },
+                "entryId": "cursor-showmorethreads-2050819190301917133",
+                "sortIndex": "2050819190301917133"
+              }
+            ],
+            "type": "TimelineAddEntries"
+          },
+          {
+            "direction": "Top",
+            "type": "TimelineTerminateTimeline"
+          }
+        ],
+        "metadata": {
+          "scribeConfig": {
+            "page": "ranked_replies"
+          }
+        }
+      }
+    }
+  },
+  "message": "Request Success"
+}

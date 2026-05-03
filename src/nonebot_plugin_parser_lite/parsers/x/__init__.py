@@ -4,58 +4,77 @@ from typing import ClassVar
 from msgspec import convert
 
 from ...utils.format import format_num
-from ..base import BaseParser, MediaContent, ParseResult, Platform, PlatformEnum, handle
-from .model import Tweet
+
+
+from .model import TweetResult
+
+
+from ..base import (
+    BaseParser,
+    PlatformEnum,
+    handle,
+    Platform,
+    ParseResult,
+    ParseException,
+    MediaContent,
+)
 
 
 class XParser(BaseParser):
     platform: ClassVar[Platform] = Platform(name=PlatformEnum.X, display_name="X")
 
-    def collect_data(self, tweet: Tweet, is_repost: bool = False) -> ParseResult:
-        """从 Tweet 模型构造 ParseResult，可递归处理转推内容。"""
-        contents: list[MediaContent | str] = [tweet.text, *tweet.medias]
-        user = tweet.user
+    def collect_data(self, tweet: TweetResult, is_repost: bool = False) -> ParseResult:
+        result = tweet.result
+        legacy = result.legacy
 
-        repost: ParseResult | None = None
-        if not is_repost:
-            if tweet.quoted_tweet:
-                repost = self.collect_data(tweet.quoted_tweet, is_repost=True)
-            elif tweet.parent:
-                repost = self.collect_data(tweet.parent, is_repost=True)
+        content: list[MediaContent | str] = [legacy.text]
+        content.extend(legacy.medias)
+
+        user = result.core.user_results.result.legacy
+
+        repost = None
+        repost_status = result.quoted_status_result or result.retweeted_status_result
+        if not is_repost and repost_status:
+            repost = self.collect_data(repost_status, True)
 
         return self.result(
-            content=contents,
-            timestamp=tweet.time_local,
+            content=content,
+            timestamp=legacy.time_local,
             author=self.create_author(
-                name=f"{user.name} @{user.screen_name}",
+                name=user.name,
                 avatar_url=user.avatar_url,
+                description=user.description,
                 id=user.screen_name,
             ),
             stats=self.create_stats(
-                like_count=format_num(tweet.favorite_count),
+                view_count=format_num(int(result.views.count)),
+                like_count=format_num(legacy.favorite_count),
+                comment_count=format_num(legacy.reply_count),
+                collect_count=format_num(legacy.bookmark_count),
+                share_count=format_num(legacy.quote_count + legacy.retweet_count),
             ),
-            url=f"https://x.com/{user.screen_name}/status/{tweet.id_str}",
+            url=f"https://x.com/{user.screen_name}/status/{result.rest_id}",
             repost=repost,
         )
-
-    @handle("t.co", r"t.co/\w+")
-    async def _parse_t_co(self, searched: Match[str]):
-        url = f"https://{searched[0]}"
-        return await self.parse_with_redirect(url)
 
     @handle("twitter.com", r"twitter.com/[0-9-a-zA-Z_]{1,20}/status/([0-9]+)")
     @handle("x.com", r"x.com/[0-9-a-zA-Z_]{1,20}/status/([0-9]+)")
     async def _parse(self, searched: Match[str]) -> ParseResult:
         tweet_id = searched[1]
-        token_num = int(tweet_id) / 1e15
-        token = str(token_num * 3.141592653589793).replace("0", "").replace(".", "")
 
-        resp = await self.httpx.get(
-            "https://cdn.syndication.twimg.com/tweet-result",
-            params={"id": tweet_id, "token": token},
+        response = await self.httpx.post(
+            "https://easycomment.ai/api/twitter/v1/free/get-tweet-detail",
+            json={"tweet_id": tweet_id},
         )
-        resp.raise_for_status()
-        data = resp.json()
+        response.raise_for_status()
+        res = response.json()
 
-        tweet = convert(data, Tweet)
+        if res["code"] != 100000:
+            raise ParseException(res["message"])
+
+        tweet_raw = res["data"]["data"]["threaded_conversation_with_injections_v2"][
+            "instructions"
+        ][1]["entries"][0]["content"]["itemContent"]["tweet_results"]
+
+        tweet = convert(tweet_raw, TweetResult)
         return self.collect_data(tweet)
