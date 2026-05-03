@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 import re
 
 from msgspec import Struct, field
@@ -120,14 +120,6 @@ class TweetLegacy(Struct):
         text = _TCO_RE.sub("", self.full_text)
         text = _INVALID_CHARS_RE.sub("", text)
         return text
-
-    @property
-    def time_utc(self) -> int:
-        """创建时间的 UTC Unix 时间戳（秒）"""
-        # 示例格式: "Fri Feb 20 16:33:16 +0000 2026"
-        dt = datetime.strptime(self.created_at, "%a %b %d %H:%M:%S %z %Y")
-        # 标准 UTC 时间戳
-        return int(dt.astimezone(timezone.utc).timestamp())
 
     @property
     def time_local(self) -> int:
