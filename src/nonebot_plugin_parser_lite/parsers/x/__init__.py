@@ -51,6 +51,7 @@ class XParser(BaseParser):
                 like_count=format_num(legacy.favorite_count),
                 comment_count=format_num(legacy.reply_count),
                 collect_count=format_num(legacy.bookmark_count),
+                share_count=format_num(legacy.quote_count + legacy.retweet_count),
             ),
             url=f"https://x.com/{user.screen_name}/status/{result.rest_id}",
             repost=repost,

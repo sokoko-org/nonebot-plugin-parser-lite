@@ -1,13 +1,9 @@
 from datetime import datetime
-import re
 
 from msgspec import Struct, field
 
 from ..data import MediaContent
 from ..creator import create_image, create_video
-
-_TCO_RE = re.compile(r"\s*https://t\.co/\w+")
-_INVALID_CHARS_RE = re.compile(r"[\u200b-\u200d\u2060\ufeff]")
 
 
 class Views(Struct):
@@ -67,13 +63,17 @@ class TweetLegacy(Struct):
     favorite_count: int
     """点赞数"""
     retweet_count: int
-    """转发数"""
+    """转推数"""
+    quote_count: int
+    """引用数"""
     reply_count: int
     """评论数"""
     full_text: str
     """推文内容"""
     created_at: str
     """utc时间戳字符串，例如'"Fri Feb 20 16:33:16 +0000 2026'"""
+    display_text_range: tuple[int, int]
+    """推文文本内容范围"""
     possibly_sensitive: bool = field(default=False)
     """是否敏感内容"""
     extended_entities: ExtendedEntities | None = None
@@ -116,10 +116,8 @@ class TweetLegacy(Struct):
 
     @property
     def text(self) -> str:
-        """去掉 t.co 短链接和非法字符的推文内容"""
-        text = _TCO_RE.sub("", self.full_text)
-        text = _INVALID_CHARS_RE.sub("", text)
-        return text
+        """推文内容"""
+        return self.full_text[self.display_text_range[0] : self.display_text_range[1]]
 
     @property
     def time_local(self) -> int:
