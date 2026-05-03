@@ -10,6 +10,11 @@ _TCO_RE = re.compile(r"\s*https://t\.co/\w+")
 _INVALID_CHARS_RE = re.compile(r"[\u200b-\u200d\u2060\ufeff]")
 
 
+class Views(Struct):
+    count: str
+    """浏览数"""
+
+
 class VideoVariant(Struct):
     content_type: str
     """视频编码类型，如 'video/mp4' 或 'application/x-mpegURL'"""
@@ -21,6 +26,8 @@ class VideoVariant(Struct):
 
 class VideoInfo(Struct):
     variants: list[VideoVariant]
+    duration_millis: int = field(default=0)
+    """视频时长(ms)"""
 
 
 class Media(Struct):
@@ -31,90 +38,58 @@ class Media(Struct):
     video_info: VideoInfo | None = None
     """视频信息，仅 type 为 video/animated_gif 时存在"""
 
-    @property
-    def orig_url(self):
-        return f"{self.media_url_https}:orig"
+
+class ExtendedEntities(Struct):
+    media: list[Media] = field(default_factory=list)
 
 
-class User(Struct):
-    id_str: str
-    """用户id"""
+class UserLegacy(Struct):
+    created_at: str
+    """注册时间"""
+    description: str
+    """用户简介"""
     name: str
     """用户昵称"""
     screen_name: str
     """用户名"""
+    followers_count: int
+    """粉丝数"""
     profile_image_url_https: str
-    is_blue_verified: bool = False
-    """是否蓝标认证"""
-    verified: bool = False
-    """是否官方认证"""
 
     @property
     def avatar_url(self):
         return self.profile_image_url_https.replace("_normal", "_bigger")
 
 
-class Tweet(Struct):
-    id_str: str
-    """推文id"""
+class TweetLegacy(Struct):
+    bookmark_count: int
+    """收藏数"""
+    favorite_count: int
+    """点赞数"""
+    retweet_count: int
+    """转发数"""
+    reply_count: int
+    """评论数"""
+    full_text: str
+    """推文内容"""
     created_at: str
-    user: User
-    full_text: str = field(name="text")
-    mediaDetails: list[Media] = field(default_factory=list)
-    favorite_count: int = field(default=0)
-    """点心数"""
-    quoted_tweet: "Tweet | None" = None
-    """引用推文"""
-    parent: "Tweet | None" = None
-    """回复推文"""
-
-    def _parse_created_at(self) -> datetime:
-        """解析 ISO 8601 UTC 时间，如 '2026-03-12T14:02:40.000Z' 或 '2026-03-12T14:02:40Z'."""
-        s = self.created_at
-        if s.endswith("Z"):
-            s = s[:-1]
-
-        # 先尝试带毫秒
-        try:
-            dt = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
-        except ValueError:
-            # 再尝试不带毫秒
-            dt = datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
-
-        return dt.replace(tzinfo=timezone.utc)
-
-    @property
-    def time_utc(self) -> int:
-        """创建时间的 UTC Unix 时间戳（秒）"""
-        dt = self._parse_created_at()
-        return int(dt.timestamp())
-
-    @property
-    def time_local(self) -> int:
-        """创建时间的本地 Unix 时间戳（秒）"""
-        dt_utc = self._parse_created_at()
-        dt_local = dt_utc.astimezone()
-        return int(dt_local.timestamp())
-
-    @property
-    def text(self) -> str:
-        """去掉 t.co 短链接和非法字符的推文内容"""
-        text = _TCO_RE.sub("", self.full_text)
-        text = _INVALID_CHARS_RE.sub("", text)
-        return text
+    """utc时间戳字符串，例如'"Fri Feb 20 16:33:16 +0000 2026'"""
+    possibly_sensitive: bool = field(default=False)
+    """是否敏感内容"""
+    extended_entities: ExtendedEntities | None = None
 
     @property
     def medias(self) -> list[MediaContent]:
         """返回所有媒体的资源"""
-        if not self.mediaDetails:
+        if not self.extended_entities or not self.extended_entities.media:
             return []
 
         medias: list[MediaContent] = []
 
-        for media in self.mediaDetails:
+        for media in self.extended_entities.media:
             # 图片：直接用 media_url_https
             if media.type == "photo":
-                medias.append(create_image(url=media.orig_url))
+                medias.append(create_image(url=f"{media.media_url_https}:orig"))
                 continue
 
             # 视频 / 动图：挑最高码率 mp4
@@ -130,7 +105,62 @@ class Tweet(Struct):
                     # 当前 media 选一个最高码率的
                     _, best = max(candidates, key=lambda x: x[0])
                     medias.append(
-                        create_video(url_or_task=best, cover_url=media.orig_url)
+                        create_video(
+                            url_or_task=best,
+                            cover_url=media.media_url_https,
+                            duration=media.video_info.duration_millis // 1000,
+                        )
                     )
 
         return medias
+
+    @property
+    def text(self) -> str:
+        """去掉 t.co 短链接和非法字符的推文内容"""
+        text = _TCO_RE.sub("", self.full_text)
+        text = _INVALID_CHARS_RE.sub("", text)
+        return text
+
+    @property
+    def time_utc(self) -> int:
+        """创建时间的 UTC Unix 时间戳（秒）"""
+        # 示例格式: "Fri Feb 20 16:33:16 +0000 2026"
+        dt = datetime.strptime(self.created_at, "%a %b %d %H:%M:%S %z %Y")
+        # 标准 UTC 时间戳
+        return int(dt.astimezone(timezone.utc).timestamp())
+
+    @property
+    def time_local(self) -> int:
+        """创建时间的本地 Unix 时间戳（秒）"""
+        dt_utc = datetime.strptime(self.created_at, "%a %b %d %H:%M:%S %z %Y")
+        dt_local = dt_utc.astimezone()
+        return int(dt_local.timestamp())
+
+
+class UserData(Struct):
+    legacy: UserLegacy
+
+
+class UserResult(Struct):
+    result: UserData
+
+
+class TweetCore(Struct):
+    user_results: UserResult
+
+
+class Tweet(Struct):
+    core: TweetCore
+    legacy: TweetLegacy
+    """原始推文"""
+    views: Views
+    rest_id: str
+    """推文id"""
+    quoted_status_result: "TweetResult | None" = None
+    """引用推文"""
+    retweeted_status_result: "TweetResult | None" = None
+    """可能存在的原始推文"""
+
+
+class TweetResult(Struct):
+    result: Tweet
