@@ -157,9 +157,9 @@ class Tweet(Struct):
     rest_id: str
     """推文id"""
     quoted_status_result: "TweetResult | None" = None
-    """引用推文"""
+    """被引用推文(转发时说话了)"""
     retweeted_status_result: "TweetResult | None" = None
-    """可能存在的原始推文"""
+    """被转发推文(直接转发啥都没说)"""
 
 
 class TweetResult(Struct):

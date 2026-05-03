@@ -25,11 +25,7 @@ class XParser(BaseParser):
 
     def collect_data(self, tweet: TweetResult, is_repost: bool = False) -> ParseResult:
         result = tweet.result
-        legacy = (
-            result.retweeted_status_result.result.legacy
-            if result.retweeted_status_result
-            else result.legacy
-        )
+        legacy = result.legacy
 
         content: list[MediaContent | str] = [legacy.text]
         content.extend(legacy.medias)
@@ -37,8 +33,9 @@ class XParser(BaseParser):
         user = result.core.user_results.result.legacy
 
         repost = None
-        if not is_repost and result.quoted_status_result:
-            repost = self.collect_data(result.quoted_status_result, True)
+        repost_status = result.quoted_status_result or result.retweeted_status_result
+        if not is_repost and repost_status:
+            repost = self.collect_data(repost_status, True)
 
         return self.result(
             content=content,
