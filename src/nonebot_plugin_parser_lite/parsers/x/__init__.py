@@ -26,7 +26,7 @@ class XParser(BaseParser):
         content: list[MediaContent | str] = [legacy.text]
         content.extend(legacy.medias)
 
-        user = tweet.core.user_results.result.legacy
+        user = tweet.core.user_results.result
 
         repost = None
         repost_status = tweet.quoted_status_result or tweet.retweeted_status_result
@@ -37,10 +37,10 @@ class XParser(BaseParser):
             content=content,
             timestamp=legacy.time_local,
             author=self.create_author(
-                name=user.name,
+                name=user.core.name,
                 avatar_url=user.avatar_url,
-                description=user.description,
-                id=user.screen_name,
+                description=user.legacy.description,
+                id=user.core.screen_name,
             ),
             stats=self.create_stats(
                 view_count=format_num(int(tweet.views.count)),
@@ -49,7 +49,7 @@ class XParser(BaseParser):
                 collect_count=format_num(legacy.bookmark_count),
                 share_count=format_num(legacy.quote_count + legacy.retweet_count),
             ),
-            url=f"https://x.com/{user.screen_name}/status/{tweet.rest_id}",
+            url=f"https://x.com/{user.core.screen_name}/status/{tweet.rest_id}",
             repost=repost,
         )
 

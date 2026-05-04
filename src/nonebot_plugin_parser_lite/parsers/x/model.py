@@ -40,26 +40,27 @@ class ExtendedEntities(Struct):
 
 
 class UserLegacy(Struct):
-    created_at: str
-    """注册时间"""
     description: str
     """用户简介"""
+    followers_count: int
+    """粉丝数"""
+    profile_banner_url: str = field(default="")
+    """banner图片"""
+
+
+class UserCore(Struct):
     name: str
     """用户昵称"""
     screen_name: str
     """用户名"""
-    followers_count: int
-    """粉丝数"""
-    profile_image_url_https: str = field(
+    created_at: str
+    """注册时间"""
+
+
+class UserAvatar(Struct):
+    image_url: str = field(
         default="https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"
     )
-    """头像"""
-    profile_banner_url: str = field(default="")
-    """banner图片"""
-
-    @property
-    def avatar_url(self):
-        return self.profile_image_url_https.replace("_normal", "_bigger")
 
 
 class TweetLegacy(Struct):
@@ -140,6 +141,13 @@ class UserData(Struct):
     """用户id"""
     rest_id: str
     """用户数字id"""
+    core: UserCore
+    avatar: UserAvatar = field(default_factory=UserAvatar)
+
+    @property
+    def avatar_url(self) -> str:
+        """头像链接"""
+        return self.avatar.image_url.replace("_normal", "_bigger")
 
 
 class UserResult(Struct):
