@@ -20,6 +20,7 @@ NEXT_DATA = re.compile(
     r'<script[^>]*id=["\']__NEXT_DATA__["\'][^>]*>\s*(.*?)\s*</script>',
     re.IGNORECASE | re.DOTALL,
 )
+# Ref https://github.com/ililaoban/nonebot-plugin-parser/blob/26e0631b9f13f4db8f3f33dd6d8bb7f803e688a2/src/nonebot_plugin_parser/parsers/coolapk.py
 
 
 class CoolapkParser(BaseParser):
