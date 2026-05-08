@@ -51,6 +51,7 @@ class PlatformEnum(str, Enum):
     HEYBOX = "heybox"
     LOFTER = "lofter"
     BUFF = "buff"
+    COOLAPK = "coolapk"
 
     def __str__(self) -> str:
         return self.value

@@ -27,6 +27,7 @@ from .duitang import DuiTangParser
 from .heybox import HeyBoxParser
 from .lofter import LofterParser
 from .buff import BuffParser
+from .coolapk import CoolapkParser
 
 __all__ = [
     "AcfunParser",
@@ -55,5 +56,6 @@ __all__ = [
     "HeyBoxParser",
     "LofterParser",
     "BuffParser",
+    "CoolapkParser",
     "handle",
 ]
