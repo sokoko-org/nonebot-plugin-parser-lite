@@ -149,13 +149,13 @@ if system == "Linux":
 logger.info(f"Launching browser from {browser_path}")
 co = ChromiumOptions()
 co.mute(True)
-# co.incognito(True)
 # co.no_imgs(True)
 co.auto_port(True)
 co.headless(pconfig.headless)
 co.set_argument("--no-sandbox")
+co.set_argument("--guest")
+co.remove_extensions()
 co.set_browser_path(browser_path)
-# 浏览器数据缓存路径 C:\Users\用户名\AppData\Local\Temp\DrissionPage\userData\9222
 BROWSER = Chromium(co)
 
 
