@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from ..utils.ffmpeg import FFmpeg
 
 from ..download.task import DownloadTaskWrapper
+from ..download import DOWNLOADER
 
 
 def repr_path_task(path_task: DownloadTaskWrapper[Path]) -> str:
@@ -128,6 +129,12 @@ class Platform:
     """ 平台名称 """
     display_name: str
     """ 平台显示名称 """
+
+    async def get_logo_path(self) -> Path:
+        return await DOWNLOADER.download_img(
+            url=f"https://emoji.awkchan.top/assets/logo/{self.name}.webp",
+            img_name=f"{self.name}.webp"
+        )
 
 
 @dataclass(repr=False, slots=True)
