@@ -1,0 +1,978 @@
+{
+  "props": {
+    "pageProps": {
+      "replies": [
+        {
+          "id": 589019270,
+          "username": "无敌小水獭",
+          "userAvatar": "http://avatar.coolapk.com/data/003/42/38/49_avatar_middle.jpg?t=1766815013",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778037523,
+          "likenum": 448,
+          "replynum": 50,
+          "message": "material design不好嘛，咕噜咕噜非要丑的跟iOS一样吗",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "人生若梦嘤嘤嘤",
+              "ruid": 25984811,
+              "rusername": "江闲",
+              "isFeedAuthor": 0,
+              "dateline": 1778147005,
+              "message": "因为有组件库，用起来方便，现在有不少都转MIUIx了，比md3好看多了[流汗滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "砚川灯凪",
+              "ruid": 3423849,
+              "rusername": "无敌小水獭",
+              "isFeedAuthor": 0,
+              "dateline": 1778156876,
+              "message": "md除了谷歌自己和个人开发者 就没看见谁用 国外那些大厂也没见谁用过",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "无敌小水獭",
+              "ruid": 25502930,
+              "rusername": "砚川灯凪",
+              "isFeedAuthor": 0,
+              "dateline": 1778158689,
+              "message": "早期的微信和QQ是典型的md呀",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "无敌小水獭",
+              "ruid": 25502930,
+              "rusername": "砚川灯凪",
+              "isFeedAuthor": 0,
+              "dateline": 1778158699,
+              "message": "早期的知乎和b站也是",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "就是沒反应",
+              "ruid": 3423849,
+              "rusername": "无敌小水獭",
+              "isFeedAuthor": 0,
+              "dateline": 1778165988,
+              "message": "Gemini的回答，完整版在我主页的帖子里",
+              "pic": "http://image.coolapk.com/feed/2026/0507/22/17424538_1b34f544_5984_8438_115@1080x2400.jpg",
+              "picArr": [
+                "http://image.coolapk.com/feed/2026/0507/22/17424538_1b34f544_5984_8438_115@1080x2400.jpg",
+                "http://image.coolapk.com/feed/2026/0507/22/17424538_382a8bbd_5984_8446_52@1080x2400.jpg"
+              ]
+            }
+          ],
+          "replyRowsMore": 45
+        },
+        {
+          "id": 589020545,
+          "username": "炸炸炸猪呜",
+          "userAvatar": "http://avatar.coolapk.com/data/001/59/92/68_avatar_middle.jpg?t=1746173019",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778038079,
+          "likenum": 283,
+          "replynum": 23,
+          "message": "玻璃无疑了，酷安马上要有和鸿蒙 ios 一样的底栏样式了[强][强]",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "花松护奋鸡",
+              "ruid": 38547555,
+              "rusername": "方舟はこぶね",
+              "isFeedAuthor": 0,
+              "dateline": 1778124953,
+              "message": "加点模糊换个名词就成华为先提的了[笑哭]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "方舟はこぶね",
+              "ruid": 31599882,
+              "rusername": "花松护奋鸡",
+              "isFeedAuthor": 0,
+              "dateline": 1778128604,
+              "message": "帮你整理了，有疑问可以自行看相关发布会，我的观点是液态玻璃和光感本质上不是一个东西，不存在抄袭一说，不否认华为最新的一些光感效果有抄袭苹果的倾向[哈哈哈]",
+              "pic": "http://image.coolapk.com/feed/2026/0507/12/38547555_44f16d44_8603_1288_4@750x1334.jpg",
+              "picArr": [
+                "http://image.coolapk.com/feed/2026/0507/12/38547555_44f16d44_8603_1288_4@750x1334.jpg",
+                "http://image.coolapk.com/feed/2026/0507/12/38547555_1ed4a53e_8603_1292_331@750x1334.jpg",
+                "http://image.coolapk.com/feed/2026/0507/12/38547555_929ef4fc_8603_1298_664@750x1334.jpg"
+              ]
+            },
+            {
+              "username": "遥遥领先是不可能的",
+              "ruid": 38547555,
+              "rusername": "方舟はこぶね",
+              "isFeedAuthor": 0,
+              "dateline": 1778141959,
+              "message": "又又又一次遥遥领先[doge]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "萬聊",
+              "ruid": 31599882,
+              "rusername": "花松护奋鸡",
+              "isFeedAuthor": 0,
+              "dateline": 1778152749,
+              "message": "米家基本盘",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "就是沒反应",
+              "ruid": 1599268,
+              "rusername": "炸炸炸猪呜",
+              "isFeedAuthor": 0,
+              "dateline": 1778166023,
+              "message": "其实只是加更多的高斯模糊而已",
+              "pic": "http://image.coolapk.com/feed/2026/0507/23/17424538_1b34f544_6020_5702_263@1080x2400.jpg",
+              "picArr": [
+                "http://image.coolapk.com/feed/2026/0507/23/17424538_1b34f544_6020_5702_263@1080x2400.jpg",
+                "http://image.coolapk.com/feed/2026/0507/23/17424538_382a8bbd_6020_5711_752@1080x2400.jpg"
+              ]
+            }
+          ],
+          "replyRowsMore": 18
+        },
+        {
+          "id": 589020074,
+          "username": "likw233",
+          "userAvatar": "http://avatar.coolapk.com/data/001/76/95/09_avatar_middle.jpg?t=1756700878",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778037878,
+          "likenum": 199,
+          "replynum": 9,
+          "message": "冷知识：安卓16的md3e预览效果至今没完全实现[真正的音乐]",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "不知道起煞名",
+              "ruid": 1745765,
+              "rusername": "异侠",
+              "isFeedAuthor": 0,
+              "dateline": 1778051675,
+              "message": "那不然？",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "沙滩上的草加雅人",
+              "ruid": 1745765,
+              "rusername": "异侠",
+              "isFeedAuthor": 0,
+              "dateline": 1778058592,
+              "message": "那不然呢",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "我看起来好累",
+              "ruid": 1769509,
+              "rusername": "likw233",
+              "isFeedAuthor": 0,
+              "dateline": 1778069986,
+              "message": "最早的my都没实现，好几年了",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "心理咨询师完颜慧德",
+              "ruid": 1745765,
+              "rusername": "异侠",
+              "isFeedAuthor": 0,
+              "dateline": 1778078968,
+              "message": "是百度的",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "白呆呆本呆uwu",
+              "ruid": 1769509,
+              "rusername": "likw233",
+              "isFeedAuthor": 0,
+              "dateline": 1778089684,
+              "message": "那玩意是要开发者领悟精髓了，自己去构造出来的要不然就是Baseline也就是普通md3[流汗滑稽]不做不减分，做了加分[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 4
+        },
+        {
+          "id": 589019667,
+          "username": "三体世界的大钟摆",
+          "userAvatar": "http://avatar.coolapk.com/data/021/45/06/56_avatar_middle.jpg?t=1778156746",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778037716,
+          "likenum": 136,
+          "replynum": 8,
+          "message": "好了这下大家都别笑了[笑眼]",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "雨淋風鈴",
+              "ruid": 20485194,
+              "rusername": "周薛",
+              "isFeedAuthor": 0,
+              "dateline": 1778080770,
+              "message": "我们酷安人才辈出[捂脸]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "杨女士",
+              "ruid": 27621694,
+              "rusername": "alkh24542",
+              "isFeedAuthor": 0,
+              "dateline": 1778096237,
+              "message": "？",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "alkh24542",
+              "ruid": 539372,
+              "rusername": "杨女士",
+              "isFeedAuthor": 0,
+              "dateline": 1778096253,
+              "message": "？有什么问题吗",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "橘喵520",
+              "ruid": 27621694,
+              "rusername": "alkh24542",
+              "isFeedAuthor": 0,
+              "dateline": 1778134390,
+              "message": "玛雅大街",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 4
+        },
+        {
+          "id": 589027848,
+          "username": "酱油四",
+          "userAvatar": "http://avatar.coolapk.com/data/001/77/37/23_avatar_middle.jpg?t=1623491718",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778041302,
+          "likenum": 87,
+          "replynum": 20,
+          "message": "说实话，material design3，特别是最近的ex，审美上真的很独树一帜（很两极分化），但是对ui的适配性太差了，很考验开发者的审美和设计功底，不留神就会搞成毛坯房风格[捂脸]，这种风格注定推广不开的",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "AeioNana",
+              "ruid": 1773723,
+              "rusername": "酱油四",
+              "isFeedAuthor": 0,
+              "dateline": 1778082148,
+              "message": "什么意思？你之前做过ui，那m3不是很简单嘛",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "酱油四",
+              "ruid": 23299498,
+              "rusername": "AeioNana",
+              "isFeedAuthor": 0,
+              "dateline": 1778082344,
+              "message": "简单是简单，但是做的好看不简陋有点难",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "AeioNana",
+              "ruid": 1773723,
+              "rusername": "酱油四",
+              "isFeedAuthor": 0,
+              "dateline": 1778082957,
+              "message": "m3e就是颜色使用对了就比较像。底色大面积用surface container，小面积用surface（bright/dark），在此之上的层级用primary/second/tertiary container（最后再用tertiary container就不会错）.. <a href=\"/feed/replyList?id=589027848\">查看更多</a>",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "四百二十七零下一百八十三",
+              "ruid": 783039,
+              "rusername": "佛罗伦萨的猫",
+              "isFeedAuthor": 0,
+              "dateline": 1778130958,
+              "message": "adnmb[流泪]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "佛罗伦萨的猫",
+              "ruid": 813272,
+              "rusername": "四百二十七零下一百八十三",
+              "isFeedAuthor": 0,
+              "dateline": 1778131048,
+              "message": "已经慢性死亡嘞[喝酒]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 15
+        },
+        {
+          "id": 589034477,
+          "username": "蓬松柔软的蓬蓬",
+          "userAvatar": "http://avatar.coolapk.com/data/003/40/18/13_avatar_middle.jpg?t=1776649857",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778044368,
+          "likenum": 27,
+          "replynum": 16,
+          "message": "我们的安卓[流泪]到底会变成[流泪]什么样子",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "Plutolove",
+              "ruid": 40081308,
+              "rusername": "林林业offic",
+              "isFeedAuthor": 0,
+              "dateline": 1778092806,
+              "message": "真的[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "雪江烟",
+              "ruid": 40081308,
+              "rusername": "林林业offic",
+              "isFeedAuthor": 0,
+              "dateline": 1778117136,
+              "message": "一夫多妻你以为呢",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "林林业offic",
+              "ruid": 1509588,
+              "rusername": "Plutolove",
+              "isFeedAuthor": 0,
+              "dateline": 1778117597,
+              "message": "有资料看吗？[喝酒]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "蓬松柔软的蓬蓬",
+              "ruid": 3941919,
+              "rusername": "雪江烟",
+              "isFeedAuthor": 0,
+              "dateline": 1778118322,
+              "message": "[流汗滑稽]？？？",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 12
+        },
+        {
+          "id": 589031369,
+          "username": "自动关机了2021",
+          "userAvatar": "http://avatar.coolapk.com/data/011/37/55/71_avatar_middle.jpg?t=1719814351",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778042854,
+          "likenum": 24,
+          "replynum": 10,
+          "message": "Apple 是科技界审美的巅峰了[流汗滑稽]\n当年老乔拟物化无人能敌，转手扁平化，其他厂商也立马掉头跟上，现在搞液态，又是大家追赶[笑哭]，想不明白是其他系统都没审美还是说根本就没所谓的审美设计部门[流汗滑稽]反正就是iOS怎么搞其他人就跟着搞就行了[疑问]",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "Youmdz2333",
+              "ruid": 11375571,
+              "rusername": "自动关机了2021",
+              "isFeedAuthor": 0,
+              "dateline": 1778146234,
+              "message": "扁平化是微软先搞的，windows 8和windows phone 8，ios7第二年跟进[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "自动关机了2021",
+              "ruid": 3404281,
+              "rusername": "Youmdz2333",
+              "isFeedAuthor": 0,
+              "dateline": 1778163098,
+              "message": "那能一样吗[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "自动关机了2021",
+              "ruid": 23175835,
+              "rusername": "满眼都是莎莎",
+              "isFeedAuthor": 0,
+              "dateline": 1778163164,
+              "message": "[受虐滑稽]跟着抄作业是真爽[流汗滑稽]设计师战术后仰一坐",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "未來予知",
+              "ruid": 11375571,
+              "rusername": "自动关机了2021",
+              "isFeedAuthor": 0,
+              "dateline": 1778164554,
+              "message": "“apple没创新了”[流汗滑稽][流汗滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "酷玩树叶",
+              "ruid": 11375571,
+              "rusername": "自动关机了2021",
+              "isFeedAuthor": 0,
+              "dateline": 1778206738,
+              "message": "一比一抄才有意思，反正自家粉不会骂。[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 5
+        },
+        {
+          "id": 589156013,
+          "username": "吾辈长歌",
+          "userAvatar": "http://avatar.coolapk.com/data/002/67/08/98_avatar_middle.jpg?t=1558504313",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778123674,
+          "likenum": 4,
+          "replynum": 15,
+          "message": "安卓压力大了，一个ios一个鸿蒙，安卓这个屎山代码要不直接整体重构吧[可爱]",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "我有名字好吗",
+              "ruid": 3299259,
+              "rusername": "只想下班的医生",
+              "isFeedAuthor": 0,
+              "dateline": 1778146806,
+              "message": "我错了，行了吧",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "只想下班的医生",
+              "ruid": 495919,
+              "rusername": "我有名字好吗",
+              "isFeedAuthor": 0,
+              "dateline": 1778147175,
+              "message": "6",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "隐处唯孤云",
+              "ruid": 3299259,
+              "rusername": "只想下班的医生",
+              "isFeedAuthor": 0,
+              "dateline": 1778153280,
+              "message": "安卓尽显颓势👍",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "讲戒时",
+              "ruid": 3299259,
+              "rusername": "只想下班的医生",
+              "isFeedAuthor": 0,
+              "dateline": 1778160939,
+              "message": "全球使用人数最多的语言是汉语，但在全球汉语真那么普及吗[哈哈哈]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 11
+        },
+        {
+          "id": 589088568,
+          "username": "厂商孝子Gun",
+          "userAvatar": "http://avatar.coolapk.com/data/005/16/60/93_avatar_middle.jpg?t=1777307662",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778069368,
+          "likenum": 18,
+          "replynum": 3,
+          "message": "已准备好了重构底层[受虐滑稽]",
+          "pic": "http://image.coolapk.com/feed/2026/0506/20/5166093_de39923b_9366_2543_500@1112x1480.jpg",
+          "picArr": [
+            "http://image.coolapk.com/feed/2026/0506/20/5166093_de39923b_9366_2543_500@1112x1480.jpg"
+          ],
+          "replyRows": [
+            {
+              "username": "封琐师",
+              "ruid": 5166093,
+              "rusername": "厂商孝子Gun",
+              "isFeedAuthor": 0,
+              "dateline": 1778069626,
+              "message": "[强][强][强][强]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "Aomolo",
+              "ruid": 5166093,
+              "rusername": "厂商孝子Gun",
+              "isFeedAuthor": 0,
+              "dateline": 1778078557,
+              "message": "阐述小米的梦",
+              "pic": "http://image.coolapk.com/feed/2026/0506/22/16629459_0149ff7e_8556_5364_955@1024x1386.jpg",
+              "picArr": [
+                "http://image.coolapk.com/feed/2026/0506/22/16629459_0149ff7e_8556_5364_955@1024x1386.jpg"
+              ]
+            }
+          ],
+          "replyRowsMore": 1
+        },
+        {
+          "id": 589078347,
+          "username": "半年都能刷卡",
+          "userAvatar": "http://avatar.coolapk.com/data/004/32/10/35_avatar_middle.jpg?t=1609032194",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778064416,
+          "likenum": 11,
+          "replynum": 4,
+          "message": "这绿色的logo能不能换了太难看垃圾桶一样",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "key001",
+              "ruid": 4321035,
+              "rusername": "半年都能刷卡",
+              "isFeedAuthor": 0,
+              "dateline": 1778066835,
+              "message": "不行，这个是有历史传承的[再见]",
+              "pic": "http://image.coolapk.com/feed/2026/0506/19/31405879_58ed6ee5_6834_462_995@1080x1327.jpg",
+              "picArr": [
+                "http://image.coolapk.com/feed/2026/0506/19/31405879_58ed6ee5_6834_462_995@1080x1327.jpg"
+              ]
+            },
+            {
+              "username": "Plutolove",
+              "ruid": 4321035,
+              "rusername": "半年都能刷卡",
+              "isFeedAuthor": 0,
+              "dateline": 1778092862,
+              "message": "祖宗之法不可变[受虐滑稽] 这个绿色机器人还挺可爱的",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "半年都能刷卡",
+              "ruid": 1509588,
+              "rusername": "Plutolove",
+              "isFeedAuthor": 0,
+              "dateline": 1778128167,
+              "message": "太丑了，看起来就像垃圾桶",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "小六six",
+              "ruid": 4321035,
+              "rusername": "半年都能刷卡",
+              "isFeedAuthor": 0,
+              "dateline": 1778128887,
+              "message": "我觉得不丑[斗鸡眼滑稽][斗鸡眼滑稽][斗鸡眼滑稽]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 0
+        },
+        {
+          "id": 589055623,
+          "username": "果华米OV耀",
+          "userAvatar": "http://avatar.coolapk.com/data/000/45/52/51_avatar_middle.jpg?t=1767026823",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778054344,
+          "likenum": 7,
+          "replynum": 8,
+          "message": "已经澄清不是玻璃了",
+          "pic": "http://image.coolapk.com/feed/2026/0506/15/455251_d3ea9d30_4343_0743_125@1080x2400.jpeg",
+          "picArr": [
+            "http://image.coolapk.com/feed/2026/0506/15/455251_d3ea9d30_4343_0743_125@1080x2400.jpeg"
+          ],
+          "replyRows": [
+            {
+              "username": "橙汁儿O",
+              "ruid": 455251,
+              "rusername": "果华米OV耀",
+              "isFeedAuthor": 0,
+              "dateline": 1778070561,
+              "message": "亚克力吗",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "焚神S",
+              "ruid": 455251,
+              "rusername": "果华米OV耀",
+              "isFeedAuthor": 0,
+              "dateline": 1778072567,
+              "message": "意思是不同于ios17的风格，将会是android17始创的彩色玻璃效果？",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "小帅丧德彪",
+              "ruid": 854630,
+              "rusername": "封琐师",
+              "isFeedAuthor": 0,
+              "dateline": 1778072630,
+              "message": "不是哥们儿，那是效果呀，那是玻璃和塑料的一种概括的效果。你这搁这儿呢？",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "流星雨668",
+              "ruid": 854630,
+              "rusername": "封琐师",
+              "isFeedAuthor": 0,
+              "dateline": 1778080470,
+              "message": "哈哈哈哈哈🤣",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "香脆酥鱼",
+              "ruid": 455251,
+              "rusername": "果华米OV耀",
+              "isFeedAuthor": 0,
+              "dateline": 1778082728,
+              "message": "到时候叫一手琉璃，哈哈哈",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 3
+        },
+        {
+          "id": 589038484,
+          "username": "可乐还是加冰",
+          "userAvatar": "http://avatar.coolapk.com/data/000/85/58/16_avatar_middle.jpg?t=1721134206",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778046515,
+          "likenum": 5,
+          "replynum": 7,
+          "message": "以后软件是不是跟这一样了[受虐滑稽]",
+          "pic": "http://image.coolapk.com/feed/2026/0506/13/855816_3502dfeb_6514_3121_598@1156x2510.jpg",
+          "picArr": [
+            "http://image.coolapk.com/feed/2026/0506/13/855816_3502dfeb_6514_3121_598@1156x2510.jpg"
+          ],
+          "replyRows": [
+            {
+              "username": "可乐还是加冰",
+              "ruid": 12419194,
+              "rusername": "Yousaling",
+              "isFeedAuthor": 0,
+              "dateline": 1778054232,
+              "message": "我表达的意思，这不是IOS的液态玻璃吗[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "Yousaling",
+              "ruid": 855816,
+              "rusername": "可乐还是加冰",
+              "isFeedAuthor": 0,
+              "dateline": 1778054351,
+              "message": "这也不液态啊",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "可乐还是加冰",
+              "ruid": 12419194,
+              "rusername": "Yousaling",
+              "isFeedAuthor": 0,
+              "dateline": 1778054367,
+              "message": "下面那一块",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "Yousaling",
+              "ruid": 855816,
+              "rusername": "可乐还是加冰",
+              "isFeedAuthor": 0,
+              "dateline": 1778054564,
+              "message": "加了一层很丑的毛玻璃，没有液态",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "可乐还是加冰",
+              "ruid": 12419194,
+              "rusername": "Yousaling",
+              "isFeedAuthor": 0,
+              "dateline": 1778054832,
+              "message": "这样算液态吗",
+              "pic": "http://image.coolapk.com/feed/2026/0506/16/855816_622be25f_4831_4307_509@1156x2510.jpg",
+              "picArr": [
+                "http://image.coolapk.com/feed/2026/0506/16/855816_622be25f_4831_4307_509@1156x2510.jpg"
+              ]
+            }
+          ],
+          "replyRowsMore": 2
+        },
+        {
+          "id": 589130794,
+          "username": "千夜Gin",
+          "userAvatar": "http://avatar.coolapk.com/data/025/19/79/39_avatar_middle.jpg?t=1748089396",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778100989,
+          "likenum": 9,
+          "replynum": 2,
+          "message": "Android更新跟我用安卓有关系吗，说的跟华米ov耀魅兴用户，预测返回有人用上了一样\n[受虐滑稽]？",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "SamsungPlayer",
+              "ruid": 25197939,
+              "rusername": "千夜Gin",
+              "isFeedAuthor": 0,
+              "dateline": 1778108350,
+              "message": "o不就用上了[t耐克嘴]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "Kendall695",
+              "ruid": 25197939,
+              "rusername": "千夜Gin",
+              "isFeedAuthor": 0,
+              "dateline": 1778116012,
+              "message": "o自家软件基本全上了[流汗滑稽]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 0
+        },
+        {
+          "id": 589078687,
+          "username": "Stand_Atlantic",
+          "userAvatar": "http://avatar.coolapk.com/data/001/26/33/50_avatar_middle.jpg?t=1763475891",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778064590,
+          "likenum": 4,
+          "replynum": 6,
+          "message": "就一句，能比肩ios不",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "白砂糖Official",
+              "ruid": 31405879,
+              "rusername": "key001",
+              "isFeedAuthor": 0,
+              "dateline": 1778069823,
+              "message": "还真比肩不了，就安卓那个MD3风格简约不是简约就是单纯丑死了还不如国内定制安卓UI风格。[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "Mr_飏",
+              "ruid": 3532802,
+              "rusername": "白砂糖Official",
+              "isFeedAuthor": 0,
+              "dateline": 1778078096,
+              "message": "所以抄液态玻璃的哇为就是对的[流汗滑稽][流汗滑稽][流汗滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "愿长青",
+              "ruid": 31405879,
+              "rusername": "key001",
+              "isFeedAuthor": 0,
+              "dateline": 1778082205,
+              "message": "就谷歌的效率和那一堆s山代码，能对比个蛋[受虐滑稽]，不要成为IOS26.1就算是平稳落地了。",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "愿长青",
+              "ruid": 31405879,
+              "rusername": "key001",
+              "isFeedAuthor": 0,
+              "dateline": 1778082348,
+              "message": "微软、谷歌和苹果……这三家的s山代码，再堆下去早晚得翻车。哦，对，苹果现在已经翻了[受虐滑稽]。）期待未来的安卓和Windows12[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            },
+            {
+              "username": "白砂糖Official",
+              "ruid": 1737872,
+              "rusername": "Mr_飏",
+              "isFeedAuthor": 0,
+              "dateline": 1778084617,
+              "message": "勿串！光感和液体玻璃的区别，你分不清？那岂不是你连“高斯”和“模糊”也分不清？[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 1
+        },
+        {
+          "id": 589023975,
+          "username": "Akekodao",
+          "userAvatar": "http://avatar.coolapk.com/data/000/48/19/25_avatar_middle.jpg?t=1557583300",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778039483,
+          "likenum": 8,
+          "replynum": 1,
+          "message": "谷歌这b芯片能带动液态玻璃吗？[t耐克嘴]",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "肯豆基大长老",
+              "ruid": 481925,
+              "rusername": "Akekodao",
+              "isFeedAuthor": 0,
+              "dateline": 1778039638,
+              "message": "做和荣耀一样的塑料玻璃不就好了[受虐滑稽]",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 0
+        },
+        {
+          "id": 589022986,
+          "username": "linry",
+          "userAvatar": "http://avatar.coolapk.com/data/010/61/22/88_avatar_middle.jpg?t=1657868348",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778039072,
+          "likenum": 8,
+          "replynum": 0,
+          "message": "液态玻璃好啊，得抄，鸿蒙都抄完了，现在看安卓怎么抄了。",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [],
+          "replyRowsMore": 0
+        },
+        {
+          "id": 589022013,
+          "username": "蹲坑到腿麻丶",
+          "userAvatar": "http://avatar.coolapk.com/data/021/91/93/06_avatar_middle.jpg?t=1657943223",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778038661,
+          "likenum": 7,
+          "replynum": 1,
+          "message": "又要重构底层吗[受虐滑稽]不会miui12复刻一遍吧",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [
+            {
+              "username": "世界无其不有龘龘",
+              "ruid": 21919306,
+              "rusername": "蹲坑到腿麻丶",
+              "isFeedAuthor": 0,
+              "dateline": 1778039417,
+              "message": "你就说复刻没复刻吧",
+              "pic": null,
+              "picArr": null
+            }
+          ],
+          "replyRowsMore": 0
+        },
+        {
+          "id": 589175194,
+          "username": "无所事士",
+          "userAvatar": "http://avatar.coolapk.com/data/000/95/04/24_avatar_middle.jpg?t=1590888853",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778133052,
+          "likenum": 7,
+          "replynum": 0,
+          "message": "老罗的含金量还在上升[受虐滑稽][受虐滑稽][受虐滑稽]",
+          "pic": "http://image.coolapk.com/feed/2026/0507/13/950424_a6c9779b_3051_3248_599@1080x1072.jpg",
+          "picArr": [
+            "http://image.coolapk.com/feed/2026/0507/13/950424_a6c9779b_3051_3248_599@1080x1072.jpg"
+          ],
+          "replyRows": [],
+          "replyRowsMore": 0
+        },
+        {
+          "id": 589160635,
+          "username": "junjiego",
+          "userAvatar": "http://avatar.coolapk.com/data/001/46/22/92_avatar_middle.jpg?t=1541254537",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778125682,
+          "likenum": 7,
+          "replynum": 0,
+          "message": "就连谷歌自家的产品都不完全适配自家的设计语言，很难要求开发者也跟进，起不了一点带头作用[受虐滑稽]",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [],
+          "replyRowsMore": 0
+        },
+        {
+          "id": 589122922,
+          "username": "Ammmas",
+          "userAvatar": "http://avatar.coolapk.com/data/018/36/99/02_avatar_middle.jpg?t=1650009947",
+          "isFeedAuthor": 0,
+          "feedUid": 2703472,
+          "dateline": 1778085440,
+          "likenum": 7,
+          "replynum": 0,
+          "message": "高斯模糊都做不好，液态亚克力吗",
+          "pic": null,
+          "picArr": null,
+          "replyRows": [],
+          "replyRowsMore": 0
+        }
+      ]
+    },
+    "__N_SSP": true
+  },
+  "page": "/reply/[id]",
+  "query": {
+    "id": "71586575"
+  },
+  "buildId": "",
+  "isFallback": false,
+  "isExperimentalCompile": false,
+  "gssp": true,
+  "scriptLoader": []
+}

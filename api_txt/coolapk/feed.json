@@ -1,0 +1,41 @@
+{
+  "props": {
+    "pageProps": {
+      "feed": {
+        "feedType": "feed",
+        "message_title": "",
+        "title": "赛博帕鲁的动态",
+        "username": "赛博帕鲁",
+        "userAvatar": "http://avatar.coolapk.com/data/002/70/34/72_avatar_middle.jpg?t=1709792415",
+        "dateline": 1778036931,
+        "message": "【安卓有望在 5 月 13 日公布全新视觉设计】\n\nAndroid 官宣，将在太平洋时间 5 月 12 日上午 10 点（北京时间 5 月 13 日凌晨 1 点）举办 The Android Show | I/O Edition。\n\n官方表示，2026 年是安卓发展史最重要的年份之一。预热视频中，经典的绿色安卓机器人变为彩色半透明形象，暗示将迎来重大视觉变化。\n\n——————\n更新：安卓生态系统总裁 Sameer Samat 表示，暂时没有跟进苹果液态玻璃的计划。\n\n<a class=\"feed-link-tag\" href=\"/t/%E4%BB%8A%E6%97%A5%E7%83%AD%E7%82%B9?type=0\">#今日热点#</a> <a class=\"feed-link-tag\" href=\"/t/Android16?type=0\">#Android16#</a>",
+        "message_raw_output": "null",
+        "picArr": [
+          "http://image.coolapk.com/feed/2026/0506/11/2703472_c9abda33_6928_6806_490@1168x1249.jpg",
+          "http://image.coolapk.com/feed/2026/0506/11/2703472_5016c36e_7272_3704_805@1004x572.gif",
+          "http://image.coolapk.com/feed/2026/0506/11/2703472_90179e03_6928_6815_835@2160x1203.jpg",
+          "http://image.coolapk.com/feed/2026/0506/11/2703472_9c3698e8_6928_6823_583@2153x1207.jpg",
+          "http://image.coolapk.com/feed/2026/0506/11/2703472_3dfa7e78_6928_6832_125@2122x1168.jpg",
+          "http://image.coolapk.com/feed/2026/0506/11/2703472_91bc9137_6928_684_753@1912x1622.jpg"
+        ],
+        "message_cover": "",
+        "productAlbumDetailInfo": null
+      },
+      "error": null,
+      "id": "71586575",
+      "aiSummary": null,
+      "adClient": "",
+      "adSlot": ""
+    },
+    "__N_SSP": true
+  },
+  "page": "/feed/[id]",
+  "query": {
+    "id": "71586575"
+  },
+  "buildId": "",
+  "isFallback": false,
+  "isExperimentalCompile": false,
+  "gssp": true,
+  "scriptLoader": []
+}

@@ -10,6 +10,7 @@ def replace_placeholder_to_sticker(
     placeholder_pattern: re.Pattern[str],
     platform: str,
     size_resolver: Callable[[str], Literal["small", "medium"]] | None = None,
+    id_resolver: Callable[[str], str] | None = None,
 ) -> list[MediaContent | str]:
     """
     将包含表情占位符的文本拆分为文本与表情。
@@ -20,6 +21,7 @@ def replace_placeholder_to_sticker(
     :param size_resolver: 一个接收表情名称并返回 size 字符串的函数，例如
                           lambda name: "small" / "medium"
                           若为 None，则默认使用 "small"。
+    :param id_resolver: 一个接受表情名称并返回 id 字符串的函数,为空自动使用正则匹配出的 name 作为 id
     :return: 由普通文本和 MediaContent 组成的列表，顺序与原字符串一致。
     """
     if "[" not in text or "]" not in text or not placeholder_pattern.search(text):
@@ -36,15 +38,18 @@ def replace_placeholder_to_sticker(
                 result.append(plain)
 
         name = match["name"]
-        size = size_resolver(name) if size_resolver is not None else "small"
-        result.append(
-            create_sticker(
-                url=f"https://emoji.awkchan.top/assets/{platform}/{name}.webp",
-                size=size,
-                desc=name,
+        emoji_id = id_resolver(name) if id_resolver is not None else name
+        if emoji_id:
+            size = size_resolver(name) if size_resolver is not None else "small"
+            result.append(
+                create_sticker(
+                    url=f"https://emoji.awkchan.top/assets/{platform}/{emoji_id}.webp",
+                    size=size,
+                    desc=name,
+                )
             )
-        )
-
+        elif placeholder_text := text[start:end]:
+            result.append(placeholder_text)
         last_pos = end
 
     # 最后剩余的纯文本
