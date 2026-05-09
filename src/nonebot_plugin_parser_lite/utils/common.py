@@ -11,7 +11,19 @@ from nonebot import logger
 K = TypeVar("K")
 V = TypeVar("V")
 
-STANDARD_IMAGE_SUFFIXES = {".jpeg", ".webp", ".jpg", ".gif", ".png", ".bmp", ".svg"}
+STANDARD_IMAGE_SUFFIXES = {
+    ".jpeg",
+    ".webp",
+    ".jpg",
+    ".gif",
+    ".png",
+    ".bmp",
+    ".svg",
+    ".avif",
+    ".heic",
+    ".heif",
+    ".jfif",
+}
 
 
 class LimitedSizeDict(OrderedDict[K, V]):
