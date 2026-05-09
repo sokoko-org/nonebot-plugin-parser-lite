@@ -1,10 +1,9 @@
 import re
 from typing import ClassVar
-from msgspec import convert
 from nonebot import logger
 
-from .reply import Reply
-from .feed import Feed
+from .reply import decoder as ReplyDecoder
+from .feed import decoder as FeedDecoder
 
 from ..base import (
     BaseParser,
@@ -37,7 +36,7 @@ class CoolapkParser(BaseParser):
         response.raise_for_status()
 
         if matched := NEXT_DATA.search(response.text):
-            next_data = convert(matched[1], Feed)
+            next_data = FeedDecoder.decode(matched[1])
         else:
             raise ParseException(f"未找到酷安页面数据: {feed_id}")
         feed = next_data.props.pageProps
@@ -45,11 +44,12 @@ class CoolapkParser(BaseParser):
         comments = []
         try:
             response = await self.httpx.get(
-                f"https://www.coolapk1s.com/reply/{feed_id}"
+                f"https://www.coolapk1s.com/reply/{feed_id}",
+                headers={"referer": f"https://www.coolapk1s.com/feed/{feed_id}"},
             )
             response.raise_for_status()
             if matched := NEXT_DATA.search(response.text):
-                reply_data = convert(matched[1], Reply)
+                reply_data = ReplyDecoder.decode(matched[1])
             else:
                 reply_data = None
 

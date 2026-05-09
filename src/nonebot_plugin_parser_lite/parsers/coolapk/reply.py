@@ -1,6 +1,8 @@
 from msgspec import Struct, field
 from ..creator import create_image
 from .util import format_sticker
+from bs4 import BeautifulSoup as soup
+from msgspec.json import Decoder
 
 
 class ReplyData(Struct):
@@ -10,13 +12,13 @@ class ReplyData(Struct):
     """回复谁的这个评论"""
     message: str
     """需要解析表情 [强]"""
-    picArr: list[str] = field(default_factory=list)
+    picArr: list[str] | None = field(default=None)
 
     @property
     def content(self):
         return [
-            *format_sticker(self.message),
-            *[create_image(pic) for pic in self.picArr],
+            *format_sticker(soup(self.message, "html.parser").get_text()),
+            *([create_image(pic) for pic in self.picArr] if self.picArr else []),
         ]
 
 
@@ -29,14 +31,14 @@ class Comment(Struct):
     replynum: int
     message: str
     """需要解析表情 [强]"""
-    picArr: list[str] = field(default_factory=list)
+    picArr: list[str] | None = field(default=None)
     replyRows: list[ReplyData] = field(default_factory=list)
 
     @property
     def content(self):
         return [
-            *format_sticker(self.message),
-            *[create_image(pic) for pic in self.picArr],
+            *format_sticker(soup(self.message, "html.parser").get_text()),
+            *([create_image(pic) for pic in self.picArr] if self.picArr else []),
         ]
 
 
@@ -50,3 +52,6 @@ class Props(Struct):
 
 class Reply(Struct):
     props: Props
+
+
+decoder = Decoder(Reply)

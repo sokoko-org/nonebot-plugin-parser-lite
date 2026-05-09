@@ -2,6 +2,7 @@ from msgspec import Struct, field
 from bs4 import BeautifulSoup as soup
 from ..creator import create_image
 from .util import format_sticker
+from msgspec.json import Decoder
 
 
 class FeedData(Struct):
@@ -10,13 +11,13 @@ class FeedData(Struct):
     userAvatar: str
     dateline: int | None = field(default=None)
     message: str = field(default="")
-    picArr: list[str] = field(default_factory=list)
+    picArr: list[str] | None = field(default=None)
 
     @property
     def content(self):
         return [
             *format_sticker(soup(self.message, "html.parser").get_text()),
-            *[create_image(pic) for pic in self.picArr],
+            *([create_image(pic) for pic in self.picArr] if self.picArr else []),
         ]
 
 
@@ -32,3 +33,6 @@ class Props(Struct):
 
 class Feed(Struct):
     props: Props
+
+
+decoder = Decoder(Feed)
