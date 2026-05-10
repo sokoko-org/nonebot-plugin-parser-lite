@@ -102,5 +102,5 @@ class AIConclusion(Struct):
     @property
     def summary(self) -> str:
         if self.model_result and self.model_result.summary:
-            return f"AI总结: {self.model_result.summary}"
+            return self.model_result.summary
         return "该视频暂不支持AI总结"

@@ -188,7 +188,7 @@ class BilibiliParser(BaseParser):
     @handle("BV", r"^(?P<bvid>BV[0-9a-zA-Z]{10})(?:\s)?(?P<page_num>\d{1,3})?$")
     @handle(
         "/BV",
-        r"bilibili\.com(?:/video)?/(?P<bvid>BV[0-9A-Za-z]{10})(?:[/?].*)?(?:[?&]p=(?P<page_num>\d{1,3}))?",
+        r"bilibili\.com(?:/video)?/(?P<bvid>BV[0-9A-Za-z]{10})(?:.*?[?&]p=(?P<page_num>\d{1,3}))?",
     )
     async def _parse_bv(self, searched: Match[str]):
         """解析视频信息"""
@@ -200,7 +200,7 @@ class BilibiliParser(BaseParser):
     @handle("av", r"^av(?P<avid>\d{6,})(?:\s)?(?P<page_num>\d{1,3})?$")
     @handle(
         "/av",
-        r"bilibili\.com(?:/video)?/av(?P<avid>\d{6,})(?:\?p=(?P<page_num>\d{1,3}))?",
+        r"bilibili\.com(?:/video)?/av(?P<avid>\d{6,})(?:.*?[?&]p=(?P<page_num>\d{1,3}))?",
     )
     async def _parse_av(self, searched: Match[str]):
         """解析视频信息"""
@@ -318,7 +318,7 @@ class BilibiliParser(BaseParser):
                 video=video, page_index=page_info.index
             )
             if page_info.duration > pconfig.duration_maximum:
-                raise DurationLimitException
+                raise DurationLimitException(page_info.duration)
             if a_url is not None:
                 return await DOWNLOADER.download_av_and_merge(
                     v_url,
