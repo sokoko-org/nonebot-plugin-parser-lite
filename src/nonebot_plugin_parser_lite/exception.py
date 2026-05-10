@@ -38,7 +38,7 @@ class DurationLimitException(DownloadLimitException):
 
     def __init__(self, duration: float):
         super().__init__("媒体时长超过配置限制，取消下载")
-        self.duration = duration
+        self.duration = round(duration, 2)
 
 
 class ZeroSizeException(DownloadException):

@@ -115,7 +115,7 @@ class Renderer:
                 continue
             except DurationLimitException as e:
                 yield UniMessage(
-                    f"设定的最大时长大小为 {pconfig.duration_maximum}s\n当前解析到的媒体时长为 {e.duration}s\n"
+                    f"设定的最大时长为 {pconfig.duration_maximum}s\n当前解析到的媒体时长为 {e.duration}s\n"
                     "媒体太长了~"
                 )
             except DownloadLimitException as e:
