@@ -13,7 +13,7 @@ from nonebot import logger
 from nonebot_plugin_htmlrender import template_to_pic
 
 from ..config import _nickname, pconfig
-from ..exception import DownloadException, DownloadLimitException
+from ..exception import DownloadException, DownloadLimitException, DurationLimitException, SizeLimitException
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..parsers.data import (
     AudioContent,
@@ -107,6 +107,17 @@ class Renderer:
             try:
                 async for msg in self.__handle_immediate_media(cont):
                     yield msg
+            except SizeLimitException as e:
+                yield UniMessage(
+                    f"设定的最大上传大小为 {pconfig.max_size}MB\n当前解析到的媒体大小为 {e.size}MB\n"
+                    "媒体太大了~"
+                )
+                continue
+            except DurationLimitException as e:
+                yield UniMessage(
+                    f"设定的最大时长大小为 {pconfig.duration_maximum}s\n当前解析到的媒体时长为 {e.duration}s\n"
+                    "媒体太长了~"
+                )
             except DownloadLimitException as e:
                 yield UniMessage(str(e))
                 continue

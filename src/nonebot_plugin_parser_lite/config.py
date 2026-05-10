@@ -80,12 +80,12 @@ class Config(BaseModel):
 
     @property
     def max_size(self) -> int:
-        """资源最大大小"""
+        """资源最大大小(mb)"""
         return self.plite_max_size
 
     @property
     def duration_maximum(self) -> int:
-        """视频/音频最大时长"""
+        """视频/音频最大时长(s)"""
         return self.plite_duration_maximum
 
     @property

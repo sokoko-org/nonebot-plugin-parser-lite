@@ -93,7 +93,7 @@ class StreamDownloader:
                 logger.warning(
                     f"媒体 url: {url} 大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
                 )
-                raise SizeLimitException
+                raise SizeLimitException(file_size_mb)
 
         async with self.client.stream(
             "GET", url, headers=headers, follow_redirects=True
@@ -143,7 +143,7 @@ class StreamDownloader:
                             logger.warning(
                                 f"媒体 url: {url} 实际下载大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
                             )
-                            raise SizeLimitException
+                            raise SizeLimitException(file_size_mb)
 
     @auto_task
     async def download_video(
@@ -279,7 +279,7 @@ class StreamDownloader:
                                 logger.warning(
                                     f"m3u8 视频大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB，取消下载"
                                 )
-                                raise SizeLimitException
+                                raise SizeLimitException(file_size_mb)
                     return
                 except SizeLimitException:
                     # 超限直接抛出，不再重试

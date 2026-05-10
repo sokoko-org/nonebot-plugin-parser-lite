@@ -28,15 +28,17 @@ class DownloadLimitException(DownloadException):
 class SizeLimitException(DownloadLimitException):
     """下载大小超过限制异常"""
 
-    def __init__(self):
+    def __init__(self, size: float):
         super().__init__("媒体大小超过配置限制，取消下载")
+        self.size = round(size, 2)
 
 
 class DurationLimitException(DownloadLimitException):
     """下载时长超过限制异常"""
 
-    def __init__(self):
+    def __init__(self, duration: float):
         super().__init__("媒体时长超过配置限制，取消下载")
+        self.duration = duration
 
 
 class ZeroSizeException(DownloadException):
