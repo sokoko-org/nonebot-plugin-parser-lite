@@ -196,39 +196,48 @@ async def parser_handler(
     await _send_parse_result(session, result)
 
 
-@on_alconna(Alconna("bm", Args["bv?", str, ""]), priority=3, block=True).handle()
-@UniHelper.with_reaction
-async def _(bv: Match[str]):
-    text = bv.result
-    matched = re.search(r"(BV[A-Za-z0-9]{10})(\s\d{1,3})?", text)
-    if not matched:
-        await UniMessage("请发送正确的 BV 号").finish()
+bilip: BilibiliParser | None
+try:
+    bilip = get_parser_by_type(BilibiliParser)
+except ValueError:
+    bilip = None
 
-    bvid, page_num = matched[1], matched[2]
-    page_idx = int(page_num) - 1 if page_num else 0
+if bilip is not None:
+    _bilip: BilibiliParser = bilip
 
-    parser = get_parser_by_type(BilibiliParser)
+    @on_alconna(Alconna("bm", Args["bv?", str, ""]), priority=3, block=True).handle()
+    @UniHelper.with_reaction
+    async def _(bv: Match[str]):
+        text = bv.result
+        matched = re.search(r"(BV[A-Za-z0-9]{10})(\s\d{1,3})?", text)
+        if not matched:
+            await UniMessage("请发送正确的 BV 号").finish()
 
-    _, audio_url = await parser.extract_download_urls(bvid=bvid, page_index=page_idx)
-    if not audio_url:
-        await UniMessage("未找到可下载的音频").finish()
+        bvid, page_num = matched[1], matched[2]
+        page_idx = int(page_num) if page_num else 0
 
-    audio_path = await DOWNLOADER.download_audio(
-        audio_url, audio_name=f"{bvid}-{page_idx}.mp3", ext_headers=parser.headers
-    )
-    if pconfig.need_upload_audio:
-        await UniMessage(UniHelper.file_seg(audio_path)).send()
-    else:
+        _, audio_url = await _bilip.extract_download_urls(
+            bvid=bvid, page_index=page_idx
+        )
+        if not audio_url:
+            await UniMessage("未找到可下载的音频").finish()
+
+        audio_path = await DOWNLOADER.download_audio(
+            audio_url, audio_name=f"{bvid}-{page_idx}.mp3"
+        )
         await UniMessage(UniHelper.record_seg(audio_path)).send()
 
+        if pconfig.need_upload_audio:
+            await UniMessage(UniHelper.file_seg(audio_path)).send()
 
-@on_alconna(Alconna("blogin"), block=True, permission=SUPERUSER, rule=to_me()).handle()
-async def _():
-    parser = get_parser_by_type(BilibiliParser)
-    qrcode = await parser.login_with_qrcode()
-    await UniMessage(UniHelper.img_seg(qrcode)).send()
-    async for msg in parser.check_qr_state():
-        await UniMessage(msg).send()
+    @on_alconna(
+        Alconna("blogin"), block=True, permission=SUPERUSER, rule=to_me()
+    ).handle()
+    async def _():
+        qrcode = await _bilip.login_with_qrcode()
+        await UniMessage(UniHelper.img_seg(qrcode)).send()
+        async for msg in _bilip.check_qr_state():
+            await UniMessage(msg).send()
 
 
 if pconfig.lazy_download:
