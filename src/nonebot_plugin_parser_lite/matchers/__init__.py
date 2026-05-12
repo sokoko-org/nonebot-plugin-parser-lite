@@ -1,7 +1,6 @@
 import asyncio
 from dataclasses import dataclass
 from itertools import chain
-import re
 from typing import ClassVar, TypeVar
 
 from nonebot import get_driver, logger
@@ -205,17 +204,15 @@ except ValueError:
 if bilip is not None:
     _bilip: BilibiliParser = bilip
 
-    @on_alconna(Alconna("bm", Args["bv?", str, ""]), priority=3, block=True).handle()
+    @on_alconna(
+        Alconna("bm", Args["bv", r"re:(BV[A-Za-z0-9]{10})"]["page?", int, 0]),
+        priority=3,
+        block=True,
+    ).handle()
     @UniHelper.with_reaction
-    async def _(bv: Match[str]):
-        text = bv.result
-        matched = re.search(r"(BV[A-Za-z0-9]{10})(\s\d{1,3})?", text)
-        if not matched:
-            await UniMessage("请发送正确的 BV 号").finish()
-
-        bvid, page_num = matched[1], matched[2]
-        page_idx = int(page_num) if page_num else 0
-
+    async def _(bv: Match[str], page: Match[int]):
+        bvid = bv.result
+        page_idx = page.result - 1 if page.result > 0 else 0
         _, audio_url = await _bilip.extract_download_urls(
             bvid=bvid, page_index=page_idx
         )
@@ -223,12 +220,13 @@ if bilip is not None:
             await UniMessage("未找到可下载的音频").finish()
 
         audio_path = await DOWNLOADER.download_audio(
-            audio_url, audio_name=f"{bvid}-{page_idx}.mp3"
+            audio_url, audio_name=f"{bvid}-{page_idx}.mp3", ext_headers=_bilip.headers
         )
-        await UniMessage(UniHelper.record_seg(audio_path)).send()
 
         if pconfig.need_upload_audio:
             await UniMessage(UniHelper.file_seg(audio_path)).send()
+        else:
+            await UniMessage(UniHelper.record_seg(audio_path)).send()
 
     @on_alconna(
         Alconna("blogin"), block=True, permission=SUPERUSER, rule=to_me()
