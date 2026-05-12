@@ -94,6 +94,7 @@ def create_video(
             args=(),
             kwargs={},
             url=download_func.video_url,
+            ext_headers=download_func.ext_headers,
         )
     else:
         # 4) 传入了不受支持的类型：立即报错，避免 AttributeError

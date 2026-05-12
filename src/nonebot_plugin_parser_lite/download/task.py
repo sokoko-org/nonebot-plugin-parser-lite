@@ -39,33 +39,28 @@ def auto_task(
 ) -> Callable[P, DownloadTaskWrapper[T]]:
     """装饰器：返回惰性的下载包装器，并挂载 url / ext_headers 属性。
 
-    强约束（运行时检查）：
+    约束（运行时检查）：
     - 被修饰函数签名必须包含：
         url: str
         ext_headers: dict[str, str] | None = None
-    - 调用方必须使用关键字传参：
-        fn(url=..., ext_headers=..., 其他参数...)
+    - 调用方必须使用关键字传参 url=...
+    - ext_headers 可以省略，不传时等价于 None（使用默认 headers）
     """
 
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> DownloadTaskWrapper[T]:
-        # 1) 强制要求 url / ext_headers 通过关键字参数传入
-        #    不限制其它参数的传参方式（可以继续用位置参数）
+        # 1) 强制要求 url 通过关键字参数传入
         if "url" not in kwargs:
             raise RuntimeError(
                 f"@auto_task 要求 {func.__qualname__} 必须有关键字参数 url: str，"
                 f"请使用 {func.__name__}(url=..., ...) 的形式调用"
             )
-        if "ext_headers" not in kwargs:
-            raise RuntimeError(
-                f"@auto_task 要求 {func.__qualname__} 必须有关键字参数 ext_headers: dict[str, str] | None，"
-                f"请使用 {func.__name__}(ext_headers=..., ...) 的形式调用"
-            )
 
         raw_url = kwargs["url"]
-        ext_headers = kwargs["ext_headers"]
+        # 2) ext_headers 允许缺省，默认为 None
+        ext_headers = kwargs.get("ext_headers", None)
 
-        # 2) 运行时类型校验（防御性）
+        # 3) 运行时类型校验（防御性）
         if not isinstance(raw_url, str):
             raise TypeError(
                 f"@auto_task 要求 {func.__qualname__} 的 url 参数为 str, "
@@ -79,7 +74,7 @@ def auto_task(
 
         url: str = raw_url
 
-        # 3) 构造惰性下载包装器（保留原始 args/kwargs，不影响其它参数）
+        # 4) 构造惰性下载包装器（保留原始 args/kwargs，不影响其它参数）
         return DownloadTaskWrapper(
             func=func,
             args=tuple(args),

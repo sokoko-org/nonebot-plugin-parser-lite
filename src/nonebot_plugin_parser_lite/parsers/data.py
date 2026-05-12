@@ -41,6 +41,7 @@ class MediaContent:
         # 保留 2 位小数
         return f"{size:.2f}{units[idx]}"
 
+    @property
     async def display_size(self) -> str:
         """获取媒体文件大小"""
         if self._size_bytes is None:

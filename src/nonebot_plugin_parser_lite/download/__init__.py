@@ -43,15 +43,12 @@ class StreamDownloader:
         - 不做大小限制校验，只用于展示/预估
         """
         headers = {**self.headers, **(ext_headers or {})}
-        try:
-            resp = await self.client.head(
-                url=url,
-                headers=headers,
-                follow_redirects=True,
-            )
-            resp.raise_for_status()
-        except Exception:  # noqa: BLE001
-            return None
+        resp = await self.client.head(
+            url=url,
+            headers=headers,
+            follow_redirects=True,
+        )
+        resp.raise_for_status()
 
         raw_len = resp.headers.get("Content-Length")
         if not raw_len:
