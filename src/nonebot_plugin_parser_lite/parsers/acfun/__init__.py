@@ -32,12 +32,10 @@ class AcfunParser(BaseParser):
             name=video_info.name, avatar_url=video_info.avatar_url
         )
 
-        video_task = DOWNLOADER.download_m3u8_video(
-            video_info.m3u8_url,
-        )
-
         video_content = self.create_video(
-            video_task,
+            url_or_task=DOWNLOADER.download_m3u8_video(
+                m3u8_url=video_info.m3u8_url, video_name=f"acfun_{acid}.mp4"
+            ),
             cover_url=video_info.coverUrl,
             duration=video_info.duration,
             video_name=f"acfun_{acid}.mp4",
