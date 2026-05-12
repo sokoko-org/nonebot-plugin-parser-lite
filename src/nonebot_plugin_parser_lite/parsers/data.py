@@ -43,7 +43,6 @@ class MediaContent:
 
     async def get_display_size(self) -> str:
         """获取媒体文件大小"""
-        print("get_size...")
         if self._size_bytes is None:
             try:
                 self._size_bytes = await DOWNLOADER.head_size(
