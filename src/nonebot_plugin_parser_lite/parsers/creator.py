@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Literal, Protocol, Sequence, Coroutine
+from typing import Any, Literal, Protocol, Sequence, Coroutine, runtime_checkable
 
 from ..config import pconfig as pconfig
 from ..download import DOWNLOADER
@@ -18,6 +18,7 @@ from .data import (
 )
 
 
+@runtime_checkable
 class VideoDownloadFunc(Protocol):
     """自定义视频下载函数协议：必须暴露真实视频 URL。"""
 
@@ -51,9 +52,7 @@ def create_author(
 
 
 def create_video(
-    url_or_task: str
-    | DownloadTaskWrapper[Path]
-    | VideoDownloadFunc,
+    url_or_task: str | DownloadTaskWrapper[Path] | VideoDownloadFunc,
     cover_url: str | None = None,
     duration: float = 0.0,
     video_name: str | None = None,
@@ -74,14 +73,14 @@ def create_video(
     if cover_url:
         cover_task = DOWNLOADER.download_img(url=cover_url, ext_headers=ext_headers)
     if isinstance(url_or_task, str):
-    # 1) 传入 URL: 使用默认下载逻辑
+        # 1) 传入 URL: 使用默认下载逻辑
         video_task = DOWNLOADER.download_video(
             url_or_task, video_name=video_name, ext_headers=ext_headers
         )
     elif isinstance(url_or_task, DownloadTaskWrapper):
         # 2) 传入 DownloadTaskWrapper: 保持原样
         video_task = url_or_task
-    else:
+    elif isinstance(url_or_task, VideoDownloadFunc):
         # 3) 传入下载函数: 自定义下载逻辑（不走 auto_task）
         download_func = url_or_task
         video_url = download_func.video_url
@@ -95,6 +94,12 @@ def create_video(
             args=(),
             kwargs={},
             url=video_url,
+        )
+    else:
+        # 4) 传入了不受支持的类型：立即报错，避免 AttributeError
+        raise TypeError(
+            f"create_video 的 url_or_task 类型不受支持: {type(url_or_task)!r}，"
+            "期望 str / DownloadTaskWrapper / VideoDownloadFunc 协议对象"
         )
     return _with_need_send(
         VideoContent(path_task=video_task, cover=cover_task, duration=duration),
