@@ -329,7 +329,7 @@ class BilibiliParser(BaseParser):
             ):
                 self.video_url = video_url
                 self._audio_url = audio_url
-                self._ext_headers = ext_headers
+                self.ext_headers = ext_headers
 
             async def __call__(self) -> Path:
                 file_base = f"{video_info.bvid}-{page_num}"
@@ -339,13 +339,13 @@ class BilibiliParser(BaseParser):
                         self.video_url,
                         self._audio_url,
                         file_name=file_base,
-                        ext_headers=self._ext_headers,
+                        ext_headers=self.ext_headers,
                     )
                 # 否则直接用流式下载
                 return await DOWNLOADER.streamd(
-                    self.video_url,
+                    url=self.video_url,
                     file_name=f"{file_base}.mp4",
-                    ext_headers=self._ext_headers,
+                    ext_headers=self.ext_headers,
                 )
 
         downloader = BiliVideoDownloader(v_url, a_url, self.headers)

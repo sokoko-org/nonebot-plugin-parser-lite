@@ -220,7 +220,9 @@ if bilip is not None:
             await UniMessage("未找到可下载的音频").finish()
 
         audio_path = await DOWNLOADER.download_audio(
-            audio_url, audio_name=f"{bvid}-{page_idx}.mp3", ext_headers=_bilip.headers
+            url=audio_url,
+            audio_name=f"{bvid}-{page_idx}.mp3",
+            ext_headers=_bilip.headers,
         )
 
         if pconfig.need_upload_audio:

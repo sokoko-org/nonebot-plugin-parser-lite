@@ -286,6 +286,9 @@
   .inset-0 {
     inset: calc(var(--spacing) * 0);
   }
+  .left-2 {
+    left: calc(var(--spacing) * 2);
+  }
   .right-2 {
     right: calc(var(--spacing) * 2);
   }

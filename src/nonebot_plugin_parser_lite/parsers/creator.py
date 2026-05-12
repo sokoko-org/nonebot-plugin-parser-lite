@@ -23,6 +23,7 @@ class VideoDownloadFunc(Protocol):
     """自定义视频下载函数协议：必须暴露真实视频 URL。"""
 
     video_url: str
+    ext_headers: dict[str, str] | None = None
 
     def __call__(self) -> Coroutine[Any, Any, Path]: ...
 
@@ -47,7 +48,7 @@ def create_author(
     :param id: 作者 ID
     """
 
-    avatar_task = DOWNLOADER.download_img(avatar_url) if avatar_url else None
+    avatar_task = DOWNLOADER.download_img(url=avatar_url) if avatar_url else None
     return Author(name=name, id=id, avatar=avatar_task, description=description)
 
 
@@ -75,7 +76,7 @@ def create_video(
     if isinstance(url_or_task, str):
         # 1) 传入 URL: 使用默认下载逻辑
         video_task = DOWNLOADER.download_video(
-            url_or_task, video_name=video_name, ext_headers=ext_headers
+            url=url_or_task, video_name=video_name, ext_headers=ext_headers
         )
     elif isinstance(url_or_task, DownloadTaskWrapper):
         # 2) 传入 DownloadTaskWrapper: 保持原样
@@ -83,7 +84,6 @@ def create_video(
     elif isinstance(url_or_task, VideoDownloadFunc):
         # 3) 传入下载函数: 自定义下载逻辑（不走 auto_task）
         download_func = url_or_task
-        video_url = download_func.video_url
 
         async def _runner() -> Path:
             return await download_func()
@@ -93,7 +93,7 @@ def create_video(
             func=_runner,
             args=(),
             kwargs={},
-            url=video_url,
+            url=download_func.video_url,
         )
     else:
         # 4) 传入了不受支持的类型：立即报错，避免 AttributeError
@@ -138,7 +138,7 @@ def create_image(
     :param ext_headers: 额外请求头
     """
 
-    task = DOWNLOADER.download_img(url, img_name=img_name, ext_headers=ext_headers)
+    task = DOWNLOADER.download_img(url=url, img_name=img_name, ext_headers=ext_headers)
 
     return _with_need_send(ImageContent(path_task=task), need_send)
 
@@ -175,7 +175,7 @@ def create_audio(
     """
 
     task = DOWNLOADER.download_audio(
-        url, audio_name=audio_name, ext_headers=ext_headers
+        url=url, audio_name=audio_name, ext_headers=ext_headers
     )
 
     return _with_need_send(AudioContent(path_task=task, duration=duration), need_send)
@@ -199,7 +199,7 @@ def create_graphic(
     """
 
     image_task = DOWNLOADER.download_img(
-        image_url, img_name=img_name, ext_headers=ext_headers
+        url=image_url, img_name=img_name, ext_headers=ext_headers
     )
     return _with_need_send(GraphicContent(path_task=image_task, alt=alt), need_send)
 
@@ -221,7 +221,7 @@ def create_sticker(
     :param ext_headers: 额外请求头
     """
 
-    image_task = DOWNLOADER.download_img(url, ext_headers=ext_headers)
+    image_task = DOWNLOADER.download_img(url=url, ext_headers=ext_headers)
     return StickerContent(path_task=image_task, size=size, desc=desc)
 
 
@@ -242,10 +242,10 @@ def create_live_photo(
     :param ext_headers: 额外请求头
     """
 
-    video_task = DOWNLOADER.download_video(video_url, ext_headers=ext_headers)
-    image_task = DOWNLOADER.download_img(image_url, ext_headers=ext_headers)
+    video_task = DOWNLOADER.download_video(url=video_url, ext_headers=ext_headers)
+    image_task = DOWNLOADER.download_img(url=image_url, ext_headers=ext_headers)
     if bgm_url:
-        bgm_task = DOWNLOADER.download_audio(bgm_url, ext_headers=ext_headers)
+        bgm_task = DOWNLOADER.download_audio(url=bgm_url, ext_headers=ext_headers)
     else:
         bgm_task = None
     return _with_need_send(

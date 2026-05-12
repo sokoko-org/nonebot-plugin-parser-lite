@@ -34,9 +34,37 @@ class StreamDownloader:
         self.cache_dir: Path = pconfig.cache_dir
         self.client: AsyncClient = AsyncClient(timeout=DOWNLOAD_TIMEOUT, verify=False)
 
+    async def head_size(
+        self, url: str, ext_headers: dict[str, str] | None = None
+    ) -> int | None:
+        """对给定 url 发送 HEAD 请求，返回 Content-Length（字节数）。
+
+        - 请求失败或无 Content-Length 时返回 None
+        - 不做大小限制校验，只用于展示/预估
+        """
+        headers = {**self.headers, **(ext_headers or {})}
+        try:
+            resp = await self.client.head(
+                url=url,
+                headers=headers,
+                follow_redirects=True,
+            )
+            resp.raise_for_status()
+        except Exception:  # noqa: BLE001
+            return None
+
+        raw_len = resp.headers.get("Content-Length")
+        if not raw_len:
+            return None
+        try:
+            return int(raw_len)
+        except ValueError:
+            return None
+
     @auto_task
     async def streamd(
         self,
+        *,
         url: str,
         file_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
@@ -148,6 +176,7 @@ class StreamDownloader:
     @auto_task
     async def download_video(
         self,
+        *,
         url: str,
         video_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
@@ -167,12 +196,15 @@ class StreamDownloader:
         if video_name is None:
             video_name = generate_file_name(url, ".mp4")
 
-        return await self.streamd(url, file_name=video_name, ext_headers=ext_headers)
+        return await self.streamd(
+            url=url, file_name=video_name, ext_headers=ext_headers
+        )
 
     @auto_task
     async def download_m3u8_video(
         self,
-        m3u8_url: str,
+        *,
+        url: str,
         video_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
     ) -> Path:
@@ -187,7 +219,7 @@ class StreamDownloader:
         :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
         :raises DownloadException: m3u8 解析、下载或转封装失败时抛出
         """
-        file_id = hashlib.md5(m3u8_url.encode()).hexdigest()[:16]
+        file_id = hashlib.md5(url.encode()).hexdigest()[:16]
 
         if video_name is None:
             video_name = f"{file_id}.mp4"
@@ -202,7 +234,7 @@ class StreamDownloader:
 
         try:
             # 1. 智能解析 m3u8 (自动处理嵌套列表)
-            ts_urls = await self._smart_parse_m3u8(m3u8_url)
+            ts_urls = await self._smart_parse_m3u8(url)
             if not ts_urls:
                 raise DownloadException("m3u8 解析结果为空")
 
@@ -434,6 +466,7 @@ class StreamDownloader:
     @auto_task
     async def download_audio(
         self,
+        *,
         url: str,
         audio_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
@@ -449,11 +482,14 @@ class StreamDownloader:
         """
         if audio_name is None:
             audio_name = generate_file_name(url, ".mp3")
-        return await self.streamd(url, file_name=audio_name, ext_headers=ext_headers)
+        return await self.streamd(
+            url=url, file_name=audio_name, ext_headers=ext_headers
+        )
 
     @auto_task
     async def download_img(
         self,
+        *,
         url: str,
         img_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
@@ -470,7 +506,7 @@ class StreamDownloader:
         """
         if img_name is None:
             img_name = generate_file_name(url, ".jpg")
-        return await self.streamd(url, file_name=img_name, ext_headers=ext_headers)
+        return await self.streamd(url=url, file_name=img_name, ext_headers=ext_headers)
 
     async def download_av_and_merge(
         self,

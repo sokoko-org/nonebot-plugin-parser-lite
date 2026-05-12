@@ -20,8 +20,39 @@ class MediaContent:
     need_send: bool = field(default=True, init=False)
     """是否发送"""
 
+    # 以字节为单位的文件大小缓存
+    _size_bytes: int | None = field(default=None, init=False, repr=False)
+
     async def get_path(self) -> Path:
         return await self.path_task
+
+    @staticmethod
+    def _format_size(size_bytes: int | None) -> str:
+        """将字节大小格式化为可读字符串（KB / MB / GB）。"""
+        if not size_bytes or size_bytes <= 0:
+            return "未知大小"
+
+        units = ["B", "KB", "MB", "GB", "TB"]
+        size = float(size_bytes)
+        idx = 0
+        while size >= 1024 and idx < len(units) - 1:
+            size /= 1024.0
+            idx += 1
+        # 保留 2 位小数
+        return f"{size:.2f}{units[idx]}"
+
+    async def display_size(self) -> str:
+        """获取媒体文件大小"""
+        if self._size_bytes is None:
+            try:
+                self._size_bytes = await DOWNLOADER.head_size(
+                    url=self.path_task.url, ext_headers=self.path_task.ext_headers
+                )
+            except Exception:
+                # HEAD 失败时不抛出，避免影响主流程
+                self._size_bytes = None
+
+        return self._format_size(self._size_bytes)
 
     def __repr__(self) -> str:
         prefix = self.__class__.__name__
@@ -133,7 +164,7 @@ class Platform:
     async def get_logo_path(self) -> Path:
         return await DOWNLOADER.download_img(
             url=f"https://emoji.awkchan.top/assets/logo/{self.name}.webp",
-            img_name=f"{self.name}.webp"
+            img_name=f"{self.name}.webp",
         )
 
 

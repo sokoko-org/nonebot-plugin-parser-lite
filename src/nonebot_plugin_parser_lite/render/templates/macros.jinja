@@ -250,6 +250,7 @@
                             '<i class="fa-icon fa-play ml-1"></i>'
                             '</div>'
                             '</div>'
+                            '<div class="absolute bottom-2 left-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">' ~ cont.display_size ~ '</div>'
                             '<div class="absolute bottom-2 right-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">' ~ cont.display_duration ~ '</div>'
                             '</div>'
                         ) %}
@@ -308,9 +309,7 @@
         {% endif %}
         {# 转发内容：嵌套一层卡片，用 is_repost=True #}
         {% if result.repost %}
-            <div class="shadow-sm m-8 mt-0 rounded-xl outline-1 outline-slate-200">
-                {{ render_content(result.repost, True) }}
-            </div>
+            <div class="shadow-sm m-8 mt-0 rounded-xl outline-1 outline-slate-200">{{ render_content(result.repost, True) }}</div>
         {% endif %}
         {# 主体内容和评论之间的间隔 #}
         {% if comments and comments|length > 0 %}
