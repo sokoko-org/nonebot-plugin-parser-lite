@@ -22,6 +22,7 @@ from ..exception import SizeLimitException as SizeLimitException
 from ..exception import TipException as TipException
 from ..exception import ZeroSizeException as ZeroSizeException
 from .creator import (
+    VideoDownloadFunc,
     create_audio,
     create_author,
     create_comment,
@@ -263,7 +264,7 @@ class BaseParser:
         self,
         url_or_task: str
         | DownloadTaskWrapper[Path]
-        | Callable[[], Coroutine[Any, Any, Path]],
+        | VideoDownloadFunc,
         cover_url: str | None = None,
         duration: float = 0.0,
         video_name: str | None = None,

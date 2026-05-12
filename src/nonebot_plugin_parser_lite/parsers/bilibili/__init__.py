@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 import json
+from pathlib import Path
 import re
 import aiofiles
 from collections.abc import AsyncGenerator
@@ -312,30 +313,46 @@ class BilibiliParser(BaseParser):
         url = f"https://bilibili.com/{video_info.bvid}"
         url += f"?p={page_info.index + 1}" if page_info.index > 0 else ""
 
-        # 视频下载任务
-        async def download_video():
-            v_url, a_url = await self.extract_download_urls(
-                video=video, page_index=page_info.index
-            )
-            if page_info.duration > pconfig.duration_maximum:
-                raise DurationLimitException(page_info.duration)
-            if a_url is not None:
-                return await DOWNLOADER.download_av_and_merge(
-                    v_url,
-                    a_url,
-                    file_name=f"{video_info.bvid}-{page_num}",
-                    ext_headers=self.headers,
-                )
-            else:
+        # 获取真实视频 / 音频 URL
+        v_url, a_url = await self.extract_download_urls(
+            video=video, page_index=page_info.index
+        )
+        if page_info.duration > pconfig.duration_maximum:
+            raise DurationLimitException(page_info.duration)
+
+        class BiliVideoDownloader:
+            def __init__(
+                self,
+                video_url: str,
+                audio_url: str | None,
+                ext_headers: dict[str, str] | None,
+            ):
+                self.video_url = video_url
+                self._audio_url = audio_url
+                self._ext_headers = ext_headers
+
+            async def __call__(self) -> Path:
+                file_base = f"{video_info.bvid}-{page_num}"
+                # 有单独音频流时，走 av 合并
+                if self._audio_url:
+                    return await DOWNLOADER.download_av_and_merge(
+                        self.video_url,
+                        self._audio_url,
+                        file_name=file_base,
+                        ext_headers=self._ext_headers,
+                    )
+                # 否则直接用流式下载
                 return await DOWNLOADER.streamd(
-                    v_url,
-                    file_name=f"{video_info.bvid}-{page_num}.mp4",
-                    ext_headers=self.headers,
+                    self.video_url,
+                    file_name=f"{file_base}.mp4",
+                    ext_headers=self._ext_headers,
                 )
 
-        # 创建视频下载内容（传递下载函数而非立即执行）
+        downloader = BiliVideoDownloader(v_url, a_url, self.headers)
+
+        # 创建视频下载内容（传递自定义下载器，而非立即执行）
         video_content = self.create_video(
-            url_or_task=download_video,
+            url_or_task=downloader,
             cover_url=page_info.cover,
             duration=page_info.duration,
             ext_headers=self.headers,
