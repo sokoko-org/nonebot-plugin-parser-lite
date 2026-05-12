@@ -41,9 +41,9 @@ class MediaContent:
         # 保留 2 位小数
         return f"{size:.2f}{units[idx]}"
 
-    @property
-    async def display_size(self) -> str:
+    async def get_display_size(self) -> str:
         """获取媒体文件大小"""
+        print("get_size...")
         if self._size_bytes is None:
             try:
                 self._size_bytes = await DOWNLOADER.head_size(
