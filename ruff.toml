@@ -1,0 +1,42 @@
+line-length = 88
+target-version = "py310"
+
+[format]
+line-ending = "lf"
+
+[lint]
+ignore = [
+  "E402", # module-import-not-at-top-of-file
+  "UP037", # quoted-annotation
+  "RUF001", # ambiguous-unicode-character-string
+  "RUF002", # ambiguous-unicode-character-docstring
+  "RUF003", # ambiguous-unicode-character-comment
+  "TID252", # relative-imports
+]
+select = [
+  "F", # Pyflakes
+  "W", # pycodestyle warnings
+  "E", # pycodestyle errors
+  "I", # isort
+  "UP", # pyupgrade
+  "ASYNC", # flake8-async
+  "C4", # flake8-comprehensions
+  "T10", # flake8-debugger
+  "T20", # flake8-print
+  "PYI", # flake8-pyi
+  "PT", # flake8-pytest-style
+  "Q", # flake8-quotes
+  "TID", # flake8-tidy-imports
+  "RUF", # Ruff-specific rules
+]
+
+[lint.isort]
+extra-standard-library = ["typing_extensions"]
+force-sort-within-sections = true
+
+[flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+[pyupgrade]
+keep-runtime-typing = true

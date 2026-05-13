@@ -1,7 +1,7 @@
 from msgspec import Struct
 
-from ..data import MediaContent
 from ..creator import create_video
+from ..data import MediaContent
 from .share import ShareData
 
 

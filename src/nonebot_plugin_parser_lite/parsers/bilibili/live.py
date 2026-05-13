@@ -61,7 +61,10 @@ class RoomData(Struct):
 
     @property
     def detail(self) -> str:
-        return f"分区: {self.room_info.area_name} | {self.room_info.parent_area_name}\n标签: {self.room_info.tags}"
+        return (
+            f"分区: {self.room_info.area_name} | {self.room_info.parent_area_name}\n"
+            f"标签: {self.room_info.tags}"
+        )
 
     @property
     def keyframe(self) -> str:

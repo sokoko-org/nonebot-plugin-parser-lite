@@ -6,11 +6,11 @@ from nonebot import logger
 
 from .base import (
     BaseParser,
-    PlatformEnum,
     ParseException,
+    PlatformEnum,
     handle,
 )
-from .data import Platform, MediaContent
+from .data import MediaContent, Platform
 
 
 class ToutiaoParser(BaseParser):
@@ -69,10 +69,6 @@ class ToutiaoParser(BaseParser):
         video_data = data.get("data")
         if not video_data or not isinstance(video_data, dict):
             raise ParseException("今日头条接口返回无效数据")
-
-        logger.info(
-            f"今日头条解析成功: {video_data.get('title', '未知标题')} - {video_data.get('author', '未知作者')}"
-        )
 
         # 创建视频内容 - 使用get方法安全访问
         video_url = video_data.get("url")

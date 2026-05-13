@@ -188,9 +188,10 @@ class TweetData(Struct):
         if self.tweet:
             return self.tweet
         # 兼容直接是 Tweet 的情况
-        assert self.core and self.legacy and self.views and self.rest_id, (
-            "TweetData is not a valid Tweet"
-        )
+        assert self.core is not None, "TweetData.core is missing"
+        assert self.legacy is not None, "TweetData.legacy is missing"
+        assert self.views is not None, "TweetData.views is missing"
+        assert self.rest_id is not None, "TweetData.rest_id is missing"
         return Tweet(
             core=self.core,
             legacy=self.legacy,

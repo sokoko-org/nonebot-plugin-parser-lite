@@ -17,7 +17,9 @@
     }
   },
   "ruff.format.preview": false,
+  "isort.check": true,
   "ruff.importStrategy": "useBundled",
+  "ruff.organizeImports": false,
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -29,5 +31,5 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
+  }
 }

@@ -1,8 +1,9 @@
-from msgspec import Struct, field
 from bs4 import BeautifulSoup as soup
+from msgspec import Struct, field
+from msgspec.json import Decoder
+
 from ..creator import create_image
 from .util import format_sticker
-from msgspec.json import Decoder
 
 
 class FeedData(Struct):

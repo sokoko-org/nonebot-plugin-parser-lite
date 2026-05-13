@@ -1,11 +1,12 @@
 from typing import Any, Optional
 
 from msgspec import Struct, convert
-from ..data import MediaContent
+
 from ..creator import (
     create_image,
     create_live_photo,
 )
+from ..data import MediaContent
 
 
 class AuthorInfo(Struct):
@@ -103,7 +104,7 @@ class DynamicMajor(Struct):
     #         pictures = self.draw.get("pictures", [])
     #         return [pic.get("img_src", "") for pic in pictures if pic.get("img_src")]
     #     # 从视频archive获取封面
-    #     elif self.type == "MAJOR_TYPE_ARCHIVE" and self.archive and self.archive.cover:
+    #     elif self.type == "MAJOR_TYPE_ARCHIVE" and self.archive and self.archive.cover:  # noqa: E501
     #         return [self.archive.cover]
     #     elif self.type == "MAJOR_TYPE_OPUS" and self.opus:
     #         return [pic.url for pic in self.opus.pics]

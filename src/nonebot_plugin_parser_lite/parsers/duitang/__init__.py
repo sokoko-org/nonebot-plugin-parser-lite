@@ -81,7 +81,7 @@ class DuiTangParser(BaseParser):
         atlas_id: str,
     ) -> AtlasData:
         """
-        调用堆糖接口获取图集详情数据。该方法只负责请求和基础校验，并将结果转换为 AtlasData 对象。
+        调用堆糖接口获取图集详情数据，并将结果转换为 AtlasData 对象
 
         :param atlas_id: 图集 ID。
         :return: 转换后的图集详情数据。
@@ -102,7 +102,7 @@ class DuiTangParser(BaseParser):
         blog_id: str,
     ) -> BlogData:
         """
-        调用堆糖接口获取博客图集详情数据。该方法只负责请求和基础校验，并将结果转换为 BlogData 对象。
+        调用堆糖接口获取博客图集详情数据，并将结果转换为 BlogData 对象
 
         :param blog_id: 图集 ID。
         :return: 转换后的博客图集详情数据。
@@ -112,7 +112,10 @@ class DuiTangParser(BaseParser):
             "https://www.duitang.com/napi/blog/with_instance_tag/detail/",
             params={
                 "blog_id": blog_id,
-                "include_fields": "tags,related_albums,related_albums.covers,root_album,share_links_2,extra_links,icon_description,root_id",
+                "include_fields": (
+                    "tags,related_albums,related_albums.covers,"
+                    "root_album,share_links_2,extra_links,icon_description,root_id"
+                ),
             },
         )
         response.raise_for_status()

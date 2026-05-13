@@ -3,7 +3,6 @@ from typing import ClassVar
 from urllib.parse import parse_qsl
 
 from ...utils.format import replace_placeholder_to_sticker
-
 from ..base import (
     BaseParser,
     Comment,
@@ -14,7 +13,8 @@ from ..base import (
     pconfig,
 )
 from ..cookie import ck2dict
-from .discovery import NoteDetailWrapper, decoder as discoveryDecoder, REDNOTE_PATTERN
+from .discovery import REDNOTE_PATTERN, NoteDetailWrapper
+from .discovery import decoder as discoveryDecoder
 
 INITIAL_STATE = re.compile(
     pattern=r"window\.__INITIAL_STATE__=(.*?)</script>",

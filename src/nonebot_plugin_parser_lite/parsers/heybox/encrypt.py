@@ -143,12 +143,3 @@ def build_url(link_id: str) -> str:
         "&page=1&index=1&limit=5&x_client_type=weboutapp&x_app=heybox_website&x_os_type=Windows"
         "&web_version=2.5"
     )
-
-
-# window._smConf = {
-#     organization: "0yD85BjYvGFAvHaSQ1mc",
-#     appId: "heybox_website",
-#     publicKey: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCXj9exmI4nQjmT52iwr+yf7hAQ06bfSZHTAHUfRBYiagCf/whhd8es0R79wBigpiHLd28TKA8b8mGR8OiiI1hV+qfynCWihvp3mdj8MiiH6SU3lhro2hkfYzImZB0RmWr2zE4Xt1+A6Oyp6bf+W7JSxYUXHw3nNv7Td4jw4jEFKQIDAQAB",
-#     staticHost: "static.portal101.cn",
-#     protocol: "https"
-# };

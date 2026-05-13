@@ -6,7 +6,8 @@ from nonebot.log import logger
 
 from ...utils.format import format_num
 from ..base import BaseParser, Comment, ParseException, Platform, PlatformEnum, handle
-from .comments import Comments, Comment as RawComment
+from .comments import Comment as RawComment
+from .comments import Comments
 from .gallery import Gallery
 from .news import News
 from .topic import Topic

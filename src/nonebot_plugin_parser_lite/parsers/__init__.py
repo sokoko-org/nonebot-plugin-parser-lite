@@ -1,33 +1,32 @@
-from .base import BaseParser
-from .base import handle
-from .data import (
-    Author,
-    Platform,
-    ParseResult,
-    AudioContent,
-    ImageContent,
-    VideoContent,
-    GraphicContent,
-)
-from .kuwo import KuWoParser
 from .acfun import AcfunParser
-from .kugou import KuGouParser
-from .tieba import TiebaParser
-from .weibo import WeiBoParser
-from .douyin import DouyinParser
-from .netease import NCMParser
-from .qsmusic import QSMusicParser
-from .toutiao import ToutiaoParser
-from .x import XParser
+from .base import BaseParser, handle
 from .bilibili import BilibiliParser
-from .kuaishou import KuaiShouParser
-from .rednote import RedNoteParser
-from .zhihu import ZhiHuParser
-from .duitang import DuiTangParser
-from .heybox import HeyBoxParser
-from .lofter import LofterParser
 from .buff import BuffParser
 from .coolapk import CoolapkParser
+from .data import (
+    AudioContent,
+    Author,
+    GraphicContent,
+    ImageContent,
+    ParseResult,
+    Platform,
+    VideoContent,
+)
+from .douyin import DouyinParser
+from .duitang import DuiTangParser
+from .heybox import HeyBoxParser
+from .kuaishou import KuaiShouParser
+from .kugou import KuGouParser
+from .kuwo import KuWoParser
+from .lofter import LofterParser
+from .netease import NCMParser
+from .qsmusic import QSMusicParser
+from .rednote import RedNoteParser
+from .tieba import TiebaParser
+from .toutiao import ToutiaoParser
+from .weibo import WeiBoParser
+from .x import XParser
+from .zhihu import ZhiHuParser
 
 __all__ = [
     "AcfunParser",
@@ -35,27 +34,27 @@ __all__ = [
     "Author",
     "BaseParser",
     "BilibiliParser",
+    "BuffParser",
+    "CoolapkParser",
     "DouyinParser",
+    "DuiTangParser",
     "GraphicContent",
+    "HeyBoxParser",
     "ImageContent",
     "KuGouParser",
     "KuWoParser",
     "KuaiShouParser",
+    "LofterParser",
     "NCMParser",
     "ParseResult",
     "Platform",
     "QSMusicParser",
+    "RedNoteParser",
     "TiebaParser",
     "ToutiaoParser",
-    "XParser",
     "VideoContent",
     "WeiBoParser",
-    "RedNoteParser",
+    "XParser",
     "ZhiHuParser",
-    "DuiTangParser",
-    "HeyBoxParser",
-    "LofterParser",
-    "BuffParser",
-    "CoolapkParser",
     "handle",
 ]

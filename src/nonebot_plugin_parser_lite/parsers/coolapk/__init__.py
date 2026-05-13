@@ -1,19 +1,19 @@
 import re
 from typing import ClassVar
+
 from nonebot import logger
 
-from .reply import decoder as ReplyDecoder
-from .feed import decoder as FeedDecoder
-
+from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    ParseException,
+    ParseResult,
+    Platform,
     PlatformEnum,
     handle,
-    Platform,
-    ParseResult,
-    ParseException,
 )
-from ...utils.format import format_num
+from .feed import decoder as FeedDecoder
+from .reply import decoder as ReplyDecoder
 
 NEXT_DATA = re.compile(
     r'<script[^>]*id=["\']__NEXT_DATA__["\'][^>]*>\s*(.*?)\s*</script>',

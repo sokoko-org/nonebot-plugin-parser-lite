@@ -1,24 +1,22 @@
 import re
 from typing import ClassVar
 
+import json_repair
 from msgspec import convert
 from nonebot import logger
 
 from ...utils.browser import BROWSER
-
-from ..base import (
-    Platform,
-    BaseParser,
-    PlatformEnum,
-    ParseException,
-    handle,
-    MediaContent,
-)
-import json_repair
-from .video_or_article import decoder as video_or_article_decoder
-from .note import Note
 from ...utils.format import format_num
-
+from ..base import (
+    BaseParser,
+    MediaContent,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    handle,
+)
+from .note import Note
+from .video_or_article import decoder as video_or_article_decoder
 
 ROUTER_PATTERN = re.compile(
     pattern=r"window\._ROUTER_DATA\s*=\s*(.*?)</script>",

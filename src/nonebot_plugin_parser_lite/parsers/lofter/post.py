@@ -1,10 +1,11 @@
+from enum import IntEnum
 import json
 
-from msgspec import Struct
-from enum import IntEnum
 from bs4 import BeautifulSoup
-from ..data import MediaContent
+from msgspec import Struct
+
 from ..creator import create_image
+from ..data import MediaContent
 
 
 class PostType(IntEnum):

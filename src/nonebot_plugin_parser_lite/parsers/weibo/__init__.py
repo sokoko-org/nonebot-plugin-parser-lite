@@ -6,6 +6,7 @@ from typing import ClassVar
 from uuid import uuid4
 
 from bs4 import BeautifulSoup, Tag
+from curl_cffi import AsyncSession
 
 from ..base import (
     BaseParser,
@@ -19,7 +20,6 @@ from .article import decoder as articleDecoder
 from .common import WeiboData
 from .common import decoder as commonDecoder
 from .show import decoder as showDecoder
-from curl_cffi import AsyncSession
 
 SESSION = AsyncSession(impersonate="chrome131")
 

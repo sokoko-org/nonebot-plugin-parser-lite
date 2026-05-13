@@ -1,21 +1,20 @@
 import re
 from typing import ClassVar
 
-
-from ...utils.format import format_num
-
-from .answer import decoder as answerDecoder
-from ..base import (
-    PlatformEnum,
-    Platform,
-    BaseParser,
-    handle,
-    ParseException,
-    MediaContent,
-)
-from ...utils.browser import BROWSER
 from bs4 import BeautifulSoup
-from bs4.element import Tag, NavigableString
+from bs4.element import NavigableString, Tag
+
+from ...utils.browser import BROWSER
+from ...utils.format import format_num
+from ..base import (
+    BaseParser,
+    MediaContent,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    handle,
+)
+from .answer import decoder as answerDecoder
 
 INITIAL_DATA = re.compile(
     pattern=r'<script id="js-initialData" type="text/json">(.*?)</script>',

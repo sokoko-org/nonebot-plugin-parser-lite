@@ -3,12 +3,12 @@ from collections.abc import AsyncGenerator
 import contextlib
 from enum import Enum
 import json
-from pathlib import Path
 import re
 from re import Match
 from typing import Any, ClassVar
 
 import aiofiles
+from anyio import Path
 import bilibili_api.video
 
 

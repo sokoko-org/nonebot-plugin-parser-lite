@@ -6,11 +6,11 @@ from nonebot import logger
 
 from .base import (
     BaseParser,
-    PlatformEnum,
     ParseException,
+    PlatformEnum,
     handle,
 )
-from .data import Platform, MediaContent
+from .data import MediaContent, Platform
 
 
 class NCMParser(BaseParser):

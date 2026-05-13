@@ -1,4 +1,3 @@
-# ruff: noqa: E402
 import asyncio
 import traceback
 
@@ -12,8 +11,8 @@ require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_localstore")
 
 import time
-from pathlib import Path
 
+from anyio import Path
 from nonebot_plugin_apscheduler import scheduler
 
 from .config import Config, pconfig
@@ -48,12 +47,14 @@ async def clean_plugin_cache() -> None:
         reserve_hours: int = 1
         now = time.time()
 
-        if all_files := [f for f in pconfig.cache_dir.iterdir() if f.is_file()]:
+        if all_files := [
+            f async for f in pconfig.cache_dir.iterdir() if await f.is_file()
+        ]:
             to_delete: list[Path] = []
             expire_seconds = reserve_hours * 60 * 60
             for f in all_files:
                 try:
-                    mtime = f.stat().st_mtime
+                    mtime = (await f.stat()).st_mtime
                 except OSError:
                     # 拿不到 stat 就直接尝试删除
                     to_delete.append(f)

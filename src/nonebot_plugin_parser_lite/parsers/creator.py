@@ -1,5 +1,7 @@
-from pathlib import Path
-from typing import Any, Literal, Protocol, Sequence, Coroutine, runtime_checkable
+from collections.abc import Coroutine, Sequence
+from typing import Any, Literal, Protocol, runtime_checkable
+
+from anyio import Path
 
 from ..config import pconfig as pconfig
 from ..download import DOWNLOADER

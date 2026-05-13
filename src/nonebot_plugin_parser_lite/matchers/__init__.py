@@ -164,7 +164,8 @@ async def _send_parse_result(session: Uninfo, result: ParseResult) -> None:
     if pconfig.lazy_download:
         download_cmd = ", ".join(pconfig.download_command)
         await UniMessage(
-            f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: \n{download_cmd}"
+            f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
+            f"\n{download_cmd}"
         ).send()
         LazyManager.add(session.user.id, result)
         return
@@ -226,16 +227,16 @@ if bilip is not None:
         )
 
         if pconfig.need_upload_audio:
-            await UniMessage(UniHelper.file_seg(audio_path)).send()
+            await UniMessage(await UniHelper.file_seg(audio_path)).send()
         else:
-            await UniMessage(UniHelper.record_seg(audio_path)).send()
+            await UniMessage(await UniHelper.record_seg(audio_path)).send()
 
     @on_alconna(
         Alconna("blogin"), block=True, permission=SUPERUSER, rule=to_me()
     ).handle()
     async def _():
         qrcode = await _bilip.login_with_qrcode()
-        await UniMessage(UniHelper.img_seg(qrcode)).send()
+        await UniMessage(await UniHelper.img_seg(qrcode)).send()
         async for msg in _bilip.check_qr_state():
             await UniMessage(msg).send()
 

@@ -1,8 +1,9 @@
-import hashlib
-from pathlib import Path
-
-from nonebot import logger
 import asyncio
+import hashlib
+
+from anyio import Path
+from nonebot import logger
+
 from ..config import pconfig
 from .common import fmt_size, safe_unlink
 

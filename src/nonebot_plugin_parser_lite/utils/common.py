@@ -1,11 +1,10 @@
-import asyncio
+from collections import OrderedDict
 import hashlib
 import re
-from collections import OrderedDict
-from pathlib import Path
 from typing import TypeVar
 from urllib.parse import urlparse
 
+from anyio import Path
 from nonebot import logger
 
 K = TypeVar("K")
@@ -59,17 +58,18 @@ async def safe_unlink(path: Path):
     安全删除文件
     """
     try:
-        await asyncio.to_thread(path.unlink, missing_ok=True)
+        await path.unlink(missing_ok=True)
     except Exception:
         logger.warning(f"删除 {path} 失败")
 
 
-def fmt_size(file_path: Path) -> str:
+async def fmt_size(file_path: Path) -> str:
     """格式化文件大小
 
     :param video_path: 视频路径
     """
-    return f"大小: {file_path.stat().st_size / 1024 / 1024:.2f} MB"
+    stat = await file_path.stat()
+    return f"大小: {stat.st_size / 1024 / 1024:.2f} MB"
 
 
 def generate_file_name(url: str, default_suffix: str = "") -> str:

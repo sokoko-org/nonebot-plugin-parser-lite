@@ -1,22 +1,22 @@
-from typing import Any, Literal
-from pathlib import Path
+from collections.abc import Awaitable, Callable, Sequence
 from functools import wraps
-from collections.abc import Callable, Sequence, Awaitable
+from typing import Any, Literal
 
+from anyio import Path
 from nonebot import logger
-from nonebot.matcher import current_bot, current_event
 from nonebot.adapters import Event
+from nonebot.matcher import current_bot, current_event
 from nonebot_plugin_alconna import SupportAdapter, uniseg
 from nonebot_plugin_alconna.uniseg import (
+    CustomNode,
     File,
-    Text,
     Image,
+    Reference,
+    Segment,
+    Text,
+    UniMessage,
     Video,
     Voice,
-    Segment,
-    Reference,
-    CustomNode,
-    UniMessage,
 )
 
 from .config import pconfig
@@ -54,7 +54,7 @@ class UniHelper:
         return Reference(nodes=nodes)
 
     @staticmethod
-    def img_seg(
+    async def img_seg(
         file: Path | bytes,
     ) -> Image:
         """获取图片 Seg
@@ -65,18 +65,26 @@ class UniHelper:
         if isinstance(file, (bytes, bytearray, memoryview)):
             return Image(raw=file)
 
-        return Image(raw=file.read_bytes()) if pconfig.use_base64 else Image(path=file)
+        return (
+            Image(raw=await file.read_bytes())
+            if pconfig.use_base64
+            else Image(path=str(file))
+        )
 
     @staticmethod
-    def record_seg(file: Path) -> Voice:
+    async def record_seg(file: Path) -> Voice:
         """获取语音 Seg
 
         :param file: 语音文件
         """
-        return Voice(raw=file.read_bytes()) if pconfig.use_base64 else Voice(path=file)
+        return (
+            Voice(raw=await file.read_bytes())
+            if pconfig.use_base64
+            else Voice(path=str(file))
+        )
 
     @classmethod
-    def video_seg(
+    async def video_seg(
         cls,
         file: Path,
         thumbnail: Path | None = None,
@@ -87,26 +95,32 @@ class UniHelper:
         :param thumbnail: 缩略图路径
         """
         # 检测文件大小
-        file_size_byte_count = int(file.stat().st_size)
+        stat = await file.stat()
+        file_size_byte_count = stat.st_size
         if file_size_byte_count == 0:
             return Text("视频文件大小为 0")
-        elif file_size_byte_count > 100 * 1024 * 1024:
-            # 转为文件 Seg
-            return cls.file_seg(file, display_name=file.name)
-        else:
-            if pconfig.use_base64:
-                video = Video(raw=file.read_bytes())
-                if thumbnail and thumbnail.stat().st_size > 0:
-                    video.thumbnail = cls.img_seg(thumbnail.read_bytes())
-            else:
-                video = Video(path=file)
-                if thumbnail and thumbnail.stat().st_size > 0:
-                    video.thumbnail = cls.img_seg(thumbnail)
 
-            return video
+        # 超过 100MB，转为文件 Seg
+        if file_size_byte_count > 100 * 1024 * 1024:
+            return await cls.file_seg(file, display_name=file.name)
+
+        # 构造 Video，对 base64 与路径模式统一一个逻辑分支
+        if pconfig.use_base64:
+            video = Video(raw=await file.read_bytes())
+        else:
+            video = Video(path=str(file))
+
+        # 处理缩略图：只做一次 stat，避免重复 IO
+        if thumbnail is not None:
+            thumb_stat = await thumbnail.stat()
+            if thumb_stat.st_size > 0:
+                # img_seg 已经内部处理 base64 / path，不需要重复判断
+                video.thumbnail = await cls.img_seg(thumbnail)
+
+        return video
 
     @staticmethod
-    def file_seg(
+    async def file_seg(
         file: Path,
         display_name: str | None = None,
     ) -> File:
@@ -120,9 +134,9 @@ class UniHelper:
         if not display_name:
             raise ValueError("文件名不能为空")
         if pconfig.use_base64:
-            return File(raw=file.read_bytes(), name=display_name)
+            return File(raw=await file.read_bytes(), name=display_name)
         else:
-            return File(path=file, name=display_name)
+            return File(path=str(file), name=display_name)
 
     @classmethod
     async def message_reaction(

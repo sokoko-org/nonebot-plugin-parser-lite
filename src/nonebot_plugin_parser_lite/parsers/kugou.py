@@ -1,19 +1,20 @@
 import base64
-import re
-import json
 import contextlib
+import json
+import re
 from re import Match
 from typing import ClassVar
 
-from .base import (
-    BaseParser,
-    PlatformEnum,
-    ParseException,
-    handle,
-)
-from .data import Platform, MediaContent
 from msgspec import Struct, field
 from msgspec.json import Decoder
+
+from .base import (
+    BaseParser,
+    ParseException,
+    PlatformEnum,
+    handle,
+)
+from .data import MediaContent, Platform
 
 
 class PlayInfo(Struct):
@@ -42,7 +43,6 @@ class PlayInfo(Struct):
     mvhash: str = ""
     """
     mv的hash
-    
     应该可以通过
     `http://mobilecdnbj.kugou.com/api/v3/mv/detail?area_code=1&plat=0&mvhash={mvhash}&with_res_tag=1`
     获取到mv，没找到测试用例
@@ -193,7 +193,8 @@ class KuGouParser(BaseParser):
 
         # 构建额外信息
         extra = {
-            "info": f"比特率: {playinfo.bitRate}K | 时长: {int(float(playinfo.timeLength) // 60)}"
+            "info": f"比特率: {playinfo.bitRate}K | "
+            f"时长: {int(float(playinfo.timeLength) // 60)}"
             f":{int(float(playinfo.timeLength) % 60):02d}",
             "lyric": text,
             "type": "audio",

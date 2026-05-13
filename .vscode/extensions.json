@@ -1,5 +1,9 @@
 {
     "recommendations": [
-        "monosans.djlint"
+        "monosans.djlint",
+        "charliermarsh.ruff",
+        "esbenp.prettier-vscode",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
     ]
 }

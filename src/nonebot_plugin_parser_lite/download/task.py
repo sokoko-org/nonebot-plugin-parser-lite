@@ -1,18 +1,18 @@
-from typing import Any, TypeVar, ParamSpec, Generic, Awaitable, Generator
+from collections.abc import Awaitable, Callable, Coroutine, Generator
 from functools import wraps
-from collections.abc import Callable, Coroutine
+from typing import Any, Generic, ParamSpec, TypeVar
 
 P = ParamSpec("P")
 T = TypeVar("T")
 
 
-class DownloadTaskWrapper(Generic[T], Awaitable[T]):
+class DownloadTaskWrapper(Awaitable[T], Generic[T]):
     """惰性下载包装器
     - 只保存函数和参数，不创建 Task
     - 在被 await 时才真正执行协程
     """
 
-    __slots__ = ("url", "ext_headers", "_func", "_args", "_kwargs")
+    __slots__ = ("_args", "_func", "_kwargs", "ext_headers", "url")
 
     def __init__(
         self,
@@ -68,7 +68,7 @@ def auto_task(
             )
         if ext_headers is not None and not isinstance(ext_headers, dict):
             raise TypeError(
-                f"@auto_task 要求 {func.__qualname__} 的 ext_headers 类型为 dict[str, str] | None, "
+                f"@auto_task 要求 {func.__qualname__} 的 ext_headers 类型为 dict[str, str] | None, "  # noqa: E501
                 f"但实际是 {type(ext_headers)!r}"
             )
 
