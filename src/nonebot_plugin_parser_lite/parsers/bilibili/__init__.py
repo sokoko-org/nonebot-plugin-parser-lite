@@ -1,28 +1,52 @@
 import asyncio
+from collections.abc import AsyncGenerator
 import contextlib
+from enum import Enum
 import json
 from pathlib import Path
 import re
-import aiofiles
-from collections.abc import AsyncGenerator
 from re import Match
 from typing import Any, ClassVar
+
+import aiofiles
+import bilibili_api.video
+
+
+class HookAudioQuality(Enum):
+    """
+    视频的音频流清晰度枚举
+
+    - _64K: 64K
+    - _132K: 132K
+    - _192K: 192K
+    - HI_RES: Hi-Res 无损
+    - DOLBY: 杜比全景声
+    """
+
+    _64K = 30216
+    _132K = 30232
+    DOLBY = 30250
+    HI_RES = 30251
+    _192K = 30280
+
+
+bilibili_api.video.AudioQuality = HookAudioQuality
 
 from bilibili_api import HEADERS, Credential, request_settings, select_client
 from bilibili_api.article import Article
 from bilibili_api.dynamic import Dynamic
+from bilibili_api.exceptions import CookiesRefreshException
 from bilibili_api.favorite_list import get_video_favorite_list_content
 from bilibili_api.live import LiveRoom
 from bilibili_api.login_v2 import QrCodeLogin, QrCodeLoginEvents
-from bilibili_api.utils.network import get_buvid
 from bilibili_api.opus import Opus
+from bilibili_api.utils.network import get_buvid
 from bilibili_api.video import (
     AudioStreamDownloadURL,
     Video,
     VideoDownloadURLDataDetecter,
     VideoStreamDownloadURL,
 )
-from bilibili_api.exceptions import CookiesRefreshException
 from msgspec import convert
 from nonebot import logger
 
@@ -33,13 +57,13 @@ from ..base import (
     BaseParser,
     Comment,
     DownloadException,
-    TipException,
     DurationLimitException,
     MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
     Stats,
+    TipException,
     handle,
     pconfig,
 )
@@ -49,7 +73,6 @@ from .favlist import FavData
 from .live import RoomData
 from .opus import ImageNode, OpusItem, TextNode
 from .video import AIConclusion, VideoInfo
-
 
 # 选择客户端
 select_client("curl_cffi")
@@ -132,10 +155,10 @@ class BilibiliParser(BaseParser):
                     page_list = page_data.get("data", {}).get("list", [])
                     black_mids.extend(obj["mid"] for obj in page_list)
                     logger.debug(
-                        f"[BiliParser] 黑名单第 {pn} 页加载完成, 当前共 {len(black_mids)} 个"
+                        f"黑名单第 {pn} 页加载完成, 当前共 {len(black_mids)} 个"
                     )
                     await asyncio.sleep(0.2)
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     logger.warning(f"请求B站黑名单第 {pn} 页异常: {e}")
                     continue
 
@@ -159,7 +182,7 @@ class BilibiliParser(BaseParser):
                     )
                     self._black_list_job_added = True
                     logger.info("已注册 B 站黑名单定时同步任务（每 1 小时刷新一次）")
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     logger.warning(f"注册 B 站黑名单定时任务失败: {e}")
 
         except Exception as e:
@@ -371,9 +394,9 @@ class BilibiliParser(BaseParser):
                     "danmaku": format_num(video_info.stat.danmaku),
                     "coin": format_num(video_info.stat.coin),
                 }
-                logger.debug(f"[BiliParser] 视频统计数据: {stats}")
+                logger.debug(f"视频统计数据: {stats}")
         except Exception as e:
-            logger.warning(f"[BiliParser] 统计数据提取异常: {e}")
+            logger.warning(f"统计数据提取异常: {e}")
 
         # 使用BV-AV转换算法将BV号转换为AV号
         bvid = video_info.bvid
@@ -381,15 +404,15 @@ class BilibiliParser(BaseParser):
             if bvid.startswith("BV"):
                 # 使用类中已封装的bv2av方法进行转换
                 video_oid = self.bv2av(bvid)
-                logger.debug(f"[BiliParser] BV号 {bvid} 转换为AV号 {video_oid}")
+                logger.debug(f"BV号 {bvid} 转换为AV号 {video_oid}")
             else:
                 # 如果不是BV号，直接使用
                 video_oid = int(bvid)
         except Exception as e:
-            logger.error(f"[BiliParser] BV-AV转换失败: {e}")
+            logger.error(f"BV-AV转换失败: {e}")
             # 转换失败时使用BV号的数值形式作为oid
             video_oid = int(bvid.replace("BV", ""), 36)
-            logger.debug(f"[BiliParser] 使用备用方法获取oid: {video_oid}")
+            logger.debug(f"使用备用方法获取oid: {video_oid}")
 
         # 获取评论数据 - _fetch_comments方法已经处理好所有数据
         comments = await self._fetch_comments(video_oid, 1)  # type=1 表示视频
@@ -466,9 +489,9 @@ class BilibiliParser(BaseParser):
             dynamic_id, dynamic_info, dynamic_info_data
         )
         if comments:
-            logger.debug(f"[BiliParser] 成功获取 {len(comments)} 条动态评论")
+            logger.debug(f"成功获取 {len(comments)} 条动态评论")
         else:
-            logger.debug("[BiliParser] 未获取到动态评论")
+            logger.debug("未获取到动态评论")
 
         return self.result(
             url=dynamic_url,
@@ -563,11 +586,13 @@ class BilibiliParser(BaseParser):
             return None
 
         # 尝试解析转发的主体类型信息
-        major_type, opus_jump_url, archive_bvid = self._get_repost_major_type(orig_item)
+        major_type, _opus_jump_url, archive_bvid = self._get_repost_major_type(
+            orig_item
+        )
 
         # 图文 / 专栏
-        # if major_type == "OPUS" and opus_jump_url:
-        #     return await self._handle_repost_article(opus_jump_url)
+        # if major_type == "OPUS" and _opus_jump_url:
+        #     return await self._handle_repost_article(_opus_jump_url)
 
         # 视频
         if major_type == "ARCHIVE" and archive_bvid:
@@ -643,9 +668,7 @@ class BilibiliParser(BaseParser):
             dynamic_id, dynamic_info, dynamic_info_data
         )
         comments = await self._fetch_comments(oid, ctype)
-        logger.debug(
-            f"[BiliParser] 动态评论参数: oid={oid}, type={ctype}, got={len(comments)}"
-        )
+        logger.debug(f"动态评论参数: oid={oid}, type={ctype}, got={len(comments)}")
         return comments
 
     def _resolve_comment_params(
@@ -820,7 +843,7 @@ class BilibiliParser(BaseParser):
             # 使用opus数据中提供的comment_id_str和comment_type
             comments = await self._fetch_comments(int(comment_id_str), comment_type)
             logger.debug(
-                f"[BiliParser] 使用opus数据中提供的评论参数: oid={comment_id_str}, type={comment_type}"
+                f"使用opus数据中提供的评论参数: oid={comment_id_str}, type={comment_type}"  # noqa: E501
             )
         else:
             content_id = str(opus_data.item.id_str)
@@ -829,14 +852,12 @@ class BilibiliParser(BaseParser):
             comments = await self._fetch_comments(
                 int(content_id), 12
             )  # type=12 表示专栏/图文
-            logger.debug(
-                f"[BiliParser] 使用content_id作为opus评论参数: oid={content_id}, type=12"
-            )
+            logger.debug(f"使用content_id作为opus评论参数: oid={content_id}, type=12")
 
         if comments:
-            logger.debug(f"[BiliParser] 成功获取 {len(comments)} 条专栏/图文评论")
+            logger.debug(f"成功获取 {len(comments)} 条专栏/图文评论")
         else:
-            logger.debug("[BiliParser] 未获取到专栏/图文评论")
+            logger.debug("未获取到专栏/图文评论")
 
         return self.result(
             url=opus_url,
@@ -974,7 +995,7 @@ class BilibiliParser(BaseParser):
         if not isinstance(video_stream, VideoStreamDownloadURL):
             raise DownloadException("未找到可下载的视频流")
         logger.debug(
-            f"视频流质量: {video_stream.video_quality.name}, 编码: {video_stream.video_codecs}"
+            f"视频流质量: {video_stream.video_quality.name}, 编码: {video_stream.video_codecs}"  # noqa: E501
         )
 
         audio_stream = streams[1]
@@ -1038,9 +1059,7 @@ class BilibiliParser(BaseParser):
                 self._credential = Credential.from_cookies(cookies)
                 return
             except Exception as e:
-                logger.warning(
-                    f"[BiliParser] 读取本地 cookies 失败，将尝试使用配置 ck: {e!r}"
-                )
+                logger.warning(f"读取本地 cookies 失败，将尝试使用配置 ck: {e!r}")
 
         if not pconfig.bili_ck:
             return
@@ -1075,7 +1094,7 @@ class BilibiliParser(BaseParser):
 
             if data.get("code") != 0 or not data.get("data"):
                 logger.debug(
-                    f"bili评论返回数据为空或错误: code={data.get('code')}, message={data.get('message')}"
+                    f"bili评论返回数据为空或错误: code={data.get('code')}, message={data.get('message')}"  # noqa: E501
                 )
                 return []
 
@@ -1113,7 +1132,7 @@ class BilibiliParser(BaseParser):
                 _append_unique(replies_raw, merged, seen_rpids)
 
             logger.debug(
-                f"bili获得评论: upper={len(upper_list)}, replies={len(replies_raw)}, merged={len(merged)}",
+                f"bili获得评论: upper={len(upper_list)}, replies={len(replies_raw)}, merged={len(merged)}",  # noqa: E501
             )
             return self._process_reply_list(merged)
 
