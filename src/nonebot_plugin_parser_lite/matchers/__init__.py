@@ -5,7 +5,7 @@ from typing import ClassVar, TypeVar
 
 from nonebot import get_driver, logger
 from nonebot.permission import SUPERUSER
-from nonebot.rule import to_me
+from nonebot.rule import Rule, to_me
 from nonebot_plugin_alconna import Alconna, Args, Match, on_alconna
 from nonebot_plugin_uninfo import Uninfo
 
@@ -196,61 +196,63 @@ async def parser_handler(
     await _send_parse_result(session, result)
 
 
-bilip: BilibiliParser | None
-try:
-    bilip = get_parser_by_type(BilibiliParser)
-except ValueError:
-    bilip = None
+@driver.on_startup
+async def register_bili_matcher():
 
-if bilip is not None:
-    _bilip: BilibiliParser = bilip
+    bilip: BilibiliParser | None
+    try:
+        bilip = get_parser_by_type(BilibiliParser)
+    except ValueError:
+        bilip = None
 
-    @on_alconna(
-        Alconna("bm", Args["bv", r"re:(BV[A-Za-z0-9]{10})"]["page?", int, 0]),
-        priority=3,
-        block=True,
-    ).handle()
-    @UniHelper.with_reaction
-    async def _(bv: Match[str], page: Match[int]):
-        bvid = bv.result
-        page_idx = page.result - 1 if page.result > 0 else 0
-        _, audio_url = await _bilip.extract_download_urls(
-            bvid=bvid, page_index=page_idx
-        )
-        if not audio_url:
-            await UniMessage("未找到可下载的音频").finish()
+    if bilip is not None:
 
-        audio_path = await DOWNLOADER.download_audio(
-            url=audio_url,
-            audio_name=f"{bvid}-{page_idx}.mp3",
-            ext_headers=_bilip.headers,
-        )
+        @on_alconna(
+            Alconna("bm", Args["bv", r"re:(BV[A-Za-z0-9]{10})"]["page?", int, 0]),
+            priority=3,
+            block=True,
+        ).handle()
+        @UniHelper.with_reaction
+        async def _(bv: Match[str], page: Match[int]):
+            bvid = bv.result
+            page_idx = page.result - 1 if page.result > 0 else 0
+            _, audio_url = await bilip.extract_download_urls(
+                bvid=bvid, page_index=page_idx
+            )
+            if not audio_url:
+                await UniMessage("未找到可下载的音频").finish()
 
-        if pconfig.need_upload_audio:
-            await UniMessage(await UniHelper.file_seg(audio_path)).send()
-        else:
-            await UniMessage(await UniHelper.record_seg(audio_path)).send()
+            audio_path = await DOWNLOADER.download_audio(
+                url=audio_url,
+                audio_name=f"{bvid}-{page_idx}.m4s",
+                ext_headers=bilip.headers,
+            )
 
-    @on_alconna(
-        Alconna("blogin"), block=True, permission=SUPERUSER, rule=to_me()
-    ).handle()
-    async def _():
-        qrcode = await _bilip.login_with_qrcode()
-        await UniMessage(await UniHelper.img_seg(qrcode)).send()
-        async for msg in _bilip.check_qr_state():
-            await UniMessage(msg).send()
+            if pconfig.need_upload_audio:
+                await UniMessage(await UniHelper.file_seg(audio_path)).send()
+            else:
+                await UniMessage(await UniHelper.record_seg(audio_path)).send()
+
+        @on_alconna(
+            Alconna("blogin"), block=True, permission=SUPERUSER, rule=to_me()
+        ).handle()
+        async def _():
+            qrcode = await bilip.login_with_qrcode()
+            await UniMessage(await UniHelper.img_seg(qrcode)).send()
+            async for msg in bilip.check_qr_state():
+                await UniMessage(msg).send()
 
 
 if pconfig.lazy_download:
 
-    def has_lazy(session: Uninfo) -> bool:
+    async def has_lazy(session: Uninfo) -> bool:
         return LazyManager.has(session.user.id)
 
     lazy_matcher = on_alconna(
         Alconna(pconfig.download_command[0]),
         block=True,
         aliases=set(pconfig.download_command[1:]),
-        rule=has_lazy,
+        rule=Rule(has_lazy),
     )
 
     @lazy_matcher.handle()
