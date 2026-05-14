@@ -180,6 +180,10 @@ class BrowserManager:
     def new_tab(cls, *args, **kwargs):
         return cls.BROWSER.new_tab(*args, **kwargs)
 
+    @classmethod
+    def quit(cls):
+        cls.BROWSER.quit(del_data=True)
+
 
 @driver.on_startup
 async def start_browser():
@@ -189,4 +193,4 @@ async def start_browser():
 @driver.on_shutdown
 def close_browser():
     logger.info("Closing browser launched by Parser Lite")
-    BrowserManager.BROWSER.quit()
+    BrowserManager.quit()
