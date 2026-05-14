@@ -1,7 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator
 import contextlib
-from enum import Enum
 import json
 import re
 from re import Match
@@ -9,29 +8,6 @@ from typing import Any, ClassVar
 
 import aiofiles
 from anyio import Path
-import bilibili_api.video
-
-
-class HookAudioQuality(Enum):
-    """
-    视频的音频流清晰度枚举
-
-    - _64K: 64K
-    - _132K: 132K
-    - _192K: 192K
-    - HI_RES: Hi-Res 无损
-    - DOLBY: 杜比全景声
-    """
-
-    _64K = 30216
-    _132K = 30232
-    DOLBY = 30250
-    HI_RES = 30251
-    _192K = 30280
-
-
-bilibili_api.video.AudioQuality = HookAudioQuality
-
 from bilibili_api import HEADERS, Credential, request_settings, select_client
 from bilibili_api.article import Article
 from bilibili_api.dynamic import Dynamic
