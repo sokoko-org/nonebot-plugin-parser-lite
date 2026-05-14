@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from msgspec import convert
 
-from ...utils.browser import BROWSER, DataPacket
+from ...utils.browser import BrowserManager, DataPacket
 from ...utils.format import format_num, replace_placeholder_to_sticker
 from ..base import (
     BaseParser,
@@ -36,7 +36,7 @@ class KuaiShouParser(BaseParser):
         # 从匹配对象中获取原始URL
         url = f"https://{searched.group(0)}"
 
-        tab = BROWSER.new_tab()
+        tab = BrowserManager.new_tab()
         tab.set.user_agent(
             self.ios_headers["User-Agent"],
             "iPhone",

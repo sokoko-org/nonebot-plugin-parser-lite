@@ -4,7 +4,7 @@ from typing import ClassVar
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
-from ...utils.browser import BROWSER
+from ...utils.browser import BrowserManager
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
@@ -56,7 +56,7 @@ class ZhiHuParser(BaseParser):
         )
 
     async def fetch_initial_state(self, url: str):
-        tab = BROWSER.new_tab()
+        tab = BrowserManager.new_tab()
         tab.set.load_mode.eager()
         tab.get(url)
         html = tab.html

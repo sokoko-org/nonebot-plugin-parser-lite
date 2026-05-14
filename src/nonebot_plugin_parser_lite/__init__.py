@@ -23,7 +23,7 @@ if aq.DOLBY.value == 30255:
 
 from .config import Config, pconfig
 from .matchers import clear_result_cache
-from .utils.browser import BROWSER
+from .utils.browser import BrowserManager
 from .utils.common import safe_unlink
 
 __plugin_meta__ = PluginMetadata(
@@ -89,4 +89,4 @@ async def clean_plugin_cache() -> None:
 
     # 资源清理完毕后，清理 result 缓存并重连浏览器
     clear_result_cache()
-    BROWSER.reconnect()
+    BrowserManager.reconnect()

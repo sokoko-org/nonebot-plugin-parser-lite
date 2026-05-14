@@ -4,7 +4,7 @@ from typing import ClassVar
 from msgspec import convert
 from nonebot.log import logger
 
-from ...utils.browser import BROWSER
+from ...utils.browser import BrowserManager
 from ...utils.format import format_num
 from ..base import BaseParser, Comment, ParseException, Platform, PlatformEnum, handle
 from .encrypt import build_url
@@ -38,7 +38,7 @@ class HeyBoxParser(BaseParser):
         link_id = searched["link_id"]
 
         if not self.x_xhh_tokenid:
-            tab = BROWSER.new_tab(url="https://www.xiaoheihe.cn/")
+            tab = BrowserManager.new_tab(url="https://www.xiaoheihe.cn/")
             self.x_xhh_tokenid = tab.run_js("window.SMSdk.getDeviceId()", as_expr=True)
             logger.info(f"成功获取到小黑盒tokenid: {self.x_xhh_tokenid[:5]}...")
             tab.close()

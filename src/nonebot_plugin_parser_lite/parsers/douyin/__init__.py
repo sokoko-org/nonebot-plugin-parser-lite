@@ -5,7 +5,7 @@ import json_repair
 from msgspec import convert
 from nonebot import logger
 
-from ...utils.browser import BROWSER
+from ...utils.browser import BrowserManager
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
@@ -72,7 +72,7 @@ class DouyinParser(BaseParser):
         raise ParseException("分享已删除或资源直链提取失败, 请稍后再试")
 
     async def parse_note(self, vid: str):
-        tab = BROWSER.new_tab()
+        tab = BrowserManager.new_tab()
         tab.set.load_mode.eager()
         tab.get(f"https://www.douyin.com/note/{vid}")
         text = tab.html
