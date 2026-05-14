@@ -81,7 +81,7 @@ class StreamDownloader:
         file_path = self.cache_dir / file_name
 
         # 已有缓存文件，直接返回
-        if file_path.exists():
+        if await file_path.exists():
             return file_path
 
         headers = {**self.headers, **(ext_headers or {})}
@@ -225,7 +225,7 @@ class StreamDownloader:
         final_video_path = self.cache_dir / video_name
         temp_ts_path = self.cache_dir / f"{file_id}_temp.ts"
 
-        if final_video_path.exists():
+        if await final_video_path.exists():
             return final_video_path
 
         logger.info(f"[StreamDownloader] 开始下载 m3u8 视频: {file_id}")
@@ -349,11 +349,11 @@ class StreamDownloader:
         # 转封装处理
         if await self._has_ffmpeg():
             await self._remux_to_mp4(temp_ts_path, final_video_path)
-        elif temp_ts_path.exists():
+        elif await temp_ts_path.exists():
             await temp_ts_path.rename(final_video_path)
 
         if (
-            not final_video_path.exists()
+            not await final_video_path.exists()
             or (await final_video_path.stat()).st_size <= 1024
         ):
             raise DownloadException("视频下载失败，最终文件不存在或大小过小")
@@ -461,7 +461,7 @@ class StreamDownloader:
         proc = await asyncio.create_subprocess_shell(cmd)
         await proc.communicate()
 
-        if output_path.exists() and input_path.exists():
+        if await output_path.exists() and await input_path.exists():
             os.remove(input_path)
 
     @auto_task

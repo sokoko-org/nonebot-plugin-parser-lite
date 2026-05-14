@@ -298,7 +298,7 @@ class Renderer:
             else:
                 # 其他平台使用各自的模板
                 file_name = f"{platform_name}.html.jinja"
-                if (self.templates_dir / file_name).exists():
+                if await (self.templates_dir / file_name).exists():
                     template_name = file_name
 
         # from jinja2 import FileSystemLoader, Environment

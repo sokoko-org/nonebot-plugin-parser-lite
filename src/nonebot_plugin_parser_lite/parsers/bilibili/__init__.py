@@ -1051,7 +1051,7 @@ class BilibiliParser(BaseParser):
         1. 本地 cookies 文件
         2. 配置中的 bili_ck
         """
-        if self._cookies_file.exists():
+        if await self._cookies_file.exists():
             try:
                 async with aiofiles.open(self._cookies_file, encoding="utf-8") as f:
                     cookies_raw = await f.read()
