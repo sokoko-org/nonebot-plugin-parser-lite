@@ -3,7 +3,6 @@ import re
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ...utils.format import replace_placeholder_to_sticker
 from ..creator import create_image, create_live_photo, create_video
 from ..data import MediaContent
 
@@ -46,10 +45,15 @@ class Stream(Struct):
         raise ValueError("Stream.url: no available stream url found")
 
 
+class VideoInfo(Struct):
+    duration: float
+
+
 class Media(Struct):
     """视频媒体容器"""
 
     stream: Stream
+    video: VideoInfo
 
 
 class Video(Struct):
@@ -63,8 +67,30 @@ class Video(Struct):
         return self.media.stream.url
 
 
+class ImageInfo(Struct):
+    url: str
+
+
+# # 新版图片资源优先保留 notes_pre_post token，使用 ci.xiaohongshu.com 输出 JPEG。
+# # 例：
+# # https://sns-webpic-qc.xhscdn.com/<time>/<hash>/notes_pre_post/<img_id>!nd_dft_wlteh_webp_3
+# # -> https://ci.xiaohongshu.com/notes_pre_post/<img_id>?imageView2/format/jpeg
+# if 'notes_pre_post/' in img_url:
+#     token = 'notes_pre_post/' + img_url.split('notes_pre_post/', 1)[1].split('!', 1)[0].split('?', 1)[0]  # noqa: E501
+#     new_url = f'https://ci.xiaohongshu.com/{token}?imageView2/format/jpeg'
+# elif 'spectrum' in img_url:
+#     token = '/'.join(img_url.split('/')[-2:]).split('!', 1)[0].split('?', 1)[0]
+#     new_url = f'https://ci.xiaohongshu.com/{token}?imageView2/format/jpeg'
+# elif '.jpg' in img_url:
+#     token = '/'.join([split for split in img_url.split('/')[-3:]]).split('!', 1)[0].split('?', 1)[0]  # noqa: E501
+#     new_url = f'https://ci.xiaohongshu.com/{token}?imageView2/format/jpeg'
+# else:
+#     token = img_url.split('/')[-1].split('!', 1)[0].split('?', 1)[0]
+#     new_url = f'https://ci.xiaohongshu.com/{token}?imageView2/format/jpeg'
+
+
 class Image(Struct):
-    fileId: str
+    infoList: list[ImageInfo]
     livePhoto: bool = False
     """是否为 iPhone Live Photo"""
     stream: Stream = field(default_factory=Stream)
@@ -73,17 +99,13 @@ class Image(Struct):
     @property
     def url(self) -> str:
         """图片无水印直链"""
-        return f"http://ci.xiaohongshu.com/{self.fileId}?imageView2/2/w/1080/format/jpg"
-
-
-class CommentImage(Struct):
-    originUrl: str
+        return self.infoList[1].url
 
 
 class User(Struct):
     """用户信息"""
 
-    nickName: str
+    nickname: str
     avatar: str
     userId: str
 
@@ -109,13 +131,13 @@ class NoteDetail(Struct):
     interactInfo: InteractInfo
     imageList: list[Image] = field(default_factory=list)
     """图片列表，包括普通图片和 Live Photo"""
-    video: Video | None = None
+    video: Video | None = field(default=None)
     """主视频（如果有）"""
 
     @property
     def nickname(self) -> str:
         """作者昵称"""
-        return self.user.nickName
+        return self.user.nickname
 
     @property
     def avatar_url(self) -> str:
@@ -139,6 +161,7 @@ class NoteDetail(Struct):
                 create_video(
                     url_or_task=self.video.url,
                     cover_url=self.imageList[0].url,
+                    duration=self.video.media.video.duration,
                 )
             )
         else:
@@ -161,54 +184,17 @@ class NoteDetail(Struct):
         return items
 
 
-class CommentUser(Struct):
-    nickname: str
-    image: str
-    userId: str
-
-
-class Comment(Struct):
-    user: CommentUser
-    time: int
-    likeViewCount: str
-    text: str = field(name="content")
-    ipLocation: str = ""
-    pictures: list[CommentImage] = field(default_factory=list)
-    subComments: list["Comment"] = field(default_factory=list)
-
-    @property
-    def content(self) -> list[MediaContent | str]:
-        content = replace_placeholder_to_sticker(self.text, REDNOTE_PATTERN, "rednote")
-        content.extend(
-            create_image(
-                url=pic.originUrl,
-            )
-            for pic in self.pictures
-        )
-        return content
-
-
-class CommentList(Struct):
-    comments: list[Comment] = field(default_factory=list)
-
-
-class NoteDetailWrapper(Struct):
-    """Wrapper for note detail, represents the value in noteDetailMap[xhs_id]"""
-
-    noteData: NoteDetail
-    commentData: CommentList = field(default_factory=CommentList)
+class NoteDetailMap(Struct):
+    note: NoteDetail
 
 
 class Note(Struct):
-    """Top-level note container with noteDetailMap"""
-
-    data: NoteDetailWrapper
+    noteDetailMap: dict[str, NoteDetailMap]
+    currentNoteId: str
 
 
 class InitialState(Struct):
-    """Root structure of window.__INITIAL_STATE__"""
-
-    noteData: Note
+    note: Note
 
 
 decoder = Decoder(InitialState)
