@@ -1,9 +1,9 @@
-from msgspec import Struct
-
-from ..data import MediaContent
-from ..creator import create_graphic, create_video
 from bs4 import BeautifulSoup, Tag
 from bs4.element import NavigableString
+from msgspec import Struct
+
+from ..creator import create_graphic, create_video
+from ..data import MediaContent
 from .share import ShareData
 
 
@@ -29,7 +29,6 @@ class News(Struct):
         for element in soup.descendants:
             # 标签节点
             if isinstance(element, Tag):
-                # 视频容器：结构约定为 <div class="video-content" data-src="..."><div class="video-play"></div><img src="..."></div>
                 if element.name == "div" and "video-content" in (
                     element.get("class") or []
                 ):

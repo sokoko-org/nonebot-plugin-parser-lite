@@ -1,19 +1,23 @@
+from collections.abc import AsyncGenerator, Awaitable
 import datetime
-import traceback
-import uuid
-from collections.abc import AsyncGenerator
 from io import BytesIO
 from itertools import chain
-from pathlib import Path
-from typing import Any, Awaitable, ClassVar
+import traceback
+from typing import Any, ClassVar
+import uuid
 
-import aiofiles
-import qrcode
+from anyio import Path
 from nonebot import logger
 from nonebot_plugin_htmlrender import template_to_pic
+import qrcode
 
 from ..config import _nickname, pconfig
-from ..exception import DownloadException, DownloadLimitException, DurationLimitException, SizeLimitException
+from ..exception import (
+    DownloadException,
+    DownloadLimitException,
+    DurationLimitException,
+    SizeLimitException,
+)
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..parsers.data import (
     AudioContent,
@@ -109,13 +113,15 @@ class Renderer:
                     yield msg
             except SizeLimitException as e:
                 yield UniMessage(
-                    f"设定的最大上传大小为 {pconfig.max_size}MB\n当前解析到的媒体大小为 {e.size}MB\n"
+                    f"设定的最大上传大小为 {pconfig.max_size}MB\n"
+                    f"当前解析到的媒体大小为 {e.size}MB\n"
                     "媒体太大了~"
                 )
                 continue
             except DurationLimitException as e:
                 yield UniMessage(
-                    f"设定的最大时长为 {pconfig.duration_maximum}s\n当前解析到的媒体时长为 {e.duration}s\n"
+                    f"设定的最大时长为 {pconfig.duration_maximum}s\n"
+                    f"当前解析到的媒体时长为 {e.duration}s\n"
                     "媒体太长了~"
                 )
             except DownloadLimitException as e:
@@ -154,18 +160,16 @@ class Renderer:
             return
 
         path = await cont.get_path()
-        if (
-            isinstance(cont, VideoContent)
-            and pconfig.need_upload_video
-            or not isinstance(cont, VideoContent)
+        if (isinstance(cont, VideoContent) and pconfig.need_upload_video) or (
+            not isinstance(cont, VideoContent)
             and isinstance(cont, AudioContent)
             and pconfig.need_upload_audio
         ):
-            yield UniMessage(UniHelper.file_seg(path))
+            yield UniMessage(await UniHelper.file_seg(path))
         elif isinstance(cont, VideoContent):
-            yield UniMessage(UniHelper.video_seg(path))
+            yield UniMessage(await UniHelper.video_seg(path))
         elif isinstance(cont, AudioContent):
-            yield UniMessage(UniHelper.record_seg(path))
+            yield UniMessage(await UniHelper.record_seg(path))
 
     async def __build_forward_segs(
         self,
@@ -202,19 +206,19 @@ class Renderer:
                     if isinstance(cont, VideoContent):
                         path = await cont.get_cover_path()
                         if path:
-                            nodes.append(UniHelper.img_seg(path))
+                            nodes.append(await UniHelper.img_seg(path))
                         return
 
                     # 图片
                     if isinstance(cont, ImageContent):
                         path = await cont.get_path()
-                        nodes.append(UniHelper.img_seg(path))
+                        nodes.append(await UniHelper.img_seg(path))
                         return
 
                     # 图文：图片 + 可选文字说明
                     if isinstance(cont, GraphicContent):
                         path = await cont.get_path()
-                        seg: ForwardNodeInner = UniHelper.img_seg(path)
+                        seg: ForwardNodeInner = await UniHelper.img_seg(path)
                         if cont.alt:
                             seg = seg + cont.alt
                         nodes.append(seg)
@@ -224,12 +228,12 @@ class Renderer:
                     if isinstance(cont, LivePhotoContent):
                         if pconfig.live_photo:
                             live_path = await cont.get_live()
-                            nodes.append(UniHelper.video_seg(live_path))
+                            nodes.append(await UniHelper.video_seg(live_path))
                         else:
                             base_path = await cont.get_base()
                             live_path = await cont.get_path()
-                            nodes.append(UniHelper.img_seg(base_path))
-                            nodes.append(UniHelper.video_seg(live_path))
+                            nodes.append(await UniHelper.img_seg(base_path))
+                            nodes.append(await UniHelper.video_seg(live_path))
                         return
                 except Exception as e:
                     # 统一当作媒体构建失败处理
@@ -294,7 +298,7 @@ class Renderer:
             else:
                 # 其他平台使用各自的模板
                 file_name = f"{platform_name}.html.jinja"
-                if (self.templates_dir / file_name).exists():
+                if await (self.templates_dir / file_name).exists():
                     template_name = file_name
 
         # from jinja2 import FileSystemLoader, Environment
@@ -308,10 +312,10 @@ class Renderer:
         # template = env.get_template(template_name)
         # # 渲染
         # with open(
-        #     f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html",
+        #     f"{self.templates_dir.parent.parent}/{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html",  # noqa: E501
         #     "w",
         #     encoding="utf8",
-        # ) as f:  # noqa: E501
+        # ) as f:
         #     f.write(
         #         await template.render_async(result=template_data)
         #     )
@@ -397,11 +401,11 @@ class Renderer:
             image_path = await self.save_img(image_raw)
             result.render_image = image_path
             if pconfig.use_base64:
-                return UniHelper.img_seg(image_raw)
-        if result.render_image.stat().st_size >= 5 * 1024 * 1024:
-            return UniHelper.file_seg(result.render_image)
+                return await UniHelper.img_seg(image_raw)
+        if (await result.render_image.stat()).st_size >= 5 * 1024 * 1024:
+            return await UniHelper.file_seg(result.render_image)
 
-        return UniHelper.img_seg(result.render_image)
+        return await UniHelper.img_seg(result.render_image)
 
     @classmethod
     async def save_img(cls, raw: bytes) -> Path:
@@ -412,8 +416,7 @@ class Renderer:
 
         file_name = f"{uuid.uuid4().hex}.jpeg"
         image_path = pconfig.cache_dir / file_name
-        async with aiofiles.open(image_path, "wb+") as f:
-            await f.write(raw)
+        await image_path.write_bytes(raw)
         return image_path
 
 

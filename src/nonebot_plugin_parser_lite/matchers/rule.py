@@ -1,16 +1,16 @@
 import re
 from typing import Literal
 
-from msgspec import Struct, DecodeError
+from msgspec import DecodeError, Struct
 from msgspec.json import Decoder
 from nonebot import logger
-from nonebot.rule import Rule
-from nonebot.params import Depends
-from nonebot.typing import T_State
 from nonebot.matcher import Matcher
+from nonebot.params import Depends
 from nonebot.plugin.on import get_matcher_source
-from nonebot_plugin_uninfo import Uninfo
+from nonebot.rule import Rule
+from nonebot.typing import T_State
 from nonebot_plugin_alconna.uniseg import Hyper, UniMsg
+from nonebot_plugin_uninfo import Uninfo
 
 from .filter import is_enabled
 
@@ -138,7 +138,10 @@ class KeywordRegexRule:
         return f"KeywordRegex(key_pattern_list={self.key_pattern_list})"
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, KeywordRegexRule) and self.key_pattern_list == other.key_pattern_list
+        return (
+            isinstance(other, KeywordRegexRule)
+            and self.key_pattern_list == other.key_pattern_list
+        )
 
     def __hash__(self) -> int:
         return hash(frozenset(self.key_pattern_list))
@@ -153,7 +156,9 @@ class KeywordRegexRule:
             if keyword not in text:
                 continue
             if searched := pattern.search(text):
-                state[PSR_SEARCHED_KEY] = SearchResult(text=text, keyword=keyword, searched=searched)
+                state[PSR_SEARCHED_KEY] = SearchResult(
+                    text=text, keyword=keyword, searched=searched
+                )
                 return True
             logger.debug(f"keyword '{keyword}' is in '{text}', but not matched")
         return False
@@ -163,7 +168,9 @@ def keyword_regex(*args: tuple[str, str | re.Pattern[str]]) -> Rule:
     return Rule(KeywordRegexRule(KeyPatternList(*args)))
 
 
-def on_keyword_regex(*args: tuple[str, str | re.Pattern[str]], priority: int = 5) -> type[Matcher]:
+def on_keyword_regex(
+    *args: tuple[str, str | re.Pattern[str]], priority: int = 5
+) -> type[Matcher]:
     return Matcher.new(
         "message",
         is_enabled & keyword_regex(*args),

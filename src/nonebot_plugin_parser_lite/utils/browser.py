@@ -1,14 +1,16 @@
 """使用 DrissionPage 启动浏览器，优先使用系统/Playwright/Puppeteer 已安装的内核."""
 
 import contextlib
-import platform
+import os
 from pathlib import Path
+import platform
 
 from DrissionPage import Chromium, ChromiumOptions
 from DrissionPage._units.listener import DataPacket as DataPacket
-from nonebot.log import logger
-from ..config import pconfig
 from nonebot import get_driver
+from nonebot.log import logger
+
+from ..config import pconfig
 
 system = platform.system()
 driver = get_driver()
@@ -43,14 +45,16 @@ def _find_browser_from_system() -> str:
 
 def _find_browser_from_playwright() -> str:
     """从 ms-playwright 默认目录寻找 Chromium 可执行文件"""
-    home = Path.home()
-    if system == "Windows":
-        base = home / "AppData" / "Local" / "ms-playwright"
-    elif system == "Darwin":
-        base = home / "Library" / "Caches" / "ms-playwright"
+    if browser_path := os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
+        base = Path(browser_path)
     else:
-        base = home / ".cache" / "ms-playwright"
-
+        home = Path.home()
+        if system == "Darwin":
+            base = home / "Library" / "Caches" / "ms-playwright"
+        elif system == "Windows":
+            base = home / "AppData" / "Local" / "ms-playwright"
+        else:
+            base = home / ".cache" / "ms-playwright"
     if not base.is_dir():
         return ""
 
@@ -143,7 +147,8 @@ browser_path = _resolve_browser_path()
 
 if system == "Linux":
     logger.warning(
-        "You are running on Linux. If there is no desktop environment, please enable headless mode."
+        "You are running on Linux. If there is no desktop environment, "
+        "please enable headless mode."
     )
 
 logger.info(f"Launching browser from {browser_path}")

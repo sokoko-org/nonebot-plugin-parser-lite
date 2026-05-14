@@ -1,14 +1,14 @@
 """Parser 基类定义"""
 
-import asyncio
 from abc import ABC
-from collections.abc import Callable, Coroutine
-from pathlib import Path
+import asyncio
+from collections.abc import Callable, Coroutine, Sequence
 from re import Match, Pattern, compile
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Sequence, TypeVar, cast, final
-
-from httpx import AsyncClient
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, TypeVar, cast, final
 from typing_extensions import ParamSpec, Unpack
+
+from anyio import Path
+from httpx import AsyncClient
 
 from ..config import pconfig as pconfig
 from ..constants import ANDROID_HEADER, COMMON_HEADER, COMMON_TIMEOUT, IOS_HEADER

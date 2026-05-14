@@ -23,7 +23,7 @@ def replace_placeholder_to_sticker(
                           若为 None，则默认使用 "small"。
     :param id_resolver: 一个接受表情名称并返回 id 字符串的函数,为空自动使用正则匹配出的 name 作为 id
     :return: 由普通文本和 MediaContent 组成的列表，顺序与原字符串一致。
-    """
+    """  # noqa: E501
     if "[" not in text or "]" not in text or not placeholder_pattern.search(text):
         return [text]
     from ..parsers.creator import create_sticker

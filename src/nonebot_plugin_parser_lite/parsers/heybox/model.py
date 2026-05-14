@@ -2,13 +2,13 @@ import json
 import re
 from typing import Literal
 
+from bs4 import BeautifulSoup
+from bs4.element import NavigableString, Tag
 from msgspec import Struct, field
 
+from ...utils.format import replace_placeholder_to_sticker
 from ..creator import create_image, create_sticker, create_video
 from ..data import MediaContent
-from ...utils.format import replace_placeholder_to_sticker
-from bs4 import BeautifulSoup
-from bs4.element import Tag, NavigableString
 
 HEYBOX_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 
@@ -127,10 +127,10 @@ class BaseResult(Struct):
 
 def extract_from_html(html: str) -> list[MediaContent | str]:
     """
-    从 HTML 内容中按顺序提取纯文本和图片。该方法通过遍历 HTML 节点，将图片节点转换为 MediaContent，并与周围文本一并按原顺序返回。
+    从 HTML 内容中按顺序提取纯文本和图片
 
     :param html: 包含知乎内容的 HTML 字符串。
-    :return: 由纯文本字符串和 MediaContent 对象组成的列表，顺序与原始 HTML 中的展示顺序一致
+    :return: 由纯文本字符串和 MediaContent 对象组成的列表
     """
 
     soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")

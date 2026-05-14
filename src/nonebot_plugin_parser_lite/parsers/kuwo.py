@@ -6,11 +6,11 @@ from nonebot import logger
 
 from .base import (
     BaseParser,
-    PlatformEnum,
     ParseException,
+    PlatformEnum,
     handle,
 )
-from .data import Platform, MediaContent
+from .data import MediaContent, Platform
 
 
 class KuWoParser(BaseParser):
@@ -74,7 +74,8 @@ class KuWoParser(BaseParser):
 
         # 构建额外信息
         extra = {
-            "info": f"时长: {music_data['songTimeMinutes']} | 专辑: {music_data['album']}",
+            "info": f"时长: {music_data['songTimeMinutes']} | "
+            f"专辑: {music_data['album']}",
             "lyric": text,
             "type": "audio",
             "type_tag": "音乐",

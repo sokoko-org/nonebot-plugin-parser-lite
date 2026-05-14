@@ -1,5 +1,6 @@
 import re
 from typing import ClassVar
+
 from ..base import (
     DOWNLOADER,
     BaseParser,

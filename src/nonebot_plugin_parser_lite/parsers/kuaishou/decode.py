@@ -1,5 +1,5 @@
-import re
 import json
+import re
 
 # 预编译正则：只用于路径提取和 ID 定位
 RE_PATH = re.compile(r"0sftu[^.\-@]*")

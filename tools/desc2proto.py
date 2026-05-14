@@ -1,8 +1,8 @@
-import google.protobuf.descriptor_pb2 as pb2
 from google.protobuf.descriptor import FieldDescriptor
+import google.protobuf.descriptor_pb2 as pb2
 from google.protobuf.descriptor_pb2 import (
-    global___EnumDescriptorProto,
     global___DescriptorProto,
+    global___EnumDescriptorProto,
     global___FieldDescriptorProto,
 )
 

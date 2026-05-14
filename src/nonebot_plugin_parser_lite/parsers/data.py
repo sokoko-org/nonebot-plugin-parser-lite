@@ -1,13 +1,13 @@
-from typing import Any, Literal, TypedDict
-from pathlib import Path
-from datetime import datetime
-from dataclasses import field, dataclass
 from collections.abc import Sequence
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Literal, TypedDict
 
-from ..utils.ffmpeg import FFmpeg
+from anyio import Path
 
-from ..download.task import DownloadTaskWrapper
 from ..download import DOWNLOADER
+from ..download.task import DownloadTaskWrapper
+from ..utils.ffmpeg import FFmpeg
 
 
 def repr_path_task(path_task: DownloadTaskWrapper[Path]) -> str:

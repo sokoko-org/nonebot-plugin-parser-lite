@@ -1,10 +1,9 @@
 from re import Match
 from typing import ClassVar
 
-
-from ..base import BaseParser, handle, Platform, PlatformEnum
-from .utils import get_post, build_comments, build_content
 from ...utils.format import format_num
+from ..base import BaseParser, Platform, PlatformEnum, handle
+from .utils import build_comments, build_content, get_post
 
 
 class TiebaParser(BaseParser):

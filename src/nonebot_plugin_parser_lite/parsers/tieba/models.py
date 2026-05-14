@@ -8,15 +8,15 @@
 
 from __future__ import annotations
 
-import re
+from collections.abc import Iterator
 import dataclasses as dcs
 from enum import IntEnum
-from typing import Any, Generic, TypeVar, Protocol, SupportsIndex, overload
 from functools import cached_property
-from collections.abc import Iterator
+import re
+from typing import Any, Generic, Protocol, SupportsIndex, TypeVar, overload
 
-import yarl
 from google.protobuf.message import Message
+import yarl
 
 TypeContainer = TypeVar("TypeContainer")
 
@@ -110,7 +110,9 @@ class FragImage:
             hash_ = hash_obj[1]
         else:
             hash_ = ""
-        return FragImage(src, big_src, origin_src, origin_size, show_width, show_height, hash_)
+        return FragImage(
+            src, big_src, origin_src, origin_size, show_width, show_height, hash_
+        )
 
 
 @dcs.dataclass
@@ -466,7 +468,15 @@ class PrivReply(IntEnum):
 @dcs.dataclass
 class Contents(
     Containers[
-        FragText | FragEmoji | FragImage | FragAt | FragLink | FragVoice | FragVideo | FragTiebaPlus | FragUnknown
+        FragText
+        | FragEmoji
+        | FragImage
+        | FragAt
+        | FragLink
+        | FragVoice
+        | FragVideo
+        | FragTiebaPlus
+        | FragUnknown
     ]
 ):
     """
@@ -561,7 +571,9 @@ class Contents(
 
         objs = list(_frags())
 
-        return Contents(objs, texts, emojis, imgs, ats, links, tiebapluses, video, voice)
+        return Contents(
+            objs, texts, emojis, imgs, ats, links, tiebapluses, video, voice
+        )
 
     @cached_property
     def text(self) -> str:
@@ -629,8 +641,16 @@ class UserInfo:
         is_bawu = bool(data_proto.is_bawu)
         is_vip = bool(data_proto.new_tshow_icon)
         is_god = bool(data_proto.new_god_data.status)
-        priv_like = PrivLike(priv_like) if (priv_like := data_proto.priv_sets.like) else PrivLike.PUBLIC
-        priv_reply = PrivReply(priv_reply) if (priv_reply := data_proto.priv_sets.reply) else PrivReply.ALL
+        priv_like = (
+            PrivLike(priv_like)
+            if (priv_like := data_proto.priv_sets.like)
+            else PrivLike.PUBLIC
+        )
+        priv_reply = (
+            PrivReply(priv_reply)
+            if (priv_reply := data_proto.priv_sets.reply)
+            else PrivReply.ALL
+        )
         return UserInfo(
             user_id,
             portrait,
@@ -827,7 +847,9 @@ class Post:
     def from_tbdata(data_proto: Message) -> Post:
         contents = Contents.from_tbdata(data_proto)
         sign = "".join(p.text for p in data_proto.signature.content if p.type == 0)
-        comments = [Comment.from_tbdata(p) for p in data_proto.sub_post_list.sub_post_list]
+        comments = [
+            Comment.from_tbdata(p) for p in data_proto.sub_post_list.sub_post_list
+        ]
         is_aimeme = bool(data_proto.sprite_meme_info.meme_id)
         pid = data_proto.id
         author_id = data_proto.author_id
@@ -897,7 +919,9 @@ class Page:
         total_count = data_proto.total_count
         has_more = bool(data_proto.has_more)
         has_prev = bool(data_proto.has_prev)
-        return Page(page_size, current_page, total_page, total_count, has_more, has_prev)
+        return Page(
+            page_size, current_page, total_page, total_count, has_more, has_prev
+        )
 
 
 @dcs.dataclass
@@ -983,7 +1007,9 @@ class ShareThread:
 
     @cached_property
     def text(self) -> str:
-        return f"{self.title}\n{self.contents.text}" if self.title else self.contents.text
+        return (
+            f"{self.title}\n{self.contents.text}" if self.title else self.contents.text
+        )
 
 
 @dcs.dataclass
@@ -1092,7 +1118,9 @@ class Thread:
 
     @property
     def text(self) -> str:
-        return f"{self.title}\n{self.contents.text}" if self.title else self.contents.text
+        return (
+            f"{self.title}\n{self.contents.text}" if self.title else self.contents.text
+        )
 
     @property
     def author_id(self) -> int:
@@ -1133,7 +1161,11 @@ class Posts(Containers[Post]):
         thread.fid = forum.fid
         thread.fname = forum.fname
 
-        objs = [Post.from_tbdata(p) for p in data_proto.post_list if not p.chat_content.bot_uk]
+        objs = [
+            Post.from_tbdata(p)
+            for p in data_proto.post_list
+            if not p.chat_content.bot_uk
+        ]
         users = {p.id: UserInfo.from_tbdata(p) for p in data_proto.user_list}
         for post in objs:
             post.fid = forum.fid

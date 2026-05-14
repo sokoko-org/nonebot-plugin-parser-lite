@@ -1,29 +1,30 @@
 import asyncio
+from collections.abc import Callable, Generator
 import contextlib
 from functools import partial
 import hashlib
 import os
-from pathlib import Path
-from typing import Callable, Generator
 from urllib.parse import urljoin
 
 import aiofiles
+from anyio import Path
+from httpx import AsyncClient, Response
 from nonebot import logger
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
+
 from ..config import pconfig
 from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
 from ..utils.common import generate_file_name, make_filename, safe_unlink
 from ..utils.ffmpeg import FFmpeg
-from httpx import AsyncClient, Response
 from .task import auto_task
-from rich.progress import (
-    Progress,
-    BarColumn,
-    DownloadColumn,
-    TransferSpeedColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
-)
 
 
 class StreamDownloader:
@@ -80,7 +81,7 @@ class StreamDownloader:
         file_path = self.cache_dir / file_name
 
         # 已有缓存文件，直接返回
-        if file_path.exists():
+        if await file_path.exists():
             return file_path
 
         headers = {**self.headers, **(ext_headers or {})}
@@ -116,7 +117,7 @@ class StreamDownloader:
             file_size_mb = content_length / 1024 / 1024
             if file_size_mb > pconfig.max_size:
                 logger.warning(
-                    f"媒体 url: {url} 大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
+                    f"媒体 url: {url} 大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"  # noqa: E501
                 )
                 raise SizeLimitException(file_size_mb)
 
@@ -166,7 +167,7 @@ class StreamDownloader:
                         file_size_mb = downloaded_bytes / 1024 / 1024
                         if file_size_mb > pconfig.max_size:
                             logger.warning(
-                                f"媒体 url: {url} 实际下载大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"
+                                f"媒体 url: {url} 实际下载大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"  # noqa: E501
                             )
                             raise SizeLimitException(file_size_mb)
 
@@ -224,7 +225,7 @@ class StreamDownloader:
         final_video_path = self.cache_dir / video_name
         temp_ts_path = self.cache_dir / f"{file_id}_temp.ts"
 
-        if final_video_path.exists():
+        if await final_video_path.exists():
             return final_video_path
 
         logger.info(f"[StreamDownloader] 开始下载 m3u8 视频: {file_id}")
@@ -257,7 +258,7 @@ class StreamDownloader:
             logger.warning(f"[StreamDownloader] m3u8 视频大小超限: {e}")
             await safe_unlink(temp_ts_path)
             raise
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error(f"[StreamDownloader] m3u8 视频下载流程出错: {e}")
             await safe_unlink(temp_ts_path)
             raise DownloadException(f"视频下载失败: {e}") from e
@@ -306,16 +307,16 @@ class StreamDownloader:
                             file_size_mb = current_bytes / 1024 / 1024
                             if file_size_mb > pconfig.max_size:
                                 logger.warning(
-                                    f"m3u8 视频大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB，取消下载"
+                                    f"m3u8 视频大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB，取消下载"  # noqa: E501
                                 )
                                 raise SizeLimitException(file_size_mb)
                     return
                 except SizeLimitException:
                     # 超限直接抛出，不再重试
                     raise
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     logger.debug(
-                        f"下载 ts 文件失败，重试中 ({retry + 1}/{max_retries}): {ts_url}, error: {e}"
+                        f"下载 ts 文件失败，重试中 ({retry + 1}/{max_retries}): {ts_url}, error: {e}"  # noqa: E501
                     )
                     await asyncio.sleep(1)
             raise DownloadException(f"多次重试仍失败的 ts 片段: {ts_url}")
@@ -348,10 +349,13 @@ class StreamDownloader:
         # 转封装处理
         if await self._has_ffmpeg():
             await self._remux_to_mp4(temp_ts_path, final_video_path)
-        elif temp_ts_path.exists():
-            temp_ts_path.rename(final_video_path)
+        elif await temp_ts_path.exists():
+            await temp_ts_path.rename(final_video_path)
 
-        if not final_video_path.exists() or final_video_path.stat().st_size <= 1024:
+        if (
+            not await final_video_path.exists()
+            or (await final_video_path.stat()).st_size <= 1024
+        ):
             raise DownloadException("视频下载失败，最终文件不存在或大小过小")
 
     async def _smart_parse_m3u8(self, m3u8_url: str) -> list[str]:
@@ -457,7 +461,7 @@ class StreamDownloader:
         proc = await asyncio.create_subprocess_shell(cmd)
         await proc.communicate()
 
-        if output_path.exists() and input_path.exists():
+        if await output_path.exists() and await input_path.exists():
             os.remove(input_path)
 
     @auto_task

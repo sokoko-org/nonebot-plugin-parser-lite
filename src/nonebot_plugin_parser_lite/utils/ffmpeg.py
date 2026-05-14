@@ -1,8 +1,9 @@
-import hashlib
-from pathlib import Path
-
-from nonebot import logger
 import asyncio
+import hashlib
+
+from anyio import Path
+from nonebot import logger
+
 from ..config import pconfig
 from .common import fmt_size, safe_unlink
 
@@ -50,7 +51,7 @@ class FFmpeg:
         """
         file_name = file_name or cls.generate_file_name(v_path, a_path)
         output_path = pconfig.cache_dir / f"{file_name}.mp4"
-        if output_path.exists():
+        if await output_path.exists():
             return output_path
         logger.info(f"Merging {v_path.name} and {a_path.name} to {output_path.name}")
 
@@ -79,7 +80,7 @@ class FFmpeg:
 
         await cls.exec_ffmpeg(cmd)
         await asyncio.gather(safe_unlink(v_path), safe_unlink(a_path))
-        logger.success(f"Merged {output_path.name}, {fmt_size(output_path)}")
+        logger.success(f"Merged {output_path.name}, {await fmt_size(output_path)}")
         return output_path
 
     @classmethod
@@ -94,7 +95,7 @@ class FFmpeg:
         """
         file_name = file_name or cls.generate_file_name(v_path, a_path)
         output_path = pconfig.cache_dir / f"{file_name}.mp4"
-        if output_path.exists():
+        if await output_path.exists():
             return output_path
         logger.info(
             f"Merging {v_path.name} and {a_path.name} to {output_path.name} with H.264"
@@ -126,7 +127,9 @@ class FFmpeg:
 
         await cls.exec_ffmpeg(cmd)
         await asyncio.gather(safe_unlink(v_path), safe_unlink(a_path))
-        logger.success(f"Merged {output_path.name} with H.264, {fmt_size(output_path)}")
+        logger.success(
+            f"Merged {output_path.name} with H.264, {await fmt_size(output_path)}"
+        )
         return output_path
 
     @classmethod
@@ -138,7 +141,7 @@ class FFmpeg:
         :return: 编码后的视频路径
         """
         output_path = video_path.with_name(f"{video_path.stem}_h264{video_path.suffix}")
-        if output_path.exists():
+        if await output_path.exists():
             return output_path
         cmd = [
             "-y",
@@ -162,7 +165,7 @@ class FFmpeg:
         ]
         await cls.exec_ffmpeg(cmd)
         logger.success(
-            f"视频重新编码为 H.264 成功: {output_path}, {fmt_size(output_path)}"
+            f"视频重新编码为 H.264 成功: {output_path}, {await fmt_size(output_path)}"
         )
         await safe_unlink(video_path)
         return output_path
@@ -185,7 +188,7 @@ class FFmpeg:
         """
         file_name = file_name or cls.generate_file_name(image_path, video_path)
         output_path = pconfig.cache_dir / f"{file_name}.mp4"
-        if output_path.exists():
+        if await output_path.exists():
             return output_path
         # 2. 构建指令：单进程一次性完成
         # 逻辑：视频 + 底图(0.6s) + 淡入
@@ -214,7 +217,7 @@ class FFmpeg:
             "[v_still][v_main_sar]concat=n=2:v=1:a=0[outv]"
         )
 
-        if bgm_path and bgm_path.exists():
+        if bgm_path and await bgm_path.exists():
             inputs += ["-i", str(bgm_path)]
             # amix: 混合原音与BGM，duration=first 保证不因BGM太长而导致视频变长
             filter_a = ";[0:a][2:a]amix=inputs=2:duration=first[outa]"

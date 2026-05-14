@@ -1,7 +1,6 @@
 from msgspec import Struct, field
 
 from ..creator import create_image, create_sticker
-
 from ..data import MediaContent
 
 

@@ -1,8 +1,8 @@
+from bs4 import BeautifulSoup
 from msgspec import Struct, field
 
-from ..data import MediaContent
 from ..creator import create_sticker
-from bs4 import BeautifulSoup
+from ..data import MediaContent
 
 
 class BlogInfo(Struct):

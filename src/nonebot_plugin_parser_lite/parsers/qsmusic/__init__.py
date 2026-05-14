@@ -4,11 +4,11 @@ from typing import ClassVar
 
 from ..base import (
     BaseParser,
-    PlatformEnum,
-    ParseException,
-    handle,
-    Platform,
     MediaContent,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    handle,
 )
 from .share import decoder as shareDecoder
 
