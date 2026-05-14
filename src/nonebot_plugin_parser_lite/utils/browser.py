@@ -199,9 +199,7 @@ class BrowserManager:
     @classmethod
     def quit(cls):
         if getattr(cls, "BROWSER", None) is None:
-            logger.info(
-                "BrowserManager.quit() called but BROWSER is not initialized."
-            )
+            logger.info("BrowserManager.quit() called but BROWSER is not initialized.")
             return
         cls.BROWSER.quit(del_data=True)
 
