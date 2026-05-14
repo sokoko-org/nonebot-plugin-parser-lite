@@ -1,5 +1,4 @@
 import asyncio
-from enum import Enum
 import traceback
 
 from nonebot import logger, require
@@ -17,26 +16,9 @@ from anyio import Path
 import bilibili_api.video
 from nonebot_plugin_apscheduler import scheduler
 
-
-class HookAudioQuality(Enum):
-    """
-    视频的音频流清晰度枚举
-
-    - _64K: 64K
-    - _132K: 132K
-    - _192K: 192K
-    - HI_RES: Hi-Res 无损
-    - DOLBY: 杜比全景声
-    """
-
-    _64K = 30216
-    _132K = 30232
-    DOLBY = 30250
-    HI_RES = 30251
-    _192K = 30280
-
-
-bilibili_api.video.AudioQuality = HookAudioQuality
+aq = bilibili_api.video.AudioQuality
+if aq.DOLBY.value == 30255:
+    object.__setattr__(aq.DOLBY, "_value_", 30250)
 
 
 from .config import Config, pconfig
