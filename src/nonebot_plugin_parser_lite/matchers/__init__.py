@@ -5,7 +5,7 @@ from typing import ClassVar, TypeVar
 
 from nonebot import get_driver, logger
 from nonebot.permission import SUPERUSER
-from nonebot.rule import to_me
+from nonebot.rule import Rule, to_me
 from nonebot_plugin_alconna import Alconna, Args, Match, on_alconna
 from nonebot_plugin_uninfo import Uninfo
 
@@ -242,26 +242,27 @@ async def register_bili_matcher():
             async for msg in bilip.check_qr_state():
                 await UniMessage(msg).send()
 
-    if pconfig.lazy_download:
 
-        def has_lazy(session: Uninfo) -> bool:
-            return LazyManager.has(session.user.id)
+if pconfig.lazy_download:
 
-        lazy_matcher = on_alconna(
-            Alconna(pconfig.download_command[0]),
-            block=True,
-            aliases=set(pconfig.download_command[1:]),
-            rule=has_lazy,
-        )
+    async def has_lazy(session: Uninfo) -> bool:
+        return LazyManager.has(session.user.id)
 
-        @lazy_matcher.handle()
-        @UniHelper.with_reaction
-        async def _(session: Uninfo):
-            """懒下载命令：发送上次解析结果中的媒体内容。"""
-            user_id = session.user.id
-            result = LazyManager.get(user_id)
-            try:
-                async for message in RENDERER.send_content(result):
-                    await message.send()
-            finally:
-                LazyManager.remove(user_id)
+    lazy_matcher = on_alconna(
+        Alconna(pconfig.download_command[0]),
+        block=True,
+        aliases=set(pconfig.download_command[1:]),
+        rule=Rule(has_lazy),
+    )
+
+    @lazy_matcher.handle()
+    @UniHelper.with_reaction
+    async def _(session: Uninfo):
+        """懒下载命令：发送上次解析结果中的媒体内容。"""
+        user_id = session.user.id
+        result = LazyManager.get(user_id)
+        try:
+            async for message in RENDERER.send_content(result):
+                await message.send()
+        finally:
+            LazyManager.remove(user_id)
