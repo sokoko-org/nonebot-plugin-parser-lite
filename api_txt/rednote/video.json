@@ -1,0 +1,211 @@
+{
+  "note": {
+    "prevRouteData": {},
+    "prevRoute": "Empty",
+    "commentTarget": {},
+    "isImgFullscreen": false,
+    "gotoPage": "",
+    "firstNoteId": "6724d4fa000000001a01fc1e",
+    "autoOpenNote": false,
+    "topCommentId": "",
+    "noteDetailMap": {
+      "6724d4fa000000001a01fc1e": {
+        "comments": {
+          "list": [],
+          "cursor": "",
+          "hasMore": true,
+          "loading": false,
+          "firstRequestFinish": false
+        },
+        "currentTime": 1778756328656,
+        "note": {
+          "xsecToken": "ABVAvMbYutJZndUDTAHbE3rfNm49LzpNesQ0TZi_BhxIc=",
+          "imageList": [
+            {
+              "fileId": "",
+              "width": 1080,
+              "infoList": [
+                {
+                  "imageScene": "WB_PRV",
+                  "url": "http://sns-webpic-qc.xhscdn.com/202605141858/736f5e560fd07a8f1cb6cbb5c70bbbbf/1040g008319ll7okk6s005o84pgg0bul0pq3i7qg!nd_prv_wlteh_webp_3"
+                },
+                {
+                  "imageScene": "WB_DFT",
+                  "url": "http://sns-webpic-qc.xhscdn.com/202605141858/116c2c8e091b983a03e26a0df8d1bb08/1040g008319ll7okk6s005o84pgg0bul0pq3i7qg!nd_dft_wlteh_webp_3"
+                }
+              ],
+              "urlDefault": "http://sns-webpic-qc.xhscdn.com/202605141858/116c2c8e091b983a03e26a0df8d1bb08/1040g008319ll7okk6s005o84pgg0bul0pq3i7qg!nd_dft_wlteh_webp_3",
+              "height": 1920,
+              "url": "",
+              "traceId": "",
+              "urlPre": "http://sns-webpic-qc.xhscdn.com/202605141858/736f5e560fd07a8f1cb6cbb5c70bbbbf/1040g008319ll7okk6s005o84pgg0bul0pq3i7qg!nd_prv_wlteh_webp_3",
+              "stream": {},
+              "livePhoto": false
+            }
+          ],
+          "tagList": [
+            {
+              "type": "topic",
+              "id": "5be3c95fa5142900019cd0a8",
+              "name": "高中生"
+            },
+            {
+              "id": "5bea53979ef9730001917207",
+              "name": "校园",
+              "type": "topic"
+            },
+            {
+              "name": "高三",
+              "type": "topic",
+              "id": "5bec527bc3c3cb0001bf0b1d"
+            },
+            {
+              "id": "54c4ee85b4c4d60cc2414174",
+              "name": "美术生",
+              "type": "topic"
+            },
+            {
+              "id": "5f6d8dfe00000000010037c2",
+              "name": "氛围感",
+              "type": "topic"
+            }
+          ],
+          "shareInfo": {
+            "unShare": false
+          },
+          "type": "video",
+          "title": "艺考生回校大队",
+          "desc": "#高中生[话题]##校园[话题]##高三[话题]##美术生[话题]##氛围感[话题]#",
+          "interactInfo": {
+            "collected": false,
+            "collectedCount": "6749",
+            "commentCount": "440",
+            "shareCount": "805",
+            "followed": true,
+            "relation": "follows",
+            "liked": true,
+            "likedCount": "8.3万"
+          },
+          "time": 1730467066000,
+          "lastUpdateTime": 1730467067000,
+          "noteId": "6724d4fa000000001a01fc1e",
+          "user": {
+            "xsecToken": "ABIyTysJuC7N4KxeJ2055IPaR4FzQlR_0V-xQhnir_wIQ=",
+            "userId": "6104cc20000000000101faa0",
+            "nickname": "弗太在摸鱼",
+            "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo31hk00jae4q005o84pgg0bul0uc0dlb0"
+          },
+          "video": {
+            "media": {
+              "videoId": 137118810761483220,
+              "video": {
+                "drmType": 0,
+                "streamTypes": [
+                  259,
+                  130
+                ],
+                "bizName": 110,
+                "bizId": "281233998886861854",
+                "duration": 9,
+                "md5": "e2f317858fb535056901684ddd18bf9b",
+                "hdrType": 0
+              },
+              "stream": {
+                "h265": [
+                  {
+                    "width": 1080,
+                    "size": 1073695,
+                    "qualityType": "HD",
+                    "defaultStream": 0,
+                    "audioBitrate": 65034,
+                    "streamDesc": "X265_MP4_WEB_130",
+                    "videoBitrate": 939364,
+                    "audioCodec": "aac",
+                    "rotate": 0,
+                    "psnr": 44.430999755859375,
+                    "videoCodec": "hevc",
+                    "ssim": 0,
+                    "fps": 30,
+                    "audioDuration": 8453,
+                    "masterUrl": "http://sns-video-v3.xhscdn.com/stream/1/110/130/01e724d4f77653d50103700197713681fb_130.mp4?sign=a8e29fc25c92e29d50ce13cfefc50b59&t=6a0a4828",
+                    "volume": 0,
+                    "hdrType": 0,
+                    "backupUrls": [
+                      "http://sns-bak-v1.xhscdn.com/stream/1/110/130/01e724d4f77653d50103700197713681fb_130.mp4",
+                      "http://sns-bak-v6.xhscdn.com/stream/1/110/130/01e724d4f77653d50103700197713681fb_130.mp4"
+                    ],
+                    "height": 1920,
+                    "avgBitrate": 1014475,
+                    "videoDuration": 8466,
+                    "audioChannels": 2,
+                    "vmaf": -1,
+                    "format": "mp4",
+                    "duration": 8467,
+                    "weight": 70,
+                    "streamType": 130
+                  }
+                ],
+                "h266": [],
+                "av1": [],
+                "h264": [
+                  {
+                    "audioChannels": 2,
+                    "defaultStream": 0,
+                    "ssim": 0,
+                    "psnr": 0,
+                    "width": 720,
+                    "videoBitrate": 935098,
+                    "videoDuration": 8466,
+                    "weight": 62,
+                    "duration": 8467,
+                    "audioDuration": 8450,
+                    "audioCodec": "aac",
+                    "backupUrls": [
+                      "http://sns-bak-v1.xhscdn.com/stream/110/259/01e724d4f77653d50103700392e7e03e3b_259.mp4",
+                      "http://sns-bak-v6.xhscdn.com/stream/110/259/01e724d4f77653d50103700392e7e03e3b_259.mp4"
+                    ],
+                    "hdrType": 0,
+                    "streamDesc": "WM_X264_MP4_web",
+                    "height": 1280,
+                    "volume": 0,
+                    "vmaf": -1,
+                    "videoCodec": "h264",
+                    "streamType": 259,
+                    "audioBitrate": 65158,
+                    "masterUrl": "http://sns-video-v3.xhscdn.com/stream/110/259/01e724d4f77653d50103700392e7e03e3b_259.mp4?sign=0b1b9518e0d86176eb50a2c9ec7f1568&t=6a0a4828",
+                    "rotate": 0,
+                    "qualityType": "HD",
+                    "format": "mp4",
+                    "size": 1066812,
+                    "avgBitrate": 1007971,
+                    "fps": 30
+                  }
+                ]
+              }
+            },
+            "image": {
+              "thumbnailFileid": "110/0/01e724d4f77653d500100000000192e7e00081_0.webp"
+            },
+            "capa": {
+              "duration": 8
+            }
+          },
+          "atUserList": []
+        }
+      }
+    },
+    "serverRequestInfo": {
+      "state": "success",
+      "errorCode": 0,
+      "errMsg": ""
+    },
+    "volume": 0,
+    "recommendVideoMap": {},
+    "videoFeedType": "note_source",
+    "rate": 1,
+    "currentNoteId": "6724d4fa000000001a01fc1e",
+    "forceScrollToComment": false,
+    "mediaWidth": 450,
+    "noteHeight": 800
+  }
+}

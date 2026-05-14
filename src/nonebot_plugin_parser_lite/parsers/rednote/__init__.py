@@ -5,7 +5,6 @@ from urllib.parse import parse_qsl
 from ...utils.format import replace_placeholder_to_sticker
 from ..base import (
     BaseParser,
-    Comment,
     ParseException,
     Platform,
     PlatformEnum,
@@ -13,8 +12,8 @@ from ..base import (
     pconfig,
 )
 from ..cookie import ck2dict
-from .discovery import REDNOTE_PATTERN, NoteDetailWrapper
-from .discovery import decoder as discoveryDecoder
+from .explore import REDNOTE_PATTERN, NoteDetailMap
+from .explore import decoder as exploreDecoder
 
 INITIAL_STATE = re.compile(
     pattern=r"window\.__INITIAL_STATE__=(.*?)</script>",
@@ -47,7 +46,7 @@ class RedNoteParser(BaseParser):
         url = f"https://{searched[0]}"
         return await self.parse_with_redirect(url, self.ios_headers)
 
-    # https://www.xiaohongshu.com/discovery/item/691e68a8000000001e02bcda?xsec_token=CBwYRkYkdf7BHsEy2bVC9-ZYDHXJDjIRl6QI8xzqm-gEg
+    # https://www.xiaohongshu.com/explore/691e68a8000000001e02bcda?xsec_token=CBwYRkYkdf7BHsEy2bVC9-ZYDHXJDjIRl6QI8xzqm-gEg
     @handle(
         "xiaohongshu.com",
         r"(?P<type>explore|search_result|discovery/item)/(?P<note_id>[0-9a-zA-Z]+)\?(?P<qs>[A-Za-z0-9._%&+=/#@-]+)",
@@ -58,7 +57,7 @@ class RedNoteParser(BaseParser):
         qs = searched["qs"]
 
         # 原始 URL（保留所有 query 参数）
-        url = f"https://www.xiaohongshu.com/discovery/item/{note_id}"
+        url = f"https://www.xiaohongshu.com/explore/{note_id}"
 
         # 解析 query string，检查 xsec_token
         params_dict = dict(parse_qsl(qs, keep_blank_values=True))
@@ -71,7 +70,7 @@ class RedNoteParser(BaseParser):
 
         response = await self.httpx.get(
             url,
-            headers=self.ios_headers,
+            headers=self.headers,
             cookies=ck2dict(pconfig.xhs_ck) if pconfig.xhs_ck else None,
         )
         response.raise_for_status()
@@ -81,16 +80,16 @@ class RedNoteParser(BaseParser):
             raw = matched[1].replace("undefined", "null")
         else:
             raise ParseException("小红书分享链接失效或内容已删除")
-        init_state = discoveryDecoder.decode(raw)
-        note_data = init_state.noteData.data
+        init_state = exploreDecoder.decode(raw)
+        note_data = init_state.note.noteDetailMap[init_state.note.currentNoteId]
 
         result = self._build_result(note_data)
         result.url = f"https://www.xiaohongshu.com/discovery/item/{note_id}?xsec_token={xsec_token}"
         return result
 
-    def _build_result(self, note_data: NoteDetailWrapper):
+    def _build_result(self, note_data: NoteDetailMap):
         """从 note_data 构建最终解析结果"""
-        note_detail = note_data.noteData
+        note_detail = note_data.note
 
         contents = replace_placeholder_to_sticker(
             note_detail.desc, REDNOTE_PATTERN, "rednote"
@@ -102,8 +101,6 @@ class RedNoteParser(BaseParser):
             avatar_url=note_detail.avatar_url,
         )
 
-        comment_list = self._build_comments(note_data)
-
         return self.result(
             title=note_detail.title,
             author=author,
@@ -113,45 +110,6 @@ class RedNoteParser(BaseParser):
                 share_count=note_detail.interactInfo.shareCount,
                 collect_count=note_detail.interactInfo.collectedCount,
             ),
-            comments=comment_list,
             content=contents,
             timestamp=note_detail.lastUpdateTime // 1000,
         )
-
-    def _build_comments(self, note_data: NoteDetailWrapper) -> list[Comment]:
-        """从 note_data.comments_list 构建标准 Comment 列表"""
-        comment_list: list[Comment] = []
-
-        for c in note_data.commentData.comments:
-            comment = self.create_comment(
-                author=self.create_author(
-                    name=c.user.nickname,
-                    avatar_url=c.user.image,
-                ),
-                content=c.content,
-                timestamp=c.time // 1000,
-                stats=self.create_stats(
-                    like_count=c.likeViewCount,
-                    comment_count=str(len(c.subComments)),
-                ),
-                location=c.ipLocation,
-            )
-
-            for sub in c.subComments:
-                comment.replies.append(
-                    self.create_comment(
-                        author=self.create_author(
-                            name=sub.user.nickname,
-                            avatar_url=sub.user.image,
-                        ),
-                        content=sub.content,
-                        timestamp=sub.time // 1000,
-                        stats=self.create_stats(
-                            like_count=sub.likeViewCount,
-                        ),
-                    )
-                )
-
-            comment_list.append(comment)
-
-        return comment_list
