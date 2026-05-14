@@ -89,4 +89,5 @@ async def clean_plugin_cache() -> None:
 
     # 资源清理完毕后，清理 result 缓存并重连浏览器
     clear_result_cache()
+    BrowserManager.clear_cache()
     BrowserManager.reconnect()

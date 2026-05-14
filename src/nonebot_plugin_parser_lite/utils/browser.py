@@ -174,14 +174,35 @@ class BrowserManager:
 
     @classmethod
     def reconnect(cls):
+        if getattr(cls, "BROWSER", None) is None:
+            logger.warning(
+                "BrowserManager.reconnect() called but BROWSER is not initialized."
+            )
+            return
         cls.BROWSER.reconnect()
 
     @classmethod
+    def clear_cache(cls):
+        logger.info(
+            "BrowserManager.clear_cache() called but BROWSER is not initialized."
+        )
+        cls.BROWSER.clear_cache(cookies=False)
+
+    @classmethod
     def new_tab(cls, *args, **kwargs):
+        if getattr(cls, "BROWSER", None) is None:
+            raise RuntimeError(
+                "BrowserManager.new_tab() called before browser initialization"
+            )
         return cls.BROWSER.new_tab(*args, **kwargs)
 
     @classmethod
     def quit(cls):
+        if getattr(cls, "BROWSER", None) is None:
+            logger.info(
+                "BrowserManager.quit() called but BROWSER is not initialized."
+            )
+            return
         cls.BROWSER.quit(del_data=True)
 
 
