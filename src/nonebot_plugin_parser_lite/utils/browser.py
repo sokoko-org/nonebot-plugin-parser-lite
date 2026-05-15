@@ -183,9 +183,11 @@ class BrowserManager:
 
     @classmethod
     def clear_cache(cls):
-        logger.info(
-            "BrowserManager.clear_cache() called but BROWSER is not initialized."
-        )
+        if getattr(cls, "BROWSER", None) is None:
+            logger.info(
+                "BrowserManager.clear_cache() called but BROWSER is not initialized."
+            )
+            return
         cls.BROWSER.clear_cache(cookies=False)
 
     @classmethod
