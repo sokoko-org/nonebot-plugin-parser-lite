@@ -18,7 +18,9 @@ from nonebot_plugin_apscheduler import scheduler
 
 aq = bilibili_api.video.AudioQuality
 if aq.DOLBY.value == 30255:
-    object.__setattr__(aq.DOLBY, "_value_", 30250)
+    aq.DOLBY._value_ = 30250
+    aq._value2member_map_.pop(30255, None)
+    aq._value2member_map_[30250] = aq.DOLBY
 
 
 from .config import Config, pconfig
