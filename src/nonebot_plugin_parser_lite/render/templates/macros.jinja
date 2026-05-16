@@ -59,10 +59,15 @@
                         <div class="text-sm text-gray-700 leading-relaxed">{{ render_content_items(comment.content) }}</div>
                         <div class="flex items-center space-x-2 text-xs text-gray-400 uppercase tracking-tight">
                             <span>{{ comment.formatted_datetime }}</span>
-                            {% if comment.location %}<span>{{ comment.location }}</span>{% endif %}
+                            {% if comment.author.location %}<span>{{ comment.author.location }}</span>{% endif %}
                             {% if comment.stats.like_count %}
                                 <span class="flex items-center">
                                     <i class="fa-icon fa-heart mr-1 mt-0.5"></i> {{ comment.stats.like_count }}
+                                </span>
+                            {% endif %}
+                            {% if comment.stats.comment_count %}
+                                <span class="flex items-center">
+                                    <i class="fa-icon fa-comment-dots mr-1 mt-0.5"></i> {{ comment.stats.comment_count }}
                                 </span>
                             {% endif %}
                         </div>
@@ -77,10 +82,15 @@
                                             <div class="text-sm text-gray-600 leading-snug">{{ render_content_items(reply.content) }}</div>
                                             <div class="flex items-center space-x-3 text-xs text-gray-400 uppercase">
                                                 <span>{{ reply.formatted_datetime }}</span>
-                                                {% if reply.location %}<span>{{ reply.location }}</span>{% endif %}
+                                                {% if reply.author.location %}<span>{{ reply.author.location }}</span>{% endif %}
                                                 {% if reply.stats.like_count %}
                                                     <span class="flex items-center">
                                                         <i class="fa-icon fa-heart mr-1 mt-0.5"></i> {{ reply.stats.like_count }}
+                                                    </span>
+                                                {% endif %}
+                                                {% if reply.stats.comment_count %}
+                                                    <span class="flex items-center">
+                                                        <i class="fa-icon fa-comment-dots mr-1 mt-0.5"></i> {{ reply.stats.comment_count }}
                                                     </span>
                                                 {% endif %}
                                             </div>
@@ -274,7 +284,7 @@
                     </div>
                     <p class="text-xs text-slate-500 mt-2 font-medium space-x-2">
                         <span>{{ result.formatted_datetime }}</span>
-                        {% if result.extra and result.extra.ip %}<span>IP {{ result.extra.ip }}</span>{% endif %}
+                        {% if result.author.location %}<span>{{ result.author.location }}</span>{% endif %}
                     </p>
                 </div>
             </div>

@@ -93,7 +93,9 @@ class DouyinParser(BaseParser):
         comments = [
             self.create_comment(
                 author=self.create_author(
-                    name=comment.user.nickname, avatar_url=comment.user.avatarUri
+                    name=comment.user.nickname,
+                    avatar_url=comment.user.avatarUri,
+                    location=comment.ipLabel,
                 ),
                 content=comment.content,
                 timestamp=comment.createTime,
@@ -101,7 +103,6 @@ class DouyinParser(BaseParser):
                     like_count=format_num(comment.diggCount),
                     comment_count=format_num(comment.replyTotal),
                 ),
-                location=comment.ipLabel,
             )
             for comment in data.comment.comments
         ]
@@ -145,7 +146,9 @@ class DouyinParser(BaseParser):
         comments = [
             self.create_comment(
                 author=self.create_author(
-                    name=comment.user.nickname, avatar_url=comment.user.avatar_url
+                    name=comment.user.nickname,
+                    avatar_url=comment.user.avatar_url,
+                    location=comment.ip_label,
                 ),
                 content=[comment.text],
                 timestamp=comment.createTime,
@@ -153,7 +156,6 @@ class DouyinParser(BaseParser):
                     like_count=format_num(comment.digg_count),
                     comment_count=format_num(comment.reply_comment_total),
                 ),
-                location=comment.ip_label,
             )
             for comment in data.comment_list.comments
         ]

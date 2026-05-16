@@ -89,6 +89,7 @@ class LofterParser(BaseParser):
                     name=c.publisherBlogInfo.blogNickName,
                     avatar_url=c.publisherBlogInfo.bigAvaImg,
                     id=c.publisherBlogInfo.blogName,
+                    location=c.ipLocation,
                 ),
                 content=c.content,
                 timestamp=c.publishTime // 1000,
@@ -102,17 +103,16 @@ class LofterParser(BaseParser):
                             name=s.publisherBlogInfo.blogNickName,
                             avatar_url=s.publisherBlogInfo.bigAvaImg,
                             id=s.publisherBlogInfo.blogName,
+                            location=s.ipLocation,
                         ),
                         content=s.content,
                         timestamp=s.publishTime // 1000,
                         stats=self.create_stats(
                             like_count=format_num(s.likeCount),
                         ),
-                        location=s.ipLocation,
                     )
                     for s in c.l2Comments
                 ],
-                location=c.ipLocation,
             )
             for c in comment_list.comments
         ]

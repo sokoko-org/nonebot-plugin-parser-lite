@@ -40,6 +40,7 @@ def create_author(
     avatar_url: str | None = None,
     description: str | None = None,
     id: str | None = None,
+    location: str | None = None,
 ):
     """
     创建作者对象
@@ -48,10 +49,13 @@ def create_author(
     :param avatar_url: 作者头像 URL
     :param description: 作者描述
     :param id: 作者 ID
+    :param location: 位置信息
     """
 
     avatar_task = DOWNLOADER.download_img(url=avatar_url) if avatar_url else None
-    return Author(name=name, id=id, avatar=avatar_task, description=description)
+    return Author(
+        name=name, id=id, avatar=avatar_task, description=description, location=location
+    )
 
 
 def create_video(
@@ -293,7 +297,6 @@ def create_comment(
     content: Sequence[MediaContent | str | None],
     timestamp: int | None = None,
     stats: Stats | None = None,
-    location: str | None = None,
     replies: list[Comment] | None = None,
     parent_author: Author | None = None,
 ):
@@ -317,7 +320,6 @@ def create_comment(
         content=content,
         timestamp=timestamp,
         stats=stats or Stats(),
-        location=location,
         replies=replies,
         parent_author=parent_author,
     )

@@ -82,7 +82,6 @@ class KuaiShouParser(BaseParser):
         if not video_url and not img_urls and cover_url:
             contents.append(self.create_image(url=cover_url))
 
-
         # 构建作者
         author = self.create_author(name=photo.name, avatar_url=photo.headUrl)
         comments = self.format_comments(data_map.comments)
@@ -106,8 +105,7 @@ class KuaiShouParser(BaseParser):
         for rc in parent_comments:
             rootComment = self.create_comment(
                 author=self.create_author(
-                    name=rc.author_name,
-                    avatar_url=rc.headurl,
+                    name=rc.author_name, avatar_url=rc.headurl, location=rc.authorArea
                 ),
                 content=replace_placeholder_to_sticker(
                     rc.content, KUAISHOU_PATTERN, "kuaishou"
@@ -117,7 +115,6 @@ class KuaiShouParser(BaseParser):
                     like_count=format_num(rc.likedCount),
                     comment_count=format_num(rc.subCommentCount),
                 ),
-                location=rc.authorArea,
             )
 
             for sc in comments.subCommentsMap.get(str(rc.comment_id), [])[:3]:
@@ -127,6 +124,7 @@ class KuaiShouParser(BaseParser):
                         author=self.create_author(
                             name=sc.author_name,
                             avatar_url=sc.headurl,
+                            location=sc.authorArea,
                         ),
                         content=replace_placeholder_to_sticker(
                             sc.content, KUAISHOU_PATTERN, "kuaishou"
@@ -135,7 +133,6 @@ class KuaiShouParser(BaseParser):
                         stats=self.create_stats(
                             like_count=format_num(sc.likedCount),
                         ),
-                        location=sc.authorArea,
                     )
                 )
             result.append(rootComment)
