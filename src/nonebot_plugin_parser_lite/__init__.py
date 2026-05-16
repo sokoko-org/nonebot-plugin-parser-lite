@@ -40,6 +40,7 @@ __plugin_meta__ = PluginMetadata(
         "author": "molanp",
         "homepage": "https://github.com/molanp/nonebot-plugin-parser-lite",
         "version": "1.2.3",
+        "plugin_type": "NORMAL",
     },
 )
 
