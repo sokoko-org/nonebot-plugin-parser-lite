@@ -246,6 +246,7 @@ class BaseParser:
         avatar_url: str | None = None,
         description: str | None = None,
         id: str | None = None,
+        location: str | None = None,
     ):
         """
         创建作者对象
@@ -254,17 +255,20 @@ class BaseParser:
         :param avatar_url: 作者头像 URL
         :param description: 作者描述
         :param id: 作者 ID
+        :param location: 位置信息
         """
 
         return create_author(
-            name=name, avatar_url=avatar_url, description=description, id=id
+            name=name,
+            avatar_url=avatar_url,
+            description=description,
+            id=id,
+            location=location,
         )
 
     def create_video(
         self,
-        url_or_task: str
-        | DownloadTaskWrapper[Path]
-        | VideoDownloadFunc,
+        url_or_task: str | DownloadTaskWrapper[Path] | VideoDownloadFunc,
         cover_url: str | None = None,
         duration: float = 0.0,
         video_name: str | None = None,
@@ -470,7 +474,6 @@ class BaseParser:
         content: Sequence[MediaContent | str | None],
         timestamp: int | None = None,
         stats: Stats | None = None,
-        location: str | None = None,
         replies: list[Comment] | None = None,
         parent_author: Author | None = None,
     ):
@@ -481,7 +484,6 @@ class BaseParser:
         :param content: 评论内容
         :param timestamp: 评论时间戳
         :param stats: 评论统计信息
-        :param location: 评论位置
         :param replies: 评论回复
         :param parent_author: 评论的父级作者
         """
@@ -491,7 +493,6 @@ class BaseParser:
             content=content,
             timestamp=timestamp,
             stats=stats,
-            location=location,
             replies=replies,
             parent_author=parent_author,
         )

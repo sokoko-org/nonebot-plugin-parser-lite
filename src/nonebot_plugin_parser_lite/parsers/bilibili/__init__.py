@@ -1206,11 +1206,11 @@ class BilibiliParser(BaseParser):
                 author=self.create_author(
                     name=member.get("uname", ""),
                     avatar_url=member.get("avatar"),
+                    location=reply_control.get("location"),
                 ),
                 content=processed_content,
                 timestamp=raw.get("ctime", 0),
                 stats=self.create_stats(like_count=raw.get("like", 0)),
-                location=reply_control.get("location"),
                 parent_author=parent_author,
             )
 

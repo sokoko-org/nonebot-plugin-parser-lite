@@ -95,6 +95,7 @@ class HeyBoxParser(BaseParser):
                 author=self.create_author(
                     name=root.user.username,
                     avatar_url=root.user.avatar_url,
+                    location=root.ip_location,
                 ),
                 content=root.content,
                 timestamp=root.create_at,
@@ -102,7 +103,6 @@ class HeyBoxParser(BaseParser):
                     like_count=format_num(root.up),
                     comment_count=format_num(root.child_num),
                 ),
-                location=root.ip_location,
             )
 
             for child in comment_list[1:]:
@@ -111,6 +111,7 @@ class HeyBoxParser(BaseParser):
                         author=self.create_author(
                             name=child.user.username,
                             avatar_url=child.user.avatar_url,
+                            location=child.ip_location,
                         ),
                         content=child.content,
                         timestamp=child.create_at,
@@ -118,7 +119,6 @@ class HeyBoxParser(BaseParser):
                             like_count=format_num(child.up),
                             comment_count=format_num(child.child_num),
                         ),
-                        location=child.ip_location,
                     )
                 )
 

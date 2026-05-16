@@ -168,7 +168,7 @@ class Platform:
         )
 
 
-@dataclass(repr=False, slots=True)
+@dataclass(slots=True)
 class Author:
     """作者信息"""
 
@@ -177,15 +177,17 @@ class Author:
     id: str | None = None
     """作者id"""
     avatar: DownloadTaskWrapper[Path] | None = None
-    """作者头像 URL 或本地路径"""
+    """作者头像"""
     description: str | None = None
     """作者个性签名等"""
+    location: str | None = None
+    """位置信息"""
 
     async def get_avatar_path(self) -> Path | None:
         return None if self.avatar is None else await self.avatar
 
 
-@dataclass(repr=False, slots=True)
+@dataclass(slots=True)
 class Stats:
     """统计信息"""
 
@@ -202,14 +204,6 @@ class Stats:
     extra: dict[str, Any] = field(default_factory=dict)
     """额外信息, 比如弹幕数/硬币数"""
 
-    def __repr__(self) -> str:
-        prefix = self.__class__.__name__
-        return (
-            f"{prefix}(view_count={self.view_count}, like_count={self.like_count}, "
-            f"collect_count={self.collect_count}, share_count={self.share_count}, "
-            f"comment_count={self.comment_count}, extra={self.extra})"
-        )
-
 
 @dataclass(repr=False, slots=True)
 class Comment:
@@ -223,8 +217,6 @@ class Comment:
     """发布时间戳，单位秒"""
     stats: Stats = field(default_factory=Stats)
     """统计信息"""
-    location: str | None = None
-    """位置信息，可选"""
     replies: list["Comment"] = field(default_factory=list)
     """子评论列表"""
     parent_author: Author | None = None

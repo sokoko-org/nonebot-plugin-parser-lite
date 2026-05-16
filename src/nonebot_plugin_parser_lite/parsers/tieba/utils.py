@@ -220,6 +220,7 @@ def build_comments(posts: list[Post], poster_id: int) -> list[Comment]:
             name=post.user.show_name,
             avatar_url=f"http://tb.himg.baidu.com/sys/portraith/item/{post.user.portrait}",
             id=post.user.portrait,
+            location=post.user.ip,
         )
         # 处理楼中楼评论
         child_posts = []
@@ -230,13 +231,13 @@ def build_comments(posts: list[Post], poster_id: int) -> list[Comment]:
                         name=comment.user.show_name,
                         avatar_url=f"http://tb.himg.baidu.com/sys/portraith/item/{comment.user.portrait}",
                         id=comment.user.portrait,
+                        location=comment.user.ip,
                     ),
                     content=build_comment(comment.contents),
                     timestamp=comment.create_time,
                     stats=create_stats(
                         like_count=str(comment.agree) if comment.agree else None
                     ),
-                    location=comment.user.ip,
                     parent_author=comment_author,
                 )
                 for comment in post.comments[:3]
@@ -249,7 +250,6 @@ def build_comments(posts: list[Post], poster_id: int) -> list[Comment]:
                 stats=create_stats(
                     like_count=str(post.agree), comment_count=str(post.reply_num)
                 ),
-                location=post.user.ip,
                 replies=child_posts,
             )
         )

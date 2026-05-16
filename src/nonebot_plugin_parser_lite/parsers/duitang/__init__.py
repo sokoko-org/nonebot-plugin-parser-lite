@@ -175,6 +175,7 @@ class DuiTangParser(BaseParser):
                     name=root_comment.sender.username,
                     avatar_url=root_comment.sender.avatar,
                     id=str(root_comment.sender.id),
+                    location=root_comment.ipaddr,
                 ),
                 content=root_content,
                 timestamp=root_comment.create_time // 1000,
@@ -182,7 +183,6 @@ class DuiTangParser(BaseParser):
                     like_count=format_num(root_comment.like_count),
                     comment_count=format_num(root_comment.reply_count),
                 ),
-                location=root_comment.ipaddr,
             )
 
             for sub_comment in root_comment.replies:
@@ -191,10 +191,10 @@ class DuiTangParser(BaseParser):
                         author=self.create_author(
                             name=sub_comment.sender.username,
                             avatar_url=sub_comment.sender.avatar,
+                            location=sub_comment.ipaddr,
                         ),
                         content=[sub_comment.content],
                         timestamp=sub_comment.add_datetime_ts // 1000,
-                        location=sub_comment.ipaddr,
                     )
                 )
 

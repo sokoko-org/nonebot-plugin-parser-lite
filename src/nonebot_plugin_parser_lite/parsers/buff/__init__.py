@@ -36,6 +36,7 @@ class BuffParser(BaseParser):
                     name=sc.author.nickname,
                     avatar_url=sc.author.avatar,
                     id=sc.author.user_id,
+                    location=sc.author.ip_location,
                 ),
                 content=sc.content,
                 timestamp=sc.created_at,
@@ -43,7 +44,6 @@ class BuffParser(BaseParser):
                     like_count=format_num(sc.ups_num),
                     comment_count=format_num(len(sc.replies)),
                 ),
-                location=sc.author.ip_location,
             )
             for sc in c.replies
         ]
@@ -52,6 +52,7 @@ class BuffParser(BaseParser):
                 name=c.author.nickname,
                 avatar_url=c.author.avatar,
                 id=c.author.user_id,
+                location=c.author.ip_location,
             ),
             content=c.content,
             timestamp=c.created_at,
@@ -60,7 +61,6 @@ class BuffParser(BaseParser):
                 comment_count=format_num(len(c.replies)),
             ),
             replies=sub_comments,
-            location=c.author.ip_location,
         )
 
     async def fetch_comments(self, comment_type: int, type_id: str) -> list[Comment]:
