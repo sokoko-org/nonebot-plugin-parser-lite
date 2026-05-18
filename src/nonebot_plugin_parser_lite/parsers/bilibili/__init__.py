@@ -34,7 +34,6 @@ from ..base import (
     BaseParser,
     Comment,
     DownloadException,
-    DurationLimitException,
     MediaContent,
     ParseException,
     Platform,
@@ -329,8 +328,6 @@ class BilibiliParser(BaseParser):
         v_url, a_url = await self.extract_download_urls(
             video=video, page_index=page_info.index
         )
-        if page_info.duration > pconfig.duration_maximum:
-            raise DurationLimitException(page_info.duration)
 
         class BiliVideoDownloader:
             def __init__(

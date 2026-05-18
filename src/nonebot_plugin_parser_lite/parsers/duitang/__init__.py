@@ -85,7 +85,7 @@ class DuiTangParser(BaseParser):
 
         :param atlas_id: 图集 ID。
         :return: 转换后的图集详情数据。
-        :raises ValueError: 当接口返回 message 不为 "success" 时抛出。
+        :raise ValueError: 当接口返回 message 不为 "success" 时抛出。
         """
         response = await self.httpx.get(
             "https://www.duitang.com/napi/vienna/atlas/detail/",
@@ -106,7 +106,7 @@ class DuiTangParser(BaseParser):
 
         :param blog_id: 图集 ID。
         :return: 转换后的博客图集详情数据。
-        :raises ValueError: 当接口返回 message 不为 "success" 时抛出。
+        :raise ValueError: 当接口返回 message 不为 "success" 时抛出。
         """
         response = await self.httpx.get(
             "https://www.duitang.com/napi/blog/with_instance_tag/detail/",
@@ -137,7 +137,7 @@ class DuiTangParser(BaseParser):
         :param subject_type: 图集类型，作为评论主体类型。
         :param limit: 拉取的评论条数上限。
         :return: 转换后的评论数据对象。
-        :raises ValueError: 当接口返回 message 不为 "success" 时抛出。
+        :raise ValueError: 当接口返回 message 不为 "success" 时抛出。
         """
         response = await self.httpx.get(
             "https://www.duitang.com/napi/vienna/comment/list/",
