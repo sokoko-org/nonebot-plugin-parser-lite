@@ -24,6 +24,12 @@ class MediaContent:
     _size_bytes: int | None = field(default=None, init=False, repr=False)
 
     async def get_path(self) -> Path:
+        """
+        获取媒体文件路径
+
+        :raise ZeroSizeException:  文件大小为零
+        :raise SizeLimitException: 文件大小超过限制
+        """
         return await self.path_task
 
     @staticmethod
