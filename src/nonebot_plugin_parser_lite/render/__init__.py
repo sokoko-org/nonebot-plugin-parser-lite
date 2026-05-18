@@ -152,9 +152,10 @@ class Renderer:
         """
         处理需要立即发送的音视频媒体，返回对应的消息段
 
-        :raises ZeroSizeException: 资源大小为 0 时抛出
-        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raises DownloadException: 重试多次仍失败时抛出
+        :raise ZeroSizeException: 资源大小为 0 时抛出
+        :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
+        :raise DurationLimitException: 媒体时长超过配置的最大限制时抛出
+        :raise DownloadException: 重试多次仍失败时抛出
         """
         if not isinstance(cont, (VideoContent, AudioContent)):
             return

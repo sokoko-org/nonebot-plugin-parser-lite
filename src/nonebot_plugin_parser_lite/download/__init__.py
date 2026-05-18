@@ -73,9 +73,9 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 下载完成后的本地文件路径
-        :raises ZeroSizeException: 资源大小为 0 时抛出
-        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raises DownloadException: 重试多次仍失败时抛出
+        :raise ZeroSizeException: 资源大小为 0 时抛出
+        :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
+        :raise DownloadException: 重试多次仍失败时抛出
         """
         file_name = make_filename(file_name) if file_name else generate_file_name(url)
         file_path = self.cache_dir / file_name
@@ -187,9 +187,9 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 下载完成后的视频文件路径
-        :raises ZeroSizeException: 资源大小为 0 时抛出
-        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raises DownloadException: 重试多次仍失败时抛出
+        :raise ZeroSizeException: 资源大小为 0 时抛出
+        :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
+        :raise DownloadException: 重试多次仍失败时抛出
         """
         if video_name is None:
             video_name = generate_file_name(url, ".mp4")
@@ -214,8 +214,8 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 最终合并并转封装后的 mp4 文件路径
-        :raises SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raises DownloadException: m3u8 解析、下载或转封装失败时抛出
+        :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
+        :raise DownloadException: m3u8 解析、下载或转封装失败时抛出
         """
         file_id = hashlib.md5(url.encode()).hexdigest()[:16]
 
@@ -365,7 +365,7 @@ class StreamDownloader:
         :param m3u8_url: m3u8 播放列表链接地址
 
         :return: 展平后的 ts 片段完整下载链接列表
-        :raises DownloadException: 解析 m3u8 内容失败或未找到有效子列表时抛出
+        :raise DownloadException: 解析 m3u8 内容失败或未找到有效子列表时抛出
         """
 
         logger.info(f"[StreamDownloader] 开始解析 m3u8: {m3u8_url}")
@@ -420,7 +420,7 @@ class StreamDownloader:
         :param url: 目标文本资源的链接地址
 
         :return: 响应体的文本内容
-        :raises DownloadException: 请求状态码非 200 时抛出
+        :raise DownloadException: 请求状态码非 200 时抛出
         """
         # 准备请求 headers
         fetch_headers = self.headers.copy()
@@ -479,7 +479,7 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 下载完成后的音频文件路径
-        :raises DownloadException: 下载过程中发生错误时抛出
+        :raise DownloadException: 下载过程中发生错误时抛出
         """
         if audio_name is None:
             audio_name = generate_file_name(url, ".mp3")
@@ -503,7 +503,7 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 下载完成后的图片文件路径
-        :raises DownloadException: 下载过程中发生错误时抛出
+        :raise DownloadException: 下载过程中发生错误时抛出
         """
         if img_name is None:
             img_name = generate_file_name(url, ".jpg")
@@ -524,7 +524,7 @@ class StreamDownloader:
         :param file_name: 合并后输出文件名(不含扩展名)
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :return: 合并后的视频文件本地路径
-        :raises DownloadException: 下载或合并过程中发生错误时抛出
+        :raise DownloadException: 下载或合并过程中发生错误时抛出
         """
         v_path, a_path = await asyncio.gather(
             self.download_video(url=v_url, ext_headers=ext_headers),
