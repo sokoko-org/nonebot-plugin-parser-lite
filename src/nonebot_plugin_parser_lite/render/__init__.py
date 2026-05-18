@@ -158,6 +158,8 @@ class Renderer:
         """
         if not isinstance(cont, (VideoContent, AudioContent)):
             return
+        if cont.duration > pconfig.duration_maximum:
+            raise DurationLimitException(cont.duration)
 
         path = await cont.get_path()
         if (isinstance(cont, VideoContent) and pconfig.need_upload_video) or (
