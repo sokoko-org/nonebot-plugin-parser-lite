@@ -332,7 +332,7 @@
             <footer class="px-8 py-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center text-[10px] font-black text-gray-300 uppercase tracking-widest antialiased">
                 <span>{{ result.bot_name }} Parser · Design negichan</span>
                 {% if result.qrcode_path %}
-                    <img src="{{ result.qrcode_path }}" width="50px" />
+                    <img src="{{ result.qrcode_path }}" style="width:50px;" />
                 {% else %}
                     <span>Rendering at {{ result.rendering_time }}</span>
                 {% endif %}
