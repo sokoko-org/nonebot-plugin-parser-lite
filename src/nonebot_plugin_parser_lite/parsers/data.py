@@ -278,10 +278,6 @@ class ParseResult:
     def repost_display_url(self) -> str | None:
         return f"原帖: {self.repost.url}" if self.repost and self.repost.url else None
 
-    @property
-    def extra_info(self) -> str | None:
-        return self.extra.get("info")
-
     async def get_cover_path(self) -> Path | None:
         """获取封面路径"""
         # 先检查视频内容

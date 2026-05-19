@@ -1,3 +1,4 @@
+import base64
 from collections.abc import AsyncGenerator, Awaitable
 import datetime
 from io import BytesIO
@@ -280,10 +281,6 @@ class Renderer:
     def append_url(self) -> bool:
         return pconfig.append_url
 
-    @property
-    def append_qrcode(self) -> bool:
-        return pconfig.append_qrcode
-
     async def render_image(self, result: ParseResult) -> bytes:
         """使用 HTML 绘制通用社交媒体帖子卡片"""
         # 准备模板数据
@@ -344,7 +341,6 @@ class Renderer:
         data: dict[str, Any] = {
             "title": result.title,
             "formatted_datetime": result.formatted_datetime,
-            "extra_info": result.extra_info,
             "extra": result.extra,
             "platform": {
                 "display_name": result.platform.display_name,
@@ -368,29 +364,21 @@ class Renderer:
         if result.repost:
             data["repost"] = await self.resolve_parse_result(result.repost)
 
-        # 添加二维码支持
         if pconfig.append_qrcode and result.url:
-            # 生成二维码
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=1,
                 box_size=10,
-                border=4,
+                border=1,
             )
             qr.add_data(result.url)
             qr.make(fit=True)
             img = qr.make_image(fill_color="black", back_color="white")
-
-            # 将二维码转换为 base64 编码
             buffer = BytesIO()
-            img.save(buffer, format="PNG")  # type: ignore
+            img.save(buffer, format="PNG")  # pyright: ignore[reportCallIssue]
             buffer.seek(0)
-            import base64
-
             img_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-
-            # 添加 base64 编码的图片数据到模板数据
-            data["qr_code_path"] = f"data:image/png;base64,{img_base64}"
+            data["qrcode_path"] = f"data:image/png;base64,{img_base64}"
 
         return data
 
