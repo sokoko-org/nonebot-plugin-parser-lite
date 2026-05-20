@@ -93,12 +93,34 @@ def _get_enabled_parser_classes() -> list[type[BaseParser]]:
 # 关键词 -> Parser 映射
 T = TypeVar("T", bound=BaseParser)
 
+# 已实例化的 parser（用于统一关闭 httpx）
 _ALL_PARSERS: list[BaseParser] = []
+# 关键词 -> parser 实例（懒加载后填充）
 _KEYWORD_PARSER_MAP: dict[str, BaseParser] = {}
+# 类型 -> parser 实例
+_TYPE_PARSER_MAP: dict[type[BaseParser], BaseParser] = {}
+# 启用的 parser class（启动时收集）
+_ENABLED_PARSER_CLASSES: list[type[BaseParser]] = []
+
+
+def _ensure_parser_instance(parser_cls: type[BaseParser]) -> BaseParser:
+    """按需实例化 parser，并缓存结果。"""
+    parser = _TYPE_PARSER_MAP.get(parser_cls)
+    if parser is not None:
+        return parser
+
+    parser = parser_cls()
+    _TYPE_PARSER_MAP[parser_cls] = parser
+    _ALL_PARSERS.append(parser)
+    return parser
 
 
 def get_parser(keyword: str) -> BaseParser:
-    """根据注册的关键字获取对应的解析器实例。"""
+    """根据注册的关键字获取解析器实例。
+
+    注意：在 register_parser_matcher 中会把本函数替换为懒加载版本。
+    这里保留一个兜底实现，避免在 startup 之前误用。
+    """
     parser = _KEYWORD_PARSER_MAP.get(keyword)
     if parser is None:
         raise KeyError(f"未找到关键字 {keyword!r} 对应的 parser")
@@ -106,10 +128,20 @@ def get_parser(keyword: str) -> BaseParser:
 
 
 def get_parser_by_type(parser_type: type[T]) -> T:
-    """根据解析器类型获取已注册的解析器实例。"""
-    for parser in _ALL_PARSERS:
-        if isinstance(parser, parser_type):
-            return parser
+    """根据解析器类型获取解析器实例（懒加载）。
+
+    Bilibili 登录等功能会用到。
+    """
+    # 先看是否已有实例
+    for cls, inst in _TYPE_PARSER_MAP.items():
+        if issubclass(cls, parser_type):
+            return inst  # type: ignore[return-value]
+
+    # 没有实例时，在启用列表中寻找对应类
+    for cls in _ENABLED_PARSER_CLASSES:
+        if issubclass(cls, parser_type):
+            return _ensure_parser_instance(cls)  # type: ignore[return-value]
+
     raise ValueError(f"未找到类型为 {parser_type.__name__} 的 parser 实例")
 
 
@@ -118,16 +150,38 @@ driver = get_driver()
 
 @driver.on_startup
 def register_parser_matcher() -> None:
-    """在启动时注册各平台解析器及其匹配规则。"""
+    """在启动时注册各平台解析器及其匹配规则（懒加载 parser 实例）。"""
+    global _ENABLED_PARSER_CLASSES, _KEYWORD_PARSER_MAP
+
     enabled_classes = _get_enabled_parser_classes()
+    _ENABLED_PARSER_CLASSES = enabled_classes
 
     enabled_platforms: list[str] = []
+    # keyword -> parser class
+    keyword_class_map: dict[str, type[BaseParser]] = {}
+
     for parser_cls in enabled_classes:
-        parser = parser_cls()
-        _ALL_PARSERS.append(parser)
-        enabled_platforms.append(parser.platform.display_name)
+        enabled_platforms.append(parser_cls.platform.display_name)
         for keyword, _ in parser_cls._key_patterns:
-            _KEYWORD_PARSER_MAP[keyword] = parser
+            keyword_class_map[keyword] = parser_cls
+
+    # 关键字 -> parser 实例的缓存，首次访问时实例化
+    def _get_parser_for_keyword(keyword: str) -> BaseParser:
+        parser = _KEYWORD_PARSER_MAP.get(keyword)
+        if parser is not None:
+            return parser
+
+        parser_cls = keyword_class_map.get(keyword)
+        if parser_cls is None:
+            raise KeyError(f"未找到关键字 {keyword!r} 对应的 parser")
+
+        parser = _ensure_parser_instance(parser_cls)
+        _KEYWORD_PARSER_MAP[keyword] = parser
+        return parser
+
+    # 用懒加载版本替换模块级 get_parser
+    globals()["get_parser"] = _get_parser_for_keyword  # type: ignore[assignment]
+
     logger.info(f"启用平台: {', '.join(sorted(enabled_platforms))}")
 
     patterns = [pattern for cls_ in enabled_classes for pattern in cls_._key_patterns]
