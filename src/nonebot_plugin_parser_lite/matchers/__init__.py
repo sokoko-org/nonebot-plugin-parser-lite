@@ -165,6 +165,8 @@ def register_parser_matcher() -> None:
         for keyword, _ in parser_cls._key_patterns:
             keyword_class_map[keyword] = parser_cls
 
+    _KEYWORD_PARSER_MAP = {}
+
     # 关键字 -> parser 实例的缓存，首次访问时实例化
     def _get_parser_for_keyword(keyword: str) -> BaseParser:
         parser = _KEYWORD_PARSER_MAP.get(keyword)
