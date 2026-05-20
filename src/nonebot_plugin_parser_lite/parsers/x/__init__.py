@@ -13,13 +13,13 @@ from ..base import (
     PlatformEnum,
     handle,
 )
-from .model import TweetRaw
+from .model import TweetEntry
 
 
 class XParser(BaseParser):
     platform: ClassVar[Platform] = Platform(name=PlatformEnum.X, display_name="X")
 
-    def collect_data(self, raw: TweetRaw, is_repost: bool = False) -> ParseResult:
+    def collect_data(self, raw: TweetEntry, is_repost: bool = False) -> ParseResult:
         tweet = raw.result.as_tweet
         legacy = tweet.legacy
 
@@ -68,9 +68,59 @@ class XParser(BaseParser):
         if res["code"] != 100000:
             raise ParseException(res["message"])
 
-        tweet_raw = res["data"]["data"]["threaded_conversation_with_injections_v2"][
-            "instructions"
-        ][1]["entries"][0]["content"]["itemContent"]["tweet_results"]
+        entries = next(
+            (
+                instruction["entries"]
+                for instruction in res["data"]["data"][
+                    "threaded_conversation_with_injections_v2"
+                ]["instructions"]
+                if instruction["type"] == "TimelineAddEntries"
+            ),
+            None,
+        )
+        if entries is None:
+            raise ParseException("TimelineAddEntries not found")
+        # 所有 Tweet 的索引：rest_id -> tweet_results
+        tweet_map: dict[str, dict] = {}
+        # 当前链接对应的那条 tweet
+        root_entry: dict | None = None
+        for entry in entries:
+            content = entry.get("content")
+            if not isinstance(content, dict):
+                continue
+            if (
+                content.get("__typename") != "TimelineTimelineItem"
+                or content.get("itemContent", {}).get("__typename") != "TimelineTweet"
+            ):
+                continue
+            tweet_results = content["itemContent"].get("tweet_results") or {}
+            result = tweet_results.get("result") or {}
+            if result.get("__typename") != "Tweet":
+                continue
+            rest_id = result.get("rest_id")
+            if not rest_id:
+                continue
+            tweet_map[rest_id] = tweet_results
+            if rest_id == tweet_id:
+                root_entry = tweet_results
 
-        tweet = convert(tweet_raw, TweetRaw)
+        if root_entry is None:
+            raise ParseException(f"Tweet {tweet_id} not found")
+
+        root_result = root_entry.get("result") or {}
+        legacy = root_result.get("legacy") or {}
+
+        if "quoted_status_result" not in root_result:
+            in_reply_to_id = legacy.get("in_reply_to_status_id_str") or legacy.get(
+                "conversation_id_str"
+            )
+            parent_entry: dict | None = None
+
+            if in_reply_to_id and in_reply_to_id != tweet_id:
+                parent_entry = tweet_map.get(in_reply_to_id)
+
+            if parent_entry is not None:
+                root_result["quoted_status_result"] = parent_entry
+
+        tweet = convert(root_entry, TweetEntry)
         return self.collect_data(tweet)
