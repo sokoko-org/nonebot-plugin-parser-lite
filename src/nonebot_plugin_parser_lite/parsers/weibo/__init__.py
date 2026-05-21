@@ -163,6 +163,7 @@ class WeiBoParser(BaseParser):
             author=author,
             content=[play_info.text, video_content],
             timestamp=play_info.real_date,
+            url=f"https://h5.video.weibo.com/show/{fid}",
         )
 
     async def parse_weibo_id(self, weibo_id: str):

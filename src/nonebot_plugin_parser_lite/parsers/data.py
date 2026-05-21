@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -249,34 +251,34 @@ class ParseResult:
     """平台信息"""
     author: Author
     """作者信息"""
-    title: str | None = None
-    """标题"""
-    timestamp: int | None = None
-    """发布时间戳, 秒"""
-    url: str | None = None
+    url: str
     """来源链接"""
-    content: Sequence[MediaContent | str | None] = field(default_factory=list)
+    content: Sequence[MediaContent | str | None]
     """资源/文本内容"""
+    title: str | None = field(default=None)
+    """标题"""
+    timestamp: int | None = field(default=None)
+    """发布时间戳, 秒"""
     stats: Stats = field(default_factory=Stats)
     """统计信息"""
     comments: list[Comment] = field(default_factory=list)
     """评论列表"""
-    ai_summary: str | None = None
+    ai_summary: str | None = field(default=None)
     """AI摘要"""
     extra: dict[str, Any] = field(default_factory=dict)
     """额外信息"""
-    repost: "ParseResult | None" = None
+    repost: ParseResult | None = field(default=None)
     """转发的内容"""
-    render_image: Path | None = None
+    render_image: Path | None = field(default=None)
     """渲染图片"""
 
     @property
     def display_url(self) -> str | None:
-        return f"链接: {self.url}" if self.url else None
+        return f"链接: {self.url}"
 
     @property
     def repost_display_url(self) -> str | None:
-        return f"引帖: {self.repost.url}" if self.repost and self.repost.url else None
+        return f"引帖: {self.repost.url}" if self.repost else None
 
     async def get_cover_path(self) -> Path | None:
         """获取封面路径"""
@@ -314,13 +316,8 @@ class ParseResult:
 class ParseResultKwargs(TypedDict, total=False):
     title: str | None
     """标题"""
-    content: Sequence[MediaContent | str | None]
-    """资源/文本内容"""
     timestamp: int | None
     """发布时间戳, 秒"""
-    url: str | None
-    """来源链接"""
-    author: Author
     """作者信息"""
     extra: dict[str, Any]
     """额外信息"""

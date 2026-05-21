@@ -120,6 +120,7 @@ class DouyinParser(BaseParser):
             ),
             timestamp=data.aweme.detail.createTime,
             comments=comments,
+            url=f"https://www.douyin.com/note/{vid}",
         )
 
     async def parse_video_or_article(self, url: str):
@@ -172,4 +173,5 @@ class DouyinParser(BaseParser):
             ),
             timestamp=video_data.create_time,
             comments=comments,
+            url=url,
         )

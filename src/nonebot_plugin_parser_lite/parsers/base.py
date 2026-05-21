@@ -203,9 +203,17 @@ class BaseParser:
         raise ParseException(f"无法匹配 {url}")
 
     @classmethod
-    def result(cls, **kwargs: Unpack[ParseResultKwargs]) -> ParseResult:
+    def result(
+        cls,
+        author: Author,
+        url: str,
+        content: Sequence[MediaContent | str | None],
+        **kwargs: Unpack[ParseResultKwargs],
+    ) -> ParseResult:
         """构建解析结果"""
-        return ParseResult(platform=cls.platform, **kwargs)
+        return ParseResult(
+            platform=cls.platform, author=author, url=url, content=content, **kwargs
+        )
 
     @staticmethod
     @retry(max_retries=3)

@@ -47,6 +47,7 @@ class AcfunParser(BaseParser):
             author=author,
             timestamp=video_info.timestamp,
             content=[video_info.text or "", video_content],
+            url=url,
         )
 
     async def parse_video_info(self, url: str):

@@ -129,6 +129,8 @@ class NoteDetail(Struct):
     user: User
     lastUpdateTime: int
     interactInfo: InteractInfo
+    xsecToken: str
+    noteId: str
     imageList: list[Image] = field(default_factory=list)
     """图片列表，包括普通图片和 Live Photo"""
     video: Video | None = field(default=None)
