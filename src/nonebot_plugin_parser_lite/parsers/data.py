@@ -318,7 +318,6 @@ class ParseResultKwargs(TypedDict, total=False):
     """标题"""
     timestamp: int | None
     """发布时间戳, 秒"""
-    """作者信息"""
     extra: dict[str, Any]
     """额外信息"""
     repost: ParseResult | None
