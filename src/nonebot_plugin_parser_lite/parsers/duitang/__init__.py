@@ -42,6 +42,7 @@ class DuiTangParser(BaseParser):
             ),
             timestamp=blog_data.add_datetime_ts,
             comments=comments,
+            url=f"https://m.duitang.com/blog?id={blog_id}",
         )
 
     @handle("duitang.com/atlas", r"id=(?P<atlas_id>\d+)")
@@ -74,6 +75,7 @@ class DuiTangParser(BaseParser):
             ),
             timestamp=atlas_data.created_at // 1000,
             comments=comments,
+            url=f"https://www.duitang.com/atlas?id={atlas_id}",
         )
 
     async def _fetch_atlas_detail(

@@ -73,8 +73,8 @@ class XParser(BaseParser):
         )
         try:
             response.raise_for_status()
-        except Exception:
-            raise ParseException(response.text)
+        except Exception as e:
+            raise ParseException(response.text) from e
         res = response.json()
 
         if res["code"] != 100000:

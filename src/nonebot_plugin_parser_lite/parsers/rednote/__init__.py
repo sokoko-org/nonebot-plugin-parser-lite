@@ -83,9 +83,7 @@ class RedNoteParser(BaseParser):
         init_state = exploreDecoder.decode(raw)
         note_data = init_state.note.noteDetailMap[init_state.note.currentNoteId]
 
-        result = self._build_result(note_data)
-        result.url = f"https://www.xiaohongshu.com/discovery/item/{note_id}?xsec_token={xsec_token}"
-        return result
+        return self._build_result(note_data)
 
     def _build_result(self, note_data: NoteDetailMap):
         """从 note_data 构建最终解析结果"""
@@ -112,4 +110,5 @@ class RedNoteParser(BaseParser):
             ),
             content=contents,
             timestamp=note_detail.lastUpdateTime // 1000,
+            url=f"https://www.xiaohongshu.com/discovery/item/{note_detail.noteId}?xsec_token={note_detail.xsecToken}",
         )

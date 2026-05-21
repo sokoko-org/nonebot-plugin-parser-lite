@@ -96,6 +96,7 @@ class KuaiShouParser(BaseParser):
             ),
             timestamp=photo.timestamp // 1000,
             comments=comments,
+            url=url,
         )
 
     def format_comments(self, comments: CommentList) -> list[Comment]:

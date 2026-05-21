@@ -933,6 +933,7 @@ class BilibiliParser(BaseParser):
             content=[
                 self.create_graphic(fav.cover, fav.desc) for fav in favdata.medias
             ],
+            url=f"https://space.bilibili.com/{favdata.info.upper.mid}/favlist?fid={fav_id}",
         )
 
     async def _get_video(
