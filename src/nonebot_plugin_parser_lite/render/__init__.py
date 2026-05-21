@@ -385,7 +385,7 @@ class Renderer:
         - 若文件已存在：直接使用，不再重新渲染
         - 若不存在：渲染并写入该文件
         """
-        cache_key = result.url or (f"{result.platform.name}:{result.title}")
+        cache_key = result.url
         file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.jpeg"
         image_path = pconfig.cache_dir / file_name
         if await image_path.exists():

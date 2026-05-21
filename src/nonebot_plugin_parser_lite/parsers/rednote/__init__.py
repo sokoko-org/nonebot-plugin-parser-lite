@@ -83,8 +83,7 @@ class RedNoteParser(BaseParser):
         init_state = exploreDecoder.decode(raw)
         note_data = init_state.note.noteDetailMap[init_state.note.currentNoteId]
 
-        result = self._build_result(note_data)
-        return result
+        return self._build_result(note_data)
 
     def _build_result(self, note_data: NoteDetailMap):
         """从 note_data 构建最终解析结果"""
