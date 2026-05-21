@@ -132,14 +132,72 @@ class Renderer:
                 failed_count += 1
                 continue
 
-        # 2构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
+        # 2 构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
         ordered_segs = await self.__build_forward_segs(result)
         if ordered_segs:
-            if pconfig.need_forward_contents or len(ordered_segs) > 4:
-                forward_msg = UniHelper.construct_forward_message(ordered_segs)
-                yield UniMessage(forward_msg)
-            else:
+            # 配置阈值（提供默认值，避免旧配置缺失时报错）
+            text_threshold = pconfig.forward_text_threshold
+            max_plain_len = pconfig.forward_text_max_length
+
+            # 先决定是否需要走“合并转发”路径
+            # 这里用一次遍历同时统计：
+            # - 总纯文字长度
+            # - 节点数量
+            total_plain_len = 0
+            node_count = 0
+            for seg in ordered_segs:
+                node_count += 1
+                if isinstance(seg, str):
+                    total_plain_len += len(seg)
+
+            # 是否需要合并转发：
+            # 1) 配置项 need_forward_contents
+            # 2) 纯文字部分超过阈值
+            # 3) 节点数较多（兼容原来的 len > 4 逻辑）
+            need_forward = (
+                pconfig.need_forward_contents
+                or total_plain_len > text_threshold
+                or node_count > 4
+            )
+
+            if not need_forward:
+                # 直接一次性发出普通消息列表
                 yield UniMessage(ordered_segs)
+            else:
+                # 需要合并转发；如果纯文字总长度不大，直接构造一个转发即可
+                if total_plain_len <= max_plain_len:
+                    forward_msg = UniHelper.construct_forward_message(ordered_segs)
+                    yield UniMessage(forward_msg)
+                else:
+                    # 纯文字太长：按纯文字长度分批构造多个转发消息
+                    batch: list[ForwardNodeInner] = []
+                    batch_plain_len = 0
+
+                    def flush_batch() -> UniMessage[Any] | None:
+                        nonlocal batch, batch_plain_len
+                        if not batch:
+                            return None
+                        msg = UniMessage(UniHelper.construct_forward_message(batch))
+                        batch = []
+                        batch_plain_len = 0
+                        return msg
+
+                    for seg in ordered_segs:
+                        seg_plain = len(seg) if isinstance(seg, str) else 0
+
+                        # 如果当前 batch 再加上这个 seg 就超过上限，则先发出当前 batch
+                        if batch and batch_plain_len + seg_plain > max_plain_len:
+                            msg = flush_batch()
+                            if msg is not None:
+                                yield msg
+
+                        batch.append(seg)
+                        batch_plain_len += seg_plain
+
+                    # 收尾
+                    last_msg = flush_batch()
+                    if last_msg is not None:
+                        yield last_msg
 
         # 汇总下载失败信息
         if failed_count > 0:

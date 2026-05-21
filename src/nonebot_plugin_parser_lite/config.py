@@ -56,6 +56,10 @@ class Config(BaseModel):
     """是否使用无头浏览器"""
     plite_max_comments: int = 5
     """最大评论数量"""
+    plite_forward_text_threshold: int = 300
+    """纯文本文本长度阈值，超过此长度的文本将会强制转发"""
+    plite_forward_text_max_length: int = 4000
+    """单段文本长度阈值，超过此长度的文本将会强制分割"""
 
     @property
     def nickname(self) -> str:
@@ -181,6 +185,16 @@ class Config(BaseModel):
     def max_comments(self) -> int:
         """最大评论数量"""
         return self.plite_max_comments
+
+    @property
+    def forward_text_threshold(self) -> int:
+        """纯文本文本长度阈值，超过此长度的文本将会强制转发"""
+        return self.plite_forward_text_threshold
+
+    @property
+    def forward_text_max_length(self) -> int:
+        """单段文本长度阈值，超过此长度的文本将会强制分割"""
+        return self.plite_forward_text_max_length
 
 
 # 初始化配置实例
