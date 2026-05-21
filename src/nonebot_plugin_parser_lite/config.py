@@ -59,7 +59,7 @@ class Config(BaseModel):
     plite_forward_text_threshold: int = 300
     """纯文本文本长度阈值，超过此长度的文本将会强制转发"""
     plite_forward_text_max_length: int = 4000
-    """单段文本长度阈值，超过此长度的文本将会强制分割"""
+    """单批转发文本总长度上限，超过此长度将拆分为多条合并转发"""
 
     @property
     def nickname(self) -> str:
@@ -193,7 +193,7 @@ class Config(BaseModel):
 
     @property
     def forward_text_max_length(self) -> int:
-        """单段文本长度阈值，超过此长度的文本将会强制分割"""
+        """单批转发文本总长度上限，超过此长度将拆分为多条合并转发"""
         return self.plite_forward_text_max_length
 
 

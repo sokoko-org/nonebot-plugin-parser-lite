@@ -185,12 +185,26 @@ class Renderer:
                     for seg in ordered_segs:
                         seg_plain = len(seg) if isinstance(seg, str) else 0
 
-                        # 如果当前 batch 再加上这个 seg 就超过上限，则先发出当前 batch
+                        # 情况 1：
+                        # 当前 batch 非空，且再加上这个 seg 会超过上限 -> 先发出当前批次
                         if batch and batch_plain_len + seg_plain > max_plain_len:
                             msg = flush_batch()
                             if msg is not None:
                                 yield msg
 
+                        # 情况 2：
+                        # 该 seg 自身就超过上限 -> 独立成一个批次发送
+                        if isinstance(seg, str) and seg_plain > max_plain_len:
+                            for start in range(0, seg_plain, max_plain_len):
+                                part = seg[start : start + max_plain_len]
+                                yield UniMessage(
+                                    UniHelper.construct_forward_message([part])
+                                )
+                            # 不把这个 seg 放入后续 batch
+                            continue
+
+                        # 情况 3：
+                        # 正常累加到当前批次
                         batch.append(seg)
                         batch_plain_len += seg_plain
 
