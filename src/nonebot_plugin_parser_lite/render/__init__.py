@@ -379,32 +379,27 @@ class Renderer:
         return data
 
     async def cache_or_render_image(self, result: ParseResult):
-        """获取缓存图片
+        """获取缓存图片（支持跨重启复用）
 
-        :param result: 解析结果
+        以解析结果的 URL（或其他稳定字段）为 key，在 cache_dir 下生成稳定文件名：
+        - 若文件已存在：直接使用，不再重新渲染
+        - 若不存在：渲染并写入该文件
         """
-        if result.render_image is None:
+        cache_key = result.url or (f"{result.platform.name}:{result.title}")
+        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.jpeg"
+        image_path = pconfig.cache_dir / file_name
+        if await image_path.exists():
+            result.render_image = image_path
+        else:
             image_raw = await self.render_image(result)
-            image_path = await self.save_img(image_raw)
+            await image_path.write_bytes(image_raw)
             result.render_image = image_path
             if pconfig.use_base64:
                 return await UniHelper.img_seg(image_raw)
-        if (await result.render_image.stat()).st_size >= 5 * 1024 * 1024:
-            return await UniHelper.file_seg(result.render_image)
+        if (await image_path.stat()).st_size >= 5 * 1024 * 1024:
+            return await UniHelper.file_seg(image_path)
 
-        return await UniHelper.img_seg(result.render_image)
-
-    @classmethod
-    async def save_img(cls, raw: bytes) -> Path:
-        """保存图片
-
-        :param raw: 图片字节
-        """
-
-        file_name = f"{uuid.uuid4().hex}.jpeg"
-        image_path = pconfig.cache_dir / file_name
-        await image_path.write_bytes(raw)
-        return image_path
+        return await UniHelper.img_seg(image_path)
 
 
 RENDERER = Renderer()
