@@ -167,9 +167,6 @@ plite_max_comments=5
 
 # [可选] 纯文本文本长度阈值，超过此长度的文本将会强制转发
 plite_forward_text_threshold=300
-
-# [可选] 单批转发文本总长度上限，超过此长度将拆分为多条合并转发
-plite_forward_text_max_length=4000
 ```
 
 </details>
