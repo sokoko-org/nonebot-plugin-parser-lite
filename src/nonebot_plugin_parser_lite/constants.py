@@ -65,3 +65,65 @@ EMOJI_MAP: Final[dict[str, tuple[str, str]]] = {
     "resolving": ("38", "🔨"),
     "done": ("148", "🍼"),
 }
+
+
+class BiliVideoQuality(Enum):
+    """
+    视频的视频流分辨率枚举
+
+    :cvar _360P: 流畅 360P
+    :cvar _480P: 清晰 480P
+    :cvar _720P: 高清 720P60
+    :cvar _1080P: 高清 1080P
+    :cvar AI_REPAIR: 智能修复（人工智能修复画质）
+    :cvar _1080P_PLUS: 高清 1080P 高码率
+    :cvar _1080P_60: 高清 1080P 60 帧码率
+    :cvar _4K: 超清 4K
+    :cvar HDR: 真彩 HDR
+    :cvar DOLBY: 杜比视界
+    :cvar _8K: 超高清 8K
+    """
+
+    _360P = 16
+    _480P = 32
+    _720P = 64
+    _1080P = 80
+    AI_REPAIR = 100
+    _1080P_PLUS = 112
+    _1080P_60 = 116
+    _4K = 120
+    HDR = 125
+    DOLBY = 126
+    _8K = 127
+
+
+class BiliVideoCodecs(Enum):
+    """
+    视频的视频流编码枚举
+
+    :cvar HEV: HEVC(H.265)
+    :cvar AVC: AVC(H.264)
+    :cvar AV1: AV1
+    """
+
+    HEV = "hev"
+    AVC = "avc"
+    AV1 = "av01"
+
+
+class BiliAudioQuality(Enum):
+    """
+    视频的音频流清晰度枚举
+
+    :cvar _64K: 64K
+    :cvar _132K: 132K
+    :cvar _192K: 192K
+    :cvar HI_RES: Hi-Res 无损
+    :cvar DOLBY: 杜比全景声
+    """
+
+    _64K = 30216
+    _132K = 30232
+    DOLBY = 30250
+    HI_RES = 30251
+    _192K = 30280

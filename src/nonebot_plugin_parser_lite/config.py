@@ -3,8 +3,7 @@ from nonebot import get_driver, get_plugin_config
 import nonebot_plugin_localstore as _store
 from pydantic import BaseModel
 
-from .constants import PlatformEnum
-from .parsers.bilibili.utils import VideoCodecs, VideoQuality
+from .constants import BiliVideoCodecs, BiliVideoQuality, PlatformEnum
 
 
 class Config(BaseModel):
@@ -32,13 +31,13 @@ class Config(BaseModel):
     """禁用的解析器"""
     plite_blacklist_users: list[str] = []
     """黑名单用户列表，这些用户触发的解析将被忽略"""
-    plite_bili_video_codes: list[VideoCodecs] = [
-        VideoCodecs.AVC,
-        VideoCodecs.AV1,
-        VideoCodecs.HEV,
+    plite_bili_video_codes: list[BiliVideoCodecs] = [
+        BiliVideoCodecs.AVC,
+        BiliVideoCodecs.AV1,
+        BiliVideoCodecs.HEV,
     ]
     """B站视频编码"""
-    plite_bili_video_quality: VideoQuality = VideoQuality._1080P
+    plite_bili_video_quality: BiliVideoQuality = BiliVideoQuality._1080P
     """B站视频清晰度"""
     plite_need_forward_contents: bool = True
     """是否需要合并转发内容(大于四项时始终转发)"""
@@ -97,12 +96,12 @@ class Config(BaseModel):
         return self.plite_disabled_platforms
 
     @property
-    def bili_video_codes(self) -> list[VideoCodecs]:
+    def bili_video_codes(self) -> list[BiliVideoCodecs]:
         """B站视频编码"""
         return self.plite_bili_video_codes
 
     @property
-    def bili_video_quality(self) -> VideoQuality:
+    def bili_video_quality(self) -> BiliVideoQuality:
         """B站视频清晰度"""
         return self.plite_bili_video_quality
 

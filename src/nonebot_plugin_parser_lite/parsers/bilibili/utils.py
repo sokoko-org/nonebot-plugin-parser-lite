@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from enum import Enum
 from functools import cmp_to_key
 import re
+
+from ...constants import BiliAudioQuality, BiliVideoCodecs, BiliVideoQuality
 
 RE_PCDN_HOST = re.compile(
     r"\.mcdn\.bilivideo\.cn|szbdyd\.com|cos\.bilibili\.com/.+pcdn", re.IGNORECASE
@@ -26,68 +27,6 @@ def is_pcdn_url(url: str | None) -> bool:
     )
 
 
-class VideoQuality(Enum):
-    """
-    视频的视频流分辨率枚举
-
-    :cvar _360P: 流畅 360P
-    :cvar _480P: 清晰 480P
-    :cvar _720P: 高清 720P60
-    :cvar _1080P: 高清 1080P
-    :cvar AI_REPAIR: 智能修复（人工智能修复画质）
-    :cvar _1080P_PLUS: 高清 1080P 高码率
-    :cvar _1080P_60: 高清 1080P 60 帧码率
-    :cvar _4K: 超清 4K
-    :cvar HDR: 真彩 HDR
-    :cvar DOLBY: 杜比视界
-    :cvar _8K: 超高清 8K
-    """
-
-    _360P = 16
-    _480P = 32
-    _720P = 64
-    _1080P = 80
-    AI_REPAIR = 100
-    _1080P_PLUS = 112
-    _1080P_60 = 116
-    _4K = 120
-    HDR = 125
-    DOLBY = 126
-    _8K = 127
-
-
-class VideoCodecs(Enum):
-    """
-    视频的视频流编码枚举
-
-    :cvar HEV: HEVC(H.265)
-    :cvar AVC: AVC(H.264)
-    :cvar AV1: AV1
-    """
-
-    HEV = "hev"
-    AVC = "avc"
-    AV1 = "av01"
-
-
-class AudioQuality(Enum):
-    """
-    视频的音频流清晰度枚举
-
-    :cvar _64K: 64K
-    :cvar _132K: 132K
-    :cvar _192K: 192K
-    :cvar HI_RES: Hi-Res 无损
-    :cvar DOLBY: 杜比全景声
-    """
-
-    _64K = 30216
-    _132K = 30232
-    DOLBY = 30250
-    HI_RES = 30251
-    _192K = 30280
-
-
 @dataclass
 class VideoStreamDownloadURL:
     """
@@ -100,8 +39,8 @@ class VideoStreamDownloadURL:
     """
 
     url: str
-    video_quality: VideoQuality
-    video_codecs: VideoCodecs
+    video_quality: BiliVideoQuality
+    video_codecs: BiliVideoCodecs
     backup_url: list[str]
 
 
@@ -116,7 +55,7 @@ class AudioStreamDownloadURL:
     """
 
     url: str
-    audio_quality: AudioQuality
+    audio_quality: BiliAudioQuality
     backup_url: list[str]
 
 
@@ -243,21 +182,25 @@ class VideoDownloadURLDataDetecter:
 
     def detect_best_streams(
         self,
-        video_max_quality: VideoQuality = VideoQuality._8K,
-        audio_max_quality: AudioQuality = AudioQuality._192K,
-        video_min_quality: VideoQuality = VideoQuality._360P,
-        audio_min_quality: AudioQuality = AudioQuality._64K,
-        video_accepted_qualities: list[VideoQuality] = [
+        video_max_quality: BiliVideoQuality = BiliVideoQuality._8K,
+        audio_max_quality: BiliAudioQuality = BiliAudioQuality._192K,
+        video_min_quality: BiliVideoQuality = BiliVideoQuality._360P,
+        audio_min_quality: BiliAudioQuality = BiliAudioQuality._64K,
+        video_accepted_qualities: list[BiliVideoQuality] = [
             item
-            for _, item in VideoQuality.__dict__.items()
-            if isinstance(item, VideoQuality)
+            for _, item in BiliVideoQuality.__dict__.items()
+            if isinstance(item, BiliVideoQuality)
         ],
-        audio_accepted_qualities: list[AudioQuality] = [
+        audio_accepted_qualities: list[BiliAudioQuality] = [
             item
-            for _, item in AudioQuality.__dict__.items()
-            if isinstance(item, AudioQuality)
+            for _, item in BiliAudioQuality.__dict__.items()
+            if isinstance(item, BiliAudioQuality)
         ],
-        codecs: list[VideoCodecs] = [VideoCodecs.AV1, VideoCodecs.AVC, VideoCodecs.HEV],
+        codecs: list[BiliVideoCodecs] = [
+            BiliVideoCodecs.AV1,
+            BiliVideoCodecs.AVC,
+            BiliVideoCodecs.HEV,
+        ],
         no_dolby_video: bool = False,
         no_dolby_audio: bool = False,
         no_hdr: bool = False,
@@ -302,16 +245,16 @@ class VideoDownloadURLDataDetecter:
         # 收集所有候选视频流
         video_streams: list[VideoStreamDownloadURL] = []
         for video_data in videos_data:
-            vq = VideoQuality(video_data["id"])
+            vq = BiliVideoQuality(video_data["id"])
 
             # HDR / 杜比过滤
-            if (vq == VideoQuality.HDR and no_hdr) or (
-                vq == VideoQuality.DOLBY and no_dolby_video
+            if (vq == BiliVideoQuality.HDR and no_hdr) or (
+                vq == BiliVideoQuality.DOLBY and no_dolby_video
             ):
                 continue
 
             # 非 HDR / 杜比的视频质量范围过滤
-            if vq not in (VideoQuality.DOLBY, VideoQuality.HDR):
+            if vq not in (BiliVideoQuality.DOLBY, BiliVideoQuality.HDR):
                 if not (video_min_quality.value <= vq.value <= video_max_quality.value):
                     continue
                 if vq not in video_accepted_qualities:
@@ -319,8 +262,8 @@ class VideoDownloadURLDataDetecter:
 
             # 编码过滤
             codecs_str: str = video_data["codecs"]
-            video_stream_codecs: VideoCodecs | None = None
-            for val in VideoCodecs:
+            video_stream_codecs: BiliVideoCodecs | None = None
+            for val in BiliVideoCodecs:
                 if val.value in codecs_str:
                     video_stream_codecs = val
                     break
@@ -340,7 +283,7 @@ class VideoDownloadURLDataDetecter:
         audio_streams: list[AudioStreamDownloadURL] = []
         if audios_data:
             for audio_data in audios_data:
-                aq = AudioQuality(audio_data["id"])
+                aq = BiliAudioQuality(audio_data["id"])
                 if not (audio_min_quality.value <= aq.value <= audio_max_quality.value):
                     continue
                 if aq not in audio_accepted_qualities:
@@ -355,7 +298,7 @@ class VideoDownloadURLDataDetecter:
 
         if flac_data and (not no_hires) and flac_data["audio"]:
             audio = flac_data["audio"]
-            aq = AudioQuality(audio["id"])
+            aq = BiliAudioQuality(audio["id"])
             audio_streams.append(
                 AudioStreamDownloadURL(
                     url=audio["base_url"],
@@ -366,7 +309,7 @@ class VideoDownloadURLDataDetecter:
 
         if dolby_data and (not no_dolby_audio) and dolby_data["audio"]:
             audio = dolby_data["audio"][0]
-            aq = AudioQuality(audio["id"])
+            aq = BiliAudioQuality(audio["id"])
             audio_streams.append(
                 AudioStreamDownloadURL(
                     url=audio["base_url"],
@@ -380,13 +323,13 @@ class VideoDownloadURLDataDetecter:
             s1: VideoStreamDownloadURL, s2: VideoStreamDownloadURL
         ) -> int:
             # 杜比/HDR 优先
-            if s1.video_quality == VideoQuality.DOLBY and not no_dolby_video:
+            if s1.video_quality == BiliVideoQuality.DOLBY and not no_dolby_video:
                 return 1
-            if s2.video_quality == VideoQuality.DOLBY and not no_dolby_video:
+            if s2.video_quality == BiliVideoQuality.DOLBY and not no_dolby_video:
                 return -1
-            if s1.video_quality == VideoQuality.HDR and not no_hdr:
+            if s1.video_quality == BiliVideoQuality.HDR and not no_hdr:
                 return 1
-            if s2.video_quality == VideoQuality.HDR and not no_hdr:
+            if s2.video_quality == BiliVideoQuality.HDR and not no_hdr:
                 return -1
 
             # 其余按清晰度数值排序
@@ -404,13 +347,13 @@ class VideoDownloadURLDataDetecter:
             s1: AudioStreamDownloadURL, s2: AudioStreamDownloadURL
         ) -> int:
             # 杜比/Hi-Res 优先
-            if s1.audio_quality == AudioQuality.DOLBY and not no_dolby_audio:
+            if s1.audio_quality == BiliAudioQuality.DOLBY and not no_dolby_audio:
                 return 1
-            if s2.audio_quality == AudioQuality.DOLBY and not no_dolby_audio:
+            if s2.audio_quality == BiliAudioQuality.DOLBY and not no_dolby_audio:
                 return -1
-            if s1.audio_quality == AudioQuality.HI_RES and not no_hires:
+            if s1.audio_quality == BiliAudioQuality.HI_RES and not no_hires:
                 return 1
-            if s2.audio_quality == AudioQuality.HI_RES and not no_hires:
+            if s2.audio_quality == BiliAudioQuality.HI_RES and not no_hires:
                 return -1
 
             return s1.audio_quality.value - s2.audio_quality.value
