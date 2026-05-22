@@ -11,6 +11,9 @@ RE_PCDN_PATH = re.compile(r"xy\d+x\d+x\d+x\d+xy|/pcdn/|/mcdn/", re.IGNORECASE)
 RE_PRIVATE_IP = re.compile(
     r"^https?://(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.)", re.IGNORECASE
 )
+# 枚举默认集合：用于 detect_best_streams 的默认允许清晰度列表
+DEFAULT_VIDEO_QUALITIES: list[BiliVideoQuality] = list(BiliVideoQuality)
+DEFAULT_AUDIO_QUALITIES: list[BiliAudioQuality] = list(BiliAudioQuality)
 
 
 def is_pcdn_url(url: str | None) -> bool:
@@ -176,9 +179,7 @@ class VideoDownloadURLDataDetecter:
 
         :param data: `Video.get_download_url` 返回的原始数据
         """
-        self.__data = data
-        if video_info := self.__data.get("video_info"):  # bangumi
-            self.__data = video_info
+        self.__data = data.get("video_info") or data
 
     def detect_best_streams(
         self,
@@ -186,21 +187,9 @@ class VideoDownloadURLDataDetecter:
         audio_max_quality: BiliAudioQuality = BiliAudioQuality._192K,
         video_min_quality: BiliVideoQuality = BiliVideoQuality._360P,
         audio_min_quality: BiliAudioQuality = BiliAudioQuality._64K,
-        video_accepted_qualities: list[BiliVideoQuality] = [
-            item
-            for _, item in BiliVideoQuality.__dict__.items()
-            if isinstance(item, BiliVideoQuality)
-        ],
-        audio_accepted_qualities: list[BiliAudioQuality] = [
-            item
-            for _, item in BiliAudioQuality.__dict__.items()
-            if isinstance(item, BiliAudioQuality)
-        ],
-        codecs: list[BiliVideoCodecs] = [
-            BiliVideoCodecs.AV1,
-            BiliVideoCodecs.AVC,
-            BiliVideoCodecs.HEV,
-        ],
+        video_accepted_qualities: list[BiliVideoQuality] | None = None,
+        audio_accepted_qualities: list[BiliAudioQuality] | None = None,
+        codecs: list[BiliVideoCodecs] | None = None,
         no_dolby_video: bool = False,
         no_dolby_audio: bool = False,
         no_hdr: bool = False,
@@ -219,22 +208,32 @@ class VideoDownloadURLDataDetecter:
         :param audio_max_quality: 可接受的音频最高清晰度
         :param video_min_quality: 可接受的视频最低清晰度
         :param audio_min_quality: 可接受的音频最低清晰度
-        :param video_accepted_qualities: 允许的视频清晰度列表
-        :param audio_accepted_qualities: 允许的音频清晰度列表
-        :param codecs: 允许的视频编码优先级列表（越靠前优先级越高）
+        :param video_accepted_qualities: 允许的视频清晰度列表，默认为所有值
+        :param audio_accepted_qualities: 允许的音频清晰度列表，默认为所有值
+        :param codecs: 允许的视频编码优先级列表（越靠前优先级越高），默认为 AV1 > AVC > HEV
         :param no_dolby_video: 是否禁用杜比视频流
         :param no_dolby_audio: 是否禁用杜比音频流
         :param no_hdr: 是否禁用 HDR 视频流
         :param no_hires: 是否禁用 Hi-Res 音频流
         :return: (最佳视频流, 最佳音频流)，若不存在则对应位置为 `None`
-        """
+        """  # noqa: E501
+        if video_accepted_qualities is None:
+            video_accepted_qualities = DEFAULT_VIDEO_QUALITIES
+        if audio_accepted_qualities is None:
+            audio_accepted_qualities = DEFAULT_AUDIO_QUALITIES
+        if codecs is None:
+            codecs = [
+                BiliVideoCodecs.AV1,
+                BiliVideoCodecs.AVC,
+                BiliVideoCodecs.HEV,
+            ]
         # FLV / MP4 情况
         if "durl" in self.__data.keys():
             url = self.__data["durl"][0]["url"]
             backup_url = self.__data["durl"][0]["backup_url"]
 
             if self.__data["format"].startswith("flv"):
-                video_stream: VideoStreamDownloadURL | None = FLVStreamDownloadURL(
+                video_stream = FLVStreamDownloadURL(
                     url=url,
                     backup_url=backup_url,
                 )
@@ -244,7 +243,6 @@ class VideoDownloadURLDataDetecter:
                     backup_url=backup_url,
                 )
 
-            # 统一对 FLV / MP4 流应用与 DASH 相同的 PCDN 过滤逻辑
             video_stream, _ = sanitize_stream_urls(video_stream, None)
             return video_stream, None
 
@@ -330,62 +328,51 @@ class VideoDownloadURLDataDetecter:
                 )
             )
 
-        # 选择最优视频流
-        def video_stream_cmp(
-            s1: VideoStreamDownloadURL, s2: VideoStreamDownloadURL
-        ) -> int:
-            # 杜比/HDR 优先
-            if s1.video_quality == BiliVideoQuality.DOLBY and not no_dolby_video:
-                return 1
-            if s2.video_quality == BiliVideoQuality.DOLBY and not no_dolby_video:
-                return -1
-            if s1.video_quality == BiliVideoQuality.HDR and not no_hdr:
-                return 1
-            if s2.video_quality == BiliVideoQuality.HDR and not no_hdr:
-                return -1
+        # 选择最优视频流：基于评分的 key 函数
+        def video_score(s: VideoStreamDownloadURL) -> tuple[int, int, int]:
+            """
+            :return: (杜比/HDR 优先级, 清晰度权重, 编码优先级)
+            """
+            # 杜比/HDR 优先级（越大越优先）
+            dolby_hdr_priority = 0
+            if not no_dolby_video and s.video_quality == BiliVideoQuality.DOLBY:
+                dolby_hdr_priority = 2
+            elif not no_hdr and s.video_quality == BiliVideoQuality.HDR:
+                dolby_hdr_priority = 1
 
-            # 其余按清晰度数值排序
-            if s1.video_quality.value != s2.video_quality.value:
-                return s1.video_quality.value - s2.video_quality.value
+            # 清晰度（越高越好）
+            quality_weight = s.video_quality.value
 
-            # 同清晰度下，按 codecs 顺序（codecs 列表越靠前越优先）
-            if s1.video_codecs != s2.video_codecs:
-                return codecs.index(s2.video_codecs) - codecs.index(s1.video_codecs)
+            # 编码优先级（codecs 列表越靠前越优先）
+            try:
+                codec_priority = len(codecs) - codecs.index(s.video_codecs)
+            except ValueError:
+                codec_priority = 0
 
-            return 0
+            return dolby_hdr_priority, quality_weight, codec_priority
 
-        # 选择最优音频流
-        def audio_stream_cmp(
-            s1: AudioStreamDownloadURL, s2: AudioStreamDownloadURL
-        ) -> int:
-            # 杜比/Hi-Res 优先
-            if s1.audio_quality == BiliAudioQuality.DOLBY and not no_dolby_audio:
-                return 1
-            if s2.audio_quality == BiliAudioQuality.DOLBY and not no_dolby_audio:
-                return -1
-            if s1.audio_quality == BiliAudioQuality.HI_RES and not no_hires:
-                return 1
-            if s2.audio_quality == BiliAudioQuality.HI_RES and not no_hires:
-                return -1
+        # 选择最优音频流：基于评分的 key 函数
+        def audio_score(s: AudioStreamDownloadURL) -> tuple[int, int]:
+            """
+            :return: (杜比/Hi-Res 优先级, 清晰度权重)
+            """
+            dolby_hires_priority = 0
+            if not no_dolby_audio and s.audio_quality == BiliAudioQuality.DOLBY:
+                dolby_hires_priority = 2
+            elif not no_hires and s.audio_quality == BiliAudioQuality.HI_RES:
+                dolby_hires_priority = 1
 
-            return s1.audio_quality.value - s2.audio_quality.value
+            quality_weight = s.audio_quality.value
+            return dolby_hires_priority, quality_weight
 
-        # 排序 + 取最优
+        # 取最优（线性扫描）
         best_video: (
             VideoStreamDownloadURL | FLVStreamDownloadURL | MP4StreamDownloadURL | None
-        ) = None
-        best_audio: AudioStreamDownloadURL | None = None
+        )
+        best_audio: AudioStreamDownloadURL | None
 
-        best_video = (
-            max(video_streams, key=cmp_to_key(video_stream_cmp))
-            if video_streams
-            else None
-        )
-        best_audio = (
-            max(audio_streams, key=cmp_to_key(audio_stream_cmp))
-            if audio_streams
-            else None
-        )
+        best_video = max(video_streams, key=video_score) if video_streams else None
+        best_audio = max(audio_streams, key=audio_score) if audio_streams else None
 
         # 清洗 PCDN URL，尽量替换为正规 CDN
         best_video, best_audio = sanitize_stream_urls(best_video, best_audio)
