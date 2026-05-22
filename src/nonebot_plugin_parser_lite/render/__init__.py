@@ -33,6 +33,12 @@ from ..parsers.data import (
 PLACEHOLDER_IMAGE = (
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 )
+SPLIT_THRESHOLD = pconfig.forward_text_threshold
+"""单段文本拆分阈值"""
+MAX_FORWARD_TEXT_LEN = 4500
+"""单个 forward 文本总长上限"""
+MAX_FORWARD_NODES = 90
+"""单个 forward 节点数上限"""
 
 
 def split_text_by_length_with_punct(text: str, max_len: int) -> list[str]:
@@ -179,42 +185,76 @@ class Renderer:
         # 2 构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
         ordered_segs = await self.__build_forward_segs(result)
         if ordered_segs:
-            text_threshold = pconfig.forward_text_threshold
-
-            # 先决定是否需要走“合并转发”路径
+            # 一次遍历：统计+长文本拆分
+            processed_segs: list[ForwardNodeInner] = []
             total_plain_len = 0
             node_count = 0
+
             for seg in ordered_segs:
                 node_count += 1
                 if isinstance(seg, str):
-                    total_plain_len += len(seg)
+                    seg_len = len(seg)
+                    total_plain_len += seg_len
+                    if seg_len > SPLIT_THRESHOLD:
+                        parts = split_text_by_length_with_punct(seg, SPLIT_THRESHOLD)
+                        for part in parts:
+                            if not part:
+                                continue
+                            processed_segs.append(part)
+                    else:
+                        processed_segs.append(seg)
+                else:
+                    processed_segs.append(seg)
 
             # 是否需要合并转发：
             # 1) 配置项 need_forward_contents
             # 2) 纯文字部分超过阈值
-            # 3) 节点数较多（兼容原来的 len > 4 逻辑）
+            # 3) 节点数较多
             need_forward = (
                 pconfig.need_forward_contents
-                or total_plain_len > text_threshold
+                or total_plain_len > SPLIT_THRESHOLD
                 or node_count > 4
             )
 
-            # 文本拆分预处理：短文本原样保留，超限文本按标点切成多段
-            processed_segs: list[ForwardNodeInner] = []
-            for seg in ordered_segs:
-                if isinstance(seg, str) and len(seg) > text_threshold:
-                    parts = split_text_by_length_with_punct(seg, text_threshold)
-                    processed_segs.extend(part for part in parts if part)
-                else:
-                    processed_segs.append(seg)
-
             if not need_forward:
-                # 不走合并转发：直接按节点顺序发出（文本 + 媒体）
+                # 不走合并转发：直接按节点顺序发出
                 yield UniMessage(processed_segs)
             else:
-                # 需要合并转发：构造一个 forward，内容为 processed_segs
-                forward_msg = UniHelper.construct_forward_message(processed_segs)
-                yield UniMessage(forward_msg)
+                # 需要合并转发：根据平台限制按文本长度 / 节点数分批构造 forward
+                current_chunk: list[ForwardNodeInner] = []
+                current_text_len = 0
+                current_nodes = 0
+
+                def flush_chunk() -> UniMessage[Any] | None:
+                    nonlocal current_chunk, current_text_len, current_nodes
+                    if not current_chunk:
+                        return None
+                    msg = UniMessage(UniHelper.construct_forward_message(current_chunk))
+                    current_chunk.clear()
+                    current_text_len = 0
+                    current_nodes = 0
+                    return msg
+
+                for seg in processed_segs:
+                    seg_text_len = len(seg) if isinstance(seg, str) else 0
+
+                    # 如果加上当前节点会超出单个 forward 限制，则先 flush 当前 chunk
+                    if current_chunk and (
+                        current_text_len + seg_text_len > MAX_FORWARD_TEXT_LEN
+                        or current_nodes + 1 > MAX_FORWARD_NODES
+                    ):
+                        msg = flush_chunk()
+                        if msg is not None:
+                            yield msg
+
+                    current_chunk.append(seg)
+                    current_text_len += seg_text_len
+                    current_nodes += 1
+
+                # 收尾：还有未发送的 chunk
+                last_msg = flush_chunk()
+                if last_msg is not None:
+                    yield last_msg
 
         # 汇总下载失败信息
         if failed_count > 0:
