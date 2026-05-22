@@ -15,7 +15,6 @@ import qrcode
 from ..config import _nickname, pconfig
 from ..exception import (
     DownloadException,
-    DownloadLimitException,
     DurationLimitException,
     SizeLimitException,
 )
@@ -125,9 +124,6 @@ class Renderer:
                     f"当前解析到的媒体时长为 {e.duration}s\n"
                     "媒体太长了~"
                 )
-            except DownloadLimitException as e:
-                yield UniMessage(str(e))
-                continue
             except DownloadException:
                 failed_count += 1
                 continue

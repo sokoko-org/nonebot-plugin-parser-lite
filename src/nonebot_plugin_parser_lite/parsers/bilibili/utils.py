@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from functools import cmp_to_key
 import re
 
 from ...constants import BiliAudioQuality, BiliVideoCodecs, BiliVideoQuality

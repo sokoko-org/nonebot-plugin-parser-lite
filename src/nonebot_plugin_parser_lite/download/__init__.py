@@ -124,7 +124,10 @@ class StreamDownloader:
         async with self.client.stream(
             "GET", url, headers=headers, follow_redirects=True
         ) as response:
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except Exception as e:
+                raise DownloadException from e
             content_length = parse_content_length(
                 response.headers.get("Content-Length")
             )
