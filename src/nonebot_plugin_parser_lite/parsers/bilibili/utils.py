@@ -232,9 +232,21 @@ class VideoDownloadURLDataDetecter:
         if "durl" in self.__data.keys():
             url = self.__data["durl"][0]["url"]
             backup_url = self.__data["durl"][0]["backup_url"]
+
             if self.__data["format"].startswith("flv"):
-                return FLVStreamDownloadURL(url=url, backup_url=backup_url), None
-            return MP4StreamDownloadURL(url=url, backup_url=backup_url), None
+                video_stream: VideoStreamDownloadURL | None = FLVStreamDownloadURL(
+                    url=url,
+                    backup_url=backup_url,
+                )
+            else:
+                video_stream = MP4StreamDownloadURL(
+                    url=url,
+                    backup_url=backup_url,
+                )
+
+            # 统一对 FLV / MP4 流应用与 DASH 相同的 PCDN 过滤逻辑
+            video_stream, _ = sanitize_stream_urls(video_stream, None)
+            return video_stream, None
 
         # DASH 正常情况
         videos_data = self.__data["dash"]["video"]
