@@ -13,15 +13,7 @@ require("nonebot_plugin_localstore")
 import time
 
 from anyio import Path
-import bilibili_api.video
 from nonebot_plugin_apscheduler import scheduler
-
-aq = bilibili_api.video.AudioQuality
-if aq.DOLBY.value == 30255:
-    aq.DOLBY._value_ = 30250
-    aq._value2member_map_.pop(30255, None)
-    aq._value2member_map_[30250] = aq.DOLBY
-
 
 from .config import Config, pconfig
 from .matchers import clear_result_cache

@@ -5,7 +5,6 @@ import json
 import re
 from re import Match
 from typing import Any, ClassVar
-from urllib.parse import quote
 
 import aiofiles
 from anyio import Path
@@ -18,12 +17,7 @@ from bilibili_api.live import LiveRoom
 from bilibili_api.login_v2 import QrCodeLogin, QrCodeLoginEvents
 from bilibili_api.opus import Opus
 from bilibili_api.utils.network import get_buvid
-from bilibili_api.video import (
-    AudioStreamDownloadURL,
-    Video,
-    VideoDownloadURLDataDetecter,
-    VideoStreamDownloadURL,
-)
+from bilibili_api.video import Video
 from msgspec import convert
 from nonebot import logger
 
@@ -48,6 +42,11 @@ from .dynamic import DynamicData, DynamicInfo
 from .favlist import FavData
 from .live import RoomData
 from .opus import ImageNode, OpusItem, TextNode
+from .utils import (
+    AudioStreamDownloadURL,
+    VideoDownloadURLDataDetecter,
+    VideoStreamDownloadURL,
+)
 from .video import AIConclusion, VideoInfo
 
 # 选择客户端
@@ -55,18 +54,6 @@ select_client("curl_cffi")
 # 模拟浏览器，第二参数数值参考 curl_cffi 文档
 # https://curl-cffi.readthedocs.io/en/latest/impersonate.html
 request_settings.set("impersonate", "chrome131")
-
-MCDN_PATTERN = re.compile(
-    r"((([0-9]{1,3}\.){3}[0-9]{1,3})|(.*\.mcdn\.bilivideo\.(com|cn|net))):[0-9]{1,5}/v1/resource"
-)
-
-
-def _encode_mcdn_url(raw_url: str) -> str:
-    """将原始 mcdn URL 做 URL 编码并拼接到代理前缀上."""
-    # 使用 quote 对整条 URL 做编码，safe="" 表示不保留任何字符
-    encoded = quote(raw_url, safe="")
-    # 补全协议头
-    return f"https://proxy-tf-all-ws.bilivideo.com/url={encoded}"
 
 
 class BilibiliParser(BaseParser):
@@ -981,20 +968,12 @@ class BilibiliParser(BaseParser):
         video_stream = streams[0]
         if not isinstance(video_stream, VideoStreamDownloadURL):
             raise DownloadException("未找到可下载的视频流")
-        if MCDN_PATTERN.search(video_stream.url):
-            logger.warning("检测到 PCDN 视频链接，正在进行代理替换...")
-            video_stream.url = _encode_mcdn_url(video_stream.url)
-
         logger.debug(
             f"视频流质量: {video_stream.video_quality.name}, 编码: {video_stream.video_codecs}"  # noqa: E501
         )
-
         audio_stream = streams[1]
         if not isinstance(audio_stream, AudioStreamDownloadURL):
             return video_stream.url, None
-        if MCDN_PATTERN.search(audio_stream.url):
-            logger.warning("检测到 PCDN 音频链接，正在进行代理替换...")
-            audio_stream.url = _encode_mcdn_url(audio_stream.url)
         logger.debug(f"音频流质量: {audio_stream.audio_quality.name}")
         return video_stream.url, audio_stream.url
 

@@ -1,10 +1,10 @@
 from anyio import Path
-from bilibili_api.video import VideoCodecs, VideoQuality
 from nonebot import get_driver, get_plugin_config
 import nonebot_plugin_localstore as _store
 from pydantic import BaseModel
 
 from .constants import PlatformEnum
+from .parsers.bilibili.utils import VideoCodecs, VideoQuality
 
 
 class Config(BaseModel):
