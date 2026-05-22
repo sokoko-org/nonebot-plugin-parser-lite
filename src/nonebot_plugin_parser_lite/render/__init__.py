@@ -35,6 +35,54 @@ PLACEHOLDER_IMAGE = (
 )
 
 
+def split_text_by_length_with_punct(text: str, max_len: int) -> list[str]:
+    """按长度切分文本，优先在标点符号处断句。
+
+    规则：
+    1. 遍历文本，当前段长度超过 max_len 时：
+       - 尝试在当前段中最后一个标点符号后断句；
+       - 若找不到合适标点，则在 max_len 处硬切。
+    2. 支持中英文常用标点。
+
+    :param text: 原始文本
+    :param max_len: 每段最大长度
+    :return: 切分后的文本段列表
+    """
+    if max_len <= 0 or len(text) <= max_len:
+        return [text]
+
+    # 常见句末/停顿标点（中英文）
+    puncts = "。！？!?；;，,、…"
+    result: list[str] = []
+    start = 0
+    length = len(text)
+
+    while start < length:
+        # 预算本段的理论结束位置
+        end = min(start + max_len, length)
+        segment = text[start:end]
+
+        if end == length:
+            # 已到末尾，直接收尾
+            result.append(segment)
+            break
+
+        cut_pos = next(
+            (i + 1 for i in range(len(segment) - 1, -1, -1) if segment[i] in puncts),
+            -1,
+        )
+        if cut_pos <= 0:
+            # 没找到合适标点，直接在 max_len 处切
+            result.append(segment)
+            start = end
+        else:
+            # 在标点后断句
+            result.append(segment[:cut_pos])
+            start += cut_pos
+
+    return [seg for seg in result if seg]
+
+
 async def safe_src(obj: Any, method: str = "get_path") -> str:
     """
     通用安全资源获取过滤器
@@ -189,10 +237,12 @@ class Renderer:
                                 yield msg
 
                         # 情况 2：
-                        # 该 seg 自身就超过上限 -> 独立成一个批次发送
+                        # 该 seg 自身就超过上限 -> 按标点优先的规则拆分为多段
                         if isinstance(seg, str) and seg_plain > max_plain_len:
-                            for start in range(0, seg_plain, max_plain_len):
-                                part = seg[start : start + max_plain_len]
+                            parts = split_text_by_length_with_punct(seg, max_plain_len)
+                            for part in parts:
+                                if not part:
+                                    continue
                                 yield UniMessage(
                                     UniHelper.construct_forward_message([part])
                                 )
