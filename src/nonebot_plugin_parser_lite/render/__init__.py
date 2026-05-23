@@ -286,7 +286,11 @@ class Renderer:
         ):
             yield UniMessage(await UniHelper.file_seg(path))
         elif isinstance(cont, VideoContent):
-            yield UniMessage(await UniHelper.video_seg(path))
+            yield UniMessage(
+                await UniHelper.video_seg(
+                    file=path, thumbnail=await cont.get_cover_path()
+                )
+            )
         elif isinstance(cont, AudioContent):
             yield UniMessage(await UniHelper.record_seg(path))
 
@@ -347,12 +351,20 @@ class Renderer:
                     if isinstance(cont, LivePhotoContent):
                         if pconfig.live_photo:
                             live_path = await cont.get_live()
-                            nodes.append(await UniHelper.video_seg(live_path))
+                            nodes.append(
+                                await UniHelper.video_seg(
+                                    file=live_path, thumbnail=await cont.get_base()
+                                )
+                            )
                         else:
                             base_path = await cont.get_base()
                             live_path = await cont.get_path()
                             nodes.append(await UniHelper.img_seg(base_path))
-                            nodes.append(await UniHelper.video_seg(live_path))
+                            nodes.append(
+                                await UniHelper.video_seg(
+                                    file=live_path, thumbnail=base_path
+                                )
+                            )
                         return
                 except Exception as e:
                     # 统一当作媒体构建失败处理
