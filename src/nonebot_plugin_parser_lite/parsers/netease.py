@@ -28,7 +28,7 @@ class NCMParser(BaseParser):
         # 处理短链接
         if matched := self.short_url_pattern.search(ncm_url):
             ncm_url = matched.group(0)
-            ncm_url = await self.get_redirect_url(ncm_url)
+            ncm_url = await self.get_final_url(ncm_url)
 
         # 获取网易云歌曲id
         matched = re.search(r"(?:\?|&)id=(\d+)", ncm_url) or re.search(
