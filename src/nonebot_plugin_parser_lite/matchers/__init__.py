@@ -1,12 +1,14 @@
 import asyncio
 from dataclasses import dataclass
 from itertools import chain
+import re
 from typing import ClassVar, TypeVar
 
 from nonebot import get_driver, logger
+from nonebot.exception import SkippedException
 from nonebot.permission import SUPERUSER
 from nonebot.rule import Rule, to_me
-from nonebot_plugin_alconna import Alconna, Args, Match, on_alconna
+from nonebot_plugin_alconna import Alconna, Args, Match, Reply, on_alconna
 from nonebot_plugin_uninfo import Uninfo
 
 from ..config import pconfig
@@ -15,7 +17,7 @@ from ..helper import UniHelper, UniMessage
 from ..parsers import BaseParser, BilibiliParser, ParseResult
 from ..render import RENDERER
 from ..utils.common import LimitedSizeDict
-from .rule import Searched, SearchResult, on_keyword_regex
+from .rule import Searched, SearchResult, _extract_text, on_keyword_regex
 
 
 class LazyManager:
@@ -100,6 +102,10 @@ _PARSER_INSTANCES: dict[type[BaseParser], BaseParser] = {}
 _KEYWORD_CLASS_MAP: dict[str, type[BaseParser]] = {}
 # 已实例化的 parser（用于 on_shutdown 统一关闭 http 客户端）
 _ALL_PARSERS: list[BaseParser] = []
+# 缓存结果
+_RESULT_CACHE = LimitedSizeDict[str, ParseResult](max_size=50)
+_BV_PATTERN = re.compile(r"BV[0-9A-Za-z]{10}")
+_URL_PATTERN = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 
 
 def _ensure_parser_instance(parser_cls: type[BaseParser]) -> BaseParser:
@@ -173,10 +179,6 @@ async def close_httpx() -> None:
     await asyncio.gather(*(parser.aclose() for parser in _ALL_PARSERS))
 
 
-# 缓存结果
-_RESULT_CACHE = LimitedSizeDict[str, ParseResult](max_size=50)
-
-
 def clear_result_cache():
     _RESULT_CACHE.clear()
 
@@ -238,13 +240,40 @@ async def register_bili_matcher():
     if bilip is not None:
 
         @on_alconna(
-            Alconna("bm", Args["bv", r"re:(BV[A-Za-z0-9]{10})"]["page?", int, 0]),
+            Alconna(
+                "bm", Args["bv", r"re:(BV[A-Za-z0-9]{10})" | Reply]["page?", int, 0]
+            ),
             priority=3,
             block=True,
         ).handle()
         @UniHelper.with_reaction
-        async def _(bv: Match[str], page: Match[int]):
-            bvid = bv.result
+        async def _(bv: Match[str | Reply], page: Match[int]):
+            bvid: str | None = None
+
+            if not isinstance(bv.result, Reply):
+                bvid = bv.result
+            else:
+                reply = bv.result
+                if msg := reply.msg:
+                    text = _extract_text(UniMessage(msg)) or ""
+                    m = _BV_PATTERN.search(text)
+                    if m:
+                        bvid = m[0]
+                    else:
+                        url_match = _URL_PATTERN.search(text)
+                        if url_match:
+                            url = url_match[0]
+                            try:
+                                final_url = await BaseParser.get_final_url(url)
+                                m2 = _BV_PATTERN.search(final_url)
+                                if m2:
+                                    bvid = m2[0]
+                            except Exception as e:
+                                logger.warning(f"bm: 展开短链接失败 url={url!r}: {e}")
+
+            if bvid is None:
+                raise SkippedException("未找到有效 BV 号")
+
             page_idx = page.result - 1 if page.result > 0 else 0
             _, audio_url = await bilip.extract_download_urls(
                 bvid=bvid, page_index=page_idx
