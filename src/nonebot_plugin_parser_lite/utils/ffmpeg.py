@@ -5,7 +5,7 @@ from anyio import Path
 from nonebot import logger
 
 from ..config import pconfig
-from .common import fmt_size, safe_unlink
+from .common import fmt_size
 
 
 class FFmpeg:
@@ -79,95 +79,7 @@ class FFmpeg:
         ]
 
         await cls.exec_ffmpeg(cmd)
-        await asyncio.gather(safe_unlink(v_path), safe_unlink(a_path))
         logger.success(f"Merged {output_path.name}, {await fmt_size(output_path)}")
-        return output_path
-
-    @classmethod
-    async def merge_av_h264(
-        cls, v_path: Path, a_path: Path, file_name: str | None = None
-    ) -> Path:
-        """合并视频和音频，并使用 H.264 编码
-
-        :param v_path: 视频文件路径
-        :param a_path: 音频文件路径
-        :param file_name: 输出文件名
-        """
-        file_name = file_name or cls.generate_file_name(v_path, a_path)
-        output_path = pconfig.cache_dir / f"{file_name}.mp4"
-        if await output_path.exists():
-            return output_path
-        logger.info(
-            f"Merging {v_path.name} and {a_path.name} to {output_path.name} with H.264"
-        )
-
-        # 修改命令以确保视频使用 H.264 编码
-        cmd = [
-            "-y",
-            "-i",
-            str(v_path),
-            "-i",
-            str(a_path),
-            "-c:v",
-            "libx264",  # 明确指定使用 H.264 编码
-            "-preset",
-            "medium",  # 编码速度和质量的平衡
-            "-crf",
-            "23",  # 质量因子，值越低质量越高
-            "-c:a",
-            "aac",  # 音频使用 AAC 编码
-            "-b:a",
-            "128k",  # 音频比特率
-            "-map",
-            "0:v:0",
-            "-map",
-            "1:a:0",
-            str(output_path),
-        ]
-
-        await cls.exec_ffmpeg(cmd)
-        await asyncio.gather(safe_unlink(v_path), safe_unlink(a_path))
-        logger.success(
-            f"Merged {output_path.name} with H.264, {await fmt_size(output_path)}"
-        )
-        return output_path
-
-    @classmethod
-    async def encode_video_to_h264(cls, video_path: Path) -> Path:
-        """将视频重新编码到 h264
-
-        :param video_path: 视频路径
-
-        :return: 编码后的视频路径
-        """
-        output_path = video_path.with_name(f"{video_path.stem}_h264{video_path.suffix}")
-        if await output_path.exists():
-            return output_path
-        cmd = [
-            "-y",
-            "-hide_banner",
-            "-loglevel",
-            "error",
-            "-i",
-            str(video_path),
-            "-c:v",
-            "libx264",
-            "-preset",
-            "veryfast",
-            "-crf",
-            "23",
-            # 保留原始音频（如果有）
-            "-c:a",
-            "copy",
-            "-movflags",
-            "+faststart",
-            str(output_path),
-        ]
-        await cls.exec_ffmpeg(cmd)
-        logger.success(
-            f"视频重新编码为 H.264 成功: {output_path}, {await fmt_size(output_path)}"
-        )
-        await safe_unlink(video_path)
         return output_path
 
     @classmethod
@@ -253,4 +165,44 @@ class FFmpeg:
         ]
 
         await cls.exec_ffmpeg(cmd)
+        return output_path
+
+    @classmethod
+    async def convert_audio_to_mp3(
+        cls, audio_path: Path, file_name: str | None = None
+    ) -> Path:
+        """
+        将任意音频文件转码为 mp3。
+
+        :param audio_path: 输入音频文件路径
+        :param file_name: 输出文件名（不含扩展名），为空时根据输入路径生成稳定名称
+        :return: 转码后的 mp3 文件路径
+        """
+        file_name = file_name or cls.generate_file_name(audio_path)
+        output_path = pconfig.cache_dir / f"{file_name}.mp3"
+
+        if await output_path.exists():
+            return output_path
+
+        logger.info(
+            f"Converting audio '{audio_path.name}' to mp3 as '{output_path.name}'"
+        )
+
+        cmd = [
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            str(audio_path),
+            "-vn",  # 明确丢弃视频流（若有）
+            "-acodec",
+            "libmp3lame",  # 使用 mp3 编码器
+            str(output_path),
+        ]
+
+        await cls.exec_ffmpeg(cmd)
+        logger.success(
+            f"Converted to mp3: {output_path.name}, size={await fmt_size(output_path)}"
+        )
         return output_path

@@ -35,13 +35,16 @@ class StreamDownloader:
         self.cache_dir: Path = pconfig.cache_dir
         self.client: AsyncClient = AsyncClient(timeout=DOWNLOAD_TIMEOUT, verify=False)
 
-    async def head_size(
+    async def head(
         self, url: str, ext_headers: dict[str, str] | None = None
-    ) -> int | None:
-        """对给定 url 发送 HEAD 请求，返回 Content-Length（字节数）。
+    ) -> Response:
+        """
+        发送 HEAD 请求并返回响应对象。
 
-        - 请求失败或无 Content-Length 时返回 None
-        - 不做大小限制校验，只用于展示/预估
+        :param url: 目标资源地址
+        :param ext_headers: 额外请求头
+        :return: httpx.Response 对象
+        :raise httpx.HTTPStatusError: 状态码非 2xx 时抛出
         """
         headers = {**self.headers, **(ext_headers or {})}
         resp = await self.client.head(
@@ -50,8 +53,16 @@ class StreamDownloader:
             follow_redirects=True,
         )
         resp.raise_for_status()
+        return resp
 
-        raw_len = resp.headers.get("Content-Length")
+    async def head_size(
+        self, url: str, ext_headers: dict[str, str] | None = None
+    ) -> int | None:
+        """
+        对给定 url 发送 HEAD 请求，返回 Content-Length
+        """
+        response = await self.head(url, ext_headers=ext_headers)
+        raw_len = response.headers.get("Content-Length")
         if not raw_len:
             return None
         try:

@@ -184,7 +184,7 @@ class BaseParser:
         headers: dict[str, str] | None = None,
     ) -> ParseResult:
         """先重定向再解析"""
-        redirect_url = await self.get_redirect_url(url, headers=headers or self.headers)
+        redirect_url = await self.get_final_url(url, headers=headers or self.headers)
 
         if redirect_url == url:
             raise ParseException(f"无法重定向 URL: {url}")
@@ -217,36 +217,13 @@ class BaseParser:
 
     @staticmethod
     @retry(max_retries=3)
-    async def get_redirect_url(
-        url: str,
-        headers: dict[str, str] | None = None,
-    ) -> str:
-        """获取重定向后的 URL, 单次重定向"""
-
-        headers = headers or COMMON_HEADER.copy()
-        async with AsyncClient(
-            headers=headers,
-            follow_redirects=False,
-        ) as client:
-            response = await client.get(url)
-            if response.status_code >= 400:
-                response.raise_for_status()
-            return response.headers.get("Location", url)
-
-    @staticmethod
-    @retry(max_retries=3)
     async def get_final_url(
         url: str,
         headers: dict[str, str] | None = None,
     ) -> str:
-        """获取重定向后的 URL, 允许多次重定向"""
-
-        headers = headers or COMMON_HEADER.copy()
-        async with AsyncClient(headers=headers) as client:
-            response = await client.get(url)
-            if response.status_code >= 400:
-                response.raise_for_status()
-            return str(response.url)
+        """获取最终重定向后的 URL"""
+        response = await DOWNLOADER.head(url, ext_headers=headers)
+        return str(response.url)
 
     def create_author(
         self,
