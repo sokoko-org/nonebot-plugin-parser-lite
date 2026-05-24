@@ -41,13 +41,26 @@ class StreamDownloader:
         """
         发送 HEAD 请求并返回响应对象。
 
+        对部分站点（如禁止 HEAD 或对 HEAD 做额外校验导致 405/412 等）
+        会自动回退为 GET 请求，只获取头部信息。
+
         :param url: 目标资源地址
         :param ext_headers: 额外请求头
         :return: httpx.Response 对象
-        :raise httpx.HTTPStatusError: 状态码非 2xx 时抛出
+        :raise httpx.HTTPStatusError: 状态码非 2xx 时抛出（在 GET 回退也失败时）
         """
         headers = {**self.headers, **(ext_headers or {})}
         resp = await self.client.head(
+            url=url,
+            headers=headers,
+            follow_redirects=True,
+        )
+        if 200 <= resp.status_code < 300:
+            return resp
+        logger.debug(
+            f"[StreamDownloader] HEAD {url} returned {resp.status_code}, fallback to GET"  # noqa: E501
+        )
+        resp = await self.client.get(
             url=url,
             headers=headers,
             follow_redirects=True,
