@@ -327,13 +327,9 @@ class Renderer:
                 try:
                     # 视频：使用封面图作为转发节点
                     if isinstance(cont, VideoContent):
-                        path = await cont.get_path()
+                        path = await cont.get_cover_path()
                         if path:
-                            nodes.append(
-                                await UniHelper.video_seg(
-                                    file=path, thumbnail=await cont.get_cover_path()
-                                )
-                            )
+                            nodes.append(await UniHelper.img_seg(file=path))
                         return
 
                     # 图片
