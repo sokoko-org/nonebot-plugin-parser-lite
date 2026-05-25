@@ -253,7 +253,7 @@ class ParseResult:
     """作者信息"""
     url: str
     """来源链接"""
-    content: Sequence[MediaContent | str | None]
+    content: Sequence[MediaContent | str]
     """资源/文本内容"""
     title: str | None = field(default=None)
     """标题"""

@@ -207,7 +207,7 @@ class BaseParser:
         cls,
         author: Author,
         url: str,
-        content: Sequence[MediaContent | str | None],
+        content: Sequence[MediaContent | str],
         **kwargs: Unpack[ParseResultKwargs],
     ) -> ParseResult:
         """构建解析结果"""

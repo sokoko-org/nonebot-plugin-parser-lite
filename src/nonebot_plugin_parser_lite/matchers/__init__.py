@@ -1,6 +1,5 @@
 import asyncio
 from dataclasses import dataclass
-from itertools import chain
 import re
 from typing import ClassVar, TypeVar
 
@@ -92,29 +91,6 @@ def clear_result_cache():
     _RESULT_CACHE.clear()
 
 
-async def _send_parse_result(session: Uninfo, result: ParseResult) -> None:
-    """根据配置发送解析结果：先发总结图，再根据懒下载配置决定是否发送媒体。"""
-    summary_msg = await RENDERER.render_messages(result)
-    await summary_msg.send()
-    # 全文本内容，无需再发送媒体
-    if all(
-        isinstance(c, str)
-        for c in chain(result.content, result.repost.content if result.repost else [])
-    ):
-        return
-    if pconfig.lazy_download:
-        download_cmd = ", ".join(pconfig.download_command)
-        await UniMessage(
-            f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
-            f"\n{download_cmd}"
-        ).send()
-        LazyManager.add(session.user.id, result)
-        return
-
-    async for content_msg in RENDERER.send_content(result):
-        await content_msg.send()
-
-
 driver = get_driver()
 
 
@@ -170,7 +146,26 @@ async def parser_handler(
         logger.debug(f"命中缓存: {cache_key}, 结果: {result!r}")
 
     # 2. 渲染并发送
-    await _send_parse_result(session, result)
+    summary_msg = await RENDERER.render_messages(result)
+    await summary_msg.send()
+    # 若所有内容都是纯文本，则无需再发送媒体
+    contents = list(result.content)
+    if result.repost:
+        contents.extend(result.repost.content)
+    has_media = any(not isinstance(c, str) and c.need_send for c in contents)
+    if not has_media:
+        return
+    if pconfig.lazy_download:
+        download_cmd = ", ".join(pconfig.download_command)
+        await UniMessage(
+            f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
+            f"\n{download_cmd}"
+        ).send()
+        LazyManager.add(session.user.id, result)
+        return
+
+    async for content_msg in RENDERER.send_content(result):
+        await content_msg.send()
 
 
 @driver.on_startup
