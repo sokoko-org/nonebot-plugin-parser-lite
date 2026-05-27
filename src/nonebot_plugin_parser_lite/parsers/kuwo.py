@@ -10,6 +10,22 @@ from .base import (
 from .data import MediaContent, Platform
 
 
+def display_duration(duration: int) -> str:
+    try:
+        total_seconds = duration
+        if total_seconds <= 0:
+            return "0:00"
+
+        minutes, seconds = divmod(total_seconds, 60)
+        if minutes < 60:
+            return f"{minutes}:{seconds:02d}"
+
+        hours, minutes = divmod(minutes, 60)
+        return f"{hours}:{minutes:02d}:{seconds:02d}"
+    except (TypeError, ValueError):
+        return "NaN"
+
+
 # ref https://kw-api.cenguigui.cn/
 class KuWoParser(BaseParser):
     # 平台信息
@@ -41,20 +57,9 @@ class KuWoParser(BaseParser):
         duration = music_data["duration"]
         audio_name = f"{music_data['name']}-{music_data['artist']}.mp3"
         audio_content = self.create_audio(audio_url, duration, audio_name=audio_name)
-        try:
-            total_seconds = duration
-            if total_seconds <= 0:
-                display_duration = "0:00"
+        dis_dura = display_duration(music_data["duration"])
 
-            minutes, seconds = divmod(total_seconds, 60)
-            if minutes < 60:
-                display_duration = f"{minutes}:{seconds:02d}"
-
-            hours, minutes = divmod(minutes, 60)
-            display_duration = f"{hours}:{minutes:02d}:{seconds:02d}"
-        except (TypeError, ValueError):
-            display_duration = "NaN"
-        text = f"专辑: {music_data['album']}\n时长: {display_duration}"
+        text = f"专辑: {music_data['album']}\n时长: {dis_dura}"
         if lyric := music_data.get("lyric"):
             text += f"\n歌词:\n{lyric}"
         contents: list[MediaContent] = []
@@ -64,8 +69,7 @@ class KuWoParser(BaseParser):
         contents.append(audio_content)
 
         extra = {
-            "info": f"时长: {music_data['display_duration']} | "
-            f"专辑: {music_data['album']}",
+            "info": f"时长: {dis_dura} | 专辑: {music_data['album']}",
             "lyric": text,
             "type": "audio",
             "type_tag": "音乐",
