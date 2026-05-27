@@ -21,7 +21,6 @@ from .visionVideoDetail import VisionVideoDetail
 class KuaiShouParser(BaseParser):
     """快手解析器"""
 
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.KUAISHOU, display_name="快手"
     )
