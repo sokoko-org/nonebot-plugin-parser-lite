@@ -63,7 +63,6 @@ class KuaiShouParser(BaseParser):
         data = response.json()
         vision_video_detail_data = data.get("data", {}).get("visionVideoDetail")
 
-        # 如果响应结构异常或缺少 visionVideoDetail，统一抛出解析异常
         if not isinstance(vision_video_detail_data, dict):
             raise ParseException(data)
 
@@ -83,9 +82,10 @@ class KuaiShouParser(BaseParser):
                 headers=self.headers,
             )
             data = response.json()
-            vision_root_comment_feed = convert(
-                data["data"]["visionCommentList"], VisionRootCommentFeed
-            )
+            vision_root_comment_feed = data.get("data", {}).get("visionCommentList")
+            if not isinstance(vision_root_comment_feed, dict):
+                raise ParseException(data)
+
             comments = [
                 self.create_comment(
                     author=self.create_author(
@@ -99,7 +99,9 @@ class KuaiShouParser(BaseParser):
                         like_count=c.likedCount,
                     ),
                 )
-                for c in vision_root_comment_feed.rootCommentsV2
+                for c in convert(
+                    vision_root_comment_feed, VisionRootCommentFeed
+                ).rootCommentsV2
             ]
         except Exception as e:
             logger.error(f"Failed to get commentList: {photo_id}, error: {e!r}")
