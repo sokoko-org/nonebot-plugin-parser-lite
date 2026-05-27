@@ -11,6 +11,8 @@ class Config(BaseModel):
     """bilibili cookies"""
     plite_xhs_ck: str | None = None
     """小红书 cookies"""
+    plite_ks_ck: str | None = None
+    """快手 cookies(无需登录态)"""
     plite_need_upload: bool = False
     """是否需要上传音视频文件（兼容旧配置）"""
     plite_need_upload_audio: bool = False
@@ -112,6 +114,11 @@ class Config(BaseModel):
     def xhs_ck(self) -> str | None:
         """小红书 cookies"""
         return self.plite_xhs_ck
+
+    @property
+    def ks_ck(self) -> str | None:
+        """快手 cookies"""
+        return self.plite_ks_ck
 
     @property
     def need_upload_audio(self) -> bool:

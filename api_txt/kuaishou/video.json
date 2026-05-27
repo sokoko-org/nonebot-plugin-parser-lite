@@ -1,0 +1,366 @@
+{
+  "data": {
+    "visionVideoDetail": {
+      "status": 1,
+      "type": 1,
+      "author": {
+        "id": "3xqzuyipahhctzg",
+        "name": "ㅤ小弹簧（训练招生）",
+        "following": false,
+        "headerUrl": "https://p2-pro.a.yximgs.com/uhead/AB/2022/01/08/08/BMjAyMjAxMDgwODA2MjNfNTMwNzgyNzM5XzFfaGQ3MTRfNw==_s.jpg",
+        "__typename": "VisionVideoDetailAuthor"
+      },
+      "photo": {
+        "id": "3xfg9g3udsuzi7e",
+        "duration": 11180,
+        "caption": "所以立定跳远是最简单的体育项目吗？#速跑斯克追光Pro #小弹簧",
+        "likeCount": "69.6万",
+        "realLikeCount": 695509,
+        "coverUrl": "https://p2.a.yximgs.com/upic/2025/04/12/12/BMjAyNTA0MTIxMjA4MzdfNTMwNzgyNzM5XzE2MTUzMTQyNzIxMl8xXzM=_Bbbd81729c580b925f6f34b77a2e7257d.jpg?tag=1-1779881550-xpcwebdetail-0-6p2hu4k23f-7c2e0fd9cc67002d&clientCacheKey=3xfg9g3udsuzi7e.jpg&di=6a2ab70f&bp=10004",
+        "photoUrl": "https://v2-zj-hnct.kwaicdn.com/upic/2025/04/12/12/BMjAyNTA0MTIxMjA4MzdfNTMwNzgyNzM5XzE2MTUzMTQyNzIxMl8xXzM=_b_B9187f0e19d329978b4eea866355f9949.mp4?tag=1-1779881550-unknown-0-33atvh5vbu-b555ce4fac3017c7&provider=self&clientCacheKey=3xfg9g3udsuzi7e_b.mp4&di=6a2ab70f&bp=10004&x-ks-ptid=161531427212&kwai-not-alloc=self-cdn&kcdntag=p:Henan;i:ChinaTelecom;ft:UNKNOWN;h:COLD;pn:kuaishouVideoProjection&Aecs=172.17.4.210&ocid=100000983&tt=b&ss=vps",
+        "liked": false,
+        "timestamp": 1744430940621,
+        "expTag": "1_i/2005871670719663266_xpcwebdetailxxnull0",
+        "llsid": null,
+        "viewCount": "5783.3万",
+        "videoRatio": 0.5625,
+        "stereoType": 0,
+        "musicBlocked": null,
+        "manifest": {
+          "mediaType": 2,
+          "businessType": 2,
+          "version": "1.0.0",
+          "adaptationSet": [
+            {
+              "id": 1,
+              "duration": 11190,
+              "representation": [
+                {
+                  "id": 1,
+                  "defaultSelect": false,
+                  "backupUrl": [
+                    "https://v4.oskwai.com/ksc2/ASuTwR8PSwbbGYLqQPtGI-zEnrev7HH-FCtA5zhopfzbKsR-0rf0-llKWiPoiMb3-dNxeZ3YnTDW9A4dAT5CGbXZ9Lt20f6ZF7UDClmBQenNJmFG8vwA4v9mHBDppc_Z0ay8X_Vk4O7MrFb2Zw-KIslhxtGN3EEhW7w9JN6ZIU7kkW0thEoyr_BI9ZjvKCXs.mp4?pkey=AAVKpHQ0wi8ZG5_9ZOLCq_oVddBttT9t2kAaugqZDQ-chwzbIHkwbULxBOdtlWYQRAWyklcguH8q5RY0p1-NCmKK1Kl8WH3U9IQ1_BuxlAv1o8_G3gKpxu7skxN6rZMMQvc&tag=1-1779881550-unknown-1-rxyfi4n1kv-0cea754b8ae0cc02&clientCacheKey=3xfg9g3udsuzi7e_b.mp4&di=6a2ab70f&bp=10004&kwai-not-alloc=0&tt=b&ss=vpm"
+                  ],
+                  "codecs": null,
+                  "url": "https://v2-zj-hnct.kwaicdn.com/upic/2025/04/12/12/BMjAyNTA0MTIxMjA4MzdfNTMwNzgyNzM5XzE2MTUzMTQyNzIxMl8xXzM=_b_B9187f0e19d329978b4eea866355f9949.mp4?tag=1-1779881550-unknown-0-l5daghyo4k-8fe2f89f9f0975b5&provider=self&clientCacheKey=3xfg9g3udsuzi7e_b.mp4&di=6a2ab70f&bp=10004&x-ks-ptid=161531427212&kwai-not-alloc=self-cdn&kcdntag=p:Henan;i:ChinaTelecom;ft:UNKNOWN;h:COLD;pn:kuaishouVideoProjection&Aecs=172.17.4.210&ocid=100000983&tt=b&ss=vpm",
+                  "height": 1280,
+                  "width": 720,
+                  "avgBitrate": 3469,
+                  "maxBitrate": 4900,
+                  "m3u8Slice": null,
+                  "qualityType": "720p",
+                  "qualityLabel": "高清",
+                  "frameRate": 50,
+                  "featureP2sp": false,
+                  "hidden": false,
+                  "disableAdaptive": false,
+                  "__typename": "VisionVideoSetRepresentation"
+                }
+              ],
+              "__typename": "VisionVideoAdaptationSet"
+            }
+          ],
+          "__typename": "VisionVideoManifest"
+        },
+        "manifestH265": {
+          "version": "1.0.0",
+          "businessType": 2,
+          "mediaType": 2,
+          "videoId": "8dea883c59ef5ca8",
+          "hideAuto": false,
+          "manualDefaultSelect": false,
+          "stereoType": 0,
+          "adaptationSet": [
+            {
+              "id": 1,
+              "duration": 11233,
+              "representation": [
+                {
+                  "id": 1,
+                  "url": "https://v2-zj-hnct.kwaicdn.com/bs2/photo-video-mz/5232338502682752745_8dea883c59ef5ca8_3468_hd15.mp4?tag=1-1779881550-unknown-0-wmzpchyzsi-c3d00c2ad084bcc8&provider=self&clientCacheKey=3xfg9g3udsuzi7e_8bc515c8&di=6a2ab70f&bp=10004&x-ks-ptid=161531427212&kwai-not-alloc=self-cdn&kcdntag=p:Henan;i:ChinaTelecom;ft:UNKNOWN;h:COLD;pn:kuaishouVideoProjection&Aecs=172.17.4.210&ocid=100000983&tt=hd15&ss=vpm",
+                  "backupUrl": [
+                    "https://v23-3.kwaicdn.com/bs2/photo-video-mz/5232338502682752745_8dea883c59ef5ca8_3468_hd15.mp4?pkey=AAW44X6d9z2nHe4wccYv9U53WXtmcD9-UXBGaDpFks4vXDMtzI5t_3Pme1TTCDVLvEVMhKPjLHbikR_dxdz4pVC79CvsBCx8-tlbmI8dCTTvTtRnTF0VnkL8-Df-gIPmS3g&tag=1-1779881550-unknown-1-d1evke3dkg-e47a39d7002d7fe9&clientCacheKey=3xfg9g3udsuzi7e_8bc515c8&di=6a2ab70f&bp=10004&kwai-not-alloc=0&tt=hd15&ss=vpm"
+                  ],
+                  "maxBitrate": 3000,
+                  "avgBitrate": 1766,
+                  "width": 720,
+                  "height": 1280,
+                  "frameRate": 30,
+                  "quality": 1.5,
+                  "kvqScore": {
+                    "FR": -1,
+                    "NR": 3.28515625,
+                    "FRPost": -1,
+                    "NRPost": -1,
+                    "sharpness": 0.26969999074935913,
+                    "blur": 0.24860000610351562
+                  },
+                  "qualityType": "720p",
+                  "qualityLabel": "高清",
+                  "featureP2sp": false,
+                  "p2spCode": "{\"fRsn\":0,\"fixOpt\":-1,\"schTask\":\"\",\"schCode\":-1,\"schRes\":\"\",\"pushTask\":\"v=0&p=0&s=0&d=0\",\"pushCode\":-1}",
+                  "hidden": false,
+                  "disableAdaptive": false,
+                  "defaultSelect": false,
+                  "comment": "videoId=8dea883c59ef5ca8/ttExplain=HEVC_Turbo2_720P_高码率/tt=hd15",
+                  "hdrType": 0,
+                  "fileSize": 2480434,
+                  "agc": true,
+                  "mute": false,
+                  "oriLoudness": -15.968,
+                  "makeupGain": 1.988,
+                  "realLoudness": -14.294,
+                  "realNormalizeGain": 1.413,
+                  "normalizeGain": 1.413,
+                  "volumeInfo": {
+                    "loudness": -14.6,
+                    "th": -24.6,
+                    "lra": 2.2,
+                    "lraTh": -34.4,
+                    "lraLow": -15.4,
+                    "lraHigh": -13.2,
+                    "tp": 1.6
+                  },
+                  "colorInfo": {}
+                }
+              ]
+            }
+          ],
+          "playInfo": {
+            "bizType": 0,
+            "cdnTimeRangeLevel": 0,
+            "strategyBus": "{ }"
+          },
+          "videoFeature": {
+            "blurProbability": 0.03033447265625,
+            "blockyProbability": 0.12101577967405319,
+            "avgEntropy": 12.666525959968567,
+            "mosScore": 0.6687825322151184,
+            "contrast": 0.016718388,
+            "underExposed": 0.0000014156103,
+            "overExposed": 2.682209e-7,
+            "capSrc": 0.000007688999
+          },
+          "audioFeature": {
+            "audioQuality": 73.797,
+            "musicProbability": 0.5862,
+            "dialogProbability": 0.3269,
+            "backgroundSoundProbability": 0.0869,
+            "stereophonicRichness": 100,
+            "audioClip": 0.0006,
+            "audioSnr": 60,
+            "effectiveBandwidthInHz": 15860.526
+          }
+        },
+        "photoH265Url": "https://v2-zj-hnct.kwaicdn.com/bs2/photo-video-mz/5232338502682752745_8dea883c59ef5ca8_3468_hd15.mp4?tag=1-1779881550-unknown-0-gwd5fvxgll-eba6b7f9fb04a99f&provider=self&clientCacheKey=3xfg9g3udsuzi7e_8bc515c8&di=6a2ab70f&bp=10004&x-ks-ptid=161531427212&kwai-not-alloc=self-cdn&kcdntag=p:Henan;i:ChinaTelecom;ft:UNKNOWN;h:COLD;pn:kuaishouVideoProjection&Aecs=172.17.4.210&ocid=100000983&tt=hd15&ss=vps",
+        "coronaCropManifest": null,
+        "coronaCropManifestH265": null,
+        "croppedPhotoH265Url": "",
+        "croppedPhotoUrl": "",
+        "videoResource": {
+          "h264": {
+            "version": "1.0.0",
+            "businessType": 2,
+            "mediaType": 2,
+            "videoId": "8dea883c59ef5ca8",
+            "hideAuto": false,
+            "manualDefaultSelect": false,
+            "stereoType": 0,
+            "adaptationSet": [
+              {
+                "id": 1,
+                "duration": 11190,
+                "representation": [
+                  {
+                    "id": 1,
+                    "url": "https://v2-zj-hnct.kwaicdn.com/upic/2025/04/12/12/BMjAyNTA0MTIxMjA4MzdfNTMwNzgyNzM5XzE2MTUzMTQyNzIxMl8xXzM=_b_B9187f0e19d329978b4eea866355f9949.mp4?tag=1-1779881550-unknown-0-l5daghyo4k-8fe2f89f9f0975b5&provider=self&clientCacheKey=3xfg9g3udsuzi7e_b.mp4&di=6a2ab70f&bp=10004&x-ks-ptid=161531427212&kwai-not-alloc=self-cdn&kcdntag=p:Henan;i:ChinaTelecom;ft:UNKNOWN;h:COLD;pn:kuaishouVideoProjection&Aecs=172.17.4.210&ocid=100000983&tt=b&ss=vpm",
+                    "backupUrl": [
+                      "https://v4.oskwai.com/ksc2/ASuTwR8PSwbbGYLqQPtGI-zEnrev7HH-FCtA5zhopfzbKsR-0rf0-llKWiPoiMb3-dNxeZ3YnTDW9A4dAT5CGbXZ9Lt20f6ZF7UDClmBQenNJmFG8vwA4v9mHBDppc_Z0ay8X_Vk4O7MrFb2Zw-KIslhxtGN3EEhW7w9JN6ZIU7kkW0thEoyr_BI9ZjvKCXs.mp4?pkey=AAVKpHQ0wi8ZG5_9ZOLCq_oVddBttT9t2kAaugqZDQ-chwzbIHkwbULxBOdtlWYQRAWyklcguH8q5RY0p1-NCmKK1Kl8WH3U9IQ1_BuxlAv1o8_G3gKpxu7skxN6rZMMQvc&tag=1-1779881550-unknown-1-rxyfi4n1kv-0cea754b8ae0cc02&clientCacheKey=3xfg9g3udsuzi7e_b.mp4&di=6a2ab70f&bp=10004&kwai-not-alloc=0&tt=b&ss=vpm"
+                    ],
+                    "maxBitrate": 4900,
+                    "avgBitrate": 3469,
+                    "width": 720,
+                    "height": 1280,
+                    "frameRate": 50,
+                    "quality": 1.5,
+                    "kvqScore": {
+                      "FR": -1,
+                      "NR": 3.2858073711395264,
+                      "FRPost": -1,
+                      "NRPost": -1,
+                      "sharpness": 0.2745000123977661,
+                      "blur": 0.24480000138282776
+                    },
+                    "qualityType": "720p",
+                    "qualityLabel": "高清",
+                    "featureP2sp": false,
+                    "p2spCode": "{\"fRsn\":0,\"fixOpt\":-1,\"schTask\":\"\",\"schCode\":-1,\"schRes\":\"\",\"pushTask\":\"v=0&p=0&s=0&d=0\",\"pushCode\":-1}",
+                    "hidden": false,
+                    "disableAdaptive": false,
+                    "defaultSelect": false,
+                    "comment": "videoId=8dea883c59ef5ca8/ttExplain=AVC_VeryFast_720P_高码率_Basic/tt=b",
+                    "hdrType": 0,
+                    "fileSize": 4853671,
+                    "bitratePattern": [4005, 3227, 4327, 463, 977],
+                    "agc": false,
+                    "mute": false,
+                    "oriLoudness": 0,
+                    "makeupGain": 0,
+                    "realLoudness": -14.492,
+                    "realNormalizeGain": 1.585,
+                    "normalizeGain": 0,
+                    "volumeInfo": {
+                      "loudness": -14.6,
+                      "th": -24.6,
+                      "lra": 2.2,
+                      "lraTh": -34.4,
+                      "lraLow": -15.4,
+                      "lraHigh": -13.2,
+                      "tp": 1.6
+                    },
+                    "colorInfo": {}
+                  }
+                ]
+              }
+            ],
+            "playInfo": {
+              "bizType": 0,
+              "cdnTimeRangeLevel": 0,
+              "strategyBus": "{ }"
+            },
+            "videoFeature": {
+              "blurProbability": 0.03033447265625,
+              "blockyProbability": 0.12101577967405319,
+              "avgEntropy": 12.666525959968567,
+              "mosScore": 0.6687825322151184,
+              "contrast": 0.016718388,
+              "underExposed": 0.0000014156103,
+              "overExposed": 2.682209e-7,
+              "capSrc": 0.000007688999
+            },
+            "audioFeature": {
+              "audioQuality": 73.797,
+              "musicProbability": 0.5862,
+              "dialogProbability": 0.3269,
+              "backgroundSoundProbability": 0.0869,
+              "stereophonicRichness": 100,
+              "audioClip": 0.0006,
+              "audioSnr": 60,
+              "effectiveBandwidthInHz": 15860.526
+            }
+          },
+          "hevc": {
+            "version": "1.0.0",
+            "businessType": 2,
+            "mediaType": 2,
+            "videoId": "8dea883c59ef5ca8",
+            "hideAuto": false,
+            "manualDefaultSelect": false,
+            "stereoType": 0,
+            "adaptationSet": [
+              {
+                "id": 1,
+                "duration": 11233,
+                "representation": [
+                  {
+                    "id": 1,
+                    "url": "https://v2-zj-hnct.kwaicdn.com/bs2/photo-video-mz/5232338502682752745_8dea883c59ef5ca8_3468_hd15.mp4?tag=1-1779881550-unknown-0-wmzpchyzsi-c3d00c2ad084bcc8&provider=self&clientCacheKey=3xfg9g3udsuzi7e_8bc515c8&di=6a2ab70f&bp=10004&x-ks-ptid=161531427212&kwai-not-alloc=self-cdn&kcdntag=p:Henan;i:ChinaTelecom;ft:UNKNOWN;h:COLD;pn:kuaishouVideoProjection&Aecs=172.17.4.210&ocid=100000983&tt=hd15&ss=vpm",
+                    "backupUrl": [
+                      "https://v23-3.kwaicdn.com/bs2/photo-video-mz/5232338502682752745_8dea883c59ef5ca8_3468_hd15.mp4?pkey=AAW44X6d9z2nHe4wccYv9U53WXtmcD9-UXBGaDpFks4vXDMtzI5t_3Pme1TTCDVLvEVMhKPjLHbikR_dxdz4pVC79CvsBCx8-tlbmI8dCTTvTtRnTF0VnkL8-Df-gIPmS3g&tag=1-1779881550-unknown-1-d1evke3dkg-e47a39d7002d7fe9&clientCacheKey=3xfg9g3udsuzi7e_8bc515c8&di=6a2ab70f&bp=10004&kwai-not-alloc=0&tt=hd15&ss=vpm"
+                    ],
+                    "maxBitrate": 3000,
+                    "avgBitrate": 1766,
+                    "width": 720,
+                    "height": 1280,
+                    "frameRate": 30,
+                    "quality": 1.5,
+                    "kvqScore": {
+                      "FR": -1,
+                      "NR": 3.28515625,
+                      "FRPost": -1,
+                      "NRPost": -1,
+                      "sharpness": 0.26969999074935913,
+                      "blur": 0.24860000610351562
+                    },
+                    "qualityType": "720p",
+                    "qualityLabel": "高清",
+                    "featureP2sp": false,
+                    "p2spCode": "{\"fRsn\":0,\"fixOpt\":-1,\"schTask\":\"\",\"schCode\":-1,\"schRes\":\"\",\"pushTask\":\"v=0&p=0&s=0&d=0\",\"pushCode\":-1}",
+                    "hidden": false,
+                    "disableAdaptive": false,
+                    "defaultSelect": false,
+                    "comment": "videoId=8dea883c59ef5ca8/ttExplain=HEVC_Turbo2_720P_高码率/tt=hd15",
+                    "hdrType": 0,
+                    "fileSize": 2480434,
+                    "agc": true,
+                    "mute": false,
+                    "oriLoudness": -15.968,
+                    "makeupGain": 1.988,
+                    "realLoudness": -14.294,
+                    "realNormalizeGain": 1.413,
+                    "normalizeGain": 1.413,
+                    "volumeInfo": {
+                      "loudness": -14.6,
+                      "th": -24.6,
+                      "lra": 2.2,
+                      "lraTh": -34.4,
+                      "lraLow": -15.4,
+                      "lraHigh": -13.2,
+                      "tp": 1.6
+                    },
+                    "colorInfo": {}
+                  }
+                ]
+              }
+            ],
+            "playInfo": {
+              "bizType": 0,
+              "cdnTimeRangeLevel": 0,
+              "strategyBus": "{ }"
+            },
+            "videoFeature": {
+              "blurProbability": 0.03033447265625,
+              "blockyProbability": 0.12101577967405319,
+              "avgEntropy": 12.666525959968567,
+              "mosScore": 0.6687825322151184,
+              "contrast": 0.016718388,
+              "underExposed": 0.0000014156103,
+              "overExposed": 2.682209e-7,
+              "capSrc": 0.000007688999
+            },
+            "audioFeature": {
+              "audioQuality": 73.797,
+              "musicProbability": 0.5862,
+              "dialogProbability": 0.3269,
+              "backgroundSoundProbability": 0.0869,
+              "stereophonicRichness": 100,
+              "audioClip": 0.0006,
+              "audioSnr": 60,
+              "effectiveBandwidthInHz": 15860.526
+            }
+          }
+        },
+        "__typename": "VisionVideoDetailPhoto"
+      },
+      "tags": [
+        {
+          "type": "1",
+          "name": "速跑斯克追光Pro",
+          "__typename": "VisionVideoDetailTags"
+        },
+        {
+          "type": "1",
+          "name": "小弹簧",
+          "__typename": "VisionVideoDetailTags"
+        }
+      ],
+      "commentLimit": {
+        "canAddComment": 0,
+        "__typename": "VisionCommentLimit"
+      },
+      "llsid": "2005871670719663266",
+      "danmakuSwitch": true,
+      "__typename": "VisionVideoDetail"
+    }
+  }
+}

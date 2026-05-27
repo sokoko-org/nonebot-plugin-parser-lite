@@ -108,6 +108,9 @@ plite_bili_video_quality=80
 # [可选] 小红书 Cookie, 部分链接无法解析，可填
 plite_xhs_ck=""
 
+# [必填] 快手 Cookie，此cookie无需登录态，首页匿名用户ck即可
+plite_ks_ck=""
+
 # [可选] 音频解析，是否需要上传群文件
 plite_need_upload_audio=False
 
