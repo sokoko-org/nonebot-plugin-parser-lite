@@ -1,8 +1,5 @@
-import contextlib
 from re import Match
 from typing import ClassVar
-
-from nonebot import logger
 
 from .base import (
     BaseParser,
@@ -13,68 +10,61 @@ from .base import (
 from .data import MediaContent, Platform
 
 
+# ref https://kw-api.cenguigui.cn/
 class KuWoParser(BaseParser):
     # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.KUWO, display_name="酷我音乐"
     )
 
-    @handle("kuwo.cn", r"https?://[^\s]*?kuwo\.cn/play_detail/\d+")
+    @handle("kuwo.cn", r"https?://[^\s]*?kuwo\.cn/play_detail/(\d+)")
     async def _parse_kuwo_share(self, searched: Match[str]):
         """解析酷我音乐分享链接"""
-        share_url = searched[0]
-        logger.debug(f"触发酷我音乐解析: {share_url}")
+        rid = searched[1]
 
         # 使用API解析
         resp = await self.httpx.get(
-            "https://api.bugpk.com/api/kuwo", params={"url": share_url}
+            "https://kw-api.cenguigui.cn/",
+            params={"id": rid, "type": "song", "level": "exhigh", "format": "json"},
         )
         resp.raise_for_status()
         data = resp.json()
 
         # 检查接口返回状态
-        if data.get("code") != 200:
+        if data["code"] != 200:
             raise ParseException(f"酷我音乐接口返回错误: {data.get('msg', '未知错误')}")
 
         music_data = data["data"]
-        logger.info(f"酷我音乐解析成功: {music_data['title']} - {music_data['artist']}")
-
-        # 创建音频内容
-        audio_url = music_data["music_url"]
+        audio_url = music_data["url"]
         if not audio_url.startswith("http"):
             raise ParseException("无效音乐URL")
-
-        # 解析时长
-        duration = 0.0
-        if music_data.get("songTimeMinutes"):
-            # 格式为 "mm:ss"
-            with contextlib.suppress(ValueError):
-                minutes, seconds = map(int, music_data["songTimeMinutes"].split(":"))
-                duration = minutes * 60 + seconds
-        # 创建有意义的音频文件名
-        audio_name = f"{music_data['title']}-{music_data['artist']}.mp3"
-        # 创建音频内容
+        duration = music_data["duration"]
+        audio_name = f"{music_data['name']}-{music_data['artist']}.mp3"
         audio_content = self.create_audio(audio_url, duration, audio_name=audio_name)
-        # 构建文本内容
-        text = (
-            f"专辑: {music_data['album']}\n发行时间: {music_data['releaseDate']}"
-            f"\n时长: {music_data['songTimeMinutes']}"
-        )
-        if music_data.get("lyrics_url"):
-            text += f"\n歌词:\n{music_data['lyrics_url']}"
+        try:
+            total_seconds = duration
+            if total_seconds <= 0:
+                display_duration = "0:00"
 
-        # 创建封面图片内容
+            minutes, seconds = divmod(total_seconds, 60)
+            if minutes < 60:
+                display_duration = f"{minutes}:{seconds:02d}"
+
+            hours, minutes = divmod(minutes, 60)
+            display_duration = f"{hours}:{minutes:02d}:{seconds:02d}"
+        except (TypeError, ValueError):
+            display_duration = "NaN"
+        text = f"专辑: {music_data['album']}\n时长: {display_duration}"
+        if lyric := music_data.get("lyric"):
+            text += f"\n歌词:\n{lyric}"
         contents: list[MediaContent] = []
-
         if cover_url := music_data.get("pic"):
             contents.append(self.create_image(cover_url, need_send=False))
 
-        # 添加音频内容到列表
         contents.append(audio_content)
 
-        # 构建额外信息
         extra = {
-            "info": f"时长: {music_data['songTimeMinutes']} | "
+            "info": f"时长: {music_data['display_duration']} | "
             f"专辑: {music_data['album']}",
             "lyric": text,
             "type": "audio",
@@ -85,7 +75,7 @@ class KuWoParser(BaseParser):
         return self.result(
             title=music_data["title"],
             author=self.create_author(name=music_data["artist"]),
-            url=share_url,
+            url=f"https://www.kuwo.cn/play_detail/{rid}",
             content=contents,
             extra=extra,
         )
