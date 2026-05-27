@@ -1,26 +1,26 @@
 from msgspec import Struct, field
 
 
-class Author(Struct):
+class VisionVideoDetailAuthor(Struct):
     id: str
     name: str
     headerUrl: str
 
 
-class Representation(Struct):
+class VisionVideoSetRepresentation(Struct):
     backupUrl: list[str]
     url: str
 
 
-class AdaptationSet(Struct):
-    representation: list[Representation]
+class VisionVideoAdaptationSet(Struct):
+    representation: list[VisionVideoSetRepresentation]
 
 
-class Manifest(Struct):
-    adaptationSet: list[AdaptationSet] = field(default_factory=list)
+class VisionVideoManifest(Struct):
+    adaptationSet: list[VisionVideoAdaptationSet] = field(default_factory=list)
 
 
-class Photo(Struct):
+class VisionVideoDetailPhoto(Struct):
     id: str
     duration: int
     """ms"""
@@ -32,7 +32,7 @@ class Photo(Struct):
     viewCount: str
     timestamp: int
     """ms"""
-    manifest: Manifest
+    manifest: VisionVideoManifest
 
     @property
     def media_url(self) -> str:
@@ -42,5 +42,5 @@ class Photo(Struct):
 
 
 class VisionVideoDetail(Struct):
-    author: Author
-    photo: Photo
+    author: VisionVideoDetailAuthor
+    photo: VisionVideoDetailPhoto

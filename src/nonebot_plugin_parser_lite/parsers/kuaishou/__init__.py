@@ -2,6 +2,7 @@ import re
 from typing import ClassVar
 
 from msgspec import convert
+from nonebot.log import logger
 
 from ..base import (
     BaseParser,
@@ -13,9 +14,8 @@ from ..base import (
     pconfig,
 )
 from ..cookie import ck2dict
+from .commentListQuery import VisionRootCommentFeed
 from .visionVideoDetail import VisionVideoDetail
-
-# KUAISHOU_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 
 
 class KuaiShouParser(BaseParser):
@@ -72,6 +72,41 @@ class KuaiShouParser(BaseParser):
         if status != 1:
             raise ParseException("不支持解析的视频")
 
+        try:
+            response = await self.httpx.post(
+                "https://www.kuaishou.com/graphql",
+                json={
+                    "operationName": "commentListQuery",
+                    "variables": {"photoId": f"{photo_id}", "pcursor": ""},
+                    "query": "query commentListQuery($photoId: String, $pcursor: String) { visionCommentList(photoId: $photoId, pcursor: $pcursor) { commentCountV2 rootCommentsV2 {   commentId   authorId   authorName   content   headurl   timestamp   hasSubComments   likedCount  __typename } pcursorV2  __typename }}",  # noqa: E501
+                },
+                cookies=ck2dict(self.ck),
+                headers=self.headers,
+            )
+            data = response.json()
+            vision_root_comment_feed = convert(
+                data["data"]["visionCommentList"], VisionRootCommentFeed
+            )
+            comments = [
+                self.create_comment(
+                    author=self.create_author(
+                        name=c.authorName,
+                        avatar_url=c.headurl,
+                        id=c.authorId,
+                    ),
+                    content=c.content,
+                    timestamp=c.timestamp // 1000,
+                    stats=self.create_stats(
+                        like_count=c.likedCount,
+                    ),
+                )
+                for c in vision_root_comment_feed.rootCommentsV2
+            ]
+        except Exception as e:
+            logger.error(f"Failed to get commentList: {photo_id}, error: {e!r}")
+            logger.error(f"Raw response: {response.text}")
+            comments = []
+
         visionVideoDetail = convert(vision_video_detail_data, VisionVideoDetail)
         contents: list[MediaContent | str] = [visionVideoDetail.photo.caption]
         photoUrl = visionVideoDetail.photo.media_url
@@ -103,4 +138,5 @@ class KuaiShouParser(BaseParser):
             ),
             timestamp=visionVideoDetail.photo.timestamp // 1000,
             url=url,
+            comments=comments,
         )
