@@ -66,15 +66,13 @@ class KuaiShouParser(BaseParser):
 
         # 如果响应结构异常或缺少 visionVideoDetail，统一抛出解析异常
         if not isinstance(vision_video_detail_data, dict):
-            raise ParseException("解析视频数据失败")
+            raise ParseException(data)
 
         status = vision_video_detail_data.get("status")
         if status != 1:
             raise ParseException("不支持解析的视频")
 
-        visionVideoDetail = convert(
-            vision_video_detail_data, VisionVideoDetail
-        )
+        visionVideoDetail = convert(vision_video_detail_data, VisionVideoDetail)
         contents: list[MediaContent | str] = [visionVideoDetail.photo.caption]
         photoUrl = visionVideoDetail.photo.media_url
         cover_url = visionVideoDetail.photo.coverUrl
