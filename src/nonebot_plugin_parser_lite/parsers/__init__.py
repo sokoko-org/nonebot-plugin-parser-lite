@@ -15,6 +15,7 @@ from .data import (
 from .douyin import DouyinParser
 from .duitang import DuiTangParser
 from .heybox import HeyBoxParser
+from .illu import IlluParser
 from .kuaishou import KuaiShouParser
 from .kugou import KuGouParser
 from .kuwo import KuWoParser
@@ -40,6 +41,7 @@ __all__ = [
     "DuiTangParser",
     "GraphicContent",
     "HeyBoxParser",
+    "IlluParser",
     "ImageContent",
     "KuGouParser",
     "KuWoParser",
