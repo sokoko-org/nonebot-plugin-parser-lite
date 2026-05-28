@@ -396,7 +396,7 @@ class StreamDownloader:
         """
 
         logger.info(f"[StreamDownloader] 开始解析 m3u8: {m3u8_url}")
-        content = await self._fetch_text(m3u8_url)
+        content = await self.text(m3u8_url)
         base_url = m3u8_url.rsplit("/", 1)[0] + "/"
 
         # 检查是否是 Master Playlist (包含子 m3u8 链接)
@@ -440,24 +440,39 @@ class StreamDownloader:
         )
         return ts_urls
 
-    async def _fetch_text(self, url: str) -> str:
+    async def text(self, url: str, ext_headers: dict[str, str] | None = None) -> str:
         """
         获取文本内容
 
         :param url: 目标文本资源的链接地址
+        :param ext_headers: 额外的请求头，会与默认请求头合并
 
         :return: 响应体的文本内容
         :raise DownloadException: 请求状态码非 200 时抛出
         """
-        # 准备请求 headers
-        fetch_headers = self.headers.copy()
-        # 使用 get 方法获取完整响应
-        resp = await self.client.get(
-            url, headers=fetch_headers, timeout=10, follow_redirects=True
-        )
+        headers = {**self.headers, **(ext_headers or {})}
+        resp = await self.client.get(url, headers=headers, follow_redirects=True)
         if resp.status_code != 200:
             raise DownloadException(f"请求失败: {resp.status_code}")
         return resp.text
+
+    async def content(
+        self, url: str, ext_headers: dict[str, str] | None = None
+    ) -> bytes:
+        """
+        获取内容
+
+        :param url: 目标资源的链接地址
+        :param ext_headers: 额外的请求头，会与默认请求头合并
+
+        :return: 响应体的内容
+        :raise DownloadException: 请求状态码非 200 时抛出
+        """
+        headers = {**self.headers, **(ext_headers or {})}
+        resp = await self.client.get(url, headers=headers, follow_redirects=True)
+        if resp.status_code != 200:
+            raise DownloadException(f"请求失败: {resp.status_code}")
+        return resp.content
 
     async def _has_ffmpeg(self) -> bool:
         """
