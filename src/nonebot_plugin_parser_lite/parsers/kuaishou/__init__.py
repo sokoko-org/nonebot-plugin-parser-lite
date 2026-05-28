@@ -2,139 +2,142 @@ import re
 from typing import ClassVar
 
 from msgspec import convert
+from nonebot.log import logger
 
-from ...utils.browser import BrowserManager, DataPacket
-from ...utils.format import format_num, replace_placeholder_to_sticker
 from ..base import (
     BaseParser,
-    Comment,
     MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
-from .decode import decode_init_state
-from .states import CommentList, Data, KsComment
-
-KUAISHOU_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
+from ..cookie import ck2dict
+from .commentListQuery import VisionRootCommentFeed
+from .visionVideoDetail import VisionVideoDetail
 
 
 class KuaiShouParser(BaseParser):
     """快手解析器"""
 
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.KUAISHOU, display_name="快手"
     )
+
+    def __init__(self):
+        super().__init__()
+        self.headers.update(
+            {
+                "Referer": "https://www.kuaishou.com/",
+                "Origin": "https://www.kuaishou.com/",
+                "X-Requested-With": "mixiaba.com.Browser",
+                "Content-Type": "application/json",
+                "Accept": "*/*",
+                "Host": "www.kuaishou.com",
+                "Connection": "keep-alive",
+            }
+        )
+        self.ck: str | None = pconfig.ks_ck
 
     # https://v.kuaishou.com/2yAnzeZ
     @handle("v.kuaishou", r"v\.kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("kuaishou", r"(?:www\.)?kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("chenzhongtech", r"(?:v\.m\.)?chenzhongtech\.com/fw/[A-Za-z\d._?%&+\-=/#]+")
     async def _parse_v_kuaishou(self, searched: re.Match[str]):
-        # 从匹配对象中获取原始URL
+        if self.ck is None:
+            raise ParseException("请配置快手 Cookie")
         url = f"https://{searched.group(0)}"
-
-        tab = BrowserManager.new_tab()
-        tab.set.user_agent(
-            self.ios_headers["User-Agent"],
-            "iPhone",
+        final_url = await self.get_final_url(url)
+        photo_id = final_url.split("?", maxsplit=1)[0].split("/")[-1]
+        response = await self.httpx.post(
+            "https://www.kuaishou.com/graphql",
+            json={
+                "operationName": "visionVideoDetail",
+                "variables": {"photoId": f"{photo_id}", "page": "detail"},
+                "query": "query visionVideoDetail($photoId: String, $type: String, $page: String, $webPageArea: String) {  visionVideoDetail(photoId: $photoId, type: $type, page: $page, webPageArea: $webPageArea) { status type author { id name following headerUrl __typename } photo { id duration caption likeCount realLikeCount coverUrl photoUrl liked timestamp expTag llsid viewCount videoRatio stereoType musicBlocked manifest {  mediaType  businessType  version  adaptationSet {  id  duration  representation { id defaultSelect backupUrl codecs url height width avgBitrate maxBitrate m3u8Slice qualityType qualityLabel frameRate featureP2sp hidden disableAdaptive __typename  }  __typename  }  __typename } manifestH265 photoH265Url coronaCropManifest coronaCropManifestH265 croppedPhotoH265Url croppedPhotoUrl videoResource __typename } tags { type name __typename } commentLimit { canAddComment __typename } llsid  danmakuSwitch __typename  }}",  # noqa: E501
+            },
+            cookies=ck2dict(self.ck),
+            headers=self.headers,
         )
-        tab.set.load_mode.none()
-        tab.listen.start("/rest/wd/photo/comment/list")
-        tab.get(url)
-        cms = tab.listen.wait()
-        assert isinstance(cms, DataPacket)
-        tab.listen.stop()
-        tab.stop_loading()
-        data = tab.run_js("window.INIT_STATE", as_expr=True)
-        raw = decode_init_state(data)
-        tab.close()
-        data_map = convert(raw, Data)
-        data_map.comments = convert(cms.response.body, CommentList)
+        data = response.json()
+        vision_video_detail_data = data.get("data", {}).get("visionVideoDetail")
 
-        photo = data_map.info.photo
-        if photo is None:
-            raise ParseException("window.init_state don't contains videos or pics")
+        if not isinstance(vision_video_detail_data, dict):
+            raise ParseException(data)
 
-        # 简洁的构建方式
-        contents: list[MediaContent | str] = [photo.caption]
-        video_url = photo.video_url
-        img_urls = photo.img_urls
-        cover_url = photo.cover_url
+        status = vision_video_detail_data.get("status")
+        if status != 1:
+            raise ParseException("不支持解析的视频")
 
-        # 添加视频内容
-        if video_url:
+        try:
+            response = await self.httpx.post(
+                "https://www.kuaishou.com/graphql",
+                json={
+                    "operationName": "commentListQuery",
+                    "variables": {"photoId": f"{photo_id}", "pcursor": ""},
+                    "query": "query commentListQuery($photoId: String, $pcursor: String) { visionCommentList(photoId: $photoId, pcursor: $pcursor) { commentCountV2 rootCommentsV2 {   commentId   authorId   authorName   content   headurl   timestamp   hasSubComments   likedCount  __typename } pcursorV2  __typename }}",  # noqa: E501
+                },
+                cookies=ck2dict(self.ck),
+                headers=self.headers,
+            )
+            data = response.json()
+            vision_root_comment_feed = data.get("data", {}).get("visionCommentList")
+            if not isinstance(vision_root_comment_feed, dict):
+                raise ParseException(data)
+
+            comments = [
+                self.create_comment(
+                    author=self.create_author(
+                        name=c.authorName,
+                        avatar_url=c.headurl,
+                        id=c.authorId,
+                    ),
+                    content=c.content,
+                    timestamp=c.timestamp // 1000,
+                    stats=self.create_stats(
+                        like_count=c.likedCount,
+                    ),
+                )
+                for c in convert(
+                    vision_root_comment_feed, VisionRootCommentFeed
+                ).rootCommentsV2
+            ]
+        except Exception as e:
+            logger.error(f"Failed to get commentList: {photo_id}, error: {e!r}")
+            logger.error(f"Raw response: {response.text}")
+            comments = []
+
+        visionVideoDetail = convert(vision_video_detail_data, VisionVideoDetail)
+        contents: list[MediaContent | str] = [visionVideoDetail.photo.caption]
+        photoUrl = visionVideoDetail.photo.media_url
+        cover_url = visionVideoDetail.photo.coverUrl
+
+        if photoUrl:
             contents.append(
                 self.create_video(
-                    url_or_task=video_url,
+                    url_or_task=photoUrl,
                     cover_url=cover_url,
-                    duration=photo.duration // 1000,
+                    duration=visionVideoDetail.photo.duration // 1000,
                 )
             )
 
-        # 添加图片内容
-        if img_urls:
-            contents.extend(self.create_images(img_urls))
-
-        # 既没有视频也没有图集时，兜底使用封面图
-        if not video_url and not img_urls and cover_url:
+        if not photoUrl and cover_url:
             contents.append(self.create_image(url=cover_url))
 
-        # 构建作者
-        author = self.create_author(name=photo.name, avatar_url=photo.headUrl)
-        comments = self.format_comments(data_map.comments)
-
+        author = self.create_author(
+            name=visionVideoDetail.author.name,
+            avatar_url=visionVideoDetail.author.headerUrl,
+            id=visionVideoDetail.author.id,
+        )
         return self.result(
             author=author,
             content=contents,
             stats=self.create_stats(
-                view_count=format_num(photo.viewCount),
-                like_count=format_num(photo.likeCount),
-                comment_count=format_num(photo.commentCount),
+                view_count=visionVideoDetail.photo.viewCount,
+                like_count=visionVideoDetail.photo.likeCount,
             ),
-            timestamp=photo.timestamp // 1000,
-            comments=comments,
+            timestamp=visionVideoDetail.photo.timestamp // 1000,
             url=url,
+            comments=comments,
         )
-
-    def format_comments(self, comments: CommentList) -> list[Comment]:
-        """格式化评论"""
-        result: list[Comment] = []
-        parent_comments = comments.rootComments[:5]
-        for rc in parent_comments:
-            rootComment = self.create_comment(
-                author=self.create_author(
-                    name=rc.author_name, avatar_url=rc.headurl, location=rc.authorArea
-                ),
-                content=replace_placeholder_to_sticker(
-                    rc.content, KUAISHOU_PATTERN, "kuaishou"
-                ),
-                timestamp=rc.timestamp // 1000,
-                stats=self.create_stats(
-                    like_count=format_num(rc.likedCount),
-                    comment_count=format_num(rc.subCommentCount),
-                ),
-            )
-
-            for sc in comments.subCommentsMap.get(str(rc.comment_id), [])[:3]:
-                sc: KsComment
-                rootComment.replies.append(
-                    self.create_comment(
-                        author=self.create_author(
-                            name=sc.author_name,
-                            avatar_url=sc.headurl,
-                            location=sc.authorArea,
-                        ),
-                        content=replace_placeholder_to_sticker(
-                            sc.content, KUAISHOU_PATTERN, "kuaishou"
-                        ),
-                        timestamp=sc.timestamp // 1000,
-                        stats=self.create_stats(
-                            like_count=format_num(sc.likedCount),
-                        ),
-                    )
-                )
-            result.append(rootComment)
-        return result
