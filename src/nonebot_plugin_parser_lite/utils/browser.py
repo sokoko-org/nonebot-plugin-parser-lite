@@ -175,43 +175,34 @@ class BrowserManager:
     @classmethod
     def reconnect(cls):
         if getattr(cls, "BROWSER", None) is None:
-            logger.warning(
-                "BrowserManager.reconnect() called but BROWSER is not initialized."
-            )
             return
         cls.BROWSER.reconnect()
 
     @classmethod
     def clear_cache(cls):
         if getattr(cls, "BROWSER", None) is None:
-            logger.info(
-                "BrowserManager.clear_cache() called but BROWSER is not initialized."
-            )
             return
         cls.BROWSER.clear_cache(cookies=False)
 
     @classmethod
-    def new_tab(cls, *args, **kwargs):
+    async def ensure_started(cls) -> None:
+        """确保浏览器已启动，若未启动则启动（惰性初始化）"""
         if getattr(cls, "BROWSER", None) is None:
-            raise RuntimeError(
-                "BrowserManager.new_tab() called before browser initialization"
-            )
+            await cls.start()
+
+    @classmethod
+    async def new_tab(cls, *args, **kwargs):
+        await cls.ensure_started()
         return cls.BROWSER.new_tab(*args, **kwargs)
 
     @classmethod
     def quit(cls):
         if getattr(cls, "BROWSER", None) is None:
-            logger.info("BrowserManager.quit() called but BROWSER is not initialized.")
             return
+        logger.info("Closing browser launched by Parser Lite")
         cls.BROWSER.quit(del_data=True)
-
-
-@driver.on_startup
-async def start_browser():
-    await BrowserManager.start()
 
 
 @driver.on_shutdown
 def close_browser():
-    logger.info("Closing browser launched by Parser Lite")
     BrowserManager.quit()

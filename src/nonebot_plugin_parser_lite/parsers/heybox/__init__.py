@@ -38,7 +38,7 @@ class HeyBoxParser(BaseParser):
         link_id = searched["link_id"]
 
         if not self.x_xhh_tokenid:
-            tab = BrowserManager.new_tab(url="https://www.xiaoheihe.cn/")
+            tab = await BrowserManager.new_tab(url="https://www.xiaoheihe.cn/")
             self.x_xhh_tokenid = tab.run_js("window.SMSdk.getDeviceId()", as_expr=True)
             logger.info(f"成功获取到小黑盒tokenid: {self.x_xhh_tokenid[:5]}...")
             tab.close()

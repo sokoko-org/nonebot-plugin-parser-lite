@@ -56,7 +56,7 @@ class ZhiHuParser(BaseParser):
         )
 
     async def fetch_initial_state(self, url: str):
-        tab = BrowserManager.new_tab()
+        tab = await BrowserManager.new_tab()
         tab.set.load_mode.eager()
         tab.get(url)
         html = tab.html
