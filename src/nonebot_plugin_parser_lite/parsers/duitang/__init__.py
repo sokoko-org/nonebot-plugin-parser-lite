@@ -1,10 +1,17 @@
-from re import Match
 from typing import ClassVar
 
 from msgspec import convert
 
 from ...utils.format import format_num
-from ..base import BaseParser, Comment, MediaContent, Platform, PlatformEnum, handle
+from ..base import (
+    BaseParser,
+    Comment,
+    MatchWithParams,
+    MediaContent,
+    Platform,
+    PlatformEnum,
+    handle,
+)
 from .model import AtlasData, BlogData, CommentData
 
 
@@ -13,9 +20,9 @@ class DuiTangParser(BaseParser):
         name=PlatformEnum.DUITANG, display_name="堆糖"
     )
 
-    @handle("duitang.com/blog", r"id=(?P<blog_id>\d+)")
-    async def parse_blog(self, searched: Match[str]):
-        blog_id = searched["blog_id"]
+    @handle("duitang.com/blog", params={"id": {"as_int": True}})
+    async def parse_blog(self, searched: MatchWithParams):
+        blog_id = searched["id"]
 
         blog_data = await self._fetch_blog_detail(blog_id=blog_id)
         comment_data = await self._fetch_comments(
@@ -45,9 +52,9 @@ class DuiTangParser(BaseParser):
             url=f"https://m.duitang.com/blog?id={blog_id}",
         )
 
-    @handle("duitang.com/atlas", r"id=(?P<atlas_id>\d+)")
-    async def parse_atlas(self, searched: Match[str]):
-        atlas_id = searched["atlas_id"]
+    @handle("duitang.com/atlas", params={"id": {"as_int": True}})
+    async def parse_atlas(self, searched: MatchWithParams):
+        atlas_id = searched["id"]
 
         atlas_data = await self._fetch_atlas_detail(atlas_id=atlas_id)
         comment_data = await self._fetch_comments(

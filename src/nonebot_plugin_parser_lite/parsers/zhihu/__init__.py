@@ -8,6 +8,7 @@ from ...utils.browser import BrowserManager
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
@@ -31,7 +32,7 @@ class ZhiHuParser(BaseParser):
         "www.zhihu.com/question",
         r"www\.zhihu\.com/question/(?P<question_id>\d+)/answer/(?P<answer_id>\d+)",
     )
-    async def _parse_short_link(self, searched: re.Match[str]):
+    async def _parse_short_link(self, searched: MatchWithParams):
         question_id = searched["question_id"]
         answer_id = searched["answer_id"]
         url = f"https://www.zhihu.com/question/{question_id}/answer/{answer_id}"

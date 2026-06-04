@@ -1,5 +1,7 @@
 from enum import Enum
-from typing import Final
+from re import Match
+from typing import Final, TypedDict
+from urllib.parse import parse_qs, urlparse
 
 from httpx import Timeout
 
@@ -128,3 +130,78 @@ class BiliAudioQuality(Enum):
     DOLBY = 30250
     HI_RES = 30251
     _192K = 30280
+
+
+class MatchWithParams:
+    """在原有 re.Match 基础上，附带 URL 与解析好的 params，并挂载额外分组"""
+
+    __slots__ = ("match", "param_rules", "params", "url")
+
+    def __init__(self, match: Match[str]):
+        self.match = match
+        self.url = match.group(0)
+        parsed = urlparse(self.url)
+        qs = parse_qs(parsed.query, keep_blank_values=True)
+        # 只取第一个
+        self.params: dict[str, str] = {k: v[0] for k, v in qs.items()}
+        self.param_rules: ParamRules = {}
+        """当前匹配对应的 ParamRules（由 BaseParser / rule 填充）"""
+
+    # 兼容原 Match 的常用访问方式
+    def __getitem__(self, key):
+        # 优先返回挂载的“虚拟组”
+        if isinstance(key, str) and key in self.params:
+            return self.params[key]
+        return self.match[key]
+
+    @property
+    def re(self):
+        return self.match.re
+
+    @property
+    def string(self):
+        return self.match.string
+
+    @property
+    def cache_key(self) -> str:
+        """
+        用于结果缓存的 key：
+        - 若没有 ParamRules：只使用原始 URL（与旧逻辑兼容）
+        - 若有 ParamRules：URL + ParamRules 中提及的参数（按 key 排序）
+        """
+        base = self.url
+
+        # 没有任何参数规则，保持与旧逻辑完全一致
+        if not self.param_rules:
+            return base
+
+        # 只使用 ParamRules 中提到的参数
+        keys = sorted(self.param_rules.keys())
+        used_params = {k: self.params[k] for k in keys if k in self.params}
+
+        # 没有实际值
+        if not used_params:
+            return base
+
+        parts = [base.split("#", 1)[0]]  # 去掉 fragment
+        param_str = "&".join(f"{k}={used_params[k]}" for k in sorted(used_params))
+        parts.append(param_str)
+        return "?".join(parts)
+
+
+class ParamRule(TypedDict, total=False):
+    """单个参数的匹配规则."""
+
+    required: bool
+    """是否必填，默认 True"""
+    equals: str
+    """必须等于该值"""
+    default: str
+    """默认值（required=False 时且未提供）"""
+    as_int: bool
+    """要求能解析为 int，仅做格式校验"""
+    one_of: list[str]
+    """必须在该集合内"""
+
+
+ParamRules = dict[str, ParamRule]

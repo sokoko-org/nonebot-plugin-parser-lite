@@ -1,8 +1,7 @@
-from re import Match
 from typing import ClassVar
 
 from ...utils.format import format_num
-from ..base import BaseParser, Platform, PlatformEnum, handle
+from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle
 from .utils import build_comments, build_content, get_post
 
 
@@ -12,9 +11,9 @@ class TiebaParser(BaseParser):
     )
 
     @handle("tieba.baidu.com", r"tieba\.baidu\.com/p/(?P<post_id>\d+)")
-    async def _parse(self, searched: Match[str]):
+    async def _parse(self, searched: MatchWithParams):
         # TODO: 显示吧头像
-        post_id = searched.group("post_id")
+        post_id = searched["post_id"]
 
         posts = await get_post(int(post_id))
 

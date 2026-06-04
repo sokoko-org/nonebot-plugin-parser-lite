@@ -1,4 +1,3 @@
-import re
 from typing import ClassVar
 
 from msgspec import convert
@@ -6,6 +5,7 @@ from nonebot.log import logger
 
 from ..base import (
     BaseParser,
+    MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
@@ -45,10 +45,10 @@ class KuaiShouParser(BaseParser):
     @handle("v.kuaishou", r"v\.kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("kuaishou", r"(?:www\.)?kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("chenzhongtech", r"(?:v\.m\.)?chenzhongtech\.com/fw/[A-Za-z\d._?%&+\-=/#]+")
-    async def _parse_v_kuaishou(self, searched: re.Match[str]):
+    async def _parse_v_kuaishou(self, searched: MatchWithParams):
         if self.ck is None:
             raise ParseException("请配置快手 Cookie")
-        url = f"https://{searched.group(0)}"
+        url = f"https://{searched.url}"
         final_url = await self.get_final_url(url)
         photo_id = final_url.split("?", maxsplit=1)[0].split("/")[-1]
         response = await self.httpx.post(

@@ -1,10 +1,10 @@
 import re
 from typing import ClassVar
-from urllib.parse import parse_qsl
 
 from ...utils.format import replace_placeholder_to_sticker
 from ..base import (
     BaseParser,
+    MatchWithParams,
     ParseException,
     Platform,
     PlatformEnum,
@@ -42,31 +42,22 @@ class RedNoteParser(BaseParser):
         )
 
     @handle("xhslink.com", r"xhslink\.com/[A-Za-z0-9._?%&+=/#@-]+")
-    async def _parse_short_link(self, searched: re.Match[str]):
-        url = f"https://{searched[0]}"
+    async def _parse_short_link(self, searched: MatchWithParams):
+        url = f"https://{searched.url}"
         return await self.parse_with_redirect(url, self.ios_headers)
 
     # https://www.xiaohongshu.com/explore/691e68a8000000001e02bcda?xsec_token=CBwYRkYkdf7BHsEy2bVC9-ZYDHXJDjIRl6QI8xzqm-gEg
     @handle(
         "xiaohongshu.com",
-        r"(?P<type>explore|search_result|discovery/item)/(?P<note_id>[0-9a-zA-Z]+)\?(?P<qs>[A-Za-z0-9._%&+=/#@-]+)",
+        r"(?P<type>explore|search_result|discovery/item)/(?P<note_id>[0-9a-zA-Z]+)",
+        params={"xsec_token": {}},
     )
-    async def _parse_common(self, searched: re.Match[str]):
+    async def _parse_common(self, searched: MatchWithParams):
         # parse_type = searched["type"]
         note_id = searched["note_id"]
-        qs = searched["qs"]
+        xsec_token = searched["xsec_token"]
 
-        # 原始 URL（保留所有 query 参数）
-        url = f"https://www.xiaohongshu.com/explore/{note_id}"
-
-        # 解析 query string，检查 xsec_token
-        params_dict = dict(parse_qsl(qs, keep_blank_values=True))
-        xsec_token = params_dict.get("xsec_token")
-        if not xsec_token:
-            # TODO: 直接请求 xhs api获取数据，但是需要计算 sign
-            raise ParseException("缺少 xsec_token, 无法解析小红书链接")
-
-        url += f"?xsec_token={xsec_token}&xsec_source=pc_share"
+        url = f"https://www.xiaohongshu.com/explore/{note_id}?xsec_token={xsec_token}&xsec_source=pc_share"
 
         response = await self.httpx.get(
             url,

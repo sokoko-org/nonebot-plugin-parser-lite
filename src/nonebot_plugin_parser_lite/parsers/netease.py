@@ -1,11 +1,11 @@
 import re
-from re import Match
 from typing import ClassVar
 
 from nonebot import logger
 
 from .base import (
     BaseParser,
+    MatchWithParams,
     ParseException,
     PlatformEnum,
     handle,
@@ -74,9 +74,9 @@ class NCMParser(BaseParser):
 
     @handle("music.163.com", r"https?://[^\s]*?music\.163\.com.*?(?:id=\d+|song/\d+)")
     @handle("163cn.tv", r"https?://[^\s]*?163cn\.tv/[a-zA-Z0-9]+")
-    async def _parse_netease(self, searched: Match[str]):
+    async def _parse_netease(self, searched: MatchWithParams):
         """解析网易云音乐分享链接"""
-        share_url = searched[0]
+        share_url = searched.url
         logger.debug(f"触发网易云解析: {share_url}")
 
         # 解析网易云音乐

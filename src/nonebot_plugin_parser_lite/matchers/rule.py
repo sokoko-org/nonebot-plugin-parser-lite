@@ -12,6 +12,7 @@ from nonebot.typing import T_State
 from nonebot_plugin_alconna.uniseg import Hyper, UniMsg
 from nonebot_plugin_uninfo import Uninfo
 
+from ..constants import MatchWithParams, ParamRules
 from .filter import is_enabled
 
 # 统一的状态键
@@ -53,11 +54,28 @@ class SearchResult:
         self,
         text: str,
         keyword: str,
-        searched: re.Match[str],
+        searched: MatchWithParams,
     ):
         self.text: str = text
         self.keyword: str = keyword
-        self.searched: re.Match[str] = searched
+        self.searched: MatchWithParams = searched
+
+
+class UrlSearchResult(SearchResult):
+    """携带 URL 及其查询参数的匹配结果"""
+
+    __slots__ = ()
+
+    def __init__(self, text: str, keyword: str, searched: re.Match[str]):
+        super().__init__(text, keyword, MatchWithParams(searched))
+
+    @property
+    def url(self) -> str:
+        return self.searched.url
+
+    @property
+    def params(self) -> dict[str, str]:
+        return self.searched.params
 
 
 def Searched() -> SearchResult:
@@ -114,16 +132,63 @@ def _extract_text(message: UniMsg) -> str | None:
     return None
 
 
-class KeyPatternList(list[tuple[str, re.Pattern[str]]]):
-    def __init__(self, *args: tuple[str, str | re.Pattern[str]]):
+class KeyPatternList(list[tuple[str, re.Pattern[str], ParamRules]]):
+    """(keyword, pattern, param_rules)
+
+    param_rules: {param_name: 期望值 or True(仅要求存在)}
+    """
+
+    def __init__(
+        self,
+        *args: tuple[str, str | re.Pattern[str]]
+        | tuple[str, str | re.Pattern[str], ParamRules],
+    ):
         super().__init__()
-        for key, pattern in args:
+        for item in args:
+            if len(item) == 2:
+                key, pattern = item
+                param_rules: ParamRules = {}
+            else:
+                key, pattern, param_rules = item
             if isinstance(pattern, str):
                 pattern = re.compile(pattern)
-            self.append((key, pattern))
+            self.append((key, pattern, param_rules))
         # 按 key 长 -> 短
         self.sort(key=lambda x: -len(x[0]))
-        logger.debug(f"KeyWords: {[k for k, _ in self]}")
+        logger.debug(f"KeyWords: {[k for k, _, _ in self]}")
+
+
+def _match_param_rules(params: dict[str, str], rules: ParamRules) -> bool:
+    """根据 ParamRules 对已有的 params 做判断，并写默认值回去"""
+    if not rules:
+        return True
+
+    for name, rule in rules.items():
+        required = rule.get("required", True)
+        value = params.get(name)
+
+        if value is None and "default" in rule:
+            value = rule["default"]
+            params[name] = value
+
+        if value is None:
+            if required:
+                return False
+            continue
+
+        if "equals" in rule and value != rule["equals"]:
+            return False
+
+        if "one_of" in rule and value not in rule["one_of"]:
+            return False
+
+        if rule.get("as_int"):
+            try:
+                int(value)
+            except ValueError:
+                return False
+
+    return True
 
 
 class KeywordRegexRule:
@@ -152,24 +217,42 @@ class KeywordRegexRule:
         if not text:
             return False
 
-        for keyword, pattern in self.key_pattern_list:
+        for keyword, pattern, param_rules in self.key_pattern_list:
             if keyword not in text:
                 continue
-            if searched := pattern.search(text):
+            if not (searched := pattern.search(text)):
+                logger.debug(f"keyword '{keyword}' is in '{text}', but not matched")
+                continue
+
+            # 没有参数规则，也构造带 params 的 searched
+            if not param_rules:
+                mwp = MatchWithParams(searched)
                 state[PSR_SEARCHED_KEY] = SearchResult(
-                    text=text, keyword=keyword, searched=searched
+                    text=text, keyword=keyword, searched=mwp
                 )
                 return True
-            logger.debug(f"keyword '{keyword}' is in '{text}', but not matched")
+
+            # 有参数规则，解析 URL 并检查
+            url_sr = UrlSearchResult(text=text, keyword=keyword, searched=searched)
+            url_sr.searched.param_rules = param_rules
+            if _match_param_rules(url_sr.params, param_rules):
+                state[PSR_SEARCHED_KEY] = url_sr
+                return True
+
         return False
 
 
-def keyword_regex(*args: tuple[str, str | re.Pattern[str]]) -> Rule:
+def keyword_regex(
+    *args: tuple[str, str | re.Pattern[str]]
+    | tuple[str, str | re.Pattern[str], ParamRules],
+) -> Rule:
     return Rule(KeywordRegexRule(KeyPatternList(*args)))
 
 
 def on_keyword_regex(
-    *args: tuple[str, str | re.Pattern[str]], priority: int = 5
+    *args: tuple[str, str | re.Pattern[str]]
+    | tuple[str, str | re.Pattern[str], ParamRules],
+    priority: int = 5,
 ) -> type[Matcher]:
     return Matcher.new(
         "message",

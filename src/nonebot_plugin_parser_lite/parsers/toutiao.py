@@ -1,11 +1,11 @@
 import json
-from re import Match
 from typing import ClassVar
 
 from nonebot import logger
 
 from .base import (
     BaseParser,
+    MatchWithParams,
     ParseException,
     PlatformEnum,
     handle,
@@ -27,7 +27,7 @@ class ToutiaoParser(BaseParser):
         "toutiao.com",
         r"https?://[^\s]*?(?:toutiao\.com|ixigua\.com)/(?:is|video)/[^\s/]+/?",
     )
-    async def _parse_toutiao_share(self, searched: Match[str]):
+    async def _parse_toutiao_share(self, searched: MatchWithParams):
         """解析今日头条分享链接"""
         share_url = searched[0]
         logger.debug(f"触发今日头条解析: {share_url}")

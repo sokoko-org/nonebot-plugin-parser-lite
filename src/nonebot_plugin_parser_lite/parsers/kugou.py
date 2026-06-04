@@ -2,18 +2,12 @@ import base64
 import contextlib
 import json
 import re
-from re import Match
 from typing import ClassVar
 
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from .base import (
-    BaseParser,
-    ParseException,
-    PlatformEnum,
-    handle,
-)
+from .base import BaseParser, MatchWithParams, ParseException, PlatformEnum, handle
 from .data import MediaContent, Platform
 
 
@@ -123,9 +117,9 @@ class KuGouParser(BaseParser):
         "kugou.com",
         r"https?://[^\s]*?kugou\.com.*?(?:/(?:share|mixsong)/[a-zA-Z0-9]+\.html|(?:id|chain)=[a-zA-Z0-9]+)",
     )
-    async def _parse_kugou_share(self, searched: Match[str]):
+    async def _parse_kugou_share(self, searched: MatchWithParams):
         """解析酷狗分享链接"""
-        share_url = searched[0]
+        share_url = searched.url
         response = await self.httpx.get(share_url)
         response.raise_for_status()
         html_text = response.text
@@ -134,7 +128,7 @@ class KuGouParser(BaseParser):
         _hash = self._extract_hash(html_text)
 
         if not _hash:
-            raise ParseException("未找到歌曲hash")
+            raise ParseException(f"未找到歌曲hash: {share_url}")
 
         # 获取歌曲信息
         response = await self.httpx.get(

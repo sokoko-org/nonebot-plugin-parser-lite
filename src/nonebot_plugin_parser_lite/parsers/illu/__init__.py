@@ -1,10 +1,17 @@
-from re import Match
 from typing import ClassVar, Literal, overload
 
 from msgspec import ValidationError
 
 from ...utils.format import format_num
-from ..base import BaseParser, Comment, ParseException, Platform, PlatformEnum, handle
+from ..base import (
+    BaseParser,
+    Comment,
+    MatchWithParams,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    handle,
+)
 from .articleByIdV2 import ArticleByIdV2
 from .articleByIdV2 import decoder as article_decoder
 from .commentList import Comment as IlluComment
@@ -25,7 +32,7 @@ class IlluParser(BaseParser):
     # 文章
     # https://illund.com/share.html?al=mindlib%3A%2F%2Freactbox%2F%3FarticleId%3Dfcfb0ffe76%26hideTitleBar%3D1%26pagename%3DArticleDetailVC&st=%E3%80%90%E6%96%87%E7%AB%A0%E5%88%86%E4%BA%AB%E3%80%91%E3%80%90%E6%98%9F%E6%B5%B7%E6%8B%BE%E9%81%97%E3%80%919.2%E5%BF%83%E8%A1%80%E6%9D%A5%E6%BD%AE
     @handle("illund.com/share.html", r"articleId%3D(?P<articleId>[0-9a-z]+)")
-    async def parse_article(self, searched: Match[str]):
+    async def parse_article(self, searched: MatchWithParams):
         object_id = searched["articleId"]
         detail = (
             await self._fetch_detail(
@@ -57,7 +64,7 @@ class IlluParser(BaseParser):
     # 图集
     # https://illund.com/share.html?al=mindlib%3A%2F%2Freactbox%2F%3Fmainid%3Dfcecc2da36%26hideTitleBar%3D1%26pagename%3DDrawingDetailVC&st=%E3%80%90%E5%9B%BE%E7%89%87%E5%88%86%E4%BA%AB%E3%80%91%E6%9D%8E%E7%AE%B1%E6%B0%B4%E4%BB%99
     @handle("illund.com/share.html", r"mainid%3D(?P<mainId>[0-9a-z]+)")
-    async def parse_drawing(self, searched: Match[str]):
+    async def parse_drawing(self, searched: MatchWithParams):
         object_id = searched["mainId"]
         detail = await self._fetch_detail(object_id, BizType.Drawing)
         return self.result(

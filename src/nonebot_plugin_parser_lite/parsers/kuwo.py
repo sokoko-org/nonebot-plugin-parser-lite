@@ -1,8 +1,8 @@
-from re import Match
 from typing import ClassVar
 
 from .base import (
     BaseParser,
+    MatchWithParams,
     ParseException,
     PlatformEnum,
     handle,
@@ -33,7 +33,7 @@ class KuWoParser(BaseParser):
         name=PlatformEnum.KUWO, display_name="酷我音乐"
     )
     @handle("kuwo.cn", r"play_detail/(\d+)")
-    async def _parse_kuwo_share(self, searched: Match[str]):
+    async def _parse_kuwo_share(self, searched: MatchWithParams):
         """解析酷我音乐分享链接"""
         rid = searched[1]
 

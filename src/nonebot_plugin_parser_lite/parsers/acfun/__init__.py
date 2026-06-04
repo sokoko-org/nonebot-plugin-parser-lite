@@ -4,6 +4,7 @@ from typing import ClassVar
 from ..base import (
     DOWNLOADER,
     BaseParser,
+    MatchWithParams,
     ParseException,
     Platform,
     PlatformEnum,
@@ -24,8 +25,8 @@ class AcfunParser(BaseParser):
         self.httpx.headers.update(self.headers)
 
     @handle("acfun.cn", r"(?:ac=|/ac)(?P<acid>\d+)")
-    async def _parse(self, searched: re.Match[str]):
-        acid = int(searched.group("acid"))
+    async def _parse(self, searched: MatchWithParams):
+        acid = int(searched["acid"])
         url = f"https://www.acfun.cn/v/ac{acid}"
 
         video_info = await self.parse_video_info(url)

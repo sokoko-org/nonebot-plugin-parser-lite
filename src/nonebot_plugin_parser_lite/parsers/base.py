@@ -3,15 +3,30 @@
 from abc import ABC
 import asyncio
 from collections.abc import Callable, Coroutine, Sequence
-from re import Match, Pattern, compile
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, TypeVar, cast, final
+from re import Pattern, compile
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Literal,
+    TypeVar,
+    cast,
+    final,
+)
 from typing_extensions import ParamSpec, Unpack
 
 from anyio import Path
 from httpx import AsyncClient
 
 from ..config import pconfig as pconfig
-from ..constants import ANDROID_HEADER, COMMON_HEADER, COMMON_TIMEOUT, IOS_HEADER
+from ..constants import (
+    ANDROID_HEADER,
+    COMMON_HEADER,
+    COMMON_TIMEOUT,
+    IOS_HEADER,
+    MatchWithParams,
+    ParamRules,
+)
 from ..constants import PlatformEnum as PlatformEnum
 from ..download import DOWNLOADER as DOWNLOADER
 from ..download.task import DownloadTaskWrapper
@@ -48,8 +63,10 @@ from .data import (
 P = ParamSpec("P")
 R = TypeVar("R")
 T = TypeVar("T", bound="BaseParser")
-HandlerFunc = Callable[[T, Match[str]], Coroutine[Any, Any, ParseResult]]
-KeyPatterns = list[tuple[str, Pattern[str]]]
+
+
+HandlerFunc = Callable[[T, MatchWithParams], Coroutine[Any, Any, ParseResult]]
+KeyPatterns = list[tuple[str, Pattern[str], ParamRules]]
 
 _KEY_PATTERNS = "_key_patterns"
 
@@ -87,20 +104,51 @@ def retry(max_retries: int = 3, delay: float = 1.0):
 
 
 # 注册处理器装饰器
-def handle(keyword: str, pattern: str, max_retries: int = 1):
-    """注册处理器装饰器"""
+def handle(
+    keyword: str,
+    pattern: str | None = None,
+    *,
+    params: ParamRules | None = None,
+):
+    """注册处理器装饰器
+
+    约定：
+    - keyword: 必填，在 rule 里始终作为关键字用于初步判断 (`keyword in text`)
+    - pattern: 可选，完整正则，用于匹配整段 URL 文本
+    - params: 可选，ParamRules，用于基于 query 的补充筛选（required/equals/default/one_of/as_int 等）
+    - pattern 与 params 至少要指定一个（可以同时存在）：
+        - 只有 pattern：纯正则匹配，不看 query
+        - 只有 params：regex 由 keyword 自动生成为 `https?://<keyword>[^\\s]*`
+        - pattern + params：先用 pattern 过滤，再用 params 解析 URL 后进一步判断
+    """  # noqa: E501
+
+    if pattern is None and not params:
+        raise ValueError("handle: pattern 和 params 至少要指定一个")
+
+    # 确定基础 regex：
+    # - 有 pattern 时：使用 pattern 作为完整正则
+    # - 无 pattern 时：使用 keyword 作为 URL 前缀生成正则
+    if pattern is not None:
+        regex = pattern
+    else:
+        escaped = (
+            keyword.replace(".", r"\.")
+            .replace("?", r"\?")
+            .replace("+", r"\+")
+            .replace("*", r"\*")
+        )
+        regex = rf"https?://{escaped}[^\s]*"
+
+    param_rules = params or {}
 
     def decorator(func: HandlerFunc[T]) -> HandlerFunc[T]:
         if not hasattr(func, _KEY_PATTERNS):
             setattr(func, _KEY_PATTERNS, [])
 
         key_patterns: KeyPatterns = getattr(func, _KEY_PATTERNS)
-        key_patterns.append((keyword, compile(pattern)))
+        key_patterns.append((keyword, compile(regex), param_rules))
 
-        # 应用重试装饰器
         wrapped_func = func
-        # 取消重试，防止死号
-        # 复制_key_patterns属性到包装函数
         setattr(wrapped_func, _KEY_PATTERNS, key_patterns)
         return wrapped_func
 
@@ -152,10 +200,11 @@ class BaseParser:
             if callable(attr) and hasattr(attr, _KEY_PATTERNS):
                 key_patterns: KeyPatterns = getattr(attr, _KEY_PATTERNS)
                 handler = cast(HandlerFunc, attr)
-                for keyword, pattern in key_patterns:
-                    # 记录 keyword -> (pattern, handler) 列表
+                for keyword, pattern, param_rules in key_patterns:
+                    # 记录 keyword -> (pattern, handler) 列表（解析时只关心 pattern）
                     cls._handlers.setdefault(keyword, []).append((pattern, handler))
-                    cls._key_patterns.append((keyword, pattern))
+                    # _key_patterns 用于 matcher 注册，保留 param_rules
+                    cls._key_patterns.append((keyword, pattern, param_rules))
 
         # 按关键字长度降序排序（search_url 仍然按原逻辑）
         cls._key_patterns.sort(key=lambda x: -len(x[0]))
@@ -166,7 +215,7 @@ class BaseParser:
         return cls._registry
 
     @final
-    async def parse(self, keyword: str, searched: Match[str]) -> ParseResult:
+    async def parse(self, keyword: str, searched: MatchWithParams) -> ParseResult:
         """解析 URL 提取信息。
 
         :param keyword: 关键词
@@ -178,7 +227,7 @@ class BaseParser:
         if not handlers:
             raise ParseException(f"未找到关键字 {keyword!r} 对应的 handler")
 
-        text = searched.group(0)
+        text = searched.url
         for pattern, handler in handlers:
             # pattern 是当初 handle 时 compile 出来的正则
             # 这里用 search/fullmatch 都可以，search 更宽松
@@ -206,13 +255,56 @@ class BaseParser:
         return await self.parse(keyword, searched)
 
     @classmethod
-    def search_url(cls, url: str) -> tuple[str, Match[str]]:
-        """搜索 URL 匹配模式"""
-        for keyword, pattern in cls._key_patterns:
+    def _match_param_rules(cls, mwp: MatchWithParams, rules: ParamRules) -> bool:
+        """根据 ParamRules 检查并补充 mwp.params."""
+        if not rules:
+            return True
+
+        for name, rule in rules.items():
+            required = rule.get("required", True)
+            value = mwp.params.get(name)
+
+            # 默认值处理
+            if value is None and "default" in rule:
+                value = rule["default"]
+                mwp.params[name] = value  # 写回，后续 handler 可以直接用
+
+            if value is None:
+                if required:
+                    return False
+                # 非必填且无值 -> 略过后续 equals/one_of/as_int 校验
+                continue
+
+            # equals
+            if "equals" in rule and value != rule["equals"]:
+                return False
+
+            # one_of
+            if "one_of" in rule and value not in rule["one_of"]:
+                return False
+
+            # as_int 仅做格式校验
+            if rule.get("as_int"):
+                try:
+                    int(value)
+                except ValueError:
+                    return False
+
+        return True
+
+    @classmethod
+    def search_url(cls, url: str) -> tuple[str, MatchWithParams]:
+        """搜索 URL 匹配模式（支持基于 params 的筛选）"""
+        for keyword, pattern, param_rules in cls._key_patterns:
             if keyword not in url:
                 continue
-            if searched := pattern.search(url):
-                return keyword, searched
+            m = pattern.search(url)
+            if not m:
+                continue
+            mwp = MatchWithParams(m)
+            mwp.param_rules = param_rules
+            if cls._match_param_rules(mwp, param_rules):
+                return keyword, mwp
         raise ParseException(f"无法匹配 {url}")
 
     @classmethod

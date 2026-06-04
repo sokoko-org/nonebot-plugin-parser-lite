@@ -1,6 +1,5 @@
 import json
 from math import ceil
-from re import Match
 from time import time
 from typing import ClassVar
 from uuid import uuid4
@@ -10,6 +9,7 @@ from curl_cffi import AsyncSession
 
 from ..base import (
     BaseParser,
+    MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
@@ -45,16 +45,23 @@ class WeiBoParser(BaseParser):
         self.httpx.headers.update(self.headers)
 
     # https://weibo.com/tv/show/1034:5007449447661594?mid=5007452630158934
-    @handle("weibo.com/tv", r"weibo\.com/tv/show/\d{4}:\d+\?mid=(?P<mid>\d+)")
-    async def _parse_weibo_tv(self, searched: Match[str]):
-        mid = str(searched.group("mid"))
+    @handle(
+        "weibo.com/tv",
+        r"weibo\.com/tv/show/\d{4}:\d+",
+        params={"mid": {"as_int": True}},
+    )
+    async def _parse_weibo_tv(self, searched: MatchWithParams):
+        mid = searched["mid"]
         weibo_id = self._mid2id(mid)
         return await self.parse_weibo_id(weibo_id)
 
     # https://video.weibo.com/show?fid=1034:5145615399845897
-    @handle("video.weibo", r"video\.weibo\.com/show\?fid=(?P<fid>\d+:\d+)")
-    async def _parse_video_weibo(self, searched: Match[str]):
-        fid = str(searched.group("fid"))
+    @handle(
+        "video.weibo.com/show",
+        params={"fid": {}},
+    )
+    async def _parse_video_weibo(self, searched: MatchWithParams):
+        fid = searched["fid"]
         return await self.parse_fid(fid)
 
     # https://m.weibo.cn/status/5234367615996775
@@ -64,14 +71,14 @@ class WeiBoParser(BaseParser):
     @handle("m.weibo.cn", r"weibo\.cn/(?:status|detail|\d+)/(?P<wid>[0-9a-zA-Z]+)")
     # https://weibo.com/7207262816/P5kWdcfDe
     @handle("weibo.com", r"weibo\.com/\d+/(?P<wid>[0-9a-zA-Z]+)")
-    async def _parse_m_weibo_cn(self, searched: Match[str]):
-        wid = str(searched.group("wid"))
+    async def _parse_m_weibo_cn(self, searched: MatchWithParams):
+        wid = searched["wid"]
         return await self.parse_weibo_id(wid)
 
     # https://mapp.api.weibo.cn/fx/233911ddcc6bffea835a55e725fb0ebc.html
     @handle("mapp.api.weibo", r"mapp\.api\.weibo\.cn/fx/[0-9A-Za-z]+\.html")
-    async def _parse_mapp_api_weibo(self, searched: Match[str]):
-        url = f"https://{searched.group(0)}"
+    async def _parse_mapp_api_weibo(self, searched: MatchWithParams):
+        url = f"https://{searched.url}"
         return await self.parse_with_redirect(url)
 
     # https://weibo.com/ttarticle/p/show?id=2309404962180771742222
@@ -79,8 +86,8 @@ class WeiBoParser(BaseParser):
     @handle("weibo.com/ttarticle", r"id=(?P<id>\d+)")
     # https://card.weibo.com/article/m/show/id/2309404962180771742222
     @handle("weibo.com/article", r"/id/(?P<id>\d+)")
-    async def _parse_article(self, searched: Match[str]):
-        _id = searched.group("id")
+    async def _parse_article(self, searched: MatchWithParams):
+        _id = searched["id"]
         return await self.parse_article(_id)
 
     async def parse_article(self, _id: str):

@@ -1,9 +1,9 @@
 import re
-from re import Match
 from typing import ClassVar
 
 from ..base import (
     BaseParser,
+    MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
@@ -25,7 +25,7 @@ class QSMusicParser(BaseParser):
     )
 
     @handle("qishui.douyin.com", r"https?://[^\s]*?qishui\.douyin\.com/s/[a-zA-Z0-9]+/")
-    async def _parse_qsmusic_share(self, searched: Match[str]):
+    async def _parse_qsmusic_share(self, searched: MatchWithParams):
         """解析汽水音乐分享链接"""
         share_url = searched[0]
 

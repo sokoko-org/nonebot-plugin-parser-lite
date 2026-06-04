@@ -104,10 +104,9 @@ def register_parser_matcher() -> None:
 
     enabled_platforms: list[str] = []
     keyword_class_map: dict[str, type[BaseParser]] = {}
-
     for parser_cls in enabled_classes:
         enabled_platforms.append(parser_cls.platform.display_name)
-        for keyword, _ in parser_cls._key_patterns:
+        for keyword, _, _ in parser_cls._key_patterns:
             keyword_class_map[keyword] = parser_cls
 
     _KEYWORD_CLASS_MAP = keyword_class_map
@@ -133,7 +132,7 @@ async def parser_handler(
     sr: SearchResult = Searched(),
 ):
     """统一的解析处理器"""
-    cache_key = sr.searched[0]
+    cache_key = sr.searched.cache_key
 
     # 1. 从缓存获取或重新解析
     result = _RESULT_CACHE.get(cache_key)

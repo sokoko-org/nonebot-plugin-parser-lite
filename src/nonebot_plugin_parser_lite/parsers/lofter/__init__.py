@@ -1,4 +1,3 @@
-import re
 from typing import ClassVar
 
 from msgspec import convert
@@ -7,6 +6,7 @@ from nonebot import logger
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
@@ -26,7 +26,7 @@ class LofterParser(BaseParser):
         "s.lofter.com",
         r"s\.lofter\.com/-s/[0-9A-Za-z]+",
     )
-    async def _parse_short_link(self, searched: re.Match[str]):
+    async def _parse_short_link(self, searched: MatchWithParams):
         """解析 Lofter 短链"""
         short_url = f"https://{searched[0]}"
         return await self.parse_with_redirect(short_url)
@@ -35,7 +35,7 @@ class LofterParser(BaseParser):
         "lofter.com",
         r"post/(?P<blog_hex>[0-9a-zA-Z]+)_(?P<post_hex>[0-9a-zA-Z]+)",
     )
-    async def _parser(self, searched: re.Match[str]):
+    async def _parser(self, searched: MatchWithParams):
         blog_id = int(searched["blog_hex"], 16)
         post_id = int(searched["post_hex"], 16)
 

@@ -9,6 +9,7 @@ from ...utils.browser import BrowserManager
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
@@ -37,8 +38,8 @@ class DouyinParser(BaseParser):
     # https://v.douyin.com/_2ljF4AmKL8
     @handle("v.douyin", r"v\.douyin\.com/[a-zA-Z0-9_\-]+")
     @handle("jx.douyin", r"jx\.douyin\.com/[a-zA-Z0-9_\-]+")
-    async def _parse_short_link(self, searched: re.Match[str]):
-        url = f"https://{searched.group(0)}"
+    async def _parse_short_link(self, searched: MatchWithParams):
+        url = f"https://{searched.url}"
         return await self.parse_with_redirect(url)
 
     # https://www.douyin.com/video/7521023890996514083
@@ -58,7 +59,7 @@ class DouyinParser(BaseParser):
         "jingxuan.douyin",
         r"jingxuan\.douyin.com/m/(?P<ty>video|note|slides|article)/(?P<vid>\d+)",
     )
-    async def _parse_douyin(self, searched: re.Match[str]):
+    async def _parse_douyin(self, searched: MatchWithParams):
         ty, vid = searched["ty"], searched["vid"]
         try:
             if ty in ["video", "article"]:

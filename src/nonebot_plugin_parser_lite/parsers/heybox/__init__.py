@@ -1,4 +1,3 @@
-from re import Match
 from typing import ClassVar
 
 from msgspec import convert
@@ -6,7 +5,15 @@ from nonebot.log import logger
 
 from ...utils.browser import BrowserManager
 from ...utils.format import format_num
-from ..base import BaseParser, Comment, ParseException, Platform, PlatformEnum, handle
+from ..base import (
+    BaseParser,
+    Comment,
+    MatchWithParams,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    handle,
+)
 from .encrypt import build_url
 from .model import BaseResult
 
@@ -28,13 +35,10 @@ class HeyBoxParser(BaseParser):
             }
         )
 
-    @handle(
-        "api.xiaoheihe.cn/v3/bbs/app/api/web/share",
-        r"link_id=(?P<link_id>[A-Za-z0-9]+)",
-    )
-    @handle("xiaoheihe.cn/bbs/post_share", r"link_id=(?P<link_id>[A-Za-z0-9]+)")
+    @handle("api.xiaoheihe.cn/v3/bbs/app/api/web/share", params={"link_id": {}})
+    @handle("xiaoheihe.cn/bbs/post_share", params={"link_id": {}})
     @handle("xiaoheihe.cn/app/bbs", r"link\/(?P<link_id>[A-Za-z0-9]+)")
-    async def _parse(self, searched: Match[str]):
+    async def _parse(self, searched: MatchWithParams):
         link_id = searched["link_id"]
 
         if not self.x_xhh_tokenid:

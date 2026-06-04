@@ -1,11 +1,18 @@
-from re import Match
 from typing import Any, ClassVar, TypeVar
 
 from msgspec import convert
 from nonebot.log import logger
 
 from ...utils.format import format_num
-from ..base import BaseParser, Comment, ParseException, Platform, PlatformEnum, handle
+from ..base import (
+    BaseParser,
+    Comment,
+    MatchWithParams,
+    ParseException,
+    Platform,
+    PlatformEnum,
+    handle,
+)
 from .comments import Comment as RawComment
 from .comments import Comments
 from .gallery import Gallery
@@ -85,9 +92,9 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/news-detail_share.html?article_id=87832&comment_type=228
     @handle(
         "buff.163.com/s/news-detail_share.html",
-        r"buff\.163\.com/s/news-detail_share\.html\?(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=228)(?:[^#]*?(?:article_id=[^&]+|comment_type=228)){2}",
+        params={"article_id": {}, "comment_type": {"equals": "228"}},
     )
-    async def parse_video(self, searched: Match[str]):
+    async def parse_video(self, searched: MatchWithParams):
         article_id = searched["article_id"]
         video = await self._fetch_ok_json(
             url="https://buff.163.com/api/news/share/detail",
@@ -115,9 +122,9 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/preview_share.html?game=csgo&preview_id=V1092280822&comment_type=216
     @handle(
         "buff.163.com/s/preview_share.html",
-        r"buff\.163\.com/s/preview_share\.html\?(?=[^#]*game=(?P<game>[^&]+))(?=[^#]*preview_id=(?P<preview_id>[^&]+))(?=[^#]*comment_type=216).*?(?:game=[^&]+|preview_id=[^&]+|comment_type=216)",
+        params={"game": {}, "preview_id": {}, "comment_type": {"equals": "216"}},
     )
-    async def parse_gallery(self, searched: Match[str]):
+    async def parse_gallery(self, searched: MatchWithParams):
         preview_id = searched["preview_id"]
         game = searched["game"]
         gallery = await self._fetch_ok_json(
@@ -148,9 +155,9 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/news-detail_share.html?article_id=87855&comment_type=211
     @handle(
         "buff.163.com/s/news-detail_share.html",
-        r"buff\.163\.com/s/news-detail_share\.html\?(?=[^#]*article_id=(?P<article_id>[^&]+))(?=[^#]*comment_type=211)(?:[^#]*?(?:article_id=[^&]+|comment_type=211)){2}",
+        params={"article_id": {}, "comment_type": {"equals": "211"}},
     )
-    async def parse_news(self, searched: Match[str]):
+    async def parse_news(self, searched: MatchWithParams):
         article_id = searched["article_id"]
         news = await self._fetch_ok_json(
             url="https://buff.163.com/api/news/share/detail",
@@ -178,9 +185,9 @@ class BuffParser(BaseParser):
     # https://buff.163.com/s/topic-detail_share.html?social_topic_post_id=P1093043595&comment_type=239
     @handle(
         "buff.163.com/s/topic-detail_share.html",
-        r"buff\.163\.com/s/topic-detail_share\.html\?(?=[^#]*social_topic_post_id=(?P<post_id>[^&]+))(?=[^#]*comment_type=239)(?:[^#]*?(?:social_topic_post_id=[^&]+|comment_type=239)){2}",
+        params={"social_topic_post_id": {}, "comment_type": {"equals": "239"}},
     )
-    async def parse_topic(self, searched: Match[str]):
+    async def parse_topic(self, searched: MatchWithParams):
         post_id = searched["post_id"]
         topic = await self._fetch_ok_json(
             url="https://buff.163.com/api/topic/posts/detail",

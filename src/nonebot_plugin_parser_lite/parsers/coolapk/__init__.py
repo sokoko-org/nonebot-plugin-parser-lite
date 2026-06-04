@@ -6,6 +6,7 @@ from nonebot import logger
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    MatchWithParams,
     ParseException,
     ParseResult,
     Platform,
@@ -30,8 +31,8 @@ class CoolapkParser(BaseParser):
     @handle("coolapk1s.com/feed/", r"coolapk1s\.com/feed/(?P<feed_id>\d+)")
     @handle("www.coolapk.com/feed/", r"www\.coolapk\.com/feed/(?P<feed_id>\d+)")
     @handle("coolapk.com/feed/", r"coolapk\.com/feed/(?P<feed_id>\d+)")
-    async def _parse(self, searched: re.Match[str]) -> ParseResult:
-        feed_id = searched.group("feed_id")
+    async def _parse(self, searched: MatchWithParams) -> ParseResult:
+        feed_id = searched["feed_id"]
         response = await self.httpx.get(f"https://www.coolapk1s.com/feed/{feed_id}")
         response.raise_for_status()
 

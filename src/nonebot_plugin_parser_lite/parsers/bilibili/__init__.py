@@ -3,7 +3,6 @@ from collections.abc import AsyncGenerator
 import contextlib
 import json
 import re
-from re import Match
 from typing import Any, ClassVar
 
 import aiofiles
@@ -28,6 +27,7 @@ from ..base import (
     BaseParser,
     Comment,
     DownloadException,
+    MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
@@ -179,59 +179,61 @@ class BilibiliParser(BaseParser):
 
     @handle("b23.tv", r"b23\.tv/[0-9a-zA-Z._?%&+\-=/#]+")
     @handle("bili2233", r"bili2233\.cn/[0-9a-zA-Z._?%&+\-=/#]+")
-    async def _parse_short_link(self, searched: Match[str]):
+    async def _parse_short_link(self, searched: MatchWithParams):
         """解析短链"""
-        url = f"https://{searched.group(0)}"
+        url = f"https://{searched.url}"
         return await self.parse_with_redirect(url)
 
     @handle("BV", r"^(?P<bvid>BV[0-9a-zA-Z]{10})(?:\s)?(?P<page_num>\d{1,3})?$")
     @handle(
         "/BV",
-        r"bilibili\.com(?:/video)?/(?P<bvid>BV[0-9A-Za-z]{10})(?:.*?[?&]p=(?P<page_num>\d{1,3}))?",
+        r"bilibili\.com(?:/video)?/(?P<bvid>BV[0-9A-Za-z]{10})",
+        params={"p": {"default": "1", "as_int": True, "required": False}},
     )
-    async def _parse_bv(self, searched: Match[str]):
+    async def _parse_bv(self, searched: MatchWithParams):
         """解析视频信息"""
-        bvid = str(searched.group("bvid"))
-        page_num = int(searched.group("page_num") or 1)
+        bvid = searched["bvid"]
+        page_num = int(searched["p"])
 
         return await self.parse_video(bvid=bvid, page_num=page_num)
 
     @handle("av", r"^av(?P<avid>\d{6,})(?:\s)?(?P<page_num>\d{1,3})?$")
     @handle(
         "/av",
-        r"bilibili\.com(?:/video)?/av(?P<avid>\d{6,})(?:.*?[?&]p=(?P<page_num>\d{1,3}))?",
+        r"bilibili\.com(?:/video)?/av(?P<avid>\d{6,})",
+        params={"p": {"default": "1", "as_int": True, "required": False}},
     )
-    async def _parse_av(self, searched: Match[str]):
+    async def _parse_av(self, searched: MatchWithParams):
         """解析视频信息"""
-        avid = int(searched.group("avid"))
-        page_num = int(searched.group("page_num") or 1)
+        avid = int(searched["avid"])
+        page_num = int(searched["p"])
 
         return await self.parse_video(avid=avid, page_num=page_num)
 
     @handle("/dynamic/", r"bilibili\.com/dynamic/(?P<dynamic_id>\d+)")
     @handle("t.bili", r"t\.bilibili\.com/(?P<dynamic_id>\d+)")
     @handle("/opus/", r"bilibili\.com/opus/(?P<dynamic_id>\d+)")
-    async def _parse_dynamic(self, searched: Match[str]):
+    async def _parse_dynamic(self, searched: MatchWithParams):
         """解析动态信息"""
-        dynamic_id = int(searched.group("dynamic_id"))
+        dynamic_id = int(searched["dynamic_id"])
         return await self.parse_dynamic_or_opus(dynamic_id)
 
     @handle("live.bili", r"live\.bilibili\.com/(?P<room_id>\d+)")
-    async def _parse_live(self, searched: Match[str]):
+    async def _parse_live(self, searched: MatchWithParams):
         """解析直播信息"""
-        room_id = int(searched.group("room_id"))
+        room_id = int(searched["room_id"])
         return await self.parse_live(room_id)
 
     @handle("/favlist", r"favlist\?fid=(?P<fav_id>\d+)")
-    async def _parse_favlist(self, searched: Match[str]):
+    async def _parse_favlist(self, searched: MatchWithParams):
         """解析收藏夹信息"""
-        fav_id = int(searched.group("fav_id"))
+        fav_id = int(searched["fav_id"])
         return await self.parse_favlist(fav_id)
 
     @handle("/read/", r"bilibili\.com/read/cv(?P<read_id>\d+)")
-    async def _parse_read(self, searched: Match[str]):
+    async def _parse_read(self, searched: MatchWithParams):
         """解析专栏信息"""
-        read_id = int(searched.group("read_id"))
+        read_id = int(searched["read_id"])
         return await self.parse_read(read_id)
 
     XOR_CODE = 23442827791579
