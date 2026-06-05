@@ -187,7 +187,6 @@ def _match_param_rules(params: dict[str, str], rules: ParamRules) -> bool:
                 int(value)
             except ValueError:
                 return False
-
     return True
 
 
@@ -209,7 +208,8 @@ class KeywordRegexRule:
         )
 
     def __hash__(self) -> int:
-        return hash(frozenset(self.key_pattern_list))
+        sig = tuple((key, pattern.pattern) for key, pattern, _ in self.key_pattern_list)
+        return hash(sig)
 
     async def __call__(self, message: UniMsg, state: T_State, sess: Uninfo) -> bool:
 
