@@ -3,7 +3,7 @@
 from abc import ABC
 import asyncio
 from collections.abc import Callable, Coroutine, Sequence
-from re import Pattern, compile
+from re import Pattern, compile, escape
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -131,12 +131,7 @@ def handle(
     if pattern is not None:
         regex = pattern
     else:
-        escaped = (
-            keyword.replace(".", r"\.")
-            .replace("?", r"\?")
-            .replace("+", r"\+")
-            .replace("*", r"\*")
-        )
+        escaped = escape(keyword)
         regex = rf"https?://{escaped}[^\s]*"
 
     param_rules = params or {}
