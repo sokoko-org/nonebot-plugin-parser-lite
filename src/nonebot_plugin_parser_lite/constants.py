@@ -100,28 +100,30 @@ class BiliVideoQuality(IntEnum):
     _8K = 127
 
 
-class BiliVideoCodecs(tuple, Enum):
+class BiliVideoCodecs(str, Enum):
     """
     视频的视频流编码枚举
 
     :cvar HEV: HEVC(H.265)
     :cvar AVC: AVC(H.264)
     :cvar AV1: AV1
+    :cvar UNKNOWN: 未知
     """
 
-    HEV = ("hev", "hvc1", "hev1")
-    AVC = ("avc",)
-    AV1 = ("av1", "av01")
-    UNKNOWN = ()
+    HEV = "hev"
+    AVC = "avc"
+    AV1 = "av01"
+    UNKNOWN = "unknown"
 
     @classmethod
     def from_codec(cls, codec: str) -> "BiliVideoCodecs":
-        """根据 codec 字符串推断枚举值"""
+        """根据返回的 codec 字符串推断枚举值"""
         codec = codec.lower()
-        return next(
-            (item for item in cls if any(alias in codec for alias in item.value)),
-            cls.UNKNOWN,
-        )
+        if any(k in codec for k in ("hev", "hvc1", "hev1")):
+            return cls.HEV
+        if any(k in codec for k in ("avc",)):
+            return cls.AVC
+        return cls.AV1 if any(k in codec for k in ("av1", "av01")) else cls.UNKNOWN
 
 
 class BiliAudioQuality(IntEnum):

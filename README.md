@@ -98,9 +98,9 @@ API_TIMEOUT=30.0
 plite_bili_ck="SESSDATA=xxxxxxxxxx;ac_time_value=131231241231241"
 
 # [可选] 允许的 B 站视频编码，越靠前的编码优先级越高
-# 可选 "avc"(H.264，体积较大), "hev"(HEVC), "av01"(AV1)
+# 可选 "avc"(H.264，体积较大), "hev"(HEVC), "av01"(AV1), "unknown"(未知)
 # 后两项在不同设备可能有兼容性问题，如需完全避免，可只填一项，如 '["avc"]'
-plite_bili_video_codes=["avc", "av01", "hev"]
+plite_bili_video_codes=["avc", "av01", "hev", "unknown"]
 
 # [可选] B 站视频清晰度
 # 360p(16), 480p(32), 720p(64), 1080p(80), 1080p+(112), 1080p_60(116), 4k(120)

@@ -37,6 +37,7 @@ class Config(BaseModel):
         BiliVideoCodecs.AVC,
         BiliVideoCodecs.AV1,
         BiliVideoCodecs.HEV,
+        BiliVideoCodecs.UNKNOWN,
     ]
     """B站视频编码"""
     plite_bili_video_quality: BiliVideoQuality = BiliVideoQuality._1080P
