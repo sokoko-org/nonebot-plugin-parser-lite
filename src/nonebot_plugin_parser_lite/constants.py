@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 from re import Match
-from typing import Final, TypedDict
+from typing import Any, Final, TypedDict
 from urllib.parse import parse_qs, urlparse
 
 from httpx import Timeout
@@ -159,11 +159,13 @@ class MatchWithParams:
         self.param_rules: ParamRules = {}
         """当前匹配对应的 ParamRules（由 BaseParser / rule 填充）"""
 
-    # 兼容原 Match 的常用访问方式
     def __getitem__(self, key):
         if isinstance(key, str) and key in self.params:
             return self.params[key]
         return self.match[key]
+
+    def get(self, key: str, default: Any = None) -> Any:
+        return self.params[key] if key in self.params else default
 
     @property
     def re(self):

@@ -193,7 +193,7 @@ class BilibiliParser(BaseParser):
     async def _parse_bv(self, searched: MatchWithParams):
         """解析视频信息"""
         bvid = searched["bvid"]
-        page_num = int(searched["p"])
+        page_num = int(searched.get("p", 1))
 
         return await self.parse_video(bvid=bvid, page_num=page_num)
 
