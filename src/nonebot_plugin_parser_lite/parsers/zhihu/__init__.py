@@ -92,7 +92,7 @@ class ZhiHuParser(BaseParser):
 
     @handle(
         "www.zhihu.com/question",
-        r"www\.zhihu\.com/question/(?P<question_id>\d+)",
+        r"www\.zhihu\.com/question/(?P<question_id>\d+)$",
     )
     async def parse_question(self, searched: MatchWithParams):
         question_id = searched["question_id"]
