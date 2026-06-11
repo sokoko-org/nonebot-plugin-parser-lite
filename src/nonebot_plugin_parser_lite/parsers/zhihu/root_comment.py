@@ -49,15 +49,16 @@ class Comment(Struct):
     @property
     def content(self):
         return replace_placeholder_to_sticker(
-            BeautifulSoup(self.raw_content).get_text("\n"), ZHIHU_PATTERN, "zhihu"
+            BeautifulSoup(self.raw_content, "html.parser").get_text("\n"),
+            ZHIHU_PATTERN,
+            "zhihu",
         )
 
     @property
     def ip_info(self):
-        for tag in self.comment_tag:
-            if tag.type == "ip_info":
-                return tag.text
-        return None
+        return next(
+            (tag.text for tag in self.comment_tag if tag.type == "ip_info"), None
+        )
 
 
 class RootComment(Struct):

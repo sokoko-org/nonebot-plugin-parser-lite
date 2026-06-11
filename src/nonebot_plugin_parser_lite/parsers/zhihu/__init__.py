@@ -1,6 +1,6 @@
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypeVar
 
-from msgspec.json import Decoder, T
+from msgspec.json import Decoder
 from nonebot import logger
 
 from ...utils.format import format_num
@@ -17,6 +17,7 @@ from .question import decoder as questionDecoder
 from .root_comment import decoder as rootCommentDecoder
 from .sign import sign_zhihu_fetch_request
 
+T = TypeVar("T")
 
 class ZhiHuParser(BaseParser):
     platform: ClassVar[Platform] = Platform(

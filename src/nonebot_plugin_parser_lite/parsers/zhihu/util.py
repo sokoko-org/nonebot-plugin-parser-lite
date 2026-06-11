@@ -107,7 +107,7 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
 
         elif isinstance(element, NavigableString):
             if text := str(element).strip():
-                yield text
+                yield f"{text}\n"
 
 
 async def _parse_video_box(tag: Tag, content_type: str) -> MediaContent | None:
