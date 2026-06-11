@@ -57,7 +57,7 @@ class Comment(Struct):
         for tag in self.comment_tag:
             if tag.type == "ip_info":
                 return tag.text
-        return
+        return None
 
 
 class RootComment(Struct):
