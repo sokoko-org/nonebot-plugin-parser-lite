@@ -112,14 +112,15 @@ class BiliVideoCodecs(tuple, Enum):
     HEV = ("hev", "hvc1", "hev1")
     AVC = ("avc",)
     AV1 = ("av1", "av01")
+    UNKNOWN = ()
 
     @classmethod
-    def from_codec(cls, codec: str) -> "BiliVideoCodecs | None":
+    def from_codec(cls, codec: str) -> "BiliVideoCodecs":
         """根据 codec 字符串推断枚举值"""
         codec = codec.lower()
         return next(
             (item for item in cls if any(alias in codec for alias in item.value)),
-            None,
+            cls.UNKNOWN,
         )
 
 
