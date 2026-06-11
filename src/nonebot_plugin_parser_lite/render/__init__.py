@@ -89,7 +89,9 @@ def split_text_by_length_with_punct(text: str, max_len: int) -> list[str]:
     return [seg for seg in result if seg]
 
 
-async def safe_src(obj: Any, method: str = "get_path") -> str:
+async def safe_src(
+    obj: Any, method: str = "get_path", *, return_none_on_fail: bool = False
+) -> str | None:
     """
     通用安全资源获取过滤器
 
@@ -97,7 +99,8 @@ async def safe_src(obj: Any, method: str = "get_path") -> str:
         {{ cont | safe_src }}                    # 默认调用 get_path()
         {{ cont | safe_src("get_base") }}        # 调用 get_base()
         {{ cont | safe_src("get_cover_path") }}  # 调用 get_cover_path()
-        {{ author | safe_src("get_avatar_path") }} # 调用 get_avatar_path()
+        {{ author | safe_src("get_avatar_path", return_none_on_fail=True) }} #
+        调用 get_avatar_path(), 在获取失败时返回`None`而不是空白图片
     """
     try:
         if not hasattr(obj, method):
@@ -113,10 +116,10 @@ async def safe_src(obj: Any, method: str = "get_path") -> str:
         call_result: Path | Awaitable[Path] = method_attr()  # type: ignore[assignment]
 
         src = await call_result if isinstance(call_result, Awaitable) else call_result
-        return src.as_uri() if src else PLACEHOLDER_IMAGE
+        return src.as_uri()
     except Exception as e:
         logger.warning(f"safe_src({method}) 处理 {type(obj).__name__} 时失败: {e}")
-        return PLACEHOLDER_IMAGE
+        return None if return_none_on_fail else PLACEHOLDER_IMAGE
 
 
 class Renderer:

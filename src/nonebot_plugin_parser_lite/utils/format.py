@@ -39,9 +39,9 @@ def replace_placeholder_to_sticker(
             size = size_resolver(name) if size_resolver is not None else "small"
             result.append(
                 create_sticker(
-                    url=f"https://emoji.awkchan.top/assets/{platform}/{name}.webp",
+                    url=f"https://sticker.sokoko.org/assets/{platform}/{name}.webp",
                     size=size,
-                    desc=name,
+                    desc=f"[{name}]",
                 )
             )
         elif placeholder_text := text[start:end]:
