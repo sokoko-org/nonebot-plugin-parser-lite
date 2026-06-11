@@ -105,18 +105,18 @@ async def safe_src(
     try:
         if not hasattr(obj, method):
             logger.warning(f"对象 {type(obj).__name__} 不存在方法 '{method}'")
-            return PLACEHOLDER_IMAGE
+            return None if return_none_on_fail else PLACEHOLDER_IMAGE
 
         method_attr = getattr(obj, method)
 
         if not callable(method_attr):
             logger.warning(f"{type(obj).__name__} 的属性 '{method}' 不是可调用对象")
-            return PLACEHOLDER_IMAGE
+            return None if return_none_on_fail else PLACEHOLDER_IMAGE
 
         call_result: Path | Awaitable[Path] = method_attr()  # type: ignore[assignment]
 
         src = await call_result if isinstance(call_result, Awaitable) else call_result
-        return src.as_uri()
+        return src.as_uri()  # 若不存在此属性，进入exception分支判断
     except Exception as e:
         logger.warning(f"safe_src({method}) 处理 {type(obj).__name__} 时失败: {e}")
         return None if return_none_on_fail else PLACEHOLDER_IMAGE

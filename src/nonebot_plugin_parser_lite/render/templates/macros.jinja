@@ -241,11 +241,11 @@
             {# 4. 贴纸 #}
         {% elif cls == 'StickerContent' %}
             {% set src = cont | safe_src(return_none_on_fail=True) %}
-            {% set size = cont.size %}
-            {% set size_class = 'h-6' if size == 'small' else 'h-12' %}
             {% if not src %}
                 {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800">' ~ cont.desc|e ~ '</span>') %}
             {% else %}
+                {% set size = cont.size %}
+                {% set size_class = 'h-6' if size == 'small' else 'h-12' %}
                 {% set _ = html_parts.append(
                                     '<img class="inline-block align-text-bottom ' ~ size_class ~ '"
                      src="' ~ src ~ '"
