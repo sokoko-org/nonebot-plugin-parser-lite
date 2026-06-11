@@ -134,4 +134,4 @@ class ZhiHuParser(BaseParser):
         )
         if res.status_code != 200:
             raise ParseException(res.text)
-        return decoder.decode(res.json())
+        return decoder.decode(res.content)
