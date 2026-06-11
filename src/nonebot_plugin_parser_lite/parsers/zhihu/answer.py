@@ -1,86 +1,72 @@
-from msgspec import Struct
+from msgspec import Struct, field
 from msgspec.json import Decoder
+
+from .util import parse_rich_content
 
 
 class Author(Struct):
-    urlToken: str
-    """用户主页的urlToken"""
-    name: str
-    """用户名称"""
-    avatarUrl: str
-    """用户头像"""
+    avatar_url: str
     headline: str
-    """一句话介绍(可以理解为签名)"""
-    gender: int
-    """性别"""
-
-
-class QuestionTopic(Struct):
+    """个性签名"""
     id: str
-    """话题ID"""
     name: str
-    """话题名称"""
-    avatarUrl: str
-    """话题图标"""
+    url: str
+    """用户信息api地址"""
+    url_token: str
+    gender: int
+    """性别.1男,0女"""
 
 
 class Question(Struct):
-    title: str
-    """标题"""
     created: int
-    """创建时间"""
-    updatedTime: int
-    """更新时间"""
-    answerCount: int
-    """回答数"""
-    visitCount: int
-    """浏览数"""
-    followerCount: int
-    """关注数"""
-    commentCount: int
-    """评论数"""
-    detail: str
-    """详细HTML内容(已知仅包含图片和文本，图片一定在文本前排布)"""
-    topics: list[QuestionTopic]
-    """话题信息"""
-    author: Author
-    """作者信息"""
     id: str
-    """问题ID"""
-    voteupCount: int
-    """赞同数"""
+    """问题id"""
+    title: str
+    updated_time: int
+    url: str
+    """问题信息api地址"""
+
+
+class Statistics(Struct):
+    comment_count: int
+    """评论数"""
+    down_vote_count: int
+    """'反对'数"""
+    favorites: int
+    """收藏数"""
+    like_count: int
+    """点'心'数"""
+    up_vote_count: int
+    """'赞同'数"""
+
+
+class Reaction(Struct):
+    statistics: Statistics
 
 
 class Answer(Struct):
     author: Author
-    """作者信息"""
-    commentCount: int
+    """回答者信息"""
+    html: str = field(name="content")
+    """html"""
+    comment_count: int
     """评论数"""
-    content: str
-    """内容HTML"""
-    createdTime: int
-    """创建时间"""
-    updatedTime: int
-    """更新时间"""
-    ipInfo: str
-    """IP归属地"""
-    voteupCount: int
-    """赞同数"""
-
-
-class AnswerData(Struct):
-    questions: dict[str, Question]
+    created_time: int
+    updated_time: int
+    id: str
+    """回答ID"""
+    question: Question
     """问题信息"""
-    answers: dict[str, Answer]
-    """回答信息"""
+    reaction: Reaction
+    """表态相关信息"""
+    voteup_count: int
+    """'赞同'数"""
+    thanks_count: int
+    """点'心'数"""
+    ip_info: str | None = field(default=None)
+
+    async def get_content(self):
+        return await parse_rich_content(self.html, "answer")
 
 
-class InitStateData(Struct):
-    entities: AnswerData
-
-
-class InitState(Struct):
-    initialState: InitStateData
-
-
-decoder = Decoder(InitState)
+decoder = Decoder(Answer)

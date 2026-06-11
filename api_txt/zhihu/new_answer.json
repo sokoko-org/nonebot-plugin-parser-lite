@@ -1,0 +1,284 @@
+{
+  "allow_segment_interaction": 1,
+  "answer_type": "normal",
+  "author": {
+    "avatar_url": "https://picx.zhimg.com/v2-abed1a8c04700ba7d72b45195223e0ff_l.jpg?source=2c26e567",
+    "avatar_url_template": "https://picx.zhimg.com/v2-abed1a8c04700ba7d72b45195223e0ff.jpg?source=2c26e567",
+    "badge": [],
+    "badge_v2": {
+      "detail_badges": [],
+      "icon": "",
+      "merged_badges": [],
+      "night_icon": "",
+      "title": "出门在外，身份是自己给的。你们也没跟我客气过。"
+    },
+    "gender": 1,
+    "headline": "",
+    "id": "fa9fffd14407fc804c4b4955f84a6853",
+    "is_advertiser": false,
+    "is_followed": false,
+    "is_org": false,
+    "is_privacy": true,
+    "name": "知乎用户",
+    "type": "people",
+    "url": "https://www.zhihu.com/api/v4/people/0",
+    "url_token": "",
+    "user_type": "people"
+  },
+  "biz_ext": {},
+  "can_comment": {
+    "reason": "",
+    "status": true
+  },
+  "comment_count": 1170,
+  "content": "<p data-pid=\"9tn3_Hir\">各位，我就是那位广东博主，实际上我是一个福建泉州人。</p><p data-pid=\"hqqriYht\">我三年前写的回答里就已经指出鹅腿阿姨卖的“鹅腿”是鸭腿这件事情了。</p><p data-pid=\"kk2mTFLq\">鹅腿阿姨已经在昨日公开承认自己售卖了十几年的“鹅腿”为鸭腿。</p><p data-pid=\"ZIFvYTn4\">就是说她欺骗了北大清华学子十几年。</p><p data-pid=\"eZKk03ti\">我这边已经可以肯定这个是樱桃谷鸭的鸭腿，很便宜，每个冰冻鸭腿的成本不足两元。</p><p data-pid=\"fGsaGJuQ\">我原回答里写出了两种猜测，要么是雁鹅要么是樱桃谷鸭。</p><p class=\"ztext-empty-paragraph\"><br/></p><p data-pid=\"AgBE5eos\">那1.4万点赞过我指出鸭腿回答的人，恭喜，你们支持对了一个三百斤的吃货的经验之谈。</p><p class=\"ztext-empty-paragraph\"><br/></p><p data-pid=\"cuGAed8T\">这个提问下的几位大V嘲弄我的回答我已经截图了，</p><p data-pid=\"4vWcehR8\">我看了一下他们的回答，我跟他们是完全不认识，无冤无仇，甚至说对他们的其他回答点过很多次赞。</p><p data-pid=\"xZb0iItw\"><b>在此之前，我不知道原来一个说出真相的人，要被这么多大V，甚至是被89万粉丝的大V随意的嘲弄侮辱。</b></p><p data-pid=\"NvLYe7m1\"><b>在今天2026年6月10日以前，我不知道这个提问，也不知道这个提问下的大V们对我这般羞辱。</b></p>",
+  "content_need_truncated": false,
+  "created_time": 1781032371,
+  "excerpt": "各位，我就是那位广东博主，实际上我是一个福建泉州人。 我三年前写的回答里就已经指出鹅腿阿姨卖的“鹅腿”是鸭腿这件事情了。 鹅腿阿姨已经在昨日公开承认自己售卖了十几年的“鹅腿”为鸭腿。 就是说她欺骗了北大清华学子十几年。 我这边已经可以肯定这个是樱桃谷鸭的鸭腿，很便宜，每个冰冻鸭腿的成本不足两元。 我原回答里写出了两种猜测，要么是雁鹅要么是樱桃谷鸭。 那1.4万点赞过我指出鸭腿回答的人，恭喜，你们支持对了…",
+  "extras": "",
+  "force_login_when_click_read_more": false,
+  "id": "2047878874239963146",
+  "ip_info": "广东",
+  "is_collapsed": false,
+  "is_copyable": true,
+  "is_jump_native": false,
+  "pagination_info": {
+    "index": 1224,
+    "next_answer_ids": [
+      "2047877500181730303",
+      "2047875454632305353",
+      "2047860743316452961",
+      "2047840529535309579",
+      "2047831899272492402",
+      "2047827285626163983",
+      "71102535566",
+      "2048155380543383394",
+      "2047988877382639978",
+      "2048039983391437039",
+      "2048037101162206677",
+      "2048357279574013019",
+      "2048346997741171738",
+      "2048339032367706457",
+      "2048303400387876807",
+      "2048178279463523990",
+      "2048174141661000597",
+      "2048161840102954471",
+      "2048155914272880257",
+      "2048146140462371220"
+    ],
+    "prev_answer_ids": [
+      "2047984819456546672",
+      "2047984246279688811",
+      "2047983971066287757",
+      "2047982357618095729",
+      "2047980046002951380",
+      "2047979631261774826",
+      "2047978044128761291",
+      "2047973530776744408",
+      "2047971091717560140",
+      "2047970860485628052",
+      "2047969527397454144",
+      "2047965821981536700",
+      "2047959874240254968",
+      "2047959723593426691",
+      "2047956692760057589",
+      "2047955605013411720",
+      "2047946053220144910",
+      "2047928578042607466",
+      "2047905460506846688",
+      "2047892416154358676"
+    ]
+  },
+  "podcast_audio_enter": {
+    "action_url": "zhihu://podcast/audio_player/81811396489?contentId=2047878874239963146&contentType=answer&subType=&entrance=detail_page",
+    "sub_type": "",
+    "text": "135 人听过",
+    "text_color": "MapBrand",
+    "text_size": 13
+  },
+  "question": {
+    "created": 1721302922,
+    "id": "661955118",
+    "question_type": "normal",
+    "relationship": {},
+    "title": "如何看待清北鹅腿阿姨被曝售假，用鸭腿冒充？",
+    "topics": [
+      {
+        "avatar_url": "https://picx.zhimg.com/v2-e2d2de874b3eae7354f6279bf05d3b98_qhd.jpg?source=57bbeac9",
+        "id": "19563245",
+        "name": "清华大学",
+        "topic_type": "NORMAL",
+        "type": "topic",
+        "url": "https://www.zhihu.com/api/v4/topics/19563245"
+      },
+      {
+        "avatar_url": "https://picx.zhimg.com/v2-d9027fb7a154265fb149c0959a8fbc5c_qhd.jpg?source=57bbeac9",
+        "id": "19570535",
+        "name": "北京大学",
+        "topic_type": "NORMAL",
+        "type": "topic",
+        "url": "https://www.zhihu.com/api/v4/topics/19570535"
+      },
+      {
+        "avatar_url": "https://pic1.zhimg.com/203935ae50875c1c7814ea45ac98ada2_qhd.jpg?source=57bbeac9",
+        "id": "19604029",
+        "name": "分子生物学",
+        "topic_type": "NORMAL",
+        "type": "topic",
+        "url": "https://www.zhihu.com/api/v4/topics/19604029"
+      },
+      {
+        "avatar_url": "https://pica.zhimg.com/v2-99b3a7b46600f53c7eed9b11c7fea750_qhd.jpg?source=57bbeac9",
+        "id": "19636658",
+        "name": "粤菜",
+        "topic_type": "NORMAL",
+        "type": "topic",
+        "url": "https://www.zhihu.com/api/v4/topics/19636658"
+      },
+      {
+        "avatar_url": "https://pic1.zhimg.com/v2-58b8aa4f80a7ceefd109c99249c03a6e_qhd.jpg?source=57bbeac9",
+        "id": "19812101",
+        "name": "生物",
+        "topic_type": "NORMAL",
+        "type": "topic",
+        "url": "https://www.zhihu.com/api/v4/topics/19812101"
+      }
+    ],
+    "type": "question",
+    "updated_time": 1781054246,
+    "url": "https://www.zhihu.com/api/v4/questions/661955118"
+  },
+  "reaction": {
+    "image_reactions": {},
+    "relation": {
+      "current_user_is_navigator": false,
+      "faved": false,
+      "following": false,
+      "is_author": false,
+      "is_navigator_vote": false,
+      "liked": false,
+      "subcribed": false,
+      "vote": "Neutral",
+      "vote_next_step": ""
+    },
+    "statistics": {
+      "applaud_count": 0,
+      "bullet_count": 0,
+      "comment_count": 1169,
+      "down_vote_count": 91,
+      "favorites": 1406,
+      "interest_play_count": 0,
+      "like_count": 749,
+      "plaincontent_like_count": 0,
+      "plaincontent_vote_up_count": 0,
+      "play_count": 0,
+      "pv_count": 0,
+      "question_answer_count": 0,
+      "question_follower_count": 0,
+      "republishers": [],
+      "share_count": 0,
+      "subscribe_count": 0,
+      "up_vote_count": 16474
+    }
+  },
+  "relationship": {
+    "upvoted_followees": []
+  },
+  "segment_infos": [
+    {
+      "marks": [
+        {
+          "end_index": 26,
+          "seg_info": {
+            "comment_count": 0,
+            "is_like": false,
+            "is_span": false,
+            "like_count": 25,
+            "my_comment_count": 0,
+            "seg_ids": ["2048180839251447929"]
+          },
+          "start_index": 3
+        }
+      ],
+      "pid": "9tn3_Hir",
+      "text": "各位，我就是那位广东博主，实际上我是一个福建泉州人。"
+    },
+    {
+      "marks": [
+        {
+          "end_index": 33,
+          "seg_info": {
+            "comment_count": 6,
+            "is_like": false,
+            "is_span": false,
+            "like_count": 116,
+            "my_comment_count": 0,
+            "seg_ids": ["2048183386288691070"]
+          },
+          "start_index": 0
+        }
+      ],
+      "pid": "hqqriYht",
+      "text": "我三年前写的回答里就已经指出鹅腿阿姨卖的“鹅腿”是鸭腿这件事情了。"
+    },
+    {
+      "marks": [
+        {
+          "end_index": 38,
+          "seg_info": {
+            "comment_count": 15,
+            "is_like": false,
+            "is_span": false,
+            "like_count": 128,
+            "my_comment_count": 0,
+            "seg_ids": ["2048014480894956697"]
+          },
+          "start_index": 0
+        }
+      ],
+      "pid": "eZKk03ti",
+      "text": "我这边已经可以肯定这个是樱桃谷鸭的鸭腿，很便宜，每个冰冻鸭腿的成本不足两元。"
+    },
+    {
+      "marks": [
+        {
+          "end_index": 41,
+          "seg_info": {
+            "comment_count": 43,
+            "is_like": false,
+            "is_span": false,
+            "like_count": 181,
+            "my_comment_count": 0,
+            "seg_ids": ["2048029934497616971"]
+          },
+          "start_index": 18
+        }
+      ],
+      "pid": "AgBE5eos",
+      "text": "那1.4万点赞过我指出鸭腿回答的人，恭喜，你们支持对了一个三百斤的吃货的经验之谈。"
+    },
+    {
+      "marks": [
+        {
+          "end_index": 48,
+          "seg_info": {
+            "comment_count": 26,
+            "is_like": false,
+            "is_span": false,
+            "like_count": 100,
+            "my_comment_count": 0,
+            "seg_ids": ["2048143405025383371"]
+          },
+          "start_index": 0
+        }
+      ],
+      "pid": "xZb0iItw",
+      "text": "在此之前，我不知道原来一个说出真相的人，要被这么多大V，甚至是被89万粉丝的大V随意的嘲弄侮辱。"
+    }
+  ],
+  "thanks_count": 749,
+  "type": "answer",
+  "updated_time": 1781033054,
+  "url": "https://www.zhihu.com/api/v4/answers/2047878874239963146",
+  "voteup_count": 16472
+}
