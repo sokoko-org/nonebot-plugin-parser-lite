@@ -271,12 +271,8 @@ class VideoDownloadURLDataDetecter:
 
             # 编码过滤
             codecs_str: str = video_data["codecs"]
-            video_stream_codecs: BiliVideoCodecs | None = None
-            for val in BiliVideoCodecs:
-                if val.value in codecs_str:
-                    video_stream_codecs = val
-                    break
-            if video_stream_codecs is None or video_stream_codecs not in codecs:
+            video_stream_codecs = BiliVideoCodecs.from_codec(codecs_str)
+            if video_stream_codecs is None:
                 continue
 
             video_streams.append(

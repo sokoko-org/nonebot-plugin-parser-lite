@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, IntEnum
 from re import Match
 from typing import Final, TypedDict
 from urllib.parse import parse_qs, urlparse
@@ -70,7 +70,7 @@ EMOJI_MAP: Final[dict[str, tuple[str, str]]] = {
 }
 
 
-class BiliVideoQuality(Enum):
+class BiliVideoQuality(IntEnum):
     """
     视频的视频流分辨率枚举
 
@@ -100,7 +100,7 @@ class BiliVideoQuality(Enum):
     _8K = 127
 
 
-class BiliVideoCodecs(Enum):
+class BiliVideoCodecs(tuple, Enum):
     """
     视频的视频流编码枚举
 
@@ -109,12 +109,21 @@ class BiliVideoCodecs(Enum):
     :cvar AV1: AV1
     """
 
-    HEV = "hev"
-    AVC = "avc"
-    AV1 = "av01"
+    HEV = ("hev", "hvc1", "hev1")
+    AVC = ("avc",)
+    AV1 = ("av1", "av01")
+
+    @classmethod
+    def from_codec(cls, codec: str) -> "BiliVideoCodecs | None":
+        """根据 codec 字符串推断枚举值"""
+        codec = codec.lower()
+        return next(
+            (item for item in cls if any(alias in codec for alias in item.value)),
+            None,
+        )
 
 
-class BiliAudioQuality(Enum):
+class BiliAudioQuality(IntEnum):
     """
     视频的音频流清晰度枚举
 
