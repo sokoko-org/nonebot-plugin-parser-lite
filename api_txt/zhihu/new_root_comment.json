@@ -1,0 +1,1220 @@
+{
+  "ad_plugin_infos": [],
+  "atmosphere_voting_config": {
+    "daily_frequency": 1,
+    "frequency_interval": 3,
+    "min_num_of_root_comment": 10,
+    "location": 3,
+    "title": "你对该内容下的评论氛围是否满意？",
+    "detail": [
+      {
+        "emoji_level": "dissatisfied",
+        "title": "不满",
+        "normal_icon": "https://picx.zhimg.com/v2-1d5d094f0cd71f7da08e7e54d037c0b5.png",
+        "selected_icon": "https://picx.zhimg.com/v2-9af3c8aa46b63f2f840138b0ee6b0a99.png"
+      },
+      {
+        "emoji_level": "fair",
+        "title": "一般",
+        "normal_icon": "https://pica.zhimg.com/v2-706985b9364429bc4842b1027a8217ed.png",
+        "selected_icon": "https://picx.zhimg.com/v2-1e8b3f0e735d3f2a98d4b43bfe793118.png"
+      },
+      {
+        "emoji_level": "satisfied",
+        "title": "满意",
+        "normal_icon": "https://pic1.zhimg.com/v2-b376d3b93058da535fbd47a79eb37d14.png",
+        "selected_icon": "https://pic1.zhimg.com/v2-626660f8a645e0a9af99e6b2ab7a1d44.png"
+      }
+    ]
+  },
+  "comment_status": {
+    "type": 0,
+    "text": "",
+    "induce_text": ""
+  },
+  "counts": {
+    "total_counts": 1191,
+    "collapsed_counts": 0,
+    "reviewing_counts": 0,
+    "segment_comment_counts": 0
+  },
+  "data": [
+    {
+      "id": "11503868013",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 496124397,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11503868013",
+      "hot": true,
+      "top": false,
+      "content": "看了一下，你是之前分享麻油甜酸凉拌面的那个答主，吃这方面我信你[思考]",
+      "score": 0,
+      "created_time": 1781040368,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11503868013",
+      "liked": false,
+      "like_count": 885,
+      "disliked": false,
+      "dislike_count": 3,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "ebb8bae2835f216a60a2238115f39ff1",
+        "url_token": "hao-29-86-53",
+        "name": "hao",
+        "avatar_url": "https://picx.zhimg.com/v2-abed1a8c04700ba7d72b45195223e0ff_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/v2-abed1a8c04700ba7d72b45195223e0ff_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/ebb8bae2835f216a60a2238115f39ff1",
+        "user_type": "people",
+        "headline": "",
+        "gender": 2,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "0",
+          "medal_name": "",
+          "avatar_url": "",
+          "description": "",
+          "medal_avatar_frame": "",
+          "can_click": true
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "新加坡",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "comment_second_tag": [
+        {
+          "type": "author_like",
+          "text": "作者赞了",
+          "color": "#545962",
+          "night_color": "#C3C7CF",
+          "has_border": false,
+          "bg_color": "#F5F7FA",
+          "bg_night_color": "#222429"
+        }
+      ],
+      "child_comment_count": 49,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11504107559",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 99142702,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504107559",
+      "hot": true,
+      "top": false,
+      "content": "《阿姨不知道什么鸭腿鹅腿》《叫了20年了》《不存在欺诈行为》《肉发绿是蔬菜汁泡的》《老实本分》《小本生意讨一口生活》《陈秀凤已申请“鹅腿阿姨”商标（多类注册成功）[大笑][大笑]",
+      "score": 0,
+      "created_time": 1781064417,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11504107559",
+      "liked": false,
+      "like_count": 2350,
+      "disliked": false,
+      "dislike_count": 1,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "cd928c6842e51881cd79729192c41a96",
+        "url_token": "mo-mo-de-bai-xiao-bai",
+        "name": "一只大墨白b",
+        "avatar_url": "https://pic1.zhimg.com/v2-6e8fc414d2deecf307010a9c37c71b3f_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/v2-6e8fc414d2deecf307010a9c37c71b3f_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/cd928c6842e51881cd79729192c41a96",
+        "user_type": "people",
+        "headline": "你若安好，乌云满天。",
+        "gender": 2,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "",
+          "medal_name": "",
+          "avatar_url": "",
+          "description": "",
+          "medal_avatar_frame": "",
+          "can_click": false
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "湖南",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "comment_second_tag": [
+        {
+          "type": "author_like",
+          "text": "作者赞了",
+          "color": "#545962",
+          "night_color": "#C3C7CF",
+          "has_border": false,
+          "bg_color": "#F5F7FA",
+          "bg_night_color": "#222429"
+        }
+      ],
+      "child_comment_count": 42,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11504101733",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 1673949380,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504101733",
+      "hot": true,
+      "top": false,
+      "content": "<p>我有印象[调皮]</p><p>记得你说过，用鹅腿成本合不上。 </p>",
+      "score": 0,
+      "created_time": 1781055183,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11504101733",
+      "liked": false,
+      "like_count": 543,
+      "disliked": false,
+      "dislike_count": 1,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "b592dad97b41af9b609b62b74daa7b89",
+        "url_token": "80-16-25-94",
+        "name": "与或非",
+        "avatar_url": "https://pic1.zhimg.com/v2-8ad3d9f84724cb020a297138fcc89e82_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://picx.zhimg.com/v2-8ad3d9f84724cb020a297138fcc89e82_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/b592dad97b41af9b609b62b74daa7b89",
+        "user_type": "people",
+        "headline": "",
+        "gender": 1,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "972464154808860672",
+          "medal_name": "社交达人",
+          "avatar_url": "https://picx.zhimg.com/v2-43f31dcf25c71d80b5808055529663c8_r.jpg?source=06d4cd63",
+          "mini_avatar_url": "https://picx.zhimg.com/v2-43f31dcf25c71d80b5808055529663c8_r.jpg?source=06d4cd63",
+          "description": "关注 5 个人",
+          "medal_avatar_frame": "",
+          "can_click": true
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "山东",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "comment_second_tag": [
+        {
+          "type": "author_like",
+          "text": "作者赞了",
+          "color": "#545962",
+          "night_color": "#C3C7CF",
+          "has_border": false,
+          "bg_color": "#F5F7FA",
+          "bg_night_color": "#222429"
+        }
+      ],
+      "child_comment_count": 13,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11504073209",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 1562738,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504073209",
+      "hot": true,
+      "top": false,
+      "content": "<p>看了答主的回答，我发现我早就点赞过了。</p><p>天日昭昭，天日昭昭！</p>",
+      "score": 0,
+      "created_time": 1781055116,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11504073209",
+      "liked": false,
+      "like_count": 544,
+      "disliked": false,
+      "dislike_count": 1,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "d84970bdc16475a1272c7f8e921b2dcc",
+        "url_token": "liu-yang-84-4",
+        "name": "海阿姨",
+        "avatar_url": "https://pica.zhimg.com/073af8626_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/073af8626_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/d84970bdc16475a1272c7f8e921b2dcc",
+        "user_type": "people",
+        "headline": "",
+        "gender": 2,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "972475023013875712",
+          "medal_name": "有口皆碑",
+          "avatar_url": "https://picx.zhimg.com/v2-b745dab79c957a541eb72381ece4438d_r.jpg?source=06d4cd63",
+          "mini_avatar_url": "https://picx.zhimg.com/v2-b745dab79c957a541eb72381ece4438d_r.jpg?source=06d4cd63",
+          "description": "获得 10000 个赞同",
+          "medal_avatar_frame": "",
+          "can_click": true
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "上海",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "comment_second_tag": [
+        {
+          "type": "author_like",
+          "text": "作者赞了",
+          "color": "#545962",
+          "night_color": "#C3C7CF",
+          "has_border": false,
+          "bg_color": "#F5F7FA",
+          "bg_night_color": "#222429"
+        }
+      ],
+      "child_comment_count": 10,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11504513913",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 34147292,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504513913",
+      "hot": true,
+      "top": false,
+      "content": "我当时觉得你文章说的是真相，而且还给身边人转发分享，因为鹅腿阿姨无预兆爆火时接受采访、视频拍摄时的表情都有些尴尬闪躲，不是那种鸡排哥那种自豪骄傲、也不是粥饼伦那种社恐低调，感觉她就是有点朴实的心虚。看到你的文章，感觉一切都合理了。",
+      "score": 0,
+      "created_time": 1781074171,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11504513913",
+      "liked": false,
+      "like_count": 535,
+      "disliked": false,
+      "dislike_count": 2,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "2681c2318163e3f44b4692190325516a",
+        "url_token": "gong-zi-ting-tao-31",
+        "name": "張水瓶",
+        "avatar_url": "https://picx.zhimg.com/v2-488372df84b328342b726c29f68557a2_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/v2-488372df84b328342b726c29f68557a2_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/2681c2318163e3f44b4692190325516a",
+        "user_type": "people",
+        "headline": "烂醉是生涯。",
+        "gender": 2,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "972477022068568064",
+          "medal_name": "备受瞩目",
+          "avatar_url": "https://pica.zhimg.com/v2-29b2e882367bb1529bc1322f2dcda7ee_r.jpg?source=06d4cd63",
+          "mini_avatar_url": "https://pica.zhimg.com/v2-29b2e882367bb1529bc1322f2dcda7ee_r.jpg?source=06d4cd63",
+          "description": "被 10000 个人关注",
+          "medal_avatar_frame": "",
+          "can_click": true
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "辽宁",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "comment_second_tag": [
+        {
+          "type": "author_like",
+          "text": "作者赞了",
+          "color": "#545962",
+          "night_color": "#C3C7CF",
+          "has_border": false,
+          "bg_color": "#F5F7FA",
+          "bg_night_color": "#222429"
+        }
+      ],
+      "child_comment_count": 8,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11503838303",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 3266086,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11503838303",
+      "hot": true,
+      "top": false,
+      "content": "沉冤昭雪了[doge]",
+      "score": 0,
+      "created_time": 1781033117,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11503838303",
+      "liked": false,
+      "like_count": 466,
+      "disliked": false,
+      "dislike_count": 0,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "96bfa7bfe0340a1ba340e62c1aba97ce",
+        "url_token": "lixile",
+        "name": "世兰只喝冰美式",
+        "avatar_url": "https://pic1.zhimg.com/v2-2a15af3ee827fefe79eeef2c1b8d8952_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/v2-2a15af3ee827fefe79eeef2c1b8d8952_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/96bfa7bfe0340a1ba340e62c1aba97ce",
+        "user_type": "people",
+        "headline": "时间会给出答案",
+        "gender": 1,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "",
+          "medal_name": "",
+          "avatar_url": "",
+          "description": "",
+          "medal_avatar_frame": "",
+          "can_click": false
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "安徽",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "comment_second_tag": [
+        {
+          "type": "author_like",
+          "text": "作者赞了",
+          "color": "#545962",
+          "night_color": "#C3C7CF",
+          "has_border": false,
+          "bg_color": "#F5F7FA",
+          "bg_night_color": "#222429"
+        }
+      ],
+      "child_comment_count": 12,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11503925727",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 1308555636,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11503925727",
+      "hot": true,
+      "top": false,
+      "content": "答主太牛了。。几年前我也刷到过那篇帖子，但是后来北大和rm日报等官媒都出来宣传，整的我也吃了一个[大笑]实话讲没有留下太深刻的印象，感觉吃的都是调料味道，翻了一下学校鹅腿群，上次来学校附近卖鹅腿还是周一……",
+      "score": 0,
+      "created_time": 1781033335,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11503925727",
+      "liked": false,
+      "like_count": 2083,
+      "disliked": false,
+      "dislike_count": 6,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "34e5eecc18e4b97675781195f015c807",
+        "url_token": "79-6-50-57",
+        "name": "棚头傀儡",
+        "avatar_url": "https://picx.zhimg.com/v2-c1ce2f77185320e6e15954fa45e7eab2_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/v2-c1ce2f77185320e6e15954fa45e7eab2_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/34e5eecc18e4b97675781195f015c807",
+        "user_type": "people",
+        "headline": "",
+        "gender": 1,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "",
+          "medal_name": "",
+          "avatar_url": "",
+          "description": "",
+          "medal_avatar_frame": "",
+          "can_click": false
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "河北",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "child_comment_count": 36,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11504068428",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 16529397,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504068428",
+      "hot": true,
+      "top": false,
+      "content": "请苍天，辨忠奸 了[捂脸]",
+      "score": 0,
+      "created_time": 1781036943,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11504068428",
+      "liked": false,
+      "like_count": 1146,
+      "disliked": false,
+      "dislike_count": 0,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "706d058ab9471173d5859f87fb4797c3",
+        "url_token": "xiao-2ge-35",
+        "name": "小2哥",
+        "avatar_url": "https://pic1.zhimg.com/v2-05f26d2afd6f05cc40f36c466c4c65b0_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/v2-05f26d2afd6f05cc40f36c466c4c65b0_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/706d058ab9471173d5859f87fb4797c3",
+        "user_type": "people",
+        "headline": "阳光开朗4kw",
+        "gender": 2,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "972460827463282688",
+          "medal_name": "表示赞同",
+          "avatar_url": "https://picx.zhimg.com/v2-0b3abd3eb369d84736e6e2e0e860d067_r.jpg?source=06d4cd63",
+          "mini_avatar_url": "https://picx.zhimg.com/v2-0b3abd3eb369d84736e6e2e0e860d067_r.jpg?source=06d4cd63",
+          "description": "赞同 5000 次",
+          "medal_avatar_frame": "",
+          "can_click": true
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "北京",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "child_comment_count": 6,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11504038445",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 131205540,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504038445",
+      "hot": true,
+      "top": false,
+      "content": "高人[赞]但是三百斤的话还是要减减啊👀",
+      "score": 0,
+      "created_time": 1781033067,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11504038445",
+      "liked": false,
+      "like_count": 605,
+      "disliked": false,
+      "dislike_count": 2,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "3a4150e4957f21fc4e26226aa98e364b",
+        "url_token": "yu-kun-22-19",
+        "name": "lyk2005",
+        "avatar_url": "https://picx.zhimg.com/v2-49fb4fab595118595c7f4016117fb1f1_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://picx.zhimg.com/v2-49fb4fab595118595c7f4016117fb1f1_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/3a4150e4957f21fc4e26226aa98e364b",
+        "user_type": "people",
+        "headline": "两个拳头打人",
+        "gender": 2,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "972475023013875712",
+          "medal_name": "有口皆碑",
+          "avatar_url": "https://pic1.zhimg.com/v2-eb56655cce39587eedeacb2824f6a116_r.jpg?source=06d4cd63",
+          "mini_avatar_url": "https://pic1.zhimg.com/v2-eb56655cce39587eedeacb2824f6a116_r.jpg?source=06d4cd63",
+          "description": "获得 50 个赞同",
+          "medal_avatar_frame": "",
+          "can_click": true
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "北京",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "child_comment_count": 1,
+      "child_comment_next_offset": null,
+      "child_comments": [
+        {
+          "id": "11504131686",
+          "type": "comment",
+          "resource_type": "answer",
+          "member_id": 1222015075,
+          "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504131686",
+          "hot": false,
+          "top": false,
+          "content": "<p>以身入局，为国捐躯</p>",
+          "score": 0,
+          "created_time": 1781058046,
+          "is_delete": false,
+          "collapsed": false,
+          "reviewing": false,
+          "reply_comment_id": "11504038445",
+          "reply_root_comment_id": "11504038445",
+          "liked": false,
+          "like_count": 98,
+          "disliked": false,
+          "dislike_count": 1,
+          "is_author": false,
+          "can_like": false,
+          "can_dislike": false,
+          "can_delete": false,
+          "can_reply": true,
+          "can_hot": false,
+          "can_author_top": false,
+          "is_author_top": false,
+          "can_collapse": false,
+          "can_share": true,
+          "can_unfold": false,
+          "can_truncate": false,
+          "can_more": true,
+          "author": {
+            "id": "50a3213dd7b6543479bc05c7a5d62ec6",
+            "url_token": "3-21-97-51",
+            "name": "沃野布吉岛",
+            "avatar_url": "https://picx.zhimg.com/v2-1752019f709bde6d8b2acda7fb24e700_l.jpg?source=06d4cd63",
+            "avatar_url_template": "https://pica.zhimg.com/v2-1752019f709bde6d8b2acda7fb24e700_l.jpg?source=06d4cd63",
+            "is_org": false,
+            "type": "people",
+            "url": "https://www.zhihu.com/api/v4/comment_v5/people/50a3213dd7b6543479bc05c7a5d62ec6",
+            "user_type": "people",
+            "headline": "别杠，你是对的",
+            "gender": 0,
+            "is_advertiser": false,
+            "badge_v2": {
+              "title": "",
+              "merged_badges": null,
+              "detail_badges": null
+            },
+            "exposed_medal": {
+              "medal_id": "",
+              "medal_name": "",
+              "avatar_url": "",
+              "description": "",
+              "medal_avatar_frame": "",
+              "can_click": false
+            },
+            "vip_info": {
+              "is_vip": false,
+              "target_url": null
+            },
+            "kvip_info": {
+              "is_vip": false,
+              "target_url": null
+            },
+            "level_info": null,
+            "is_anonymous": false,
+            "ring_info": null
+          },
+          "author_tag": [],
+          "reply_author_tag": [],
+          "content_tag": [],
+          "comment_tag": [
+            {
+              "type": "ip_info",
+              "text": "湖南",
+              "color": "#999999",
+              "night_color": "#999999",
+              "has_border": false
+            }
+          ],
+          "child_comment_count": 0,
+          "child_comment_next_offset": null,
+          "is_visible_only_to_myself": false,
+          "_": null,
+          "level_tag": 2,
+          "is_gift": false,
+          "disclaimer_info": null
+        }
+      ],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    },
+    {
+      "id": "11504039347",
+      "type": "comment",
+      "resource_type": "answer",
+      "member_id": 31295282,
+      "url": "https://www.zhihu.com/api/v4/comment_v5/comments/11504039347",
+      "hot": true,
+      "top": false,
+      "content": "<p>鹅就是很贵的，一个鹅蛋都比鸡蛋贵了十几倍。</p>",
+      "score": 0,
+      "created_time": 1781044671,
+      "is_delete": false,
+      "collapsed": false,
+      "reviewing": false,
+      "reply_comment_id": "0",
+      "reply_root_comment_id": "11504039347",
+      "liked": false,
+      "like_count": 652,
+      "disliked": false,
+      "dislike_count": 0,
+      "is_author": false,
+      "can_like": false,
+      "can_dislike": false,
+      "can_delete": false,
+      "can_reply": true,
+      "can_hot": false,
+      "can_author_top": false,
+      "is_author_top": false,
+      "can_collapse": false,
+      "can_share": true,
+      "can_unfold": false,
+      "can_truncate": false,
+      "can_more": true,
+      "author": {
+        "id": "cd6f42adb2d0c1de57c699647a1171ae",
+        "url_token": "mo-ren-de-xiao-yao-jing-4",
+        "name": "磨人的小妖精",
+        "avatar_url": "https://pic1.zhimg.com/v2-79664d22722f3ba416b7a32c1f98db74_l.jpg?source=06d4cd63",
+        "avatar_url_template": "https://pic1.zhimg.com/v2-79664d22722f3ba416b7a32c1f98db74_l.jpg?source=06d4cd63",
+        "is_org": false,
+        "type": "people",
+        "url": "https://www.zhihu.com/api/v4/comment_v5/people/cd6f42adb2d0c1de57c699647a1171ae",
+        "user_type": "people",
+        "headline": "",
+        "gender": 0,
+        "is_advertiser": false,
+        "badge_v2": {
+          "title": "",
+          "merged_badges": null,
+          "detail_badges": null
+        },
+        "exposed_medal": {
+          "medal_id": "0",
+          "medal_name": "",
+          "avatar_url": "",
+          "description": "",
+          "medal_avatar_frame": "",
+          "can_click": true
+        },
+        "vip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "kvip_info": {
+          "is_vip": false,
+          "target_url": null
+        },
+        "level_info": null,
+        "is_anonymous": false,
+        "ring_info": null
+      },
+      "author_tag": [],
+      "reply_author_tag": [],
+      "content_tag": [],
+      "comment_tag": [
+        {
+          "type": "ip_info",
+          "text": "江苏",
+          "color": "#999999",
+          "night_color": "#999999",
+          "has_border": false
+        },
+        {
+          "type": "hot",
+          "text": "热评",
+          "color": "#FF9607",
+          "night_color": "#FF9607",
+          "has_border": false
+        }
+      ],
+      "child_comment_count": 51,
+      "child_comment_next_offset": null,
+      "child_comments": [],
+      "is_visible_only_to_myself": false,
+      "_": null,
+      "level_tag": 2,
+      "is_gift": false,
+      "disclaimer_info": null
+    }
+  ],
+  "edit_status": {
+    "can_reply": false,
+    "toast": "未登录用户"
+  },
+  "header": [],
+  "is_content_author": false,
+  "is_content_rewardable": false,
+  "paging": {
+    "is_end": false,
+    "is_start": true,
+    "next": "https://www.zhihu.com/api/v4/comment_v5/answers/2047878874239963146/root_comment?limit=10&offset=1332128769_11504039347_0&order_by=score",
+    "previous": "https://www.zhihu.com/api/v4/comment_v5/answers/2047878874239963146/root_comment?limit=10&offset=1665405870_11503868013_1&order_by=score",
+    "totals": 1191
+  },
+  "sorter": [
+    {
+      "type": "score",
+      "text": "默认"
+    },
+    {
+      "type": "ts",
+      "text": "最新"
+    }
+  ]
+}
