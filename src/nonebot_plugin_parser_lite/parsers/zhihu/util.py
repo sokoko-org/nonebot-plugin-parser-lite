@@ -18,7 +18,7 @@ def _quality_rank(q: str) -> int:
     return 1 if q == "SD" else 0
 
 
-async def fetch_video(video_id: str, content_type: str):
+async def fetch_video(video_id: str, content_type: str) -> MediaContent | None:
     res = await DOWNLOADER.client.post(
         "https://www.zhihu.com/api/v4/video/play_info",
         headers=VIDEO_HEADER,
@@ -34,7 +34,7 @@ async def fetch_video(video_id: str, content_type: str):
     video_play = data["video_play"]
     mp4_list = video_play.get("playlist", {}).get("mp4")
     if not mp4_list:
-        return
+        return None
 
     # 至少保证有一个条目，所以直接用 max 推导出最佳条目
     best_item = max(
@@ -110,7 +110,7 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
                 yield text
 
 
-async def _parse_video_box(tag: Tag, content_type: str):
+async def _parse_video_box(tag: Tag, content_type: str) -> MediaContent | None:
     """
     解析知乎 <a class="video-box">，根据 data-lens-id 拉取视频信息
     """
