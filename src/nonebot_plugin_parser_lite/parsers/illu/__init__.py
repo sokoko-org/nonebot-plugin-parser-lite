@@ -14,7 +14,7 @@ from ..base import (
 )
 from .articleByIdV2 import ArticleByIdV2
 from .articleByIdV2 import decoder as article_decoder
-from .commentList import Comment as IlluComment
+from .commentList import CommentObj
 from .commentList import decoder as comment_decoder
 from .drawingDetail import DrawingDetail
 from .drawingDetail import decoder as drawing_decoder
@@ -154,7 +154,7 @@ class IlluParser(BaseParser):
         data = resp.json()["result"]
         comment_data = comment_decoder.decode(data)
 
-        def _make_comment(node: IlluComment) -> Comment:
+        def _make_comment(node: CommentObj) -> Comment:
             """从 commentList 的节点构造 Comment"""
             author = self.create_author(
                 name=node.author.nickname,

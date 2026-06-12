@@ -6,13 +6,13 @@ from msgspec.json import Decoder
 from .models import User
 
 
-class Comment(Struct):
+class CommentObj(Struct):
     author: User
     likeCount: int
     content: str
     objectId: str
     createdAt: str
-    subCommentList: list["Comment"] = field(default_factory=list)
+    subCommentList: list["CommentObj"] = field(default_factory=list)
     subCommentCount: int = field(default=0)
 
     @property
@@ -23,7 +23,7 @@ class Comment(Struct):
 
 class CommentList(Struct):
     msg: str
-    results: list[Comment] = field(default_factory=list)
+    results: list[CommentObj] = field(default_factory=list)
 
 
 decoder = Decoder(CommentList)
