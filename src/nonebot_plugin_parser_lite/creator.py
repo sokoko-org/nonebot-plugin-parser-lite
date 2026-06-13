@@ -29,7 +29,8 @@ class VideoDownloadFunc(Protocol):
     video_url: str
     ext_headers: dict[str, str] | None = None
 
-    def __call__(self) -> Coroutine[Any, Any, Path]: ...
+    def __call__(self) -> Coroutine[Any, Any, Path]:
+        raise NotImplementedError
 
 
 def _with_need_send(obj: T, need_send: bool) -> T:
