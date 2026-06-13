@@ -168,7 +168,7 @@ class WeiBoParser(BaseParser):
             res = await AuthHelper.get(
                 "https://weibo.com/ajax/statuses/buildComments",
                 params={
-                    "id": fid.split()[-1],
+                    "id": fid.split(":")[-1],
                     "count": 20,
                     "expand_text": 1,
                     "is_show_bulletin": 2,

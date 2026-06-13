@@ -21,7 +21,7 @@ class PlayInfo(Struct):
 
     @property
     def avatar_url(self) -> str:
-        return f"https:{self.cover_image}"
+        return f"https:{self.avatar}"
 
     @property
     def description(self) -> str:

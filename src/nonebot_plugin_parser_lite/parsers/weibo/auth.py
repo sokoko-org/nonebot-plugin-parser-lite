@@ -21,6 +21,11 @@ class AuthHelper:
     SESSION: AsyncClient = AsyncClient(timeout=COMMON_TIMEOUT)
 
     @classmethod
+    async def aclose(cls) -> None:
+        """关闭全局 HTTP 会话以释放连接/文件描述符"""
+        await cls.SESSION.aclose()
+
+    @classmethod
     def _need_refresh(cls) -> bool:
         """判断是否需要刷新 XSRF"""
         if not cls.xsrf_token or cls.xsrf_obtained_at is None:

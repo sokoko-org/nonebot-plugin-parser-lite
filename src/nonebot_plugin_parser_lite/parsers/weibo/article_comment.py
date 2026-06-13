@@ -30,8 +30,8 @@ class ArticleCommentData(Struct):
     comments: list[ArticleComment]
 
 
-class AriticleCommentWrapper(Struct):
+class ArticleCommentWrapper(Struct):
     data: ArticleCommentData
 
 
-decoder = Decoder(AriticleCommentWrapper)
+decoder = Decoder(ArticleCommentWrapper)
