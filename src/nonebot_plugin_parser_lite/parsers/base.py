@@ -40,12 +40,7 @@ from ..data import (
 )
 from ..download import DOWNLOADER as DOWNLOADER
 from ..download.task import DownloadTaskWrapper
-from ..exception import DownloadException as DownloadException
-from ..exception import DurationLimitException as DurationLimitException
-from ..exception import ParseException as ParseException
-from ..exception import SizeLimitException as SizeLimitException
-from ..exception import TipException as TipException
-from ..exception import ZeroSizeException as ZeroSizeException
+from ..exception import ParseException
 
 P = ParamSpec("P")
 R = TypeVar("R")

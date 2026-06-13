@@ -34,7 +34,6 @@ class StreamDownloader:
         self.headers: dict[str, str] = COMMON_HEADER.copy()
         self.cache_dir: Path = pconfig.cache_dir
         self.client: AsyncClient = AsyncClient(timeout=DOWNLOAD_TIMEOUT, verify=False)
-        self._active_downloads: dict[str, asyncio.Task[None]] = {}
         self._ffmpeg_available: bool | None = None
 
     async def aclose(self) -> None:
@@ -114,30 +113,13 @@ class StreamDownloader:
             return file_path
 
         headers = {**self.headers, **(ext_headers or {})}
-        download_key = str(file_path)
-        active_download = self._active_downloads.get(download_key)
-        if active_download is not None:
-            await active_download
-            return file_path
 
-        download_task = asyncio.create_task(
-            self._download_with_stream(
-                url=url,
-                file_path=file_path,
-                headers=headers,
-                desc=file_name,
-            )
+        await self._download_with_stream(
+            url=url,
+            file_path=file_path,
+            headers=headers,
+            desc=file_name,
         )
-        self._active_downloads[download_key] = download_task
-        try:
-            await download_task
-        except Exception:
-            await safe_unlink(file_path)
-            raise
-        finally:
-            if self._active_downloads.get(download_key) is download_task:
-                self._active_downloads.pop(download_key, None)
-
         return file_path
 
     async def _download_with_stream(

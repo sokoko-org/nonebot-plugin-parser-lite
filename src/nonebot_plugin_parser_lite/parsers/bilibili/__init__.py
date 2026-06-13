@@ -20,6 +20,7 @@ from bilibili_api.video import Video
 from msgspec import convert
 from nonebot import logger
 
+from ...exception import DownloadException, TipException
 from ...utils.cookie import ck2dict
 from ...utils.format import format_num
 from ..base import (
@@ -27,14 +28,12 @@ from ..base import (
     Author,
     BaseParser,
     Comment,
-    DownloadException,
     MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
     Stats,
-    TipException,
     handle,
     pconfig,
 )

@@ -6,7 +6,6 @@ from msgspec.json import Decoder
 
 from ...creator import Creator
 from ...data import MediaContent
-from ..base import ParseException
 
 
 class Avatar(Struct):
@@ -98,7 +97,7 @@ class VideoInfoRes(Struct):
     @property
     def video_data(self) -> VideoData:
         if not self.item_list:
-            raise ParseException("can't find data in videoInfoRes")
+            raise ValueError("can't find data in videoInfoRes")
         return choice(self.item_list)
 
 
@@ -138,7 +137,7 @@ class RouterData(Struct):
             return page.video_info_res.video_data
         elif page := self.loader_data.note_page:
             return page.video_info_res.video_data
-        raise ParseException(
+        raise ValueError(
             "can't find video_(id)/page or note_(id)/page in router data"
         )
 
@@ -148,7 +147,7 @@ class RouterData(Struct):
             return page.commentListData
         elif page := self.loader_data.note_page:
             return page.commentListData
-        raise ParseException(
+        raise ValueError(
             "can't find video_(id)/page or note_(id)/page in router data"
         )
 
