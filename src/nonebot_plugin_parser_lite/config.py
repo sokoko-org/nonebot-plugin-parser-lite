@@ -148,7 +148,7 @@ class Config(BaseModel):
 
     @property
     def need_forward_contents(self) -> bool:
-        """是否需要转发原文内容"""
+        """是否需要合并转发"""
         return self.plite_need_forward_contents
 
     @property
