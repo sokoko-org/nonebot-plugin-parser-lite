@@ -1,5 +1,5 @@
 from collections.abc import Coroutine, Sequence
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import Any, Literal, Protocol, TypeVar, runtime_checkable
 
 from anyio import Path
 
@@ -19,6 +19,8 @@ from .data import (
     VideoContent,
 )
 
+T = TypeVar("T", bound=MediaContent)
+
 
 @runtime_checkable
 class VideoDownloadFunc(Protocol):
@@ -30,7 +32,7 @@ class VideoDownloadFunc(Protocol):
     def __call__(self) -> Coroutine[Any, Any, Path]: ...
 
 
-def _with_need_send(obj: MediaContent, need_send: bool) -> MediaContent:
+def _with_need_send(obj: T, need_send: bool) -> T:
     obj.need_send = need_send
     return obj
 
@@ -41,6 +43,7 @@ def create_author(
     description: str | None = None,
     id: str | None = None,
     location: str | None = None,
+    ext_headers: dict[str, str] | None = None,
 ):
     """
     创建作者对象
@@ -50,9 +53,14 @@ def create_author(
     :param description: 作者描述
     :param id: 作者 ID
     :param location: 位置信息
+    :param ext_headers: 额外请求头
     """
 
-    avatar_task = DOWNLOADER.download_img(url=avatar_url) if avatar_url else None
+    avatar_task = (
+        DOWNLOADER.download_img(url=avatar_url, ext_headers=ext_headers)
+        if avatar_url
+        else None
+    )
     return Author(
         name=name, id=id, avatar=avatar_task, description=description, location=location
     )

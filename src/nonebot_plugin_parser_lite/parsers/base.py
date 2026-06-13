@@ -346,6 +346,7 @@ class BaseParser:
         description: str | None = None,
         id: str | None = None,
         location: str | None = None,
+        ext_headers: dict[str, str] | None = None,
     ):
         """
         创建作者对象
@@ -355,6 +356,7 @@ class BaseParser:
         :param description: 作者描述
         :param id: 作者 ID
         :param location: 位置信息
+        :param ext_headers: 额外请求头
         """
 
         return create_author(
@@ -363,6 +365,7 @@ class BaseParser:
             description=description,
             id=id,
             location=location,
+            ext_headers=ext_headers,
         )
 
     def create_video(
