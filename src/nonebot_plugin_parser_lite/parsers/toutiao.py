@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from nonebot import logger
 
+from ..data import MediaContent, Platform
 from .base import (
     BaseParser,
     MatchWithParams,
@@ -10,7 +11,6 @@ from .base import (
     PlatformEnum,
     handle,
 )
-from .data import MediaContent, Platform
 
 
 class ToutiaoParser(BaseParser):

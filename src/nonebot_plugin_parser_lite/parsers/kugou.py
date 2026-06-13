@@ -7,8 +7,8 @@ from typing import ClassVar
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
+from ..data import MediaContent, Platform
 from .base import BaseParser, MatchWithParams, ParseException, PlatformEnum, handle
-from .data import MediaContent, Platform
 
 
 class PlayInfo(Struct):

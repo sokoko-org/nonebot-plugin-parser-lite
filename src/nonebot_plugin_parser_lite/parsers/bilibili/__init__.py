@@ -20,6 +20,7 @@ from bilibili_api.video import Video
 from msgspec import convert
 from nonebot import logger
 
+from ...utils.cookie import ck2dict
 from ...utils.format import format_num
 from ..base import (
     DOWNLOADER,
@@ -37,7 +38,6 @@ from ..base import (
     handle,
     pconfig,
 )
-from ..cookie import ck2dict
 from .dynamic import DynamicData, DynamicInfo
 from .favlist import FavData
 from .live import RoomData

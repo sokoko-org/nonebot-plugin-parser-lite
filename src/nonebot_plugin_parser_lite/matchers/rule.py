@@ -193,10 +193,20 @@ def _match_param_rules(params: dict[str, str], rules: ParamRules) -> bool:
 class KeywordRegexRule:
     """检查消息是否含有关键词, 有关键词进行正则匹配"""
 
-    __slots__ = ("key_pattern_list",)
+    __slots__ = ("key_pattern_list", "keyword_items", "keyword_pattern")
 
     def __init__(self, key_pattern_list: KeyPatternList):
         self.key_pattern_list = key_pattern_list
+        keywords = [re.escape(keyword) for keyword, _, _ in key_pattern_list]
+        self.keyword_pattern = re.compile("|".join(keywords)) if keywords else None
+        keyword_items: dict[
+            str, list[tuple[int, str, re.Pattern[str], ParamRules]]
+        ] = {}
+        for index, (keyword, pattern, param_rules) in enumerate(key_pattern_list):
+            keyword_items.setdefault(keyword, []).append(
+                (index, keyword, pattern, param_rules)
+            )
+        self.keyword_items = keyword_items
 
     def __repr__(self) -> str:
         return f"KeywordRegex(key_pattern_list={self.key_pattern_list})"
@@ -216,10 +226,22 @@ class KeywordRegexRule:
         text = _extract_text(message)
         if not text:
             return False
+        if self.keyword_pattern is None:
+            return False
 
-        for keyword, pattern, param_rules in self.key_pattern_list:
-            if keyword not in text:
-                continue
+        keyword_matches = self.keyword_pattern.finditer(text)
+        matched_keywords = {match.group(0) for match in keyword_matches}
+        if not matched_keywords:
+            return False
+
+        candidate_items = [
+            item
+            for keyword in matched_keywords
+            for item in self.keyword_items.get(keyword, ())
+        ]
+        candidate_items.sort(key=lambda item: item[0])
+
+        for _, keyword, pattern, param_rules in candidate_items:
             if not (searched := pattern.search(text)):
                 logger.debug(f"keyword '{keyword}' is in '{text}', but not matched")
                 continue

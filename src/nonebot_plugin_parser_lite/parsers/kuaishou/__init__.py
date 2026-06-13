@@ -3,6 +3,7 @@ from typing import ClassVar
 from msgspec import convert
 from nonebot.log import logger
 
+from ...utils.cookie import ck2dict
 from ..base import (
     BaseParser,
     MatchWithParams,
@@ -14,7 +15,6 @@ from ..base import (
     handle,
     pconfig,
 )
-from ..cookie import ck2dict
 from .commentListQuery import VisionRootCommentFeed
 from .visionVideoDetail import VisionVideoDetail
 

@@ -34,6 +34,11 @@ class StreamDownloader:
         self.headers: dict[str, str] = COMMON_HEADER.copy()
         self.cache_dir: Path = pconfig.cache_dir
         self.client: AsyncClient = AsyncClient(timeout=DOWNLOAD_TIMEOUT, verify=False)
+        self._active_downloads: dict[str, asyncio.Task[None]] = {}
+        self._ffmpeg_available: bool | None = None
+
+    async def aclose(self) -> None:
+        await self.client.aclose()
 
     async def head(
         self, url: str, ext_headers: dict[str, str] | None = None
@@ -109,13 +114,29 @@ class StreamDownloader:
             return file_path
 
         headers = {**self.headers, **(ext_headers or {})}
+        download_key = str(file_path)
+        active_download = self._active_downloads.get(download_key)
+        if active_download is not None:
+            await active_download
+            return file_path
 
-        await self._download_with_stream(
-            url=url,
-            file_path=file_path,
-            headers=headers,
-            desc=file_name,
+        download_task = asyncio.create_task(
+            self._download_with_stream(
+                url=url,
+                file_path=file_path,
+                headers=headers,
+                desc=file_name,
+            )
         )
+        self._active_downloads[download_key] = download_task
+        try:
+            await download_task
+        except Exception:
+            await safe_unlink(file_path)
+            raise
+        finally:
+            if self._active_downloads.get(download_key) is download_task:
+                self._active_downloads.pop(download_key, None)
 
         return file_path
 
@@ -478,6 +499,9 @@ class StreamDownloader:
         """
         :return: 本机是否可用 ffmpeg 可执行程序
         """
+        if self._ffmpeg_available is not None:
+            return self._ffmpeg_available
+
         try:
             proc = await asyncio.create_subprocess_shell(
                 "ffmpeg -version",
@@ -485,9 +509,10 @@ class StreamDownloader:
                 stderr=asyncio.subprocess.DEVNULL,
             )
             await proc.communicate()
-            return proc.returncode == 0
+            self._ffmpeg_available = proc.returncode == 0
         except Exception:
-            return False
+            self._ffmpeg_available = False
+        return self._ffmpeg_available
 
     async def _remux_to_mp4(self, input_path: Path, output_path: Path):
         """

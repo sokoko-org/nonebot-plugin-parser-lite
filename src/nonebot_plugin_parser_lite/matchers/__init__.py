@@ -23,6 +23,8 @@ from ..config import pconfig
 from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers import BaseParser, BilibiliParser, ParseResult
+from ..parsers.tieba.utils import close_client as close_tieba_client
+from ..parsers.weibo.auth import AuthHelper as WeiboAuthHelper
 from ..render import RENDERER
 from ..utils.common import LimitedSizeDict
 from ..utils.ffmpeg import FFmpeg
@@ -120,10 +122,12 @@ def register_parser_matcher() -> None:
 
 @driver.on_shutdown
 async def close_httpx() -> None:
-    if not _ALL_PARSERS:
-        return
-
-    await asyncio.gather(*(parser.aclose() for parser in _ALL_PARSERS))
+    await asyncio.gather(
+        *(parser.aclose() for parser in _ALL_PARSERS),
+        DOWNLOADER.aclose(),
+        close_tieba_client(),
+        WeiboAuthHelper.aclose(),
+    )
 
 
 @UniHelper.with_reaction

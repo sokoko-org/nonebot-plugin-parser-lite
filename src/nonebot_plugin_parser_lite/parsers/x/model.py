@@ -4,8 +4,8 @@ from datetime import datetime
 
 from msgspec import Struct, field
 
-from ..creator import create_image, create_video
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 
 class Views(Struct):
@@ -97,7 +97,7 @@ class TweetLegacy(Struct):
         for media in self.extended_entities.media:
             # 图片：直接用 media_url_https
             if media.type == "photo":
-                medias.append(create_image(url=f"{media.media_url_https}:orig"))
+                medias.append(Creator.image(url=f"{media.media_url_https}:orig"))
                 continue
 
             # 视频 / 动图：挑最高码率 mp4
@@ -113,7 +113,7 @@ class TweetLegacy(Struct):
                     # 当前 media 选一个最高码率的
                     _, best = max(candidates, key=lambda x: x[0])
                     medias.append(
-                        create_video(
+                        Creator.video(
                             url_or_task=best,
                             cover_url=media.media_url_https,
                             duration=media.video_info.duration_millis // 1000,

@@ -1,12 +1,11 @@
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from msgspec import Struct, convert
 
-from ..creator import (
-    create_image,
-    create_live_photo,
-)
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 
 class AuthorInfo(Struct):
@@ -128,22 +127,22 @@ class DynamicMajor(Struct):
             for pic in self.opus.pics:
                 if pic.live_url:
                     items.append(
-                        create_live_photo(video_url=pic.live_url, image_url=pic.url)
+                        Creator.live_photo(video_url=pic.live_url, image_url=pic.url)
                     )
                 else:
-                    items.append(create_image(url=pic.url))
+                    items.append(Creator.image(url=pic.url))
 
         # draw 类型图片动态
         if self.type == "MAJOR_TYPE_DRAW" and self.draw:
             pictures = self.draw.get("pictures", [])
             for pic in pictures:
                 if img_src := pic.get("img_src"):
-                    items.append(create_image(url=img_src))
+                    items.append(Creator.image(url=img_src))
 
         # 视频封面作为普通图片补充（如果前面没有任何媒体）
         if not items and self.type == "MAJOR_TYPE_ARCHIVE" and self.archive:
             if cover := self.archive.cover:
-                items.append(create_image(url=cover))
+                items.append(Creator.image(url=cover))
 
         return items
 
@@ -190,7 +189,7 @@ class DynamicInfo(Struct):
     modules: DynamicModule
     basic: dict[str, Any] | None = None
     # 【关键修改】添加 orig 字段以支持转发内容 (递归结构)
-    orig: Optional["DynamicInfo"] = None
+    orig: DynamicInfo | None = None
 
     @property
     def name(self) -> str:
@@ -267,7 +266,7 @@ class DynamicInfo(Struct):
                 # 2.1 直接 pics: [{url: ...}]
                 if "pics" in dynamic_data:
                     return [
-                        create_image(url=pic.get("url"))
+                        Creator.image(url=pic.get("url"))
                         for pic in dynamic_data["pics"]
                         if pic.get("url")
                     ]
@@ -278,14 +277,14 @@ class DynamicInfo(Struct):
                 ):
                     if "pics" in major:
                         return [
-                            create_image(url=pic.get("url"))
+                            Creator.image(url=pic.get("url"))
                             for pic in major["pics"]
                             if pic.get("url")
                         ]
                     draw = major.get("draw")
                     if isinstance(draw, dict) and "pictures" in draw:
                         return [
-                            create_image(url=pic.get("img_src"))
+                            Creator.image(url=pic.get("img_src"))
                             for pic in draw["pictures"]
                             if pic.get("img_src")
                         ]

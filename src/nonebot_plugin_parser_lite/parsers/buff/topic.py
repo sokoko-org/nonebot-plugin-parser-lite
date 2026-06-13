@@ -1,7 +1,7 @@
 from msgspec import Struct, field
 
-from ..creator import create_image
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 from .share import ShareData
 
 
@@ -29,7 +29,7 @@ class Item(Struct):
 
     @property
     def content(self) -> list[MediaContent | str]:
-        return [self.text] + [create_image(pic.image_url) for pic in self.pictures]
+        return [self.text, *[Creator.image(pic.image_url) for pic in self.pictures]]
 
 
 class Topic(Struct):

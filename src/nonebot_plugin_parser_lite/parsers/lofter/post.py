@@ -4,8 +4,8 @@ import json
 from bs4 import BeautifulSoup
 from msgspec import Struct
 
-from ..creator import create_image
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 
 class PostType(IntEnum):
@@ -76,4 +76,4 @@ class Post(Struct):
 
     @property
     def medias(self) -> list[MediaContent]:
-        return [create_image(photo["orign"]) for photo in json.loads(self.photoLinks)]
+        return [Creator.image(photo["orign"]) for photo in json.loads(self.photoLinks)]

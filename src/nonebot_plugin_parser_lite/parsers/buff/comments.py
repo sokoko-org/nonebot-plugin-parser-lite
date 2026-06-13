@@ -1,7 +1,7 @@
 from msgspec import Struct, field
 
-from ..creator import create_image, create_sticker
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 
 class Author(Struct):
@@ -33,7 +33,7 @@ class Comment(Struct):
 
         for pic in self.pictures:
             if pic.is_emoji:
-                sticker = create_sticker(
+                sticker = Creator.sticker(
                     url=pic.icon_url,
                     size="medium",
                     desc=pic.name,
@@ -43,7 +43,7 @@ class Comment(Struct):
                 if placeholder in text:
                     text = text.replace(placeholder, "", 1)
             else:
-                contents.append(create_image(pic.icon_url))
+                contents.append(Creator.image(pic.icon_url))
 
         if text:
             contents.insert(0, text)

@@ -1,9 +1,9 @@
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
+from ...creator import Creator
+from ...data import MediaContent
 from ...download import DOWNLOADER
-from ..creator import create_image, create_video
-from ..data import MediaContent
 
 VIDEO_HEADER = {**DOWNLOADER.headers, "x-app-za": "OS=webplayer", "x-referer": ""}
 
@@ -42,7 +42,7 @@ async def fetch_video(video_id: str, content_type: str) -> MediaContent | None:
         key=lambda item: _quality_rank(item["quality"]),
     )
 
-    return create_video(
+    return Creator.video(
         url_or_task=best_item["url"][0],
         cover_url=video_play["default_cover"],
         duration=best_item["duration"],
@@ -103,7 +103,7 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
                     or attrs.get("data-default-watermark-src")
                     or attrs.get("src")
                 ):
-                    yield create_image(url=src)
+                    yield Creator.image(url=src)
 
         elif isinstance(element, NavigableString):
             if text := str(element).strip():

@@ -31,9 +31,7 @@ class Detail(Enum):
     ArticleDetail = "/1/functions/getArticleByIdV2"
     DrawingDetail = "/1/functions/getDrawingDetail"
     CommentList = "/1/functions/getCommonCommentList"
-    """{"mainId": "fcecc2da36", "page": 1, "orderType": 0, "bizType": 4}"""
     ArticleCommentList = "/1/functions/getCommonCommentList"
-    """{"mainId": "fcfb0ffe76", "page": 1, "orderType": 0, "bizType": 1}"""
 
 
 class OrderType(IntEnum):

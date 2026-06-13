@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from bs4 import BeautifulSoup
 from msgspec import Struct, field
 
-from ..creator import create_sticker
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 
 class BlogInfo(Struct):
@@ -36,7 +38,7 @@ class Comment(Struct):
     ipLocation: str
     """IP归属地"""
     emotes: list[Emote] = field(default_factory=list)
-    l2Comments: list["Comment"] = field(default_factory=list)
+    l2Comments: list[Comment] = field(default_factory=list)
     """子评论"""
 
     @property
@@ -86,10 +88,9 @@ class Comment(Struct):
                 if plain := text[last_plain_start:i]:
                     contents.append(plain)
 
-            # 输出表情贴纸
             emote = emote_map[matched_name]
             contents.append(
-                create_sticker(
+                Creator.sticker(
                     url=emote.url,
                     size="small",
                     desc=emote.name,

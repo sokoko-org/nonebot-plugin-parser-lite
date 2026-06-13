@@ -1,20 +1,12 @@
-# pyright: reportAttributeAccessIssue=false
-
+from functools import lru_cache
 from pathlib import Path
 
 from google.protobuf import descriptor_pb2, descriptor_pool
 from google.protobuf.message_factory import GetMessageClass
 from httpx import AsyncClient
 
-from ..creator import (
-    create_author,
-    create_comment,
-    create_graphic,
-    create_stats,
-    create_sticker,
-    create_video,
-)
-from ..data import Comment, MediaContent
+from ...creator import Creator
+from ...data import Comment, MediaContent
 from .models import (
     Contents,
     FragAt,
@@ -27,7 +19,10 @@ from .models import (
     Posts,
 )
 
+_CLIENT = AsyncClient()
 
+
+@lru_cache(maxsize=2)
 def get_message(name: str):
     fds = descriptor_pb2.FileDescriptorSet()
     fds.ParseFromString((Path(__file__).parent / f"{name}.desc").read_bytes())
@@ -39,18 +34,22 @@ def get_message(name: str):
     return GetMessageClass(msg_descriptor)
 
 
+async def close_client() -> None:
+    await _CLIENT.aclose()
+
+
 def make_req(tid: int) -> bytes:
     req_proto = get_message("PbPageReqIdl")()
-    req_proto.data.common._client_type = 2
-    req_proto.data.common._client_version = "12.64.1.1"
-    req_proto.data.kz = tid
-    req_proto.data.pn = 1
-    req_proto.data.rn = 30
-    req_proto.data.r = 0
-    req_proto.data.lz = 0
-    req_proto.data.with_floor = 1
-    req_proto.data.floor_sort_type = 1
-    req_proto.data.floor_rn = 4
+    req_proto.data.common._client_type = 2  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.common._client_version = "12.64.1.1"  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.kz = tid  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.pn = 1  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.rn = 30  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.r = 0  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.lz = 0  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.with_floor = 1  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.floor_sort_type = 1  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto.data.floor_rn = 4  # pyright: ignore[reportAttributeAccessIssue]
     return req_proto.SerializeToString()
 
 
@@ -74,30 +73,29 @@ async def pack_req(data: bytes) -> bytes:
     )
 
     # 设置 Content-Type，带上固定 boundary
-    async with AsyncClient() as client:
-        response = await client.post(
-            "http://tiebac.baidu.com/c/f/pb/page",
-            headers={
-                "x_bd_data_type": "protobuf",
-                "Connection": "keep-alive",
-                "Accept-Encoding": "gzip",
-                "User-Agent": "miku/39",
-                "Host": "tiebac.baidu.com",
-                "Content-Type": f"multipart/form-data; boundary={boundary}",
-            },
-            params={"cmd": 302001},
-            content=body,
-        )
-        return response.content
+    response = await _CLIENT.post(
+        "http://tiebac.baidu.com/c/f/pb/page",
+        headers={
+            "x_bd_data_type": "protobuf",
+            "Connection": "keep-alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": "miku/39",
+            "Host": "tiebac.baidu.com",
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+        },
+        params={"cmd": 302001},
+        content=body,
+    )
+    return response.content
 
 
 def parse_res(data: bytes) -> Posts:
     res = get_message("PbPageResIdl")()
     res.ParseFromString(data)
-    if res.error.errorno:
-        raise ValueError(res.error.errmsg)
+    if res.error.errorno:  # pyright: ignore[reportAttributeAccessIssue]
+        raise ValueError(res.error.errmsg)  # pyright: ignore[reportAttributeAccessIssue]
 
-    data_proto = res.data
+    data_proto = res.data  # pyright: ignore[reportAttributeAccessIssue]
     return Posts.from_tbdata(data_proto)
 
 
@@ -123,7 +121,7 @@ def build_content(posts: Posts) -> list[MediaContent | str]:
             contents.append(part.text)
         elif isinstance(part, FragEmoji):
             contents.append(
-                create_sticker(
+                Creator.sticker(
                     url=f"https://emoji.awkchan.top/assets/tieba/{part.id}.webp",
                     size="small",
                     desc=part.desc,
@@ -131,7 +129,7 @@ def build_content(posts: Posts) -> list[MediaContent | str]:
             )
         elif isinstance(part, FragImage):
             contents.append(
-                create_graphic(
+                Creator.graphic(
                     image_url=part.origin_src,
                     ext_headers={"Referer": "https://tieba.baidu.com/"},
                 )
@@ -150,7 +148,7 @@ def build_content(posts: Posts) -> list[MediaContent | str]:
                 contents.append(url_str)
         elif isinstance(part, FragVideo):
             contents.append(
-                create_video(
+                Creator.video(
                     url_or_task=part.src,
                     cover_url=part.cover_src,
                     duration=part.duration,
@@ -179,14 +177,14 @@ def build_comment(contents: Contents) -> list[MediaContent | str]:
             content.append(part.text)
         elif isinstance(part, FragEmoji):
             content.append(
-                create_sticker(
+                Creator.sticker(
                     url=f"https://emoji.awkchan.top/assets/tieba/{part.id}.webp",
                     size="small",
                     desc=part.desc,
                 )
             )
         elif isinstance(part, FragImage):
-            content.append(create_graphic(part.origin_src))
+            content.append(Creator.graphic(part.origin_src))
         elif isinstance(part, FragAt):
             content.append(f"@{part.text} ")
         elif isinstance(part, FragLink):
@@ -216,7 +214,7 @@ def build_comments(posts: list[Post], poster_id: int) -> list[Comment]:
     combined_comments: list[Post] = main_comments[:5] + other_comments[:5]
 
     for post in combined_comments:
-        comment_author = create_author(
+        comment_author = Creator.author(
             name=post.user.show_name,
             avatar_url=f"http://tb.himg.baidu.com/sys/portraith/item/{post.user.portrait}",
             id=post.user.portrait,
@@ -226,8 +224,8 @@ def build_comments(posts: list[Post], poster_id: int) -> list[Comment]:
         child_posts = []
         if post.comments:
             child_posts.extend(
-                create_comment(
-                    author=create_author(
+                Creator.comment(
+                    author=Creator.author(
                         name=comment.user.show_name,
                         avatar_url=f"http://tb.himg.baidu.com/sys/portraith/item/{comment.user.portrait}",
                         id=comment.user.portrait,
@@ -235,7 +233,7 @@ def build_comments(posts: list[Post], poster_id: int) -> list[Comment]:
                     ),
                     content=build_comment(comment.contents),
                     timestamp=comment.create_time,
-                    stats=create_stats(
+                    stats=Creator.stats(
                         like_count=str(comment.agree) if comment.agree else None
                     ),
                     parent_author=comment_author,
@@ -243,11 +241,11 @@ def build_comments(posts: list[Post], poster_id: int) -> list[Comment]:
                 for comment in post.comments[:3]
             )
         comments.append(
-            create_comment(
+            Creator.comment(
                 author=comment_author,
                 content=build_comment(post.contents),
                 timestamp=post.create_time,
-                stats=create_stats(
+                stats=Creator.stats(
                     like_count=str(post.agree), comment_count=str(post.reply_num)
                 ),
                 replies=child_posts,

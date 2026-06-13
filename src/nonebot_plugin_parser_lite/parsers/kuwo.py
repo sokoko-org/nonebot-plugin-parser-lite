@@ -1,5 +1,6 @@
 from typing import ClassVar
 
+from ..data import MediaContent, Platform
 from .base import (
     BaseParser,
     MatchWithParams,
@@ -7,7 +8,6 @@ from .base import (
     PlatformEnum,
     handle,
 )
-from .data import MediaContent, Platform
 
 
 def display_duration(duration: int) -> str:

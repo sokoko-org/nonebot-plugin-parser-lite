@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Awaitable, Callable, Coroutine, Generator
 from functools import wraps
 from typing import Any, Generic, ParamSpec, TypeVar
@@ -12,7 +13,16 @@ class DownloadTaskWrapper(Awaitable[T], Generic[T]):
     - 在被 await 时才真正执行协程
     """
 
-    __slots__ = ("_args", "_func", "_kwargs", "ext_headers", "url")
+    __slots__ = (
+        "_args",
+        "_func",
+        "_has_result",
+        "_kwargs",
+        "_lock",
+        "_result",
+        "ext_headers",
+        "url",
+    )
 
     def __init__(
         self,
@@ -27,11 +37,27 @@ class DownloadTaskWrapper(Awaitable[T], Generic[T]):
         self._kwargs = kwargs
         self.url: str = url
         self.ext_headers: dict[str, str] | None = ext_headers
+        self._has_result = False
+        self._lock: asyncio.Lock | None = None
+        self._result: T | None = None
 
     def __await__(self) -> Generator[Any, Any, T]:
-        # 每次 await 都直接执行原始协程
-        coro = self._func(*self._args, **self._kwargs)
-        return coro.__await__()
+        return self._run().__await__()
+
+    async def _run(self) -> T:
+        if self._has_result:
+            return self._result  # type: ignore[return-value]
+
+        if self._lock is None:
+            self._lock = asyncio.Lock()
+
+        async with self._lock:
+            if self._has_result:
+                return self._result  # type: ignore[return-value]
+
+            self._result = await self._func(*self._args, **self._kwargs)
+            self._has_result = True
+            return self._result
 
     def __repr__(self) -> str:
         return self.url

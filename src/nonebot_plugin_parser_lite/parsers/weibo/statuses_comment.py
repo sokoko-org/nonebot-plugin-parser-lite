@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
+from ...creator import Creator
 from ...utils.format import replace_placeholder_to_sticker
-from ..creator import create_image, create_live_photo
 
 WEIBO_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 
@@ -26,12 +26,12 @@ class Pic(Struct):
     @property
     def content(self):
         if self.video:
-            return create_live_photo(
+            return Creator.live_photo(
                 video_url=self.video,
                 image_url=self.original.url,
                 ext_headers={"Referer": "https://weibo.com/"},
             )
-        return create_image(
+        return Creator.image(
             url=self.original.url, ext_headers={"Referer": "https://weibo.com/"}
         )
 
