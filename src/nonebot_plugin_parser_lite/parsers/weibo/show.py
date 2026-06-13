@@ -1,44 +1,32 @@
-from re import sub
-
+from bs4 import BeautifulSoup
 from msgspec import Struct
 from msgspec.json import Decoder
-
-
-class User(Struct):
-    name: str
-    profile_image_url: str
-    description: str
-
-
-class Reward(Struct):
-    user: User
 
 
 class PlayInfo(Struct):
     title: str
     text: str
-    reward: Reward
+    author: str
+    avatar: str
     cover_image: str
     stream_url: str
     real_date: int
     urls: dict[str, str]
+    duration_time: float
+    attitudes_count: int
+    comments_count: str
+    reposts_count: str
+    play_count: str
+    ip_info_str: str
 
     @property
-    def name(self) -> str:
-        return self.reward.user.name
-
-    @property
-    def avatar(self) -> str:
-        return self.reward.user.profile_image_url
+    def avatar_url(self) -> str:
+        return f"https:{self.avatar}"
 
     @property
     def description(self) -> str:
-        return self.reward.user.description
-
-    @property
-    def clean_text(self) -> str:
-        text = sub(r"<[^>]*>", "", self.text)
-        return text.replace("\n\n", "").strip()
+        soup = BeautifulSoup(self.text, "html.parser")
+        return soup.get_text(separator="\n", strip=True)
 
     @property
     def cover_url(self) -> str:
