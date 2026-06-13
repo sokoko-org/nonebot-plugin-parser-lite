@@ -6,7 +6,7 @@ from msgspec.json import Decoder
 
 from ...utils.format import replace_placeholder_to_sticker
 
-ZHIHU_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
+ZHIHU_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 
 
 class Counts(Struct):
