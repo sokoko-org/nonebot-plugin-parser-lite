@@ -5,6 +5,7 @@ from google.protobuf import descriptor_pb2, descriptor_pool
 from google.protobuf.message_factory import GetMessageClass
 from httpx import AsyncClient
 
+from ...constants import STICKER_CDN
 from ...creator import Creator
 from ...data import Comment, MediaContent
 from .models import (
@@ -122,7 +123,7 @@ def build_content(posts: Posts) -> list[MediaContent | str]:
         elif isinstance(part, FragEmoji):
             contents.append(
                 Creator.sticker(
-                    url=f"https://emoji.awkchan.top/assets/tieba/{part.id}.webp",
+                    url=STICKER_CDN.format(platform="tieba", name=part.id),
                     size="small",
                     desc=part.desc,
                 )
@@ -178,7 +179,7 @@ def build_comment(contents: Contents) -> list[MediaContent | str]:
         elif isinstance(part, FragEmoji):
             content.append(
                 Creator.sticker(
-                    url=f"https://emoji.awkchan.top/assets/tieba/{part.id}.webp",
+                    url=STICKER_CDN.format(platform="tieba", name=part.id),
                     size="small",
                     desc=part.desc,
                 )

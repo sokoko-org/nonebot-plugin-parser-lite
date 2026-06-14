@@ -7,6 +7,7 @@ from typing import Any, Literal, TypedDict
 
 from anyio import Path
 
+from .constants import STICKER_CDN
 from .download import DOWNLOADER
 from .download.task import DownloadTaskWrapper
 from .utils.ffmpeg import FFmpeg
@@ -171,7 +172,7 @@ class Platform:
 
     async def get_logo_path(self) -> Path:
         return await DOWNLOADER.download_img(
-            url=f"https://emoji.awkchan.top/assets/logo/{self.name}.webp",
+            url=STICKER_CDN.format(platform="logo", name=self.name),
             img_name=f"{self.name}.webp",
         )
 

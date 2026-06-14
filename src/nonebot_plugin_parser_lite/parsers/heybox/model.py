@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from msgspec import Struct, field
 
+from ...constants import STICKER_CDN
 from ...creator import Creator
 from ...data import MediaContent
 from ...utils.format import replace_placeholder_to_sticker
@@ -54,7 +55,7 @@ class CommentItem(Struct):
         if self.is_cy:
             content.append(
                 Creator.sticker(
-                    url="https://emoji.awkchan.top/assets/heybox/cy.webp",
+                    url=STICKER_CDN.format(platform="heybox", name="cy"),
                     size="small",
                     desc="插眼",
                 )

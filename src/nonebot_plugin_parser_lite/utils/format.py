@@ -2,6 +2,7 @@ from collections.abc import Callable
 import re
 from typing import Final, Literal
 
+from ..constants import STICKER_CDN
 from ..creator import Creator
 from ..data import MediaContent
 
@@ -41,7 +42,7 @@ def replace_placeholder_to_sticker(
             size = size_resolver(name) if size_resolver is not None else "small"
             result.append(
                 Creator.sticker(
-                    url=f"https://sticker.sokoko.org/assets/{platform}/{name}.webp",
+                    url=STICKER_CDN.format(platform=platform, name=name),
                     size=size,
                     desc=f"[{name}]",
                 )
