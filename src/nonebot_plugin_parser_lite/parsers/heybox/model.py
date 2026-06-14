@@ -6,9 +6,9 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from msgspec import Struct, field
 
+from ...creator import Creator
+from ...data import MediaContent
 from ...utils.format import replace_placeholder_to_sticker
-from ..creator import create_image, create_sticker, create_video
-from ..data import MediaContent
 
 HEYBOX_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 
@@ -50,10 +50,10 @@ class CommentItem(Struct):
             self.text, HEYBOX_PATTERN, "heybox", size_resolver
         )
         for img in self.imgs:
-            content.append(create_image(url=img.url + "\\"))
+            content.append(Creator.image(url=img.url + "\\"))
         if self.is_cy:
             content.append(
-                create_sticker(
+                Creator.sticker(
                     url="https://emoji.awkchan.top/assets/heybox/cy.webp",
                     size="small",
                     desc="插眼",
@@ -110,12 +110,12 @@ class Link(Struct):
                         )
                     )
                 elif part["type"] == "img":
-                    content.append(create_image(url=part["url"] + "\\"))
+                    content.append(Creator.image(url=part["url"] + "\\"))
         except (json.JSONDecodeError, TypeError):
             content.append(self.text)
         if self.has_video and self.video_url and self.video_thumb:
             content.append(
-                create_video(url_or_task=self.video_url, cover_url=self.video_thumb)
+                Creator.video(url_or_task=self.video_url, cover_url=self.video_thumb)
             )
         return content
 
@@ -155,7 +155,7 @@ def extract_from_html(html: str) -> list[MediaContent | str]:
                 or attrs.get("data-default-watermark-src")
             ):
                 result.append(
-                    create_image(
+                    Creator.image(
                         url=src,
                     )
                 )

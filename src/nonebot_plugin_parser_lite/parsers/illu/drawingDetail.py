@@ -1,8 +1,8 @@
 from msgspec import Struct
 from msgspec.json import Decoder
 
-from ..creator import create_image
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 from .models import File, Time, User
 
 
@@ -24,7 +24,7 @@ class DrawingDetail(Struct):
     def medias(self) -> list[MediaContent | str]:
         return [
             self.content,
-            *[create_image(url=image.url) for image in self.images],
+            *[Creator.image(url=image.url) for image in self.images],
         ]
 
 

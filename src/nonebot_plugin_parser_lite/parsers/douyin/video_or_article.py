@@ -4,9 +4,8 @@ from typing import Any
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ..base import ParseException
-from ..creator import create_image, create_video
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 
 class Avatar(Struct):
@@ -71,7 +70,7 @@ class VideoData(Struct):
         medias: list[MediaContent] = []
         if self.images:
             medias.extend(
-                create_image(
+                Creator.image(
                     url=image.url_list[0].replace("playwm", "play"),
                     ext_headers={"Referer": "https://www.douyin.com/"},
                 )
@@ -79,7 +78,7 @@ class VideoData(Struct):
             )
         if self.video:
             medias.append(
-                create_video(
+                Creator.video(
                     url_or_task=self.video.play_addr.url_list[0].replace(
                         "playwm", "play"
                     ),
@@ -98,7 +97,7 @@ class VideoInfoRes(Struct):
     @property
     def video_data(self) -> VideoData:
         if not self.item_list:
-            raise ParseException("can't find data in videoInfoRes")
+            raise ValueError("can't find data in videoInfoRes")
         return choice(self.item_list)
 
 
@@ -138,7 +137,7 @@ class RouterData(Struct):
             return page.video_info_res.video_data
         elif page := self.loader_data.note_page:
             return page.video_info_res.video_data
-        raise ParseException(
+        raise ValueError(
             "can't find video_(id)/page or note_(id)/page in router data"
         )
 
@@ -148,7 +147,7 @@ class RouterData(Struct):
             return page.commentListData
         elif page := self.loader_data.note_page:
             return page.commentListData
-        raise ParseException(
+        raise ValueError(
             "can't find video_(id)/page or note_(id)/page in router data"
         )
 

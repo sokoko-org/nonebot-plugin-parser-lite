@@ -20,24 +20,23 @@ from bilibili_api.video import Video
 from msgspec import convert
 from nonebot import logger
 
+from ...exception import DownloadException, TipException
+from ...utils.cookie import ck2dict
 from ...utils.format import format_num
 from ..base import (
     DOWNLOADER,
     Author,
     BaseParser,
     Comment,
-    DownloadException,
     MatchWithParams,
     MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
     Stats,
-    TipException,
     handle,
     pconfig,
 )
-from ..cookie import ck2dict
 from .dynamic import DynamicData, DynamicInfo
 from .favlist import FavData
 from .live import RoomData

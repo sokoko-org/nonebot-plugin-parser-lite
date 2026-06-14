@@ -1,7 +1,7 @@
 from msgspec import Struct
 
-from ..creator import create_video
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 from .share import ShareData
 
 
@@ -29,12 +29,12 @@ class Video(Struct):
     def content(self) -> list[MediaContent | str]:
         return [
             self.body,
-            *(
-                create_video(
+            *[
+                Creator.video(
                     url_or_task=item.video_url,
                     cover_url=item.icon_url,
                     duration=float(item.duration),
                 )
                 for item in self.video
-            ),
+            ],
         ]

@@ -1,6 +1,7 @@
 import re
 from typing import ClassVar
 
+from ...utils.cookie import ck2dict
 from ...utils.format import replace_placeholder_to_sticker
 from ..base import (
     BaseParser,
@@ -11,7 +12,6 @@ from ..base import (
     handle,
     pconfig,
 )
-from ..cookie import ck2dict
 from .explore import REDNOTE_PATTERN, NoteDetailMap
 from .explore import decoder as exploreDecoder
 

@@ -3,6 +3,8 @@ from typing import ClassVar
 from msgspec import convert
 from nonebot.log import logger
 
+from ...exception import TipException
+from ...utils.cookie import ck2dict
 from ..base import (
     BaseParser,
     MatchWithParams,
@@ -10,11 +12,9 @@ from ..base import (
     ParseException,
     Platform,
     PlatformEnum,
-    TipException,
     handle,
     pconfig,
 )
-from ..cookie import ck2dict
 from .commentListQuery import VisionRootCommentFeed
 from .visionVideoDetail import VisionVideoDetail
 

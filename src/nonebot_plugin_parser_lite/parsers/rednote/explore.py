@@ -3,8 +3,8 @@ import re
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ..creator import create_image, create_live_photo, create_video
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
 
@@ -160,7 +160,7 @@ class NoteDetail(Struct):
         # 处理视频情况：如果有视频，第一张图片是封面
         if self.video:
             items.append(
-                create_video(
+                Creator.video(
                     url_or_task=self.video.url,
                     cover_url=self.imageList[0].url,
                     duration=self.video.media.video.duration,
@@ -171,14 +171,14 @@ class NoteDetail(Struct):
             for img in self.imageList:
                 if img.livePhoto:
                     items.append(
-                        create_live_photo(
+                        Creator.live_photo(
                             video_url=img.stream.url,
                             image_url=img.url,
                         )
                     )
                 else:
                     items.append(
-                        create_image(
+                        Creator.image(
                             url=img.url,
                         )
                     )

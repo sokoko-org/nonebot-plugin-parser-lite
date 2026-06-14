@@ -2,8 +2,8 @@ from bs4 import BeautifulSoup, Tag
 from bs4.element import NavigableString
 from msgspec import Struct
 
-from ..creator import create_graphic, create_video
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 from .share import ShareData
 
 
@@ -42,7 +42,7 @@ class News(Struct):
                     thumb = str(cover_img["src"])
 
                     data.append(
-                        create_video(
+                        Creator.video(
                             url_or_task=video,
                             cover_url=thumb,
                         )
@@ -54,7 +54,7 @@ class News(Struct):
                 # 普通图片
                 if element.name == "img":
                     if src_attr := element.attrs.get("data-original"):
-                        data.append(create_graphic(image_url=str(src_attr)))
+                        data.append(Creator.graphic(image_url=str(src_attr)))
 
             elif isinstance(element, NavigableString):
                 if text := str(element).strip():

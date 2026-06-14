@@ -4,8 +4,8 @@ import re
 from msgspec import Struct
 from msgspec.json import Decoder
 
+from ...creator import Creator
 from ...utils.format import replace_placeholder_to_sticker
-from ..creator import create_image, create_live_photo, create_video
 from .auth import AuthHelper
 from .longText import decoder as longTextDecoder
 
@@ -29,12 +29,12 @@ class Pic(Struct):
     @property
     def content(self):
         if self.video:
-            return create_live_photo(
+            return Creator.live_photo(
                 video_url=self.video,
                 image_url=self.original.url,
                 ext_headers={"Referer": "https://weibo.com/"},
             )
-        return create_image(
+        return Creator.image(
             url=self.original.url, ext_headers={"Referer": "https://weibo.com/"}
         )
 
@@ -51,7 +51,7 @@ class PageInfo(Struct):
 
     @property
     def content(self):
-        return create_video(
+        return Creator.video(
             url_or_task=self.media_info.stream_url_hd,
             cover_url=self.page_pic,
             ext_headers={"Referer": "https://weibo.com/"},

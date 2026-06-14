@@ -13,13 +13,7 @@ from nonebot_plugin_htmlrender import template_to_pic
 import qrcode
 
 from ..config import _nickname, pconfig
-from ..exception import (
-    DownloadException,
-    DurationLimitException,
-    SizeLimitException,
-)
-from ..helper import ForwardNodeInner, UniHelper, UniMessage
-from ..parsers.data import (
+from ..data import (
     AudioContent,
     GraphicContent,
     ImageContent,
@@ -29,6 +23,12 @@ from ..parsers.data import (
     StickerContent,
     VideoContent,
 )
+from ..exception import (
+    DownloadException,
+    DurationLimitException,
+    SizeLimitException,
+)
+from ..helper import ForwardNodeInner, UniHelper, UniMessage
 
 PLACEHOLDER_IMAGE = (
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"

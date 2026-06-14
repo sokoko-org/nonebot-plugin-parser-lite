@@ -28,29 +28,8 @@ from ..constants import (
     ParamRules,
 )
 from ..constants import PlatformEnum as PlatformEnum
-from ..download import DOWNLOADER as DOWNLOADER
-from ..download.task import DownloadTaskWrapper
-from ..exception import DownloadException as DownloadException
-from ..exception import DurationLimitException as DurationLimitException
-from ..exception import ParseException as ParseException
-from ..exception import SizeLimitException as SizeLimitException
-from ..exception import TipException as TipException
-from ..exception import ZeroSizeException as ZeroSizeException
-from .creator import (
-    VideoDownloadFunc,
-    create_audio,
-    create_author,
-    create_comment,
-    create_graphic,
-    create_image,
-    create_images,
-    create_live_photo,
-    create_stats,
-    create_sticker,
-    create_video,
-    create_videos,
-)
-from .data import (
+from ..creator import Creator, VideoDownloadFunc
+from ..data import (
     Author,
     Comment,
     MediaContent,
@@ -59,6 +38,9 @@ from .data import (
     Platform,
     Stats,
 )
+from ..download import DOWNLOADER as DOWNLOADER
+from ..download.task import DownloadTaskWrapper
+from ..exception import ParseException
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -359,7 +341,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_author(
+        return Creator.author(
             name=name,
             avatar_url=avatar_url,
             description=description,
@@ -388,7 +370,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_video(
+        return Creator.video(
             url_or_task=url_or_task,
             cover_url=cover_url,
             duration=duration,
@@ -409,7 +391,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_videos(video_urls=video_urls, ext_headers=ext_headers)
+        return Creator.videos(video_urls=video_urls, ext_headers=ext_headers)
 
     def create_images(
         self,
@@ -423,7 +405,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_images(image_urls=image_urls, ext_headers=ext_headers)
+        return Creator.images(image_urls=image_urls, ext_headers=ext_headers)
 
     def create_image(
         self,
@@ -441,7 +423,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_image(
+        return Creator.image(
             url=url, img_name=img_name, need_send=need_send, ext_headers=ext_headers
         )
 
@@ -463,7 +445,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_audio(
+        return Creator.audio(
             url=url,
             duration=duration,
             audio_name=audio_name,
@@ -489,7 +471,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_graphic(
+        return Creator.graphic(
             image_url=image_url,
             img_name=img_name,
             alt=alt,
@@ -515,7 +497,7 @@ class BaseParser:
         :param ext_headers: 额外请求头
         """
 
-        return create_sticker(url=url, size=size, desc=desc, ext_headers=ext_headers)
+        return Creator.sticker(url=url, size=size, desc=desc, ext_headers=ext_headers)
 
     def create_live_photo(
         self,
@@ -534,7 +516,7 @@ class BaseParser:
         :param need_send: 是否发送
         :param ext_headers: 额外请求头
         """
-        return create_live_photo(
+        return Creator.live_photo(
             video_url=video_url,
             image_url=image_url,
             bgm_url=bgm_url,
@@ -561,7 +543,7 @@ class BaseParser:
         :param comment_count: 评论数
         :param extra: 额外的信息
         """
-        return create_stats(
+        return Creator.stats(
             view_count=view_count,
             like_count=like_count,
             collect_count=collect_count,
@@ -590,7 +572,7 @@ class BaseParser:
         :param parent_author: 评论的父级作者
         """
 
-        return create_comment(
+        return Creator.comment(
             author=author,
             content=content,
             timestamp=timestamp,

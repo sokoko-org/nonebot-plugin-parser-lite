@@ -34,6 +34,10 @@ class StreamDownloader:
         self.headers: dict[str, str] = COMMON_HEADER.copy()
         self.cache_dir: Path = pconfig.cache_dir
         self.client: AsyncClient = AsyncClient(timeout=DOWNLOAD_TIMEOUT, verify=False)
+        self._ffmpeg_available: bool | None = None
+
+    async def aclose(self) -> None:
+        await self.client.aclose()
 
     async def head(
         self, url: str, ext_headers: dict[str, str] | None = None
@@ -116,7 +120,6 @@ class StreamDownloader:
             headers=headers,
             desc=file_name,
         )
-
         return file_path
 
     async def _download_with_stream(
@@ -478,6 +481,9 @@ class StreamDownloader:
         """
         :return: 本机是否可用 ffmpeg 可执行程序
         """
+        if self._ffmpeg_available is not None:
+            return self._ffmpeg_available
+
         try:
             proc = await asyncio.create_subprocess_shell(
                 "ffmpeg -version",
@@ -485,9 +491,10 @@ class StreamDownloader:
                 stderr=asyncio.subprocess.DEVNULL,
             )
             await proc.communicate()
-            return proc.returncode == 0
+            self._ffmpeg_available = proc.returncode == 0
         except Exception:
-            return False
+            self._ffmpeg_available = False
+        return self._ffmpeg_available
 
     async def _remux_to_mp4(self, input_path: Path, output_path: Path):
         """

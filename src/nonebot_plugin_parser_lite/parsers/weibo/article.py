@@ -2,8 +2,8 @@ from bs4 import BeautifulSoup, Tag
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ..creator import create_image
-from ..data import MediaContent
+from ...creator import Creator
+from ...data import MediaContent
 
 
 class UserInfo(Struct):
@@ -40,7 +40,7 @@ class Data(Struct):
                 src = element.get("src")
                 if isinstance(src, str):
                     content.append(
-                        create_image(
+                        Creator.image(
                             url=src, ext_headers={"Referer": "https://weibo.com/"}
                         )
                     )

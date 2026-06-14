@@ -1,7 +1,7 @@
 import re
 
+from ...data import MediaContent
 from ...utils.format import replace_placeholder_to_sticker
-from ..data import MediaContent
 
 COOLAPK_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 

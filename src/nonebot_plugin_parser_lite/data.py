@@ -7,9 +7,9 @@ from typing import Any, Literal, TypedDict
 
 from anyio import Path
 
-from ..download import DOWNLOADER
-from ..download.task import DownloadTaskWrapper
-from ..utils.ffmpeg import FFmpeg
+from .download import DOWNLOADER
+from .download.task import DownloadTaskWrapper
+from .utils.ffmpeg import FFmpeg
 
 
 def repr_path_task(path_task: DownloadTaskWrapper[Path]) -> str:

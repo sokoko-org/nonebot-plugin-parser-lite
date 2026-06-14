@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup as soup
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ..creator import create_image
+from ...creator import Creator
 from .util import format_sticker
 
 
@@ -18,7 +18,7 @@ class FeedData(Struct):
     def content(self):
         return [
             *format_sticker(soup(self.message, "html.parser").get_text()),
-            *([create_image(pic) for pic in self.picArr] if self.picArr else []),
+            *([Creator.image(pic) for pic in self.picArr] if self.picArr else []),
         ]
 
 

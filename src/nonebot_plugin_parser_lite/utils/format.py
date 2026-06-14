@@ -2,10 +2,11 @@ from collections.abc import Callable
 import re
 from typing import Final, Literal
 
-from ..parsers.creator import create_sticker
-from ..parsers.data import MediaContent
+from ..creator import Creator
+from ..data import MediaContent
 
 DEFAULT_PLACEHOLDER_PATTERN: Final = re.compile(r"\[(?P<name>[^]]+)\]")
+
 
 def replace_placeholder_to_sticker(
     text: str,
@@ -39,7 +40,7 @@ def replace_placeholder_to_sticker(
         if name := match["name"]:
             size = size_resolver(name) if size_resolver is not None else "small"
             result.append(
-                create_sticker(
+                Creator.sticker(
                     url=f"https://sticker.sokoko.org/assets/{platform}/{name}.webp",
                     size=size,
                     desc=f"[{name}]",

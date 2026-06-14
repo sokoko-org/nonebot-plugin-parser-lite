@@ -216,7 +216,6 @@ class KeywordRegexRule:
         text = _extract_text(message)
         if not text:
             return False
-
         for keyword, pattern, param_rules in self.key_pattern_list:
             if keyword not in text:
                 continue
