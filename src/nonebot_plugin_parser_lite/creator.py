@@ -84,7 +84,10 @@ class Creator:
         ext_headers: dict[str, str] | None = None,
     ):
         """
-        创建视频内容
+        创建视频内容,
+        传入 `VideoDownloadFunc` 时,
+        会使用 `VideoDownloadFunc` 的 `ext_headers` 而不是传入的.
+        这个问题会在后续版本进行修复
 
         :param url: 视频 URL
         :param cover_url: 封面 URL
@@ -122,7 +125,7 @@ class Creator:
         else:
             # 4) 传入了不受支持的类型：立即报错，避免 AttributeError
             raise TypeError(
-                f"create_video 的 url_or_task 类型不受支持: {type(url_or_task)!r}，"
+                f"Creator.video 收到了不受支持的 url_or_task 类型: {type(url_or_task)},"
                 "期望 str / DownloadTaskWrapper / VideoDownloadFunc 协议对象"
             )
         return _with_need_send(
