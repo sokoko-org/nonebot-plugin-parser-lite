@@ -18,7 +18,7 @@ def _quality_rank(q: str) -> int:
     return 1 if q == "SD" else 0
 
 
-async def fetch_video(video_id: str, content_type: str) -> MediaContent | None:
+async def fetch_video(video_id: str, content_type: str):
     res = await DOWNLOADER.client.post(
         "https://www.zhihu.com/api/v4/video/play_info",
         headers=VIDEO_HEADER,
@@ -76,6 +76,11 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
     for element in soup.descendants:
         # 标签节点
         if isinstance(element, Tag):
+            # 段落 / 换行：作为显式的换行控制
+            if element.name in {"p", "br"}:
+                yield "\n"
+                continue
+
             # 视频卡片：整体视为一个单元，处理完后从 DOM 移除以避免重复产出
             if element.name == "a" and "video-box" in (element.get("class") or []):
                 video = await _parse_video_box(element, content_type)
@@ -86,7 +91,6 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
                     if text := str(data_name).strip():
                         yield text
 
-                # 从 DOM 树移除该节点及其所有子节点，后续遍历不会再碰到
                 element.decompose()
                 continue
 
@@ -106,11 +110,12 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
                     yield Creator.image(url=src)
 
         elif isinstance(element, NavigableString):
-            if text := str(element).strip():
-                yield f"{text}\n"
+            text = str(element)
+            if text.strip():
+                yield text
 
 
-async def _parse_video_box(tag: Tag, content_type: str) -> MediaContent | None:
+async def _parse_video_box(tag: Tag, content_type: str):
     """
     解析知乎 <a class="video-box">，根据 data-lens-id 拉取视频信息
     """
