@@ -240,8 +240,8 @@ class BrowserManager:
         logger.info("Closing browser launched by Parser Lite")
         try:
             cls.BROWSER.quit(del_data=True)
-        except Exception as e:
-            logger.warning(f"Error while quitting browser: {e}")
+        except Exception:
+            logger.exception("Error while quitting browser")
         finally:
             cls.BROWSER = None
             cls._last_used = None
