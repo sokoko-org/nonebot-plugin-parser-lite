@@ -20,6 +20,10 @@ driver = get_driver()
 class BrowserManager:
     BROWSER: Chromium | None = None
     _init_lock: asyncio.Lock = asyncio.Lock()
+    _last_used: float | None = None
+    _idle_timeout: float = 60 * 30
+    """浏览器空闲超时时间(s)"""
+    _idle_task: asyncio.Task[None] | None = None
 
     @staticmethod
     async def _find_browser_from_system() -> str:
@@ -92,7 +96,6 @@ class BrowserManager:
 
             for exe_path in exe_candidates:
                 if await exe_path.is_file():
-                    # 返回绝对路径，避免相对路径带来的工作目录依赖
                     return str(await exe_path.resolve())
 
         return ""
@@ -153,6 +156,29 @@ class BrowserManager:
         raise RuntimeError("无法找到可启动的浏览器，请在配置中设置 browser_path")
 
     @classmethod
+    def _touch(cls) -> None:
+        """更新最近使用时间戳"""
+        cls._last_used = asyncio.get_event_loop().time()
+
+    @classmethod
+    async def _idle_watcher(cls) -> None:
+        """后台协程：浏览器长时间空闲时自动关闭以节省资源"""
+        try:
+            while cls.BROWSER is not None:
+                await asyncio.sleep(cls._idle_timeout / 2)
+                if cls.BROWSER is None or cls._last_used is None:
+                    continue
+                now = asyncio.get_event_loop().time()
+                if now - cls._last_used > cls._idle_timeout:
+                    logger.info(
+                        f"Browser idle for {int(now - cls._last_used)}s, auto quitting."
+                    )
+                    cls.quit()
+                    break
+        finally:
+            cls._idle_task = None
+
+    @classmethod
     async def start(cls):
         if cls.BROWSER is not None:
             return
@@ -175,6 +201,8 @@ class BrowserManager:
         co.remove_extensions()
         co.set_browser_path(browser_path)
         cls.BROWSER = Chromium(co)
+        cls._touch()
+        cls._idle_task = asyncio.create_task(cls._idle_watcher())
 
     @classmethod
     def reconnect(cls):
@@ -192,6 +220,7 @@ class BrowserManager:
     async def ensure_started(cls) -> None:
         """确保浏览器已启动，若未启动则启动（惰性初始化）"""
         if cls.BROWSER is not None:
+            cls._touch()
             return
         async with cls._init_lock:
             if cls.BROWSER is None:
@@ -201,6 +230,7 @@ class BrowserManager:
     async def new_tab(cls, *args, **kwargs):
         await cls.ensure_started()
         assert cls.BROWSER
+        cls._touch()
         return cls.BROWSER.new_tab(*args, **kwargs)
 
     @classmethod
@@ -208,7 +238,16 @@ class BrowserManager:
         if cls.BROWSER is None:
             return
         logger.info("Closing browser launched by Parser Lite")
-        cls.BROWSER.quit(del_data=True)
+        try:
+            cls.BROWSER.quit(del_data=True)
+        except Exception as e:
+            logger.warning(f"Error while quitting browser: {e}")
+        finally:
+            cls.BROWSER = None
+            cls._last_used = None
+            if cls._idle_task is not None:
+                cls._idle_task.cancel()
+                cls._idle_task = None
 
 
 @driver.on_shutdown
