@@ -1,4 +1,3 @@
-import asyncio
 import traceback
 
 from nonebot import logger, require
@@ -10,15 +9,12 @@ require("nonebot_plugin_htmlrender")
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_localstore")
 
-import time
-
-from anyio import Path
 from nonebot_plugin_apscheduler import scheduler
 
-from .config import Config, pconfig
+from .cache import CacheManager
+from .config import Config
 from .matchers import clear_result_cache
 from .utils.browser import BrowserManager
-from .utils.common import safe_unlink
 
 __plugin_meta__ = PluginMetadata(
     name="链接分享解析 Lite 版",
@@ -44,41 +40,7 @@ async def clean_plugin_cache() -> None:
     """周期性清理过期缓存文件，并重置解析状态。"""
 
     try:
-        # 保留最近 N 小时内的缓存，默认 1 小时
-        reserve_hours: int = 1
-        now = time.time()
-
-        if all_files := [
-            f async for f in pconfig.cache_dir.iterdir() if await f.is_file()
-        ]:
-            to_delete: list[Path] = []
-            expire_seconds = reserve_hours * 60 * 60
-            for f in all_files:
-                try:
-                    mtime = (await f.stat()).st_mtime
-                except OSError:
-                    # 拿不到 stat 就直接尝试删除
-                    to_delete.append(f)
-                    continue
-
-                if now - mtime >= expire_seconds:
-                    to_delete.append(f)
-
-            if not to_delete:
-                logger.info(
-                    f"缓存文件共 {len(all_files)} 个，"
-                    f"无早于 {reserve_hours} 小时的文件，本次跳过清理"
-                )
-            else:
-                tasks = [safe_unlink(file) for file in to_delete]
-                await asyncio.gather(*tasks)
-                logger.success(
-                    f"已清理 {len(to_delete)} 个过期缓存文件，"
-                    f"保留 {len(all_files) - len(to_delete)} 个"
-                )
-
-        else:
-            logger.info("未找到需要清理的缓存文件")
+        await CacheManager.clean_expired()
     except Exception:
         logger.exception(f"清理缓存文件时发生异常: {traceback.format_exc()}")
 

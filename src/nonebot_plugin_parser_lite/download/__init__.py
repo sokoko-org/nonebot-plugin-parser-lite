@@ -19,6 +19,7 @@ from rich.progress import (
     TransferSpeedColumn,
 )
 
+from ..cache import CacheManager
 from ..config import pconfig
 from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
@@ -34,6 +35,7 @@ class StreamDownloader:
         self.headers: dict[str, str] = COMMON_HEADER.copy()
         self.cache_dir: Path = pconfig.cache_dir
         self.client: AsyncClient = AsyncClient(timeout=DOWNLOAD_TIMEOUT, verify=False)
+        self._active_downloads: dict[str, asyncio.Task[None]] = {}
         self._ffmpeg_available: bool | None = None
 
     async def aclose(self) -> None:
@@ -94,11 +96,13 @@ class StreamDownloader:
         url: str,
         file_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
+        cache_type: str = CacheManager.MEDIA,
     ) -> Path:
         """
         :param url: 下载文件的链接地址
         :param file_name: 保存到本地的文件名，为空时根据 url 自动生成
         :param ext_headers: 额外的请求头，会与默认请求头合并
+        :param cache_type: 缓存类型
 
         :return: 下载完成后的本地文件路径
         :raise ZeroSizeException: 资源大小为 0 时抛出
@@ -106,20 +110,37 @@ class StreamDownloader:
         :raise DownloadException: 重试多次仍失败时抛出
         """
         file_name = make_filename(file_name) if file_name else generate_file_name(url)
-        file_path = self.cache_dir / file_name
+        cache_dir = await CacheManager.ensure_dir(cache_type)
+        file_path = cache_dir / file_name
 
         # 已有缓存文件，直接返回
         if await file_path.exists():
             return file_path
 
         headers = {**self.headers, **(ext_headers or {})}
+        download_key = str(file_path)
+        active_download = self._active_downloads.get(download_key)
+        if active_download is not None:
+            await active_download
+            return file_path
 
-        await self._download_with_stream(
-            url=url,
-            file_path=file_path,
-            headers=headers,
-            desc=file_name,
+        download_task = asyncio.create_task(
+            self._download_with_stream(
+                url=url,
+                file_path=file_path,
+                headers=headers,
+                desc=file_name,
+            )
         )
+        self._active_downloads[download_key] = download_task
+        try:
+            await download_task
+        except Exception:
+            await safe_unlink(file_path)
+            raise
+        finally:
+            if self._active_downloads.get(download_key) is download_task:
+                self._active_downloads.pop(download_key, None)
         return file_path
 
     async def _download_with_stream(
@@ -208,6 +229,7 @@ class StreamDownloader:
         url: str,
         video_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
+        cache_type: str = CacheManager.MEDIA,
     ) -> Path:
         """
         下载普通视频
@@ -215,6 +237,7 @@ class StreamDownloader:
         :param url: 视频下载地址
         :param video_name: 保存到本地的视频文件名，为空时根据 url 自动生成 mp4 文件名
         :param ext_headers: 额外的请求头，会与默认请求头合并
+        :param cache_type: 缓存类型
 
         :return: 下载完成后的视频文件路径
         :raise ZeroSizeException: 资源大小为 0 时抛出
@@ -225,7 +248,10 @@ class StreamDownloader:
             video_name = generate_file_name(url, ".mp4")
 
         return await self.streamd(
-            url=url, file_name=video_name, ext_headers=ext_headers
+            url=url,
+            file_name=video_name,
+            ext_headers=ext_headers,
+            cache_type=cache_type,
         )
 
     @auto_task
@@ -235,6 +261,7 @@ class StreamDownloader:
         url: str,
         video_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
+        cache_type: str = CacheManager.MEDIA,
     ) -> Path:
         """
         下载 m3u8 视频并合并到 mp4
@@ -242,6 +269,7 @@ class StreamDownloader:
         :param m3u8_url: m3u8 播放列表链接地址
         :param video_name: 输出的 mp4 文件名，为空时根据 m3u8 链接生成
         :param ext_headers: 额外的请求头，会与默认请求头合并
+        :param cache_type: 缓存类型
 
         :return: 最终合并并转封装后的 mp4 文件路径
         :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
@@ -252,8 +280,9 @@ class StreamDownloader:
         if video_name is None:
             video_name = f"{file_id}.mp4"
 
-        final_video_path = self.cache_dir / video_name
-        temp_ts_path = self.cache_dir / f"{file_id}_temp.ts"
+        cache_dir = await CacheManager.ensure_dir(cache_type)
+        final_video_path = cache_dir / video_name
+        temp_ts_path = cache_dir / f"{file_id}_temp.ts"
 
         if await final_video_path.exists():
             return final_video_path
@@ -520,12 +549,14 @@ class StreamDownloader:
         url: str,
         audio_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
+        cache_type: str = CacheManager.MEDIA,
     ) -> Path:
         """
         下载音频
         :param url: 音频下载地址
         :param audio_name: 保存到本地的音频文件名，为空时根据 url 自动生成 mp3 文件名
         :param ext_headers: 额外的请求头，会与默认请求头合并
+        :param cache_type: 缓存类型
 
         :return: 下载完成后的音频文件路径
         :raise DownloadException: 下载过程中发生错误时抛出
@@ -533,7 +564,10 @@ class StreamDownloader:
         if audio_name is None:
             audio_name = generate_file_name(url, ".mp3")
         return await self.streamd(
-            url=url, file_name=audio_name, ext_headers=ext_headers
+            url=url,
+            file_name=audio_name,
+            ext_headers=ext_headers,
+            cache_type=cache_type,
         )
 
     @auto_task
@@ -543,6 +577,7 @@ class StreamDownloader:
         url: str,
         img_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
+        cache_type: str = CacheManager.MEDIA,
     ) -> Path:
         """
         下载图片
@@ -550,13 +585,19 @@ class StreamDownloader:
         :param url: 图片下载地址
         :param img_name: 保存到本地的图片文件名，为空时根据 url 自动生成 jpg 文件名
         :param ext_headers: 额外的请求头，会与默认请求头合并
+        :param cache_type: 缓存类型
 
         :return: 下载完成后的图片文件路径
         :raise DownloadException: 下载过程中发生错误时抛出
         """
         if img_name is None:
             img_name = generate_file_name(url, ".jpg")
-        return await self.streamd(url=url, file_name=img_name, ext_headers=ext_headers)
+        return await self.streamd(
+            url=url,
+            file_name=img_name,
+            ext_headers=ext_headers,
+            cache_type=cache_type,
+        )
 
     async def download_av_and_merge(
         self,

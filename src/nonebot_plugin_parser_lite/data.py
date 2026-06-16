@@ -7,6 +7,7 @@ from typing import Any, Literal, TypedDict
 
 from anyio import Path
 
+from .cache import CacheManager
 from .constants import STICKER_CDN
 from .download import DOWNLOADER
 from .download.task import DownloadTaskWrapper
@@ -174,6 +175,7 @@ class Platform:
         return await DOWNLOADER.download_img(
             url=STICKER_CDN.format(platform="logo", name=self.name),
             img_name=f"{self.name}.webp",
+            cache_type=CacheManager.LOGO,
         )
 
 
@@ -287,7 +289,7 @@ class ParseResult:
         for cont in self.content:
             if isinstance(cont, VideoContent):
                 return await cont.get_cover_path()
-            elif isinstance(cont, (ImageContent, GraphicContent)):
+            elif isinstance(cont, ImageContent | GraphicContent):
                 return await cont.get_path()
         return None
 
