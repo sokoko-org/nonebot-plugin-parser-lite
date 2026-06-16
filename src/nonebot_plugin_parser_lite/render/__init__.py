@@ -280,7 +280,7 @@ class Renderer:
         :raise DurationLimitException: 媒体时长超过配置的最大限制时抛出
         :raise DownloadException: 重试多次仍失败时抛出
         """
-        if not isinstance(cont, VideoContent | AudioContent):
+        if not isinstance(cont, (VideoContent, AudioContent)):
             return
         if cont.duration > pconfig.duration_maximum:
             raise DurationLimitException(cont.duration)
