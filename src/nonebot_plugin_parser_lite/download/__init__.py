@@ -113,7 +113,6 @@ class StreamDownloader:
         cache_dir = await CacheManager.ensure_dir(cache_type)
         file_path = cache_dir / file_name
 
-        # 已有缓存文件，直接返回
         if await file_path.exists():
             return file_path
 
@@ -124,15 +123,19 @@ class StreamDownloader:
             await active_download
             return file_path
 
-        download_task = asyncio.create_task(
-            self._download_with_stream(
+        async def _download_task() -> None:
+            if await file_path.exists():
+                return
+            await self._download_with_stream(
                 url=url,
                 file_path=file_path,
                 headers=headers,
                 desc=file_name,
             )
-        )
+
+        download_task = asyncio.create_task(_download_task())
         self._active_downloads[download_key] = download_task
+
         try:
             await download_task
         except Exception:
@@ -141,6 +144,7 @@ class StreamDownloader:
         finally:
             if self._active_downloads.get(download_key) is download_task:
                 self._active_downloads.pop(download_key, None)
+
         return file_path
 
     async def _download_with_stream(
