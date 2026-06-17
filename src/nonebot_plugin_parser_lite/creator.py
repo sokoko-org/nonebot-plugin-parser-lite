@@ -3,6 +3,7 @@ from typing import Any, Literal, Protocol, TypeVar, runtime_checkable
 
 from anyio import Path
 
+from .cache import CacheManager
 from .config import pconfig as pconfig
 from .data import (
     AudioContent,
@@ -253,7 +254,11 @@ class Creator:
         :param ext_headers: 额外请求头
         """
 
-        image_task = DOWNLOADER.download_img(url=url, ext_headers=ext_headers)
+        image_task = DOWNLOADER.download_img(
+            url=url,
+            ext_headers=ext_headers,
+            cache_type=CacheManager.STICKER,
+        )
         return StickerContent(path_task=image_task, size=size, desc=desc)
 
     @staticmethod

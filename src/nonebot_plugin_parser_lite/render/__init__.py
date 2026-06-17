@@ -12,6 +12,7 @@ from nonebot import logger
 from nonebot_plugin_htmlrender import template_to_pic
 import qrcode
 
+from ..cache import CacheManager
 from ..config import _nickname, pconfig
 from ..data import (
     AudioContent,
@@ -520,7 +521,8 @@ class Renderer:
         """
         cache_key = result.url
         file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.jpeg"
-        image_path = pconfig.cache_dir / file_name
+        cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
+        image_path = cache_dir / file_name
         if await image_path.exists():
             result.render_image = image_path
         else:

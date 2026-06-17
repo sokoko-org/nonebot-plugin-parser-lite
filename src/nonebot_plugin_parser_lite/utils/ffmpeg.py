@@ -4,7 +4,7 @@ import hashlib
 from anyio import Path
 from nonebot import logger
 
-from ..config import pconfig
+from ..cache import CacheManager
 from .common import fmt_size
 
 
@@ -50,7 +50,8 @@ class FFmpeg:
         :param file_name: 输出文件名
         """
         file_name = file_name or cls.generate_file_name(v_path, a_path)
-        output_path = pconfig.cache_dir / f"{file_name}.mp4"
+        cache_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+        output_path = cache_dir / f"{file_name}.mp4"
         if await output_path.exists():
             return output_path
         logger.info(f"Merging {v_path.name} and {a_path.name} to {output_path.name}")
@@ -99,7 +100,8 @@ class FFmpeg:
         :param file_name: 输出文件名
         """
         file_name = file_name or cls.generate_file_name(image_path, video_path)
-        output_path = pconfig.cache_dir / f"{file_name}.mp4"
+        cache_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+        output_path = cache_dir / f"{file_name}.mp4"
         if await output_path.exists():
             return output_path
         # 2. 构建指令：单进程一次性完成
@@ -179,7 +181,8 @@ class FFmpeg:
         :return: 转码后的 mp3 文件路径
         """
         file_name = file_name or cls.generate_file_name(audio_path)
-        output_path = pconfig.cache_dir / f"{file_name}.mp3"
+        cache_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+        output_path = cache_dir / f"{file_name}.mp3"
 
         if await output_path.exists():
             return output_path
