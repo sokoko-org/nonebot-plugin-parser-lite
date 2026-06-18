@@ -16,7 +16,7 @@ class CachePolicy:
     """缓存目录策略。ttl_seconds 为 None 时默认不清理。"""
 
     subdir: str
-    ttl_seconds: int | None
+    ttl_seconds: int
 
 
 class CacheManager:
@@ -31,12 +31,9 @@ class CacheManager:
     _POLICIES: ClassVar[dict[str, CachePolicy]] = {
         MEDIA: CachePolicy("media", 60 * 60),
         RENDER: CachePolicy("render", 60 * 60),
-        LOGO: CachePolicy("logo", None),
-        STICKER: CachePolicy("sticker", 60 * 60 * 24 * 14),
+        LOGO: CachePolicy("logo", 60 * 60 * 24 * 30),
+        STICKER: CachePolicy("sticker", 60 * 60 * 24 * 15),
         LEGACY: CachePolicy("", 60 * 60),
-    }
-    _MANAGED_DIRS: ClassVar[set[str]] = {
-        policy.subdir for policy in _POLICIES.values() if policy.subdir
     }
 
     @classmethod
@@ -66,9 +63,6 @@ class CacheManager:
         cls, cache_type: str, now: float
     ) -> tuple[int, list[Path]]:
         policy = cls._POLICIES[cache_type]
-        if policy.ttl_seconds is None:
-            return 0, []
-
         cache_dir = cls.cache_dir(cache_type)
         total = 0
         expired: list[Path] = []
@@ -87,7 +81,6 @@ class CacheManager:
     @classmethod
     async def _collect_legacy_expired_files(cls, now: float) -> tuple[int, list[Path]]:
         policy = cls._POLICIES[cls.LEGACY]
-        assert policy.ttl_seconds is not None
 
         total = 0
         expired: list[Path] = []
