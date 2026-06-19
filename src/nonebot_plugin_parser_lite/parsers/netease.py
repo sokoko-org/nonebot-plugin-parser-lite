@@ -107,10 +107,13 @@ class NCMParser(BaseParser):
             "data": encrypted,
         }
         resp = await self.httpx.post(endpoint, json=body)
+        resp.raise_for_status()
         result = resp.json()
+        if result.get("code") != 200:
+            raise ParseException(f"接口返回错误: {result}")
         if ciphertext := result.get("ciphertext"):
-            return _decrypt(ciphertext, session["key"])
-        return result
+            return _decrypt(ciphertext, session["key"])["data"]
+        return result["data"]
 
     @handle("163cn.tv", r"https?://[^\s]*?163cn\.tv/[a-zA-Z0-9]+")
     async def _parse_163cn(self, searched: MatchWithParams):
@@ -120,23 +123,14 @@ class NCMParser(BaseParser):
     @handle("music.163.com", r"song/(?P<id>\d+)")
     async def _parse_netease(self, searched: MatchWithParams):
         ncm_id = searched["id"]
-        info = await self.fetch("getSongInfo", {"id": ncm_id})
-        if info.get("code") != 200:
-            raise ParseException(f"歌曲信息接口错误: {info}")
-        song = info["data"]
+        song = await self.fetch("getSongInfo", {"id": ncm_id})
         title = song.get("name", "未知")
         artist = song.get("singer", "未知歌手")
         duration = parse_duration_to_seconds(song.get("duration", "0"))
         lyric = ""
         with contextlib.suppress(Exception):
-            lyric_resp = await self.fetch("getSongLyric", {"id": ncm_id})
-            if lyric_resp.get("code") == 200:
-                lyric = lyric_resp["data"].get("lrc", "")
-        url_resp = await self.fetch("getSongUrl", {"id": ncm_id, "level": "standard"})
-        if url_resp.get("code") != 200:
-            raise ParseException(str(url_resp))
-
-        url_data = url_resp["data"]
+            lyric = (await self.fetch("getSongLyric", {"id": ncm_id})).get("lrc")
+        url_data = await self.fetch("getSongUrl", {"id": ncm_id, "level": "standard"})
         if not (audio_url := url_data.get("url")):
             raise ParseException("无法获取音频下载地址")
         url_no_params = audio_url.split("?", 1)[0]
@@ -144,7 +138,7 @@ class NCMParser(BaseParser):
         audio_type = ext if ext in {"flac", "wav", "m4a", "aac", "mp3"} else "mp3"
         contents: list[MediaContent] = []
 
-        audio_name = f"{title}-{artist}.{ext}"
+        audio_name = f"{title}-{artist}.{audio_type}"
         audio = self.create_audio(
             audio_url,
             duration=duration,
