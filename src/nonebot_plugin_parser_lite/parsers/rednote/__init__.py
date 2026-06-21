@@ -10,7 +10,7 @@ from ..base import (
     PlatformEnum,
     handle,
 )
-from .discovery import decoder as discoryDecoder
+from .discovery import decoder as discoveryDecoder
 
 INITIAL_STATE = re.compile(
     pattern=r"window\.__INITIAL_STATE__=(.*?)</script>",
@@ -65,7 +65,7 @@ class RedNoteParser(BaseParser):
             raw = matched[1].replace("undefined", "null")
         else:
             raise ParseException("小红书分享链接失效或内容已删除")
-        init_state = discoryDecoder.decode(raw)
+        init_state = discoveryDecoder.decode(raw)
         note_detail = init_state.noteData.data.noteData
         comment_data = init_state.noteData.data.commentData
         author = self.create_author(
