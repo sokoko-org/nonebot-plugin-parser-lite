@@ -228,7 +228,7 @@ class Comment:
     """发布时间戳，单位秒"""
     stats: Stats = field(default_factory=Stats)
     """统计信息"""
-    replies: list["Comment"] = field(default_factory=list)
+    replies: list[Comment] = field(default_factory=list)
     """子评论列表"""
     parent_author: Author | None = None
     """父评论作者，用于渲染“回复 @xxx”，可选"""

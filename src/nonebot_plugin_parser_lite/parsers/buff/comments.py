@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from msgspec import Struct, field
 
 from ...creator import Creator
@@ -23,7 +25,7 @@ class Comment(Struct):
     message: str
     pictures: list[Picture]
     ups_num: int
-    replies: list["Comment"] = field(default_factory=list)
+    replies: list[Comment] = field(default_factory=list)
 
     @property
     def content(self) -> list[MediaContent | str]:

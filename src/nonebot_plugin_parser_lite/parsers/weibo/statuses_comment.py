@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 import re
 
@@ -52,7 +54,7 @@ class StatusesComment(Struct):
     user: User
     like_count: int = 0
     pic_infos: dict[str, Pic] | None = None
-    comments: list["StatusesComment"] | bool = field(default_factory=list)
+    comments: list[StatusesComment] | bool = field(default_factory=list)
 
     @property
     def replies(self):
