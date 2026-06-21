@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from msgspec import Struct, field
@@ -194,7 +196,7 @@ class Comment(Struct):
     text: str = field(name="content")
     ipLocation: str = ""
     pictures: list[CommentImage] = field(default_factory=list)
-    subComments: list["Comment"] = field(default_factory=list)
+    subComments: list[Comment] = field(default_factory=list)
 
     @property
     def content(self) -> list[MediaContent | str]:
