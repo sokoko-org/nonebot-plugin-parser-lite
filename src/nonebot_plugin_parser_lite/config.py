@@ -9,8 +9,6 @@ from .constants import BiliVideoCodecs, BiliVideoQuality, PlatformEnum
 class Config(BaseModel):
     plite_bili_ck: str | None = None
     """bilibili cookies"""
-    plite_xhs_ck: str | None = None
-    """小红书 cookies"""
     plite_ks_ck: str | None = None
     """快手 cookies(无需登录态)"""
     plite_need_upload: bool = False
@@ -110,11 +108,6 @@ class Config(BaseModel):
     def bili_ck(self) -> str | None:
         """bilibili cookies"""
         return self.plite_bili_ck
-
-    @property
-    def xhs_ck(self) -> str | None:
-        """小红书 cookies"""
-        return self.plite_xhs_ck
 
     @property
     def ks_ck(self) -> str | None:

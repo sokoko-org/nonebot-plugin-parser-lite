@@ -1,8 +1,7 @@
 import re
 from typing import ClassVar
 
-from ...utils.cookie import ck2dict
-from ...utils.format import replace_placeholder_to_sticker
+from ...data import Comment
 from ..base import (
     BaseParser,
     MatchWithParams,
@@ -10,10 +9,8 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
-    pconfig,
 )
-from .explore import REDNOTE_PATTERN, NoteDetailMap
-from .explore import decoder as exploreDecoder
+from .discovery import decoder as discoryDecoder
 
 INITIAL_STATE = re.compile(
     pattern=r"window\.__INITIAL_STATE__=(.*?)</script>",
@@ -22,12 +19,9 @@ INITIAL_STATE = re.compile(
 
 
 class RedNoteParser(BaseParser):
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.REDNOTE, display_name="小红书"
     )
-    # 小红书笔记详情页对真实浏览器仍有速率限制，达到限制后需要时间恢复
-    # 暂时不知ck能否缓解此问题
 
     def __init__(self):
         super().__init__()
@@ -46,7 +40,8 @@ class RedNoteParser(BaseParser):
         url = f"https://{searched.url}"
         return await self.parse_with_redirect(url, self.ios_headers)
 
-    # https://www.xiaohongshu.com/explore/691e68a8000000001e02bcda?xsec_token=CBwYRkYkdf7BHsEy2bVC9-ZYDHXJDjIRl6QI8xzqm-gEg
+    # https://www.xiaohongshu.com/explore/6a33df40000000001101fce5?xsec_token=ABoRHhYoIhXV24zUz64kWg8vu6u8D4zLUjIFRBf8fcf54=
+    # https://www.xiaohongshu.com/explore/6a355d090000000021018c66?xsec_token=CBC_w7YSZbQP_uKutDlmX7iqXuEzWJJ8x8_nfNNfFWoHU=
     @handle(
         "xiaohongshu.com",
         r"(?P<type>explore|search_result|discovery/item)/(?P<note_id>[0-9a-zA-Z]+)",
@@ -57,12 +52,11 @@ class RedNoteParser(BaseParser):
         note_id = searched["note_id"]
         xsec_token = searched["xsec_token"]
 
-        url = f"https://www.xiaohongshu.com/explore/{note_id}?xsec_token={xsec_token}&xsec_source=pc_share"
+        url = f"https://www.xiaohongshu.com/discovery/item/{note_id}?xsec_token={xsec_token}&xsec_source=pc_share"
 
         response = await self.httpx.get(
             url,
-            headers=self.headers,
-            cookies=ck2dict(pconfig.xhs_ck) if pconfig.xhs_ck else None,
+            headers=self.ios_headers,
         )
         response.raise_for_status()
         html = response.text
@@ -71,24 +65,44 @@ class RedNoteParser(BaseParser):
             raw = matched[1].replace("undefined", "null")
         else:
             raise ParseException("小红书分享链接失效或内容已删除")
-        init_state = exploreDecoder.decode(raw)
-        note_data = init_state.note.noteDetailMap[init_state.note.currentNoteId]
-
-        return self._build_result(note_data)
-
-    def _build_result(self, note_data: NoteDetailMap):
-        """从 note_data 构建最终解析结果"""
-        note_detail = note_data.note
-
-        contents = replace_placeholder_to_sticker(
-            note_detail.desc, REDNOTE_PATTERN, "rednote"
-        )
-        contents.extend(note_detail.medias)
-
+        init_state = discoryDecoder.decode(raw)
+        note_detail = init_state.noteData.data.noteData
+        comment_data = init_state.noteData.data.commentData
         author = self.create_author(
             name=note_detail.nickname,
             avatar_url=note_detail.avatar_url,
         )
+        comment_list: list[Comment] = []
+
+        for c in comment_data.comments:
+            comment = self.create_comment(
+                author=self.create_author(
+                    name=c.user.nickname, avatar_url=c.user.image, location=c.ipLocation
+                ),
+                content=c.content,
+                timestamp=c.time // 1000,
+                stats=self.create_stats(
+                    like_count=c.likeViewCount,
+                    comment_count=str(len(c.subComments)),
+                ),
+            )
+
+            for sub in c.subComments:
+                comment.replies.append(
+                    self.create_comment(
+                        author=self.create_author(
+                            name=sub.user.nickname,
+                            avatar_url=sub.user.image,
+                        ),
+                        content=sub.content,
+                        timestamp=sub.time // 1000,
+                        stats=self.create_stats(
+                            like_count=sub.likeViewCount,
+                        ),
+                    )
+                )
+
+            comment_list.append(comment)
 
         return self.result(
             title=note_detail.title,
@@ -99,7 +113,8 @@ class RedNoteParser(BaseParser):
                 share_count=note_detail.interactInfo.shareCount,
                 collect_count=note_detail.interactInfo.collectedCount,
             ),
-            content=contents,
+            comments=comment_list,
+            content=note_detail.content,
             timestamp=note_detail.lastUpdateTime // 1000,
-            url=f"https://www.xiaohongshu.com/discovery/item/{note_detail.noteId}?xsec_token={note_detail.xsecToken}",
+            url=url,
         )
