@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 import re
 
@@ -50,7 +52,7 @@ class TvComment(Struct):
     user: User
     like_counts: int = 0
     pic_infos: dict[str, Pic] | None = None
-    comments: list["TvComment"] = field(default_factory=list)
+    comments: list[TvComment] = field(default_factory=list)
 
     @property
     def content(self):
