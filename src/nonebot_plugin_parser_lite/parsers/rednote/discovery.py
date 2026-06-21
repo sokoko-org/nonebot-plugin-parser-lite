@@ -64,7 +64,7 @@ class VideoImage(Struct):
     @property
     def url(self) -> str:
         """视频封面无水印直链"""
-        return f"http://ci.xiaohongshu.com/{self.firstFrameFileid}?imageView2/2/w/1080/format/jpg"
+        return f"https://ci.xiaohongshu.com/{self.firstFrameFileid}?imageView2/2/w/1080/format/jpg"
 
 
 class Video(Struct):
@@ -76,7 +76,7 @@ class Video(Struct):
     @property
     def url(self) -> str:
         """主视频直链"""
-        return f"https://sns-video-bd.xhscdn.com/{self.consumer.originVideoKey}"
+        return f"httpss://sns-video-bd.xhscdn.com/{self.consumer.originVideoKey}"
 
 
 class Image(Struct):
@@ -89,7 +89,7 @@ class Image(Struct):
     @property
     def url(self) -> str:
         """图片无水印直链"""
-        return f"http://ci.xiaohongshu.com/{self.fileId}?imageView2/2/w/1080/format/jpg"
+        return f"https://ci.xiaohongshu.com/{self.fileId}?imageView2/2/w/1080/format/jpg"
 
 
 class CommentImage(Struct):
