@@ -19,6 +19,7 @@ from .sign import sign_zhihu_fetch_request
 
 T = TypeVar("T")
 
+
 class ZhiHuParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.ZHIHU, display_name="知乎"
@@ -101,6 +102,33 @@ class ZhiHuParser(BaseParser):
             f"https://www.zhihu.com/api/v4/questions/{question_id}?include=read_count,visit_count,answer_count,voteup_count,comment_count,follower_count,detail,excerpt,author,relationship.is_following,topics",
             questionDecoder,
         )
+
+        try:
+            comment_data = await self.fetch(
+                f"https://www.zhihu.com/api/v4/comment_v5/questions/{question_id}/root_comment?order_by=score&limit=20",
+                rootCommentDecoder,
+                {"Referer": f"https://www.zhihu.com/question/{question_id}"},
+            )
+            comments = [
+                self.create_comment(
+                    author=self.create_author(
+                        name=c.author.name,
+                        avatar_url=c.author.avatar_url,
+                        id=c.author.url_token,
+                        location=c.ip_info,
+                    ),
+                    content=c.content,
+                    timestamp=c.created_time,
+                    stats=self.create_stats(
+                        like_count=format_num(c.like_count),
+                        comment_count=format_num(c.child_comment_count),
+                    ),
+                )
+                for c in comment_data.data
+            ]
+        except Exception as e:
+            logger.warning(f"知乎获取评论失败, {type(e)}:{e!r}")
+            comments = []
         return self.result(
             title=question_data.title,
             content=await question_data.get_content(),
@@ -120,6 +148,7 @@ class ZhiHuParser(BaseParser):
                     "follow": format_num(question_data.follower_count),
                 },
             ),
+            comments=comments,
         )
 
     async def fetch(
