@@ -1,0 +1,827 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "code": 0,
+    "model_result": {
+      "result_type": 2,
+      "summary": "小明借同学聚会之机试探昔日友情，揭露多年未联系的同学对他的冷漠，最终意外发现首富校友现身却遭拒接电话，众人补救后慷慨相助，反转中揭示小明曾偷窃手机等物品，最终众人合力搜查并调侃其行为，以幽默讽刺展现人性变化与社交现实。",
+      "outline": [
+        {
+          "title": "昔日好友今成现实反讽",
+          "part_outline": [
+            {
+              "timestamp": 25,
+              "content": "过去友情被现实利益冲淡，众人对小民态度转变"
+            },
+            {
+              "timestamp": 70,
+              "content": "小民回忆昔日互助往事，质问朋友是否仍守承诺"
+            },
+            {
+              "timestamp": 128,
+              "content": "同学分化为不同圈层，首富校友社交成为新目标"
+            }
+          ],
+          "timestamp": 1
+        },
+        {
+          "title": "昔日好友反目成仇劫财",
+          "part_outline": [
+            {
+              "timestamp": 206,
+              "content": "小明借故试探旧友，揭露昔日轻视者的虚伪与变化"
+            },
+            {
+              "timestamp": 237,
+              "content": "众人慷慨解囊助小明，反衬其过往对朋友的冷落与算计"
+            },
+            {
+              "timestamp": 318,
+              "content": "小明失窃手机被追责，揭示其贪婪本性与同伙关系破裂"
+            }
+          ],
+          "timestamp": 168
+        }
+      ],
+      "subtitle": [
+        {
+          "title": "",
+          "part_subtitle": [
+            {
+              "start_timestamp": 0,
+              "end_timestamp": 2,
+              "content": "今天我想跟大家借点钱"
+            },
+            {
+              "start_timestamp": 3,
+              "end_timestamp": 4,
+              "content": "我最近创业"
+            },
+            {
+              "start_timestamp": 4,
+              "end_timestamp": 9,
+              "content": "手头上还差点借着同学聚会跟大家开这个口"
+            },
+            {
+              "start_timestamp": 12,
+              "end_timestamp": 14,
+              "content": "这不是大家朋友一场"
+            },
+            {
+              "start_timestamp": 14,
+              "end_timestamp": 15,
+              "content": "能不能帮帮我"
+            },
+            {
+              "start_timestamp": 15,
+              "end_timestamp": 17,
+              "content": "本来今天是我们几个聚"
+            },
+            {
+              "start_timestamp": 17,
+              "end_timestamp": 19,
+              "content": "是你自己在门口看见了"
+            },
+            {
+              "start_timestamp": 19,
+              "end_timestamp": 20,
+              "content": "要进来进来了"
+            },
+            {
+              "start_timestamp": 20,
+              "end_timestamp": 22,
+              "content": "开口就要借钱"
+            },
+            {
+              "start_timestamp": 22,
+              "end_timestamp": 23,
+              "content": "太扫兴了"
+            },
+            {
+              "start_timestamp": 23,
+              "end_timestamp": 23,
+              "content": "黄先生"
+            },
+            {
+              "start_timestamp": 23,
+              "end_timestamp": 25,
+              "content": "你们几个聚也不喊我呀"
+            },
+            {
+              "start_timestamp": 25,
+              "end_timestamp": 29,
+              "content": "现在也不愿意借我钱上学"
+            },
+            {
+              "start_timestamp": 29,
+              "end_timestamp": 30,
+              "content": "那会儿就我们几个关系玩的最好"
+            },
+            {
+              "start_timestamp": 30,
+              "end_timestamp": 33,
+              "content": "那现在呢你们还拿我当朋友吗"
+            },
+            {
+              "start_timestamp": 33,
+              "end_timestamp": 36,
+              "content": "小民这些年不也联系不上你吗"
+            },
+            {
+              "start_timestamp": 36,
+              "end_timestamp": 39,
+              "content": "而且今天咱们去是有正事"
+            },
+            {
+              "start_timestamp": 39,
+              "end_timestamp": 40,
+              "content": "要见一个大人物"
+            },
+            {
+              "start_timestamp": 40,
+              "end_timestamp": 43,
+              "content": "这时候说借钱不合适吧"
+            },
+            {
+              "start_timestamp": 43,
+              "end_timestamp": 45,
+              "content": "不合适"
+            },
+            {
+              "start_timestamp": 45,
+              "end_timestamp": 47,
+              "content": "上学那会儿我对你们不薄吧"
+            },
+            {
+              "start_timestamp": 47,
+              "end_timestamp": 49,
+              "content": "那么你阑尾炎犯了"
+            },
+            {
+              "start_timestamp": 49,
+              "end_timestamp": 50,
+              "content": "我背你去的医院"
+            },
+            {
+              "start_timestamp": 50,
+              "end_timestamp": 52,
+              "content": "还有你从来不去上课"
+            },
+            {
+              "start_timestamp": 52,
+              "end_timestamp": 53,
+              "content": "我帮你答了多少次道"
+            },
+            {
+              "start_timestamp": 53,
+              "end_timestamp": 55,
+              "content": "你在球场上跟人家发生冲突"
+            },
+            {
+              "start_timestamp": 55,
+              "end_timestamp": 56,
+              "content": "我都是第一个冲上去的"
+            },
+            {
+              "start_timestamp": 56,
+              "end_timestamp": 58,
+              "content": "这都多少年前的事了"
+            },
+            {
+              "start_timestamp": 63,
+              "end_timestamp": 67,
+              "content": "其实我就是想看看当年说做一辈子朋友的人"
+            },
+            {
+              "start_timestamp": 68,
+              "end_timestamp": 70,
+              "content": "现在都变成什么样了"
+            },
+            {
+              "start_timestamp": 70,
+              "end_timestamp": 73,
+              "content": "明儿我给你转了3万"
+            },
+            {
+              "start_timestamp": 73,
+              "end_timestamp": 76,
+              "content": "等月月寄账户到账3万元"
+            },
+            {
+              "start_timestamp": 76,
+              "end_timestamp": 78,
+              "content": "毕业的时候"
+            },
+            {
+              "start_timestamp": 78,
+              "end_timestamp": 79,
+              "content": "大家伙都说过"
+            },
+            {
+              "start_timestamp": 79,
+              "end_timestamp": 82,
+              "content": "我苟富贵勿相忘"
+            },
+            {
+              "start_timestamp": 82,
+              "end_timestamp": 83,
+              "content": "苟富贵勿相忘"
+            },
+            {
+              "start_timestamp": 84,
+              "end_timestamp": 87,
+              "content": "王哥谢谢你啊"
+            },
+            {
+              "start_timestamp": 87,
+              "end_timestamp": 88,
+              "content": "还好有你"
+            },
+            {
+              "start_timestamp": 88,
+              "end_timestamp": 90,
+              "content": "既然现在我也很难爱"
+            },
+            {
+              "start_timestamp": 95,
+              "end_timestamp": 99,
+              "content": "其他人我今天算是看透了"
+            },
+            {
+              "start_timestamp": 101,
+              "end_timestamp": 104,
+              "content": "就你们这样的还想见大人物"
+            },
+            {
+              "start_timestamp": 105,
+              "end_timestamp": 107,
+              "content": "大人物愿意认识你们吗"
+            },
+            {
+              "start_timestamp": 108,
+              "end_timestamp": 109,
+              "content": "怎么样"
+            },
+            {
+              "start_timestamp": 110,
+              "end_timestamp": 111,
+              "content": "蘑菇哥"
+            },
+            {
+              "start_timestamp": 111,
+              "end_timestamp": 112,
+              "content": "这些年小明都不知道在干嘛"
+            },
+            {
+              "start_timestamp": 112,
+              "end_timestamp": 115,
+              "content": "你那钱大概率是血本无归了算了"
+            },
+            {
+              "start_timestamp": 115,
+              "end_timestamp": 117,
+              "content": "同学一场"
+            },
+            {
+              "start_timestamp": 117,
+              "end_timestamp": 119,
+              "content": "就当为那几年的情谊买单了"
+            },
+            {
+              "start_timestamp": 119,
+              "end_timestamp": 121,
+              "content": "情谊我看也就那样吧"
+            },
+            {
+              "start_timestamp": 121,
+              "end_timestamp": 123,
+              "content": "我们那会一个宿舍的时候"
+            },
+            {
+              "start_timestamp": 123,
+              "end_timestamp": 124,
+              "content": "我就不太乐意跟他玩"
+            },
+            {
+              "start_timestamp": 124,
+              "end_timestamp": 125,
+              "content": "我那会儿鞋老丢"
+            },
+            {
+              "start_timestamp": 125,
+              "end_timestamp": 126,
+              "content": "我就怀疑是他干的"
+            },
+            {
+              "start_timestamp": 126,
+              "end_timestamp": 128,
+              "content": "其实也就上学的时候大家能平等一点"
+            },
+            {
+              "start_timestamp": 128,
+              "end_timestamp": 130,
+              "content": "这毕业了都要回到各自的圈层"
+            },
+            {
+              "start_timestamp": 130,
+              "end_timestamp": 131,
+              "content": "现在不多说"
+            },
+            {
+              "start_timestamp": 131,
+              "end_timestamp": 132,
+              "content": "向上社交"
+            },
+            {
+              "start_timestamp": 132,
+              "end_timestamp": 134,
+              "content": "就像咱们那个首富校友一"
+            },
+            {
+              "start_timestamp": 134,
+              "end_timestamp": 136,
+              "content": "这个首富可是男约啊"
+            },
+            {
+              "start_timestamp": 136,
+              "end_timestamp": 139,
+              "content": "我托了整整三层关系才加到了他的秘书"
+            },
+            {
+              "start_timestamp": 139,
+              "end_timestamp": 140,
+              "content": "因为是校友"
+            },
+            {
+              "start_timestamp": 140,
+              "end_timestamp": 142,
+              "content": "又弄到了他的私人号码"
+            },
+            {
+              "start_timestamp": 142,
+              "end_timestamp": 143,
+              "content": "一会儿他来了"
+            },
+            {
+              "start_timestamp": 143,
+              "end_timestamp": 144,
+              "content": "随便提醒我们几句"
+            },
+            {
+              "start_timestamp": 144,
+              "end_timestamp": 146,
+              "content": "大家日后一定飞黄腾达"
+            },
+            {
+              "start_timestamp": 146,
+              "end_timestamp": 147,
+              "content": "哈哈谢你啊"
+            },
+            {
+              "start_timestamp": 148,
+              "end_timestamp": 149,
+              "content": "本市最神秘的首富"
+            },
+            {
+              "start_timestamp": 149,
+              "end_timestamp": 153,
+              "content": "确定于今晚在06:30餐厅参加一场校友聚餐"
+            },
+            {
+              "start_timestamp": 153,
+              "end_timestamp": 155,
+              "content": "这也是他首次公开现身"
+            },
+            {
+              "start_timestamp": 155,
+              "end_timestamp": 157,
+              "content": "嘿嘿这都被人发现了诶"
+            },
+            {
+              "start_timestamp": 157,
+              "end_timestamp": 158,
+              "content": "但他怎么还没来啊"
+            },
+            {
+              "start_timestamp": 158,
+              "end_timestamp": 160,
+              "content": "这菜都快凉了"
+            },
+            {
+              "start_timestamp": 160,
+              "end_timestamp": 161,
+              "content": "要不我打个电话催一下"
+            },
+            {
+              "start_timestamp": 161,
+              "end_timestamp": 163,
+              "content": "催不太好吧"
+            },
+            {
+              "start_timestamp": 163,
+              "end_timestamp": 164,
+              "content": "好不容易弄到的号码"
+            },
+            {
+              "start_timestamp": 164,
+              "end_timestamp": 166,
+              "content": "再给人催生气了"
+            },
+            {
+              "start_timestamp": 166,
+              "end_timestamp": 166,
+              "content": "应该没事吧"
+            },
+            {
+              "start_timestamp": 166,
+              "end_timestamp": 168,
+              "content": "你就说问他到了没"
+            },
+            {
+              "start_timestamp": 168,
+              "end_timestamp": 170,
+              "content": "需不需要我们去接也行"
+            },
+            {
+              "start_timestamp": 170,
+              "end_timestamp": 171,
+              "content": "催催"
+            },
+            {
+              "start_timestamp": 173,
+              "end_timestamp": 174,
+              "content": "谁电话响了"
+            },
+            {
+              "start_timestamp": 174,
+              "end_timestamp": 179,
+              "content": "哎小林快给他挂了"
+            },
+            {
+              "start_timestamp": 179,
+              "end_timestamp": 180,
+              "content": "小弟明显不"
+            },
+            {
+              "start_timestamp": 180,
+              "end_timestamp": 182,
+              "content": "您拨打的用户正忙"
+            },
+            {
+              "start_timestamp": 182,
+              "end_timestamp": 184,
+              "content": "请稍后再拨过了"
+            },
+            {
+              "start_timestamp": 184,
+              "end_timestamp": 185,
+              "content": "我再打一个"
+            },
+            {
+              "start_timestamp": 196,
+              "end_timestamp": 196,
+              "content": "喂"
+            },
+            {
+              "start_timestamp": 200,
+              "end_timestamp": 202,
+              "content": "小明就是首富"
+            },
+            {
+              "start_timestamp": 202,
+              "end_timestamp": 203,
+              "content": "难怪这么多年没见他"
+            },
+            {
+              "start_timestamp": 203,
+              "end_timestamp": 206,
+              "content": "今天我想跟大家借点钱"
+            },
+            {
+              "start_timestamp": 206,
+              "end_timestamp": 209,
+              "content": "其实我就是想看看当年说做一辈子朋友的人"
+            },
+            {
+              "start_timestamp": 209,
+              "end_timestamp": 211,
+              "content": "现在都变成什么样了"
+            },
+            {
+              "start_timestamp": 211,
+              "end_timestamp": 214,
+              "content": "他刚才说把我都看透了"
+            },
+            {
+              "start_timestamp": 214,
+              "end_timestamp": 217,
+              "content": "就你们这样的还想见大人物"
+            },
+            {
+              "start_timestamp": 217,
+              "end_timestamp": 218,
+              "content": "大人物愿意认识你"
+            },
+            {
+              "start_timestamp": 218,
+              "end_timestamp": 220,
+              "content": "我就说吧"
+            },
+            {
+              "start_timestamp": 220,
+              "end_timestamp": 222,
+              "content": "这么多年的朋友了"
+            },
+            {
+              "start_timestamp": 222,
+              "end_timestamp": 222,
+              "content": "帮帮他"
+            },
+            {
+              "start_timestamp": 222,
+              "end_timestamp": 223,
+              "content": "能走了"
+            },
+            {
+              "start_timestamp": 223,
+              "end_timestamp": 225,
+              "content": "现在好吗"
+            },
+            {
+              "start_timestamp": 227,
+              "end_timestamp": 230,
+              "content": "小明哥小明哥"
+            },
+            {
+              "start_timestamp": 230,
+              "end_timestamp": 231,
+              "content": "哎强子"
+            },
+            {
+              "start_timestamp": 231,
+              "end_timestamp": 231,
+              "content": "你别生气"
+            },
+            {
+              "start_timestamp": 231,
+              "end_timestamp": 232,
+              "content": "别走啊"
+            },
+            {
+              "start_timestamp": 232,
+              "end_timestamp": 233,
+              "content": "我们一起开个玩笑"
+            },
+            {
+              "start_timestamp": 233,
+              "end_timestamp": 234,
+              "content": "就你当真了"
+            },
+            {
+              "start_timestamp": 234,
+              "end_timestamp": 236,
+              "content": "来坐坐坐坐坐"
+            },
+            {
+              "start_timestamp": 236,
+              "end_timestamp": 237,
+              "content": "你们真是"
+            },
+            {
+              "start_timestamp": 237,
+              "end_timestamp": 238,
+              "content": "你要借钱是吧"
+            },
+            {
+              "start_timestamp": 238,
+              "end_timestamp": 239,
+              "content": "我给你转5万"
+            },
+            {
+              "start_timestamp": 239,
+              "end_timestamp": 240,
+              "content": "我也给你转5万"
+            },
+            {
+              "start_timestamp": 240,
+              "end_timestamp": 241,
+              "content": "我给你转8万"
+            },
+            {
+              "start_timestamp": 241,
+              "end_timestamp": 242,
+              "content": "不用还"
+            },
+            {
+              "start_timestamp": 244,
+              "end_timestamp": 246,
+              "content": "你们真的愿意把钱都给我"
+            },
+            {
+              "start_timestamp": 246,
+              "end_timestamp": 247,
+              "content": "当当然了"
+            },
+            {
+              "start_timestamp": 247,
+              "end_timestamp": 250,
+              "content": "苟富贵勿相忘"
+            },
+            {
+              "start_timestamp": 250,
+              "end_timestamp": 253,
+              "content": "哈哈哈行"
+            },
+            {
+              "start_timestamp": 253,
+              "end_timestamp": 254,
+              "content": "我很感动"
+            },
+            {
+              "start_timestamp": 255,
+              "end_timestamp": 255,
+              "content": "我没看错"
+            },
+            {
+              "start_timestamp": 255,
+              "end_timestamp": 257,
+              "content": "你们莫哥"
+            },
+            {
+              "start_timestamp": 262,
+              "end_timestamp": 265,
+              "content": "唉还好我们补救的及时"
+            },
+            {
+              "start_timestamp": 265,
+              "end_timestamp": 265,
+              "content": "是啊"
+            },
+            {
+              "start_timestamp": 265,
+              "end_timestamp": 267,
+              "content": "唉不过他怎么又走了"
+            },
+            {
+              "start_timestamp": 267,
+              "end_timestamp": 267,
+              "content": "对呀"
+            },
+            {
+              "start_timestamp": 267,
+              "end_timestamp": 272,
+              "content": "我估计是半身行头准备王者归来啊"
+            },
+            {
+              "start_timestamp": 293,
+              "end_timestamp": 294,
+              "content": "哈哈好兄弟"
+            },
+            {
+              "start_timestamp": 294,
+              "end_timestamp": 294,
+              "content": "就等你了"
+            },
+            {
+              "start_timestamp": 294,
+              "end_timestamp": 295,
+              "content": "来吧"
+            },
+            {
+              "start_timestamp": 295,
+              "end_timestamp": 298,
+              "content": "开席哎咦我去"
+            },
+            {
+              "start_timestamp": 299,
+              "end_timestamp": 301,
+              "content": "这小子刚刚就在这屋里"
+            },
+            {
+              "start_timestamp": 301,
+              "end_timestamp": 302,
+              "content": "你们可给我搜仔细了"
+            },
+            {
+              "start_timestamp": 302,
+              "end_timestamp": 303,
+              "content": "看看除了我的手机外"
+            },
+            {
+              "start_timestamp": 303,
+              "end_timestamp": 304,
+              "content": "他还偷的啥"
+            },
+            {
+              "start_timestamp": 304,
+              "end_timestamp": 309,
+              "content": "是不是手机是你偷的啊"
+            },
+            {
+              "start_timestamp": 311,
+              "end_timestamp": 313,
+              "content": "他才是收货"
+            },
+            {
+              "start_timestamp": 313,
+              "end_timestamp": 316,
+              "content": "还有你们几个都是他的同伙吧"
+            },
+            {
+              "start_timestamp": 316,
+              "end_timestamp": 317,
+              "content": "我是没什么孩子"
+            },
+            {
+              "start_timestamp": 317,
+              "end_timestamp": 318,
+              "content": "我们学校有了"
+            },
+            {
+              "start_timestamp": 318,
+              "end_timestamp": 319,
+              "content": "今天是我们替你吃饭"
+            },
+            {
+              "start_timestamp": 319,
+              "end_timestamp": 320,
+              "content": "不对呀"
+            },
+            {
+              "start_timestamp": 320,
+              "end_timestamp": 321,
+              "content": "不可能是同伙"
+            },
+            {
+              "start_timestamp": 321,
+              "end_timestamp": 322,
+              "content": "他还欠我钱呢"
+            },
+            {
+              "start_timestamp": 322,
+              "end_timestamp": 324,
+              "content": "钱呢钱拿了多少钱"
+            },
+            {
+              "start_timestamp": 324,
+              "end_timestamp": 326,
+              "content": "我都花了这么一会就花了"
+            },
+            {
+              "start_timestamp": 326,
+              "end_timestamp": 327,
+              "content": "快点"
+            },
+            {
+              "start_timestamp": 327,
+              "end_timestamp": 328,
+              "content": "这不有手机吗"
+            },
+            {
+              "start_timestamp": 328,
+              "end_timestamp": 329,
+              "content": "我对你这么好"
+            },
+            {
+              "start_timestamp": 329,
+              "end_timestamp": 330,
+              "content": "我的车你都不放过"
+            },
+            {
+              "start_timestamp": 330,
+              "end_timestamp": 331,
+              "content": "是不是还有啊"
+            },
+            {
+              "start_timestamp": 331,
+              "end_timestamp": 332,
+              "content": "哎加油打一"
+            },
+            {
+              "start_timestamp": 332,
+              "end_timestamp": 333,
+              "content": "我去啊"
+            },
+            {
+              "start_timestamp": 333,
+              "end_timestamp": 335,
+              "content": "咻咻咻咻咻DUANG"
+            },
+            {
+              "start_timestamp": 335,
+              "end_timestamp": 336,
+              "content": "陈翔06:30"
+            }
+          ],
+          "timestamp": 3
+        }
+      ]
+    },
+    "stid": "7983841176428811042",
+    "status": 0,
+    "like_num": 0,
+    "dislike_num": 0
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "bvid": "BV1BQwyzVEcE",
+    "aid": 116255470197715,
+    "videos": 4,
+    "tid": 172,
+    "tid_v2": 2074,
+    "tname": "",
+    "tname_v2": "",
+    "copyright": 1,
+    "pic": "http://i2.hdslb.com/bfs/archive/d7c96826f5f9887a9618170959b2d0d0261cdd68.jpg",
+    "title": "《绝区零》南宫羽角色展示 | 全连全良天使",
+    "pubdate": 1773979200,
+    "ctime": 1773917953,
+    "desc": "「这位南宫小姐，要不要考虑成为金手指的终生荣誉会员？」\n「等你们研究出我全连不了的谱面，我……」\n「小羽！！快看快看！！这里竟然有上架我们的新歌诶！」\n「呜…这个谱面，让我多试试！」\n「当然愿意~」\n\n南宫羽CV\n中：杜晴晴\n日：高尾奏音\n\n千夏CV\n中：木雅瑞林\n日：森嶋优花\n\n爱芮CV\n中：静宸\n日：前田佳织里\n\n铃CV\n中：侯小菲\n日：千本木彩花\n\n—— 欢迎来到新艾利都！——\n▼ 2.7版本「英雄不死于往昔」将于3月24日上线！\nbilibili安卓端下载地址：https://www.biligame.com/detail/?id=108434\nbilibiliPC端下载地址：https://www.biligame.com/detail/?id=111210",
+    "desc_v2": [
+      {
+        "raw_text": "「这位南宫小姐，要不要考虑成为金手指的终生荣誉会员？」\n「等你们研究出我全连不了的谱面，我……」\n「小羽！！快看快看！！这里竟然有上架我们的新歌诶！」\n「呜…这个谱面，让我多试试！」\n「当然愿意~」\n\n南宫羽CV\n中：杜晴晴\n日：高尾奏音\n\n千夏CV\n中：木雅瑞林\n日：森嶋优花\n\n爱芮CV\n中：静宸\n日：前田佳织里\n\n铃CV\n中：侯小菲\n日：千本木彩花\n\n—— 欢迎来到新艾利都！——\n▼ 2.7版本「英雄不死于往昔」将于3月24日上线！\nbilibili安卓端下载地址：https://www.biligame.com/detail/?id=108434\nbilibiliPC端下载地址：https://www.biligame.com/detail/?id=111210",
+        "type": 1,
+        "biz_id": 0
+      }
+    ],
+    "state": 0,
+    "duration": 501,
+    "rights": {
+      "bp": 0,
+      "elec": 0,
+      "download": 1,
+      "movie": 0,
+      "pay": 0,
+      "hd5": 1,
+      "no_reprint": 1,
+      "autoplay": 1,
+      "ugc_pay": 0,
+      "is_cooperation": 0,
+      "ugc_pay_preview": 0,
+      "no_background": 0,
+      "clean_mode": 0,
+      "is_stein_gate": 0,
+      "is_360": 0,
+      "no_share": 0,
+      "arc_pay": 0,
+      "free_watch": 0
+    },
+    "owner": {
+      "mid": 1636034895,
+      "name": "绝区零",
+      "face": "https://i0.hdslb.com/bfs/face/f013e3aacdc4e3254a476648e1cec3f39b7df097.jpg"
+    },
+    "stat": {
+      "aid": 116255470197715,
+      "view": 2043738,
+      "danmaku": 4748,
+      "reply": 8190,
+      "favorite": 27387,
+      "coin": 88958,
+      "share": 8402,
+      "now_rank": 0,
+      "his_rank": 17,
+      "like": 145789,
+      "dislike": 0,
+      "evaluation": "",
+      "vt": 0
+    },
+    "argue_info": {
+      "argue_msg": "",
+      "argue_type": 0,
+      "argue_link": ""
+    },
+    "dynamic": "#绝区零##绝区零南宫羽##英雄不死于往昔##妄想天使#\n《绝区零》南宫羽角色展示 | 全连全良天使",
+    "cid": 36936485341,
+    "dimension": {
+      "width": 1920,
+      "height": 1080,
+      "rotate": 0
+    },
+    "premiere": null,
+    "teenage_mode": 1,
+    "is_chargeable_season": false,
+    "is_story": false,
+    "is_upower_exclusive": false,
+    "is_upower_play": false,
+    "is_upower_preview": false,
+    "enable_vt": 0,
+    "vt_display": "",
+    "is_upower_exclusive_with_qa": false,
+    "no_cache": false,
+    "pages": [
+      {
+        "cid": 36936485341,
+        "page": 1,
+        "from": "vupload",
+        "part": "《绝区零》南宫羽角色展示 | 全连全良天使",
+        "duration": 129,
+        "vid": "",
+        "weblink": "",
+        "dimension": {
+          "width": 1920,
+          "height": 1080,
+          "rotate": 0
+        },
+        "first_frame": "http://i0.hdslb.com/bfs/storyff/_00000unfafvlt43il23z19maloppa3b_firsti.jpg",
+        "ctime": 1774338046
+      },
+      {
+        "cid": 36936485134,
+        "page": 2,
+        "from": "vupload",
+        "part": "日-《绝区零》南宫羽角色展示 | 全连全良天使",
+        "duration": 124,
+        "vid": "",
+        "weblink": "",
+        "dimension": {
+          "width": 2560,
+          "height": 1080,
+          "rotate": 0
+        },
+        "first_frame": "http://i1.hdslb.com/bfs/storyff/_000016ghc9ydxcfah27ovmpoez5e4ab_firsti.jpg",
+        "ctime": 1774338046
+      },
+      {
+        "cid": 36936485546,
+        "page": 3,
+        "from": "vupload",
+        "part": "英-《绝区零》南宫羽角色展示 | 全连全良天使",
+        "duration": 124,
+        "vid": "",
+        "weblink": "",
+        "dimension": {
+          "width": 2560,
+          "height": 1080,
+          "rotate": 0
+        },
+        "first_frame": "http://i0.hdslb.com/bfs/storyff/_00002oiwdgd6kicus2oh5e0i2wp76wb_firsti.jpg",
+        "ctime": 1774338046
+      },
+      {
+        "cid": 36936485681,
+        "page": 4,
+        "from": "vupload",
+        "part": "韩-《绝区零》南宫羽角色展示 | 全连全良天使",
+        "duration": 124,
+        "vid": "",
+        "weblink": "",
+        "dimension": {
+          "width": 2560,
+          "height": 1080,
+          "rotate": 0
+        },
+        "first_frame": "http://i2.hdslb.com/bfs/storyff/_00001yseonawa8mh525hpm4940jjinb_firsti.jpg",
+        "ctime": 1774338046
+      }
+    ],
+    "subtitle": {
+      "allow_submit": false,
+      "list": []
+    },
+    "is_season_display": false,
+    "user_garb": {
+      "url_image_ani_cut": "https://i0.hdslb.com/bfs/garb/a041e754845c9cdbe39fa065acda435f7cf064cf.bin"
+    },
+    "honor_reply": {
+      "honor": [
+        {
+          "aid": 116255470197715,
+          "type": 3,
+          "desc": "全站排行榜最高第17名",
+          "weekly_recommend_num": 0
+        },
+        {
+          "aid": 116255470197715,
+          "type": 7,
+          "desc": "热门收录",
+          "weekly_recommend_num": 0
+        }
+      ]
+    },
+    "like_icon": "",
+    "need_jump_bv": false,
+    "disable_show_up_info": false,
+    "is_story_play": 0,
+    "is_view_self": false
+  }
+}
