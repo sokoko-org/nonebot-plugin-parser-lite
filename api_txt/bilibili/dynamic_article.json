@@ -1,0 +1,458 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "item": {
+      "basic": {
+        "comment_id_str": "50833682",
+        "comment_type": 12,
+        "jump_url": "//www.bilibili.com/opus/1217310112420462599",
+        "like_icon": {
+          "action_url": "https://i0.hdslb.com/bfs/garb/a041e754845c9cdbe39fa065acda435f7cf064cf.bin",
+          "end_url": "",
+          "id": 1769661347001,
+          "start_url": ""
+        },
+        "rid_str": "50833682"
+      },
+      "id_str": "1217310112420462599",
+      "modules": {
+        "module_author": {
+          "avatar": {
+            "container_size": {
+              "height": 1.35,
+              "width": 1.35
+            },
+            "fallback_layers": {
+              "is_critical_group": true,
+              "layers": [
+                {
+                  "general_spec": {
+                    "pos_spec": {
+                      "axis_x": 0.675,
+                      "axis_y": 0.675,
+                      "coordinate_pos": 2
+                    },
+                    "render_spec": {
+                      "opacity": 1
+                    },
+                    "size_spec": {
+                      "height": 1,
+                      "width": 1
+                    }
+                  },
+                  "layer_config": {
+                    "is_critical": true,
+                    "tags": {
+                      "AVATAR_LAYER": {},
+                      "GENERAL_CFG": {
+                        "config_type": 1,
+                        "general_config": {
+                          "web_css_style": {
+                            "borderRadius": "50%"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "resource": {
+                    "res_image": {
+                      "image_src": {
+                        "placeholder": 6,
+                        "remote": {
+                          "bfs_style": "widget-layer-avatar",
+                          "url": "https://i0.hdslb.com/bfs/face/211cc1102b3cb637b791dc81daab265b2f54909e.jpg"
+                        },
+                        "src_type": 1
+                      }
+                    },
+                    "res_type": 3
+                  },
+                  "visible": true
+                },
+                {
+                  "general_spec": {
+                    "pos_spec": {
+                      "axis_x": 0.8000000000000002,
+                      "axis_y": 0.8000000000000002,
+                      "coordinate_pos": 1
+                    },
+                    "render_spec": {
+                      "opacity": 1
+                    },
+                    "size_spec": {
+                      "height": 0.41666666666666663,
+                      "width": 0.41666666666666663
+                    }
+                  },
+                  "layer_config": {
+                    "tags": {
+                      "GENERAL_CFG": {
+                        "config_type": 1,
+                        "general_config": {
+                          "web_css_style": {
+                            "background-color": "rgb(255,255,255)",
+                            "border": "2px solid rgba(255,255,255,1)",
+                            "borderRadius": "50%",
+                            "boxSizing": "border-box"
+                          }
+                        }
+                      },
+                      "ICON_LAYER": {}
+                    }
+                  },
+                  "resource": {
+                    "res_image": {
+                      "image_src": {
+                        "local": 3,
+                        "src_type": 2
+                      }
+                    },
+                    "res_type": 3
+                  },
+                  "visible": true
+                }
+              ]
+            },
+            "mid": "276087954"
+          },
+          "face": "https://i0.hdslb.com/bfs/face/211cc1102b3cb637b791dc81daab265b2f54909e.jpg",
+          "face_nft": false,
+          "following": null,
+          "jump_url": "//space.bilibili.com/276087954/dynamic",
+          "label": "",
+          "mid": 276087954,
+          "name": "GameTips原神",
+          "official_verify": {
+            "desc": "",
+            "type": 0
+          },
+          "pendant": {
+            "expire": 0,
+            "image": "",
+            "image_enhance": "",
+            "image_enhance_frame": "",
+            "n_pid": 0,
+            "name": "",
+            "pid": 0
+          },
+          "pub_action": "投稿了文章",
+          "pub_location_text": "",
+          "pub_time": "2026年06月24日 09:44",
+          "pub_ts": 1782265497,
+          "type": "AUTHOR_TYPE_NORMAL",
+          "vip": {
+            "avatar_subscript": 0,
+            "avatar_subscript_url": "",
+            "due_date": 1747584000000,
+            "label": {
+              "bg_color": "",
+              "bg_style": 0,
+              "border_color": "",
+              "img_label_uri_hans": "",
+              "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/d7b702ef65a976b20ed854cbd04cb9e27341bb79.png",
+              "img_label_uri_hant": "",
+              "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/KJunwh19T5.png",
+              "label_theme": "",
+              "path": "",
+              "text": "",
+              "text_color": "",
+              "use_img_label": true
+            },
+            "nickname_color": "",
+            "status": 0,
+            "theme_type": 0,
+            "type": 1
+          }
+        },
+        "module_dynamic": {
+          "additional": null,
+          "desc": null,
+          "major": {
+            "opus": {
+              "fold_action": ["全文"],
+              "jump_url": "//www.bilibili.com/opus/1217310112420462599",
+              "pics": [
+                {
+                  "aigc": null,
+                  "height": 1080,
+                  "live_url": null,
+                  "size": 309.9970703125,
+                  "url": "http://i0.hdslb.com/bfs/new_dyn/054afecd675c8f236eb60e52e5c339e6276087954.jpg",
+                  "width": 1920
+                }
+              ],
+              "summary": {
+                "has_more": true,
+                "paragraphs": [
+                  {
+                    "align": 0,
+                    "format": {
+                      "align": 0,
+                      "indent": null
+                    },
+                    "para_type": 1,
+                    "text": {
+                      "nodes": [
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "[图片]"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "align": 0,
+                    "format": {
+                      "align": 0,
+                      "indent": null
+                    },
+                    "para_type": 1,
+                    "text": {
+                      "nodes": [
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "亲爱的代理们，"
+                          }
+                        },
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "\n"
+                          }
+                        },
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "\n"
+                          }
+                        },
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "《绝区零》即将亮相Anime Expo，将于7月5日（下午12:00 – 12:50，在Petree Hall）举办一场特别的声优小组讨论会！"
+                          }
+                        },
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "\n"
+                          }
+                        },
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "\n"
+                          }
+                        },
+                        {
+                          "type": "TEXT_NODE_TYPE_WORD",
+                          "word": {
+                            "bg_style": {
+                              "color": {}
+                            },
+                            "color": null,
+                            "font_level": "regular",
+                            "style": {},
+                            "words": "我们的英语配音演员将分享幕后..."
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "rich_text_nodes": [
+                  {
+                    "orig_text": "[图片]",
+                    "text": "[图片]",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "亲爱的代理们，",
+                    "text": "亲爱的代理们，",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "《绝区零》即将亮相Anime Expo，将于7月5日（下午12:00 – 12:50，在Petree Hall）举办一场特别的声优小组讨论会！",
+                    "text": "《绝区零》即将亮相Anime Expo，将于7月5日（下午12:00 – 12:50，在Petree Hall）举办一场特别的声优小组讨论会！",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "我们的英语配音演员将分享幕后故事和经历，讲述他们如何将新艾利都带入生命。",
+                    "text": "我们的英语配音演员将分享幕后故事和经历，讲述他们如何将新艾利都带入生命。",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "为了让这次讨论会更加激动人心和互动性十足，我们希望提前听到你们的问题！",
+                    "text": "为了让这次讨论会更加激动人心和互动性十足，我们希望提前听到你们的问题！",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "无论是关于你最喜爱的角色的配音指导、录音时的搞笑瞬间、他们如何演绎某些台词，还是其他任何让你好奇的事——请在下方留下你的问题！",
+                    "text": "无论是关于你最喜爱的角色的配音指导、录音时的搞笑瞬间、他们如何演绎某些台词，还是其他任何让你好奇的事——请在下方留下你的问题！",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "我们将挑选一些最棒的问题，在讨论会上向声优们提出。",
+                    "text": "我们将挑选一些最棒的问题，在讨论会上向声优们提出。",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "让我们一起让这次问答环节成为难忘的回忆吧！",
+                    "text": "让我们一起让这次问答环节成为难忘的回忆吧！",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  },
+                  {
+                    "orig_text": "\n",
+                    "text": "\n",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  }
+                ],
+                "text": "[图片]\n亲爱的代理们，\n\n《绝区零》即将亮相Anime Expo，将于7月5日（下午12:00 – 12:50，在Petree Hall）举办一场特别的声优小组讨论会！\n\n我们的英语配音演员将分享幕后故事和经历，讲述他们如何将新艾利都带入生命。\n\n为了让这次讨论会更加激动人心和互动性十足，我们希望提前听到你们的问题！\n\n无论是关于你最喜爱的角色的配音指导、录音时的搞笑瞬间、他们如何演绎某些台词，还是其他任何让你好奇的事——请在下方留下你的问题！\n\n我们将挑选一些最棒的问题，在讨论会上向声优们提出。\n\n让我们一起让这次问答环节成为难忘的回忆吧！\n..."
+              },
+              "title": "绝区零 将在洛杉矶 Anime Expo 动漫展 上举办特别的声优座谈会！"
+            },
+            "type": "MAJOR_TYPE_OPUS"
+          },
+          "topic": null
+        },
+        "module_more": {
+          "three_point_items": [
+            {
+              "label": "举报",
+              "type": "THREE_POINT_REPORT"
+            }
+          ]
+        },
+        "module_stat": {
+          "comment": {
+            "count": 1,
+            "forbidden": false
+          },
+          "forward": {
+            "count": 0,
+            "forbidden": false
+          },
+          "like": {
+            "count": 241,
+            "forbidden": false,
+            "status": false
+          }
+        }
+      },
+      "type": "DYNAMIC_TYPE_ARTICLE",
+      "visible": true
+    }
+  }
+}

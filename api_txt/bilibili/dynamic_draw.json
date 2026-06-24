@@ -1,0 +1,233 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "item": {
+      "basic": {
+        "comment_id_str": "383127023",
+        "comment_type": 11,
+        "jump_url": "//www.bilibili.com/opus/1164087045252972544",
+        "like_icon": {
+          "action_url": "https://i0.hdslb.com/bfs/garb/a041e754845c9cdbe39fa065acda435f7cf064cf.bin",
+          "end_url": "",
+          "id": 1769661347001,
+          "start_url": ""
+        },
+        "rid_str": "383127023"
+      },
+      "id_str": "1164087045252972544",
+      "modules": {
+        "module_author": {
+          "avatar": {
+            "container_size": {
+              "height": 1.35,
+              "width": 1.35
+            },
+            "fallback_layers": {
+              "is_critical_group": true,
+              "layers": [
+                {
+                  "general_spec": {
+                    "pos_spec": {
+                      "axis_x": 0.675,
+                      "axis_y": 0.675,
+                      "coordinate_pos": 2
+                    },
+                    "render_spec": {
+                      "opacity": 1
+                    },
+                    "size_spec": {
+                      "height": 1,
+                      "width": 1
+                    }
+                  },
+                  "layer_config": {
+                    "is_critical": true,
+                    "tags": {
+                      "AVATAR_LAYER": {},
+                      "GENERAL_CFG": {
+                        "config_type": 1,
+                        "general_config": {
+                          "web_css_style": {
+                            "borderRadius": "50%"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "resource": {
+                    "res_image": {
+                      "image_src": {
+                        "placeholder": 6,
+                        "remote": {
+                          "bfs_style": "widget-layer-avatar",
+                          "url": "https://i1.hdslb.com/bfs/face/1e17ed6e7c3fe0c46d9d0d22a85b169e6b4179ef.jpg"
+                        },
+                        "src_type": 1
+                      }
+                    },
+                    "res_type": 3
+                  },
+                  "visible": true
+                },
+                {
+                  "general_spec": {
+                    "pos_spec": {
+                      "axis_x": 0.8000000000000002,
+                      "axis_y": 0.8000000000000002,
+                      "coordinate_pos": 1
+                    },
+                    "render_spec": {
+                      "opacity": 1
+                    },
+                    "size_spec": {
+                      "height": 0.41666666666666663,
+                      "width": 0.41666666666666663
+                    }
+                  },
+                  "layer_config": {
+                    "tags": {
+                      "GENERAL_CFG": {
+                        "config_type": 1,
+                        "general_config": {
+                          "web_css_style": {
+                            "background-color": "rgb(255,255,255)",
+                            "border": "2px solid rgba(255,255,255,1)",
+                            "borderRadius": "50%",
+                            "boxSizing": "border-box"
+                          }
+                        }
+                      },
+                      "ICON_LAYER": {}
+                    }
+                  },
+                  "resource": {
+                    "res_image": {
+                      "image_src": {
+                        "local": 3,
+                        "src_type": 2
+                      }
+                    },
+                    "res_type": 3
+                  },
+                  "visible": true
+                }
+              ]
+            },
+            "mid": "1344099355"
+          },
+          "decoration_card": {
+            "big_card_url": "https://i0.hdslb.com/bfs/garb/dbd73096fa7403ebd7b22aee24e0b7a5f569ae35.png",
+            "card_type": 2,
+            "card_type_name": "免费",
+            "card_url": "https://i0.hdslb.com/bfs/garb/dbd73096fa7403ebd7b22aee24e0b7a5f569ae35.png",
+            "fan": {},
+            "id": 1689315522001,
+            "image_enhance": "https://i0.hdslb.com/bfs/garb/dbd73096fa7403ebd7b22aee24e0b7a5f569ae35.png",
+            "item_id": 1689315522001,
+            "jump_url": "https://www.bilibili.com/h5/mall/equity-link/collect-home?item_id=1689315522001&isdiy=0&part=card&from=post&f_source=garb&vmid=1344099355&native.theme=1&navhide=1",
+            "name": "系统预警"
+          },
+          "face": "https://i1.hdslb.com/bfs/face/1e17ed6e7c3fe0c46d9d0d22a85b169e6b4179ef.jpg",
+          "face_nft": false,
+          "following": true,
+          "jump_url": "//space.bilibili.com/1344099355/dynamic",
+          "label": "",
+          "mid": 1344099355,
+          "name": "略nd",
+          "official_verify": {
+            "desc": "",
+            "type": 0
+          },
+          "pendant": {
+            "expire": 0,
+            "image": "",
+            "image_enhance": "",
+            "image_enhance_frame": "",
+            "n_pid": 0,
+            "name": "",
+            "pid": 0
+          },
+          "pub_action": "",
+          "pub_location_text": "",
+          "pub_time": "2026年01月31日 23:32",
+          "pub_ts": 1769873536,
+          "type": "AUTHOR_TYPE_NORMAL",
+          "vip": {
+            "avatar_subscript": 1,
+            "avatar_subscript_url": "",
+            "due_date": 1803657600000,
+            "label": {
+              "bg_color": "#FB7299",
+              "bg_style": 1,
+              "border_color": "",
+              "img_label_uri_hans": "",
+              "img_label_uri_hans_static": "http://i0.hdslb.com/bfs/vip/d63b91b46ffcdfc289f8025ca82586136742d67b.png",
+              "img_label_uri_hant": "",
+              "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/uckjAv3Npy.png",
+              "label_theme": "annual_vip",
+              "path": "http://i0.hdslb.com/bfs/vip/label_annual.png",
+              "text": "年度大会员",
+              "text_color": "#FFFFFF",
+              "use_img_label": true
+            },
+            "nickname_color": "#FB7299",
+            "status": 1,
+            "theme_type": 0,
+            "type": 2
+          }
+        },
+        "module_dynamic": {
+          "additional": null,
+          "desc": null,
+          "major": {
+            "opus": {
+              "fold_action": ["展开", "收起"],
+              "jump_url": "//www.bilibili.com/opus/1164087045252972544",
+              "pics": [],
+              "summary": {
+                "rich_text_nodes": [
+                  {
+                    "orig_text": "(。•́︿•̀。)",
+                    "text": "(。•́︿•̀。)",
+                    "type": "RICH_TEXT_NODE_TYPE_TEXT"
+                  }
+                ],
+                "text": "(。•́︿•̀。)"
+              },
+              "title": null
+            },
+            "type": "MAJOR_TYPE_OPUS"
+          },
+          "topic": null
+        },
+        "module_more": {
+          "three_point_items": [
+            {
+              "label": "举报",
+              "type": "THREE_POINT_REPORT"
+            }
+          ]
+        },
+        "module_stat": {
+          "comment": {
+            "count": 152,
+            "forbidden": false
+          },
+          "forward": {
+            "count": 2,
+            "forbidden": false
+          },
+          "like": {
+            "count": 1744,
+            "forbidden": false,
+            "status": false
+          }
+        }
+      },
+      "type": "DYNAMIC_TYPE_DRAW",
+      "visible": true
+    }
+  }
+}
