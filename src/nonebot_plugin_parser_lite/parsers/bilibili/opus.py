@@ -27,8 +27,12 @@ class Author(Struct):
     face: str
     mid: int
     pub_time: str
-    pub_ts: int
+    pub_ts: str | int
     views_text: str | None = None
+
+    @property
+    def timestamp(self) -> int:
+        return int(self.pub_ts)
 
 
 class Image(Struct):
@@ -125,7 +129,7 @@ class OpusItem(Struct):
         """获取发布时间戳"""
         return next(
             (
-                module.module_author.pub_ts
+                module.module_author.timestamp
                 for module in self.item.modules
                 if module.module_type == "MODULE_TYPE_AUTHOR" and module.module_author
             ),
