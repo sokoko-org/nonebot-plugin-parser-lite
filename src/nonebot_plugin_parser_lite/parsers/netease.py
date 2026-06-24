@@ -6,6 +6,7 @@ import time
 from typing import ClassVar
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from nonebot import logger
 
 from .base import (
     BaseParser,
@@ -123,22 +124,43 @@ class NCMParser(BaseParser):
     @handle("music.163.com", r"song/(?P<id>\d+)")
     async def _parse_netease(self, searched: MatchWithParams):
         ncm_id = searched["id"]
+        logger.info(f"[网易云解析] 提取歌曲ID: {ncm_id}")
         song = await self.fetch("getSongInfo", {"id": ncm_id})
         title = song.get("name", "未知")
         artist = song.get("singer", "未知歌手")
         duration = parse_duration_to_seconds(song.get("duration", "0"))
+        logger.info(f"[网易云解析] 歌曲: {title} - {artist}")
         lyric = ""
         with contextlib.suppress(Exception):
             lyric = (await self.fetch("getSongLyric", {"id": ncm_id})).get("lrc")
-        url_data = await self.fetch("getSongUrl", {"id": ncm_id, "level": "standard"})
-        if not (audio_url := url_data.get("url")):
+
+        audio_url = ""
+        audio_level = "standard"
+        audio_size = ""
+        audio_type = "mp3"
+
+        for level in ("lossless", "standard"):
+            try:
+                url_data = await self.fetch("getSongUrl", {"id": ncm_id, "level": level})
+                if url_data.get("url"):
+                    audio_url = url_data["url"]
+                    audio_level = level
+                    audio_size = url_data.get("size", "")
+                    url_no_params = audio_url.split("?", 1)[0]
+                    ext = url_no_params.rsplit(".", 1)[-1].lower() if "." in url_no_params else ""
+                    audio_type = ext if ext in {"flac", "wav", "m4a", "aac", "mp3"} else "mp3"
+                    logger.info(f"[网易云解析] {level} URL 获取成功")
+                    break
+            except Exception as e:
+                logger.warning(f"[网易云解析] {level} 获取失败: {e}")
+
+        if not audio_url:
             raise ParseException("无法获取音频下载地址")
-        url_no_params = audio_url.split("?", 1)[0]
-        ext = url_no_params.rsplit(".", 1)[-1].lower() if "." in url_no_params else ""
-        audio_type = ext if ext in {"flac", "wav", "m4a", "aac", "mp3"} else "mp3"
+
         contents: list[MediaContent] = []
 
         audio_name = f"{title}-{artist}.{audio_type}"
+        logger.info(f"[网易云解析] 生成文件名: {audio_name}")
         audio = self.create_audio(
             audio_url,
             duration=duration,
@@ -149,11 +171,18 @@ class NCMParser(BaseParser):
         if cover_url := song.get("picimg"):
             contents.append(self.create_image(cover_url))
 
-        audio_info = f"大小: {await audio.get_display_size()} | 格式: {audio_type}"
+        audio_info = f"音质: {audio_level} | 大小: {audio_size} | 格式: {audio_type}"
+
+        text = audio_info
+        if lyric:
+            text += f"\n歌词:\n{lyric}"
 
         extra = {
             "info": audio_info,
-            "lyric": lyric,
+            "lyric": text,
+            "type": "audio",
+            "type_tag": "音乐",
+            "type_icon": "fa-music",
         }
 
         return self.result(
