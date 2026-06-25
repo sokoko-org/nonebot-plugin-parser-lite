@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, TypeVar
+from typing import Any, ClassVar, TypeVar  # noqa: I001
 
 from msgspec.json import Decoder
 from nonebot import logger
@@ -14,6 +14,7 @@ from ..base import (
 )
 from .answer import decoder as answerDecoder
 from .question import decoder as questionDecoder
+from .article import decoder as articleDecoder
 from .root_comment import decoder as rootCommentDecoder
 from .sign import sign_zhihu_fetch_request
 
@@ -24,6 +25,69 @@ class ZhiHuParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.ZHIHU, display_name="知乎"
     )
+
+    @handle(
+        "zhuanlan.zhihu.com/p",
+        r"zhuanlan\.zhihu\.com/p/(?P<article_id>\d+)",
+    )
+    async def parse_zhuanlan(self, searched: MatchWithParams):
+        article_id = searched["article_id"]
+        article_data = await self.fetch(
+            f"https://www.zhihu.com/api/v4/articles/{article_id}?include=content,topics,paid_info,can_comment,excerpt,thanks_count,voteup_count,comment_count,visited_count,relationship,ip_info,relationship.vote,author.badge_v2",
+            articleDecoder,
+        )
+
+        statistics = article_data.reaction.statistics
+
+        try:
+            comment_data = await self.fetch(
+                f"https://www.zhihu.com/api/v4/comment_v5/articles/{article_id}/root_comment?order_by=score&limit=20",
+                rootCommentDecoder,
+            )
+            comments = [
+                self.create_comment(
+                    author=self.create_author(
+                        name=c.author.name,
+                        avatar_url=c.author.avatar_url,
+                        id=c.author.url_token,
+                        location=c.ip_info,
+                    ),
+                    content=c.content,
+                    timestamp=c.created_time,
+                    stats=self.create_stats(
+                        like_count=format_num(c.like_count),
+                        comment_count=format_num(c.child_comment_count),
+                    ),
+                )
+                for c in comment_data.data
+            ]
+        except Exception as e:
+            logger.warning(f"知乎获取评论失败, {type(e)}:{e!r}")
+            comments = []
+
+        return self.result(
+            title=article_data.title,
+            content=await article_data.get_content(),
+            timestamp=article_data.updated,
+            url=f"https://zhuanlan.zhihu.com/p/{article_data.id}",
+            author=self.create_author(
+                name=article_data.author.name,
+                avatar_url=article_data.author.avatar_url,
+                id=article_data.author.url_token,
+                description=article_data.author.headline,
+                location=article_data.ip_info,
+            ),
+            stats=self.create_stats(
+                like_count=format_num(statistics.like_count),
+                comment_count=format_num(statistics.comment_count),
+                collect_count=format_num(statistics.favorites),
+                extra={
+                    "down_vote": format_num(statistics.down_vote_count),
+                    "up_vote": format_num(statistics.up_vote_count),
+                },
+            ),
+            comments=comments,
+        )
 
     @handle(
         "www.zhihu.com/question",

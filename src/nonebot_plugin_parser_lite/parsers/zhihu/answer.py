@@ -47,7 +47,7 @@ class Reaction(Struct):
 class Answer(Struct):
     author: Author
     """回答者信息"""
-    html: str = field(name="content")
+    content: str
     """html"""
     comment_count: int
     """评论数"""
@@ -66,7 +66,7 @@ class Answer(Struct):
     ip_info: str | None = field(default=None)
 
     async def get_content(self):
-        return await parse_rich_content(self.html, "answer")
+        return await parse_rich_content(self.content, "answer")
 
 
 decoder = Decoder(Answer)
