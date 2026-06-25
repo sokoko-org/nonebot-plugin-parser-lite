@@ -91,23 +91,6 @@ class DynamicMajor(Struct):
             return self.desc.rich_text_nodes
         return []
 
-    # @property
-    # def image_urls(self) -> list[str]:
-    #     """获取图片URL列表"""
-    #     # 优先从opus获取图片
-    #     # 不可能是图文，因为图文不走动态解析
-    #     # if self.type == "MAJOR_TYPE_OPUS" and self.opus and self.opus.pics:
-    #     #     return [pic.url for pic in self.opus.pics]
-    #     # 从draw类型获取图片
-    #     if self.type == "MAJOR_TYPE_DRAW" and self.draw:
-    #         pictures = self.draw.get("pictures", [])
-    #         return [pic.get("img_src", "") for pic in pictures if pic.get("img_src")]
-    #     # 从视频archive获取封面
-    #     elif self.type == "MAJOR_TYPE_ARCHIVE" and self.archive and self.archive.cover:  # noqa: E501
-    #         return [self.archive.cover]
-    #     elif self.type == "MAJOR_TYPE_OPUS" and self.opus:
-    #         return [pic.url for pic in self.opus.pics]
-    #     return []
 
     @property
     def medias(self) -> list[MediaContent]:
