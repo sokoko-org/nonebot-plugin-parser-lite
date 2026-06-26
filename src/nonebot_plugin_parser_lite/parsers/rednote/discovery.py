@@ -49,7 +49,7 @@ class Stream(Struct):
 
 
 class Media(Struct):
-    """视频媒体容器"""
+    """媒体容器"""
 
     stream: Stream
 
@@ -58,21 +58,14 @@ class Consumer(Struct):
     originVideoKey: str
 
 
-class VideoImage(Struct):
-    """视频封面信息"""
-
-    firstFrameFileid: str
-
-    @property
-    def url(self) -> str:
-        """视频封面无水印直链"""
-        return f"https://ci.xiaohongshu.com/{self.firstFrameFileid}?imageView2/2/w/1080/format/jpg"
+class Capa(Struct):
+    duration: float
 
 
 class Video(Struct):
     """笔记中的主视频信息"""
 
-    image: VideoImage
+    capa: Capa
     consumer: Consumer
 
     @property
@@ -91,7 +84,9 @@ class Image(Struct):
     @property
     def url(self) -> str:
         """图片无水印直链"""
-        return f"https://ci.xiaohongshu.com/{self.fileId}?imageView2/2/w/1080/format/jpg"
+        return (
+            f"https://ci.xiaohongshu.com/{self.fileId}?imageView2/2/w/1080/format/jpg"
+        )
 
 
 class CommentImage(Struct):
@@ -115,6 +110,10 @@ class InteractInfo(Struct):
     shareCount: str
 
 
+class Cover(Struct):
+    fileId: str
+
+
 class NoteDetail(Struct):
     # type: str
     # """类型，一般是normal/video"""
@@ -125,6 +124,7 @@ class NoteDetail(Struct):
     user: User
     lastUpdateTime: int
     interactInfo: InteractInfo
+    cover: Cover
     imageList: list[Image] = field(default_factory=list)
     """图片列表，包括普通图片和 Live Photo"""
     video: Video | None = None
@@ -154,7 +154,8 @@ class NoteDetail(Struct):
             items.append(
                 Creator.video(
                     url_or_task=self.video.url,
-                    cover_url=self.video.image.url,
+                    cover_url=f"https://ci.xiaohongshu.com/{self.cover.fileId}?imageView2/2/w/1080/format/jpg",
+                    duration=self.video.capa.duration,
                 )
             )
         else:
