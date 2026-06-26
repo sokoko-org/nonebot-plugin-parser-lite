@@ -1,0 +1,60 @@
+from bs4 import BeautifulSoup
+from bs4.element import NavigableString, Tag
+
+from ...creator import Creator
+from ...data import MediaContent
+
+
+def parse_rich_content(html: str) -> list[MediaContent | str]:
+    soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")
+
+    result: list[MediaContent | str] = []
+    buffer: list[str] = []
+
+    for item in _iter_media_and_text(soup):
+        if isinstance(item, str):
+            buffer.append(item)
+        else:
+            if buffer:
+                text_block = "".join(buffer)
+                lines = [line.rstrip() for line in text_block.splitlines()]
+                if normalized := "\n".join(lines).strip():
+                    result.append(normalized)
+                buffer.clear()
+            result.append(item)
+
+    if buffer:
+        text_block = "".join(buffer)
+        lines = [line.rstrip() for line in text_block.splitlines()]
+        if normalized := "\n".join(lines).strip():
+            result.append(normalized)
+
+    return result
+
+
+def _iter_media_and_text(soup: BeautifulSoup):
+    for element in soup.descendants:
+        if isinstance(element, Tag):
+            if element.name == "p":
+                yield "\n"
+                continue
+
+            if element.name == "br":
+                yield "\n"
+                continue
+
+            if element.name == "video":
+                yield Creator.video(
+                    url_or_task=str(element.get("src")),
+                    cover_url=str(element.get("poster")),
+                )
+                element.decompose()
+                continue
+
+            if element.name == "img":
+                if src := element.get("src"):
+                    yield Creator.image(url=str(src))
+
+        elif isinstance(element, NavigableString):
+            if text := str(element).strip():
+                yield text

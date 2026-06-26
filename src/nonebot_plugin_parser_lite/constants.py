@@ -51,7 +51,6 @@ class PlatformEnum(str, Enum):
     REDNOTE = "rednote"
     QSMUSIC = "qsmusic"
     KUWO = "kuwo"
-    TOUTIAO = "toutiao"
     TIEBA = "tieba"
     ZHIHU = "zhihu"
     DUITANG = "duitang"
@@ -60,6 +59,7 @@ class PlatformEnum(str, Enum):
     BUFF = "buff"
     COOLAPK = "coolapk"
     ILLU = "illu"
+    HUPU = "hupu"
 
     def __str__(self) -> str:
         return self.value

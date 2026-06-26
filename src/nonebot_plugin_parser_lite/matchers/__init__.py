@@ -22,7 +22,8 @@ from tarina import LRU
 from ..config import pconfig
 from ..download import DOWNLOADER
 from ..helper import UniHelper
-from ..parsers import BaseParser, BilibiliParser, ParseResult
+from ..parsers import BilibiliParser
+from ..parsers.base import BaseParser, ParseResult
 from ..parsers.tieba.utils import close_client as close_tieba_client
 from ..parsers.weibo.auth import AuthHelper as WeiboAuthHelper
 from ..render import RENDERER

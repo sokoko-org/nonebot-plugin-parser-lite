@@ -1,148 +1,138 @@
 {
-  "props": {
-    "pageProps": {
-      "detail": {
-        "breadCrumb": [
+  "status": "200",
+  "data": {
+    "t_desc": {
+      "title": "日文派蒙账号【提瓦特！】第36话「天敌」",
+      "kword": "日文派蒙账号【提瓦特！】第36话「天敌」",
+      "desc": "挪德卡莱到处都是机械，怕铁的莉奈娅可够呛的……漫画：第一格： 莉奈娅：哇啊啊！不要靠过来啊——！！第二格： 锵锵！！噗嘶——第三格"
+    },
+    "t_rcmd": [
+      {
+        "title": "【无关氵】【深夜电台氵】感觉现在的主流环境已经无法接受从负数到零的成长故事了",
+        "url": "//m.hupu.com/bbs/640307729.html",
+        "label": "游戏区",
+        "replies": "5",
+        "lightReply": "3",
+        "tid": "640307729"
+      },
+      {
+        "title": "呜呜呜她真好看",
+        "url": "//m.hupu.com/bbs/640299184.html",
+        "label": "游戏区",
+        "replies": "7",
+        "lightReply": "7",
+        "tid": "640299184"
+      },
+      {
+        "title": "还是来猜猜周年庆出谁的装甲吧",
+        "url": "//m.hupu.com/bbs/640301208.html",
+        "label": "游戏区",
+        "replies": "10",
+        "lightReply": "5",
+        "tid": "640301208"
+      },
+      {
+        "title": "下版本又没新装甲",
+        "url": "//m.hupu.com/bbs/640296766.html",
+        "label": "游戏区",
+        "replies": "8",
+        "lightReply": "1",
+        "tid": "640296766"
+      },
+      {
+        "title": "下个版本只有协同者，崩落符要开dlc了？",
+        "url": "//m.hupu.com/bbs/640292417.html",
+        "label": "游戏区",
+        "replies": "6",
+        "lightReply": "4",
+        "tid": "640292417"
+      }
+    ],
+    "t_detail": {
+      "tid": "639669147",
+      "f_info": {
+        "fid": "4875",
+        "f_name": "游戏区"
+      },
+      "user": {
+        "puid": "183075775112764",
+        "username": "想你了琪天大圣",
+        "header": "https://i3.hoopchina.com.cn/user/764/183075775112764-4745195222625076686.png@45h_45w_2e",
+        "date": "06-02 05:47",
+        "cert": false
+      },
+      "title": "日文派蒙账号【提瓦特！】第36话「天敌」",
+      "content": "<p>挪德卡莱到处都是机械，怕铁的莉奈娅可够呛的……</p><div class=\"slate-image\" style=\"margin:0 auto\"><center><center><center><img class=\"article-deposit-pic\" src='https://i5.hoopchina.com.cn/editor/1e2851c502f26e1a2bbad0a986089ec4_w_1200_h_1799_.jpeg?x-oss-process=image/resize,w_800/format,webp' class=\"css_inner_pic\" /></center></center></center></div><p><span data-type=\"bold\" style=\"font-weight:bolder\" class=\"slate-bold\">漫画：</span></p><p>第一格： </p><p>莉奈娅：哇啊啊！不要靠过来啊——！！</p><p></p><p>第二格： </p><p>锵锵！！噗嘶——</p><p></p><p>第三格： </p><p>莉奈娅：好、好厉害！！竟然一瞬间就把陆巡艇给制服了！ </p><p>莉奈娅：多亏你我才得救了！我实在不擅长应付机械……</p><p></p><p>第四格： </p><p>莉奈娅：而且你这对耳朵……！毛茸茸的好可爱！可以让我摸一下吗！？ </p><p>伊涅芙：……检测到威胁，执行回避。</p>",
+      "is_top": "0",
+      "is_lock": "0",
+      "hits": "1824",
+      "rcmd": "8",
+      "replies": "1",
+      "lights": "1",
+      "update": "",
+      "via": ""
+    },
+    "lr_list": [],
+    "r_list": [
+      {
+        "pid": "243225",
+        "hide": false,
+        "user": {
+          "puid": "171169563574009",
+          "username": "y451719939",
+          "header": "https://i1.hoopchina.com.cn/user/38288754/1674932782653.jpg@45h_45w_2e",
+          "date": "15天前"
+        },
+        "content": "<p>想看这三人组的夏活/逸闻互动</p><p></p>",
+        "images": [
           {
-            "title": "社区",
-            "url": "/"
-          },
-          {
-            "title": "游戏",
-            "url": "/all-gg"
-          },
-          {
-            "title": "崩坏3",
-            "url": "/788"
-          },
-          {
-            "title": "日文派蒙账号【提瓦特...",
-            "url": "/639669147.html"
+            "width": "1080",
+            "height": "1285",
+            "format": "jpg",
+            "src": "https://i5.hoopchina.com.cn/hupuapp/bbs/0/0/thread_0_20250903113345_s_1002813_o_w_1080_h_1285_75695.jpg?imageMogr2/format/webp/auto-orient/thumbnail/2000x/quality/70/ignore-error/1?x-oss-process=image/resize,w_225/qulity,Q_60?x-oss-process=image/resize,w_365"
           }
         ],
-        "user": {
-          "puid": "0"
-        },
-        "thread": {
-          "tid": "639669147",
-          "title": "日文派蒙账号【提瓦特！】第36话「天敌」",
-          "titleBeforeMerge": "",
-          "content": "<p>挪德卡莱到处都是机械，怕铁的莉奈娅可够呛的……</p><div class=\"slate-image\" style=\"margin:0 auto\"><p><img data-origin=\"https://i5.hoopchina.com.cn/editor/1e2851c502f26e1a2bbad0a986089ec4_w_1200_h_1799_.jpeg?x-oss-process=image/resize,w_800/format,webp\" src=\"https://i5.hoopchina.com.cn/editor/1e2851c502f26e1a2bbad0a986089ec4_w_1200_h_1799_.jpeg?x-oss-process=image/resize,w_800/format,webp\"></p></div><p><span data-type=\"bold\" style=\"font-weight:bolder\" class=\"slate-bold\">漫画：</span></p><p>第一格： </p><p>莉奈娅：哇啊啊！不要靠过来啊——！！</p><p></p><p>第二格： </p><p>锵锵！！噗嘶——</p><p></p><p>第三格： </p><p>莉奈娅：好、好厉害！！竟然一瞬间就把陆巡艇给制服了！ </p><p>莉奈娅：多亏你我才得救了！我实在不擅长应付机械……</p><p></p><p>第四格： </p><p>莉奈娅：而且你这对耳朵……！毛茸茸的好可爱！可以让我摸一下吗！？ </p><p>伊涅芙：……检测到威胁，执行回避。</p>",
-          "videoCover": "",
-          "video": "",
-          "url": "/639669147.html",
-          "lights": 1,
-          "replies": 1,
-          "recommend": 8,
-          "read": 1792,
-          "client": "PC",
-          "createdAt": 1780350462000,
-          "createdAtFormat": "20天前",
-          "repliedAt": 1781125274000,
-          "hasVideo": false,
-          "authorId": "98815574",
-          "author": {
-            "puid": "98815574",
-            "euid": "183075775112764",
-            "puname": "想你了琪天大圣",
-            "level": 29,
-            "header": "https://i1.hoopchina.com.cn/user/764/183075775112764-4745195222625076686.png@150h_150w_2e",
-            "url": "https://my.hupu.com/183075775112764",
-            "groupIds": [-1],
-            "isBlacked": false,
-            "isAdmin": false
-          },
-          "topicId": "788",
-          "fid": "4875",
-          "topic": {
-            "topicId": "788",
-            "cateId": "7",
-            "cateName": "游戏",
-            "type": 1,
-            "name": "崩坏3",
-            "logo": "https://i5.hoopchina.com.cn/marketing-activity/25318-refa8u.png",
-            "url": "/788",
-            "desc": "为世界上所有的美好而战",
-            "count": 857,
-            "countText": "857",
-            "fid": "4875"
-          },
-          "status": 0,
-          "isLock": 0,
-          "contentType": 1,
-          "format": "{\"htmlV3\":\"<p style=\\\"text-align: \\\">挪德卡莱到处都是机械，怕铁的莉奈娅可够呛的……<br></p><div data-hupu-node=\\\"image\\\"><img src=\\\"https://i5.hoopchina.com.cn/editor/1e2851c502f26e1a2bbad0a986089ec4_w_1200_h_1799_.jpeg\\\"></div><p style=\\\"text-align: \\\"><strong>漫画：</strong></p><p style=\\\"text-align: \\\">第一格： </p><p style=\\\"text-align: \\\">莉奈娅：哇啊啊！不要靠过来啊——！！</p><p style=\\\"text-align: \\\"></p><p style=\\\"text-align: \\\">第二格： </p><p style=\\\"text-align: \\\">锵锵！！噗嘶——</p><p style=\\\"text-align: \\\"></p><p style=\\\"text-align: \\\">第三格： </p><p style=\\\"text-align: \\\">莉奈娅：好、好厉害！！竟然一瞬间就把陆巡艇给制服了！ </p><p style=\\\"text-align: \\\">莉奈娅：多亏你我才得救了！我实在不擅长应付机械……</p><p style=\\\"text-align: \\\"></p><p style=\\\"text-align: \\\">第四格： </p><p style=\\\"text-align: \\\">莉奈娅：而且你这对耳朵……！毛茸茸的好可爱！可以让我摸一下吗！？ </p><p style=\\\"text-align: \\\">伊涅芙：……检测到威胁，执行回避。</p>\",\"jsonV3\":{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"挪德卡莱到处都是机械，怕铁的莉奈娅可够呛的……\"},{\"type\":\"hardBreak\"}]},{\"type\":\"image\",\"attrs\":{\"src\":\"https://i5.hoopchina.com.cn/editor/1e2851c502f26e1a2bbad0a986089ec4_w_1200_h_1799_.jpeg\"}},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"漫画：\"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"第一格： \"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"莉奈娅：哇啊啊！不要靠过来啊——！！\"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"}},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"第二格： \"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"锵锵！！噗嘶——\"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"}},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"第三格： \"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"莉奈娅：好、好厉害！！竟然一瞬间就把陆巡艇给制服了！ \"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"莉奈娅：多亏你我才得救了！我实在不擅长应付机械……\"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"}},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"第四格： \"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"莉奈娅：而且你这对耳朵……！毛茸茸的好可爱！可以让我摸一下吗！？ \"}]},{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":\"start\"},\"content\":[{\"type\":\"text\",\"text\":\"伊涅芙：……检测到威胁，执行回避。\"}]}]},\"imgList\":[{\"remoteUrl\":\"https://i5.hoopchina.com.cn/editor/1e2851c502f26e1a2bbad0a986089ec4_w_1200_h_1799_.jpeg\",\"key\":\"1358919971126888\"}],\"videoInfo\":{\"extra\":1}}",
-          "userIp": "",
-          "titleFont": "",
-          "location": "",
-          "visibleRange": "ALL_SEE",
-          "cardList": [],
-          "containsAi": 0
-        },
-        "lights": [],
-        "replies": {
-          "count": 1,
-          "size": 20,
-          "current": 1,
-          "total": 1,
-          "baseUrl": "/639669147_0.html",
-          "list": [
-            {
-              "pid": "243225",
-              "authorId": "38288754",
-              "content": "<p>想看这三人组的夏活/逸闻互动</p><p><img src=\"https://i5.hoopchina.com.cn/hupuapp/bbs/0/0/thread_0_20250903113345_s_1002813_o_w_1080_h_1285_75695.jpg?imageMogr2/format/webp/auto-orient/thumbnail/2000x>/quality/70/ignore-error/1?x-oss-process=image/resize,w_225/qulity,Q_60\"/></p>",
-              "count": 2,
-              "allLightCount": 2,
-              "client": "ANDROID",
-              "isAudit": false,
-              "isHidden": false,
-              "isDelete": false,
-              "isSelfDelete": false,
-              "isStarter": false,
-              "createdAt": 1781125274000,
-              "createdAtFormat": "11天前",
-              "author": {
-                "puid": "38288754",
-                "euid": "171169563574009",
-                "puname": "y451719939",
-                "header": "https://i3.hoopchina.com.cn/user/38288754/1674932782653.jpg@150h_150w_2e",
-                "url": "https://my.hupu.com/171169563574009",
-                "groupIds": [-1],
-                "isBlacked": false,
-                "isAdmin": false
-              },
-              "replyNum": 0,
-              "userBanned": 0,
-              "hidePost": 0,
-              "attr": "a:2:{s:6:\"source\";s:3:\"app\";s:12:\"audit_status\";i:1;}",
-              "location": "广东",
-              "containsAi": 0
-            }
-          ]
-        },
-        "latest": [],
-        "hot": [],
-        "isRecommended": false,
-        "visibleRange": "ALL_SEE",
-        "title": "日文派蒙账号【提瓦特！】第36话「天敌」 - 虎扑社区",
-        "keywords": "日文派蒙账号【提瓦特！】第36话「天敌」",
-        "desc": "挪德卡莱到处都是机械，怕铁的莉奈娅可够呛的……漫画：第一格： 莉奈娅：哇啊啊！不要靠过来啊——！！第二格： 锵锵！！噗嘶——第三格"
-      },
-      "detailErrorInfo": {
-        "code": 200,
-        "message": "成功"
-      },
-      "euid": "",
-      "side": []
+        "video": [],
+        "quote": [],
+        "quote_info": null,
+        "light": "2",
+        "replies": 0,
+        "update": "0",
+        "cert": "",
+        "is_lz": 0,
+        "via": "",
+        "floor": "1"
+      }
+    ],
+    "t_author": {
+      "puid": "183075775112764",
+      "username": "想你了琪天大圣",
+      "header": "https://i3.hoopchina.com.cn/user/764/183075775112764-4745195222625076686.png@45h_45w_2e",
+      "date": "06-02 05:47",
+      "cert": false
     },
-    "__N_SSP": true
-  },
-  "page": "/[tid]",
-  "query": {
-    "tid": "639669147.html"
-  },
-  "buildId": "650lDZoghNG2E2fMUGKQj",
-  "assetPrefix": "//w1.hoopchina.com.cn/games/static/bbs-pc-web",
-  "isFallback": false,
-  "gssp": true,
-  "scriptLoader": []
+    "ad_info": {
+      "m_adbanner": {
+        "m_thread_detail_under_lightReply": []
+      },
+      "m_adapp": {
+        "hupusports": {
+          "adword": "全新网页版邀您体验！",
+          "adurl": "http://games.mobileapi.hupu.com/s?u=transmit&source=https%3A%2F%2Fm.hupu.com%2Fapi%2Fv1%2Fbbs-thread-frontend%2F639669147",
+          "isopen": "on",
+          "pic": "https://i1.hoopchina.com.cn/touch/772/93075557822772/touch_adlist_93075557822772_1585898652_s_14005_o_w__h__40575.png"
+        },
+        "hupusoccer": {
+          "adurl": "http://games.mobileapi.hupu.com/s?u=transmit&source=https%3A%2F%2Fm.hupu.com%2Fapi%2Fv1%2Fbbs-thread-frontend%2F639669147"
+        }
+      }
+    },
+    "is_nfl": false,
+    "is_webp": "1",
+    "nonce": "60618",
+    "r_total_page": "1",
+    "is_reflow": 0,
+    "c": [],
+    "user": []
+  }
 }
