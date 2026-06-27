@@ -129,6 +129,7 @@ class Data(Struct):
                     name=c.user.username,
                     avatar_url=c.user.header,
                     id=c.user.puid,
+                    location=c.via,
                 ),
                 content=c.content,
                 stats=Creator.stats(
