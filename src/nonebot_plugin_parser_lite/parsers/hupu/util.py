@@ -52,8 +52,13 @@ def _iter_media_and_text(soup: BeautifulSoup):
                 continue
 
             if element.name == "img":
-                if src := element.get("src"):
-                    yield Creator.image(url=str(src))
+                attrs: dict[str, str] = {
+                    str(k): str(v[0] if isinstance(v, list) and v else v)
+                    for k, v in (element.attrs or {}).items()
+                    if v
+                }
+                if src := (attrs.get("data-src") or attrs.get("src")):
+                    yield Creator.image(url=src)
 
         elif isinstance(element, NavigableString):
             if text := str(element).strip():

@@ -1,155 +1,90 @@
-from datetime import datetime, timedelta
-import re
-
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
 from ...creator import Creator
-from ...data import Comment
+from ...utils.format import format_num
 from .util import parse_rich_content
 
-_HUPU_RELATIVE_RE = re.compile(r"(\d+)(天|小时|分钟|秒)前")
-_HUPU_ABSOLUTE_RE = re.compile(r"^\d{4}-")
 
-
-def parse_hupu_date(date_str: str) -> int:
-    """将虎扑时间字符串解析为时间戳"""
-    date_str = date_str.strip()
-    now_dt = datetime.now()
-    if date_str == "刚刚":
-        return int(now_dt.timestamp())
-    if m := _HUPU_RELATIVE_RE.match(date_str):
-        value = int(m[1])
-        unit = m[2]
-        if unit == "天":
-            dt = now_dt - timedelta(days=value)
-            dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        elif unit == "小时":
-            dt = now_dt - timedelta(hours=value)
-            dt = dt.replace(minute=0, second=0, microsecond=0)
-        elif unit == "分钟":
-            dt = now_dt - timedelta(minutes=value)
-            dt = dt.replace(second=0, microsecond=0)
-        else:
-            dt = now_dt - timedelta(seconds=value)
-            dt = dt.replace(microsecond=0)
-        return int(dt.timestamp())
-    try:
-        if _HUPU_ABSOLUTE_RE.match(date_str):
-            dt = datetime.strptime(date_str, "%Y-%m-%d")
-        else:
-            year = now_dt.year
-            dt = datetime.strptime(f"{year}-{date_str}", "%Y-%m-%d %H:%M")
-        return int(dt.timestamp())
-    except Exception as e:
-        raise ValueError(f"无法解析时间字符串: {date_str!r}") from e
-
-
-class Forum(Struct):
-    fid: str
-    f_name: str
-
-
-class User(Struct):
-    puid: str
-    username: str
+class Author(Struct):
+    name: str
     header: str
-    date: str
-
-    @property
-    def timestamp(self) -> int:
-        return parse_hupu_date(self.date)
+    view: int
+    puid: int
 
 
-class Detail(Struct):
+class Data(Struct):
+    fid: str
     tid: str
-    f_info: Forum
-    user: User
     title: str
     html: str = field(name="content")
-    hits: str | int
-    replies: str | int
-    lights: str | int
-    via: str
-    """发帖签名档信息"""
+    share_num: int
+    replies: str
+    create_time: int
 
     @property
     def content(self):
         return parse_rich_content(self.html)
 
-    @property
-    def timestamp(self) -> int:
-        return self.user.timestamp
+
+class OfflineData(Struct):
+    data: Data
 
 
-class Image(Struct):
-    format: str
+class VideoInfo(Struct):
+    img: str
     src: str
-
-
-class QuoteInfo(Struct):
-    pid: str
-    user_ip: str | None = None
-
-
-class Reply(Struct):
-    pid: str
-    user: User
-    html: str = field(name="content")
-    images: list[Image] | None
-    light: str | int
-    replies: str | int
-    via: str
-    quote_info: QuoteInfo | None
-
-    @property
-    def content(self):
-        return [
-            *parse_rich_content(self.html),
-            *[Creator.image(url=image.src) for image in (self.images or [])],
-        ]
-
-    @property
-    def timestamp(self) -> int:
-        return self.user.timestamp
-
-
-class Data(Struct):
-    t_detail: Detail
-    r_list: list[Reply]
-
-    @property
-    def comments(self) -> list[Comment]:
-
-        pid_to_node: dict[str, Comment] = {}
-
-        for c in self.r_list:
-            node = Creator.comment(
-                author=Creator.author(
-                    name=c.user.username,
-                    avatar_url=c.user.header,
-                    id=c.user.puid,
-                    location=c.via,
-                ),
-                content=c.content,
-                stats=Creator.stats(
-                    like_count=str(c.light), comment_count=str(c.replies)
-                ),
-                timestamp=c.user.timestamp,
-            )
-
-            if quote_info := c.quote_info:
-                parent = pid_to_node.get(quote_info.pid)
-                if parent is not None:
-                    parent.author.location = quote_info.user_ip
-                    parent.add_reply(node)
-                    continue
-            pid_to_node[c.pid] = node
-        return list(pid_to_node.values())
+    duration: str
+    size: str
+    play_num: str
 
 
 class BBS(Struct):
-    data: Data
+    offline_data: OfflineData
+    author: Author
+    recommend_num: str
+    """点赞"""
+    video_info: VideoInfo | None
+    tid: str
+    fid: str
+
+    @property
+    def title(self):
+        return self.offline_data.data.title
+
+    @property
+    def timestamp(self):
+        return self.offline_data.data.create_time
+
+    @property
+    def content(self):
+        c = self.offline_data.data.content
+        if video := self.video_info:
+            c.append(
+                Creator.video(
+                    url_or_task=video.src,
+                    cover_url=video.img,
+                    duration=int(video.duration),
+                )
+            )
+        return c
+
+    @property
+    def author_obj(self):
+        return Creator.author(
+            name=self.author.name,
+            avatar_url=self.author.header,
+            id=str(self.author.puid),
+        )
+
+    @property
+    def stats(self):
+        return Creator.stats(
+            view_count=format_num(self.author.view),
+            like_count=self.recommend_num,
+            share_count=format_num(self.offline_data.data.share_num),
+            comment_count=self.offline_data.data.replies,
+        )
 
 
 decoder = Decoder(BBS)

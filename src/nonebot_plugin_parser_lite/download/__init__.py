@@ -179,7 +179,7 @@ class StreamDownloader:
             try:
                 response.raise_for_status()
             except Exception as e:
-                raise DownloadException from e
+                raise DownloadException(str(e)) from e
             content_length = parse_content_length(
                 response.headers.get("Content-Length")
             )
