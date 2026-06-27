@@ -57,7 +57,9 @@ def _iter_media_and_text(soup: BeautifulSoup):
                     for k, v in (element.attrs or {}).items()
                     if v
                 }
-                if src := (attrs.get("data-src") or attrs.get("src")):
+                if src := (
+                    attrs.get("data-gif") or attrs.get("data-src") or attrs.get("src")
+                ):
                     yield Creator.image(url=src)
 
         elif isinstance(element, NavigableString):
