@@ -43,6 +43,7 @@ class HupuParser(BaseParser):
                 like_count=format_num(int(bbs.lights)),
                 comment_count=format_num(int(bbs.replies)),
             ),
+            title=bbs.title,
             timestamp=bbs.timestamp,
-            url=f"https://bbs.hupu.com/{bbs.tid}",
+            url=f"https://m.hupu.com/bbs/{bbs.tid}",
         )
