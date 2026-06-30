@@ -301,7 +301,7 @@
         </div>
         {{ render_stats(result.stats) }}
         <div class="px-8 space-y-2 pb-6">
-            {% if result.title %}<p class="title text-lg font-extrabold text-gray-800">{{ result.title }}</p>{% endif %}
+            {% if result.title %}<p class="title text-lg font-extrabold text-gray-800">{{ result.title | e }}</p>{% endif %}
             <div class="text-gray-800 text-base leading-relaxed">{{ render_content_items(result.content) }}</div>
         </div>
         {# AI 总结 / 锐评 #}
