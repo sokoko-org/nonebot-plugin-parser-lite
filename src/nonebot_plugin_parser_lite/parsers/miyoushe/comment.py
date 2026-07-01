@@ -1,40 +1,31 @@
-from enum import IntEnum
+from __future__ import annotations
 
-from msgspec import Struct
+from msgspec import Struct, field
 from msgspec.json import Decoder
 
 from ...creator import Creator
-from ...data import ContentItem
+from ...data import Comment, ContentItem
 from ...utils.format import format_num
 from .sticker import replace_sticker
 from .structed_content import (
     ImageStructed,
-    LinkCard,
     LinkStructed,
     StructedContent,
     VideoStructed,
 )
 
 
-class ViewType(IntEnum):
-    VIDEO = 5
-    IMAGE = 2
-    TEXT = 1
-
-
-class Post(Struct):
+class Reply(Struct):
     post_id: str
-    subject: str
-    structured_content: str
-    images: list[str]
+    reply_id: str
+    struct_content: str
     created_at: int
     updated_at: int
-    view_type: ViewType
 
     @property
     def content(self):
         content: list[ContentItem] = []
-        data = Decoder(list[StructedContent]).decode(self.structured_content)
+        data = Decoder(list[StructedContent]).decode(self.struct_content)
         for item in data:
             ins = item.insert
             if isinstance(ins, str):
@@ -59,44 +50,34 @@ class Post(Struct):
                 )
             elif isinstance(ins, ImageStructed):
                 content.append(Creator.image(url=ins.image))
-        if self.view_type == ViewType.IMAGE:
-            content.extend(Creator.images(self.images))
         return content
-
-
-class Forum(Struct):
-    id: int
-    name: str
-    icon: str
 
 
 class User(Struct):
     uid: str
     nickname: str
-    introduce: str
-    gender: int
     avatar_url: str
+    gender: int
+    ip_region: str
 
 
 class Stat(Struct):
-    view_num: int
     reply_num: int
+    """回复该用户的回复数"""
+    sub_num: int
+    """总回复数"""
     like_num: int
-    bookmark_num: int
-    forward_num: int
-    share_num: int
 
 
-class PostData(Struct):
-    post: Post
-    forum: Forum
+class CommentData(Struct):
+    reply: Reply
     user: User
     stat: Stat
-    link_card_list: list[LinkCard]
+    sub_replies: list[CommentData]
 
 
 class ResponseData(Struct):
-    post: PostData
+    _list: list[CommentData] = field(name="list")
 
 
 class Response(Struct):
@@ -105,34 +86,37 @@ class Response(Struct):
     data: ResponseData
 
     @property
-    def post(self):
-        return self.data.post.post
+    def comments(self):
+        def to_author(user: User):
+            return Creator.author(
+                name=user.nickname,
+                avatar_url=user.avatar_url,
+                id=user.uid,
+                location=user.ip_region,
+            )
 
-    @property
-    def forum(self):
-        return self.data.post.forum
+        def to_stats(stat: Stat):
+            return Creator.stats(
+                like_count=format_num(stat.like_num),
+                comment_count=format_num(stat.sub_num),
+            )
 
-    @property
-    def user(self):
-        return self.data.post.user
+        def build_comment(node: CommentData):
+            return Creator.comment(
+                author=to_author(node.user),
+                content=node.reply.content,
+                stats=to_stats(node.stat),
+                timestamp=node.reply.updated_at,
+            )
 
-    @property
-    def stat(self):
-        return self.data.post.stat
-
-    @property
-    def stats(self):
-        return Creator.stats(
-            view_count=format_num(self.stat.view_num),
-            like_count=format_num(self.stat.like_num),
-            collect_count=format_num(self.stat.bookmark_num),
-            share_count=format_num(self.stat.share_num + self.stat.forward_num),
-            comment_count=format_num(self.stat.reply_num),
-        )
-
-    @property
-    def share_info(self):
-        return self.data.post.link_card_list[0]
+        comments: list[Comment] = []
+        for comment in self.data._list:
+            c = build_comment(comment)
+            if comment.sub_replies:
+                for sub in comment.sub_replies:
+                    c.add_reply(build_comment(sub))
+            comments.append(c)
+        return comments
 
 
 decoder = Decoder(Response)

@@ -1,6 +1,9 @@
 from typing import ClassVar
 
-from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle
+from nonebot.log import logger
+
+from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle, pconfig
+from .comment import decoder as commentDecoder
 from .post import decoder as postDecoder
 
 
@@ -21,6 +24,20 @@ class MiyousheParser(BaseParser):
         )
         res.raise_for_status()
         post = postDecoder.decode(res.content)
+        try:
+            res = await self.httpx.get(
+                "https://bbs-api.miyoushe.com/post/wapi/getPostReplies",
+                params={
+                    "post_id": searched["post_id"],
+                    "is_hot": True,
+                    "size": pconfig.max_comments,
+                },
+            )
+            res.raise_for_status()
+            comments = commentDecoder.decode(res.content).comments
+        except Exception:
+            logger.exception("获取帖子评论失败")
+            comments = []
         return self.result(
             author=self.create_author(
                 name=post.user.nickname,
@@ -31,4 +48,6 @@ class MiyousheParser(BaseParser):
             content=post.post.content,
             title=post.post.subject,
             stats=post.stats,
+            timestamp=post.post.updated_at,
+            comments=comments,
         )
