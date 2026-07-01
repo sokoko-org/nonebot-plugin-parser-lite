@@ -16,11 +16,23 @@ class MiyousheParser(BaseParser):
         super().__init__()
         self.httpx.headers.update({"Referer": "https://www.miyoushe.com/"})
 
-    @handle("miyoushe.com", r"article/(?P<post_id>\d+)")
+    # https://m.miyoushe.com/zzz/#/article/76178399
+    # https://m.miyoushe.com/zzz?channel=beta/#/article/76178399
+    # https://www.miyoushe.com/ys/article/75247726
+    @handle(
+        "miyoushe.com",
+        r"/(?P<forum>[a-zA-Z]+)(.*)/#/article/(?P<post_id>\d+)",
+    )
+    @handle(
+        "miyoushe.com",
+        r"/(?P<forum>[a-zA-Z]+)/article/(?P<post_id>\d+)",
+    )
     async def _(self, searched: MatchWithParams):
+        post_id = searched["post_id"]
+        forum = searched["forum"]
         res = await self.httpx.get(
             "https://bbs-api.miyoushe.com/post/wapi/getPostFull",
-            params={"post_id": searched["post_id"]},
+            params={"post_id": post_id},
         )
         res.raise_for_status()
         post = postDecoder.decode(res.content)
@@ -28,7 +40,7 @@ class MiyousheParser(BaseParser):
             res = await self.httpx.get(
                 "https://bbs-api.miyoushe.com/post/wapi/getPostReplies",
                 params={
-                    "post_id": searched["post_id"],
+                    "post_id": post_id,
                     "is_hot": True,
                     "size": pconfig.max_comments,
                 },
@@ -44,7 +56,7 @@ class MiyousheParser(BaseParser):
                 avatar_url=post.user.avatar_url,
                 id=post.user.uid,
             ),
-            url=post.share_info.origin_url,
+            url=f"https://m.miyoushe.com/{forum}/#/article/{post_id}",
             content=post.post.content,
             title=post.post.subject,
             stats=post.stats,
