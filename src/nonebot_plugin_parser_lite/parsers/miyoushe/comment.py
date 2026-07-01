@@ -7,12 +7,7 @@ from ...creator import Creator
 from ...data import Comment, ContentItem
 from ...utils.format import format_num
 from .sticker import replace_sticker
-from .structed_content import (
-    ImageStructed,
-    LinkStructed,
-    StructedContent,
-    VideoStructed,
-)
+from .structed_content import decode_structed_content
 
 
 class Reply(Struct):
@@ -25,14 +20,13 @@ class Reply(Struct):
     @property
     def content(self):
         content: list[ContentItem] = []
-        data = Decoder(list[StructedContent]).decode(self.struct_content)
+        data = decode_structed_content(self.struct_content)
         for item in data:
             ins = item.insert
             if isinstance(ins, str):
                 if ins.strip():
                     content.extend(replace_sticker(ins))
-            elif isinstance(ins, VideoStructed):
-                v = ins.vod
+            elif v := ins.vod:
                 content.append(
                     Creator.video(
                         url_or_task=v.resolutions[0].url,
@@ -40,16 +34,22 @@ class Reply(Struct):
                         duration=v.duration,
                     )
                 )
-            elif isinstance(ins, LinkStructed):
-                link = ins.link_card
+            elif link := ins.link_card:
                 content.append(
                     Creator.link(
                         text=link.title,
                         url=link.origin_url,
                     )
                 )
-            elif isinstance(ins, ImageStructed):
-                content.append(Creator.image(url=ins.image))
+            elif url := ins.image:
+                content.append(Creator.image(url=url))
+            elif custom_emoticon := ins.custom_emoticon:
+                content.append(
+                    Creator.sticker(
+                        url=custom_emoticon.url,
+                        desc=ins.backup_text,
+                    )
+                )
         return content
 
 

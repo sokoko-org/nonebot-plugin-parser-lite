@@ -7,13 +7,7 @@ from ...creator import Creator
 from ...data import ContentItem
 from ...utils.format import format_num
 from .sticker import replace_sticker
-from .structed_content import (
-    ImageStructed,
-    LinkCard,
-    LinkStructed,
-    StructedContent,
-    VideoStructed,
-)
+from .structed_content import decode_structed_content
 
 
 class ViewType(IntEnum):
@@ -34,14 +28,13 @@ class Post(Struct):
     @property
     def content(self):
         content: list[ContentItem] = []
-        data = Decoder(list[StructedContent]).decode(self.structured_content)
+        data = decode_structed_content(self.structured_content)
         for item in data:
             ins = item.insert
             if isinstance(ins, str):
                 if ins.strip():
                     content.extend(replace_sticker(ins))
-            elif isinstance(ins, VideoStructed):
-                v = ins.vod
+            elif v := ins.vod:
                 content.append(
                     Creator.video(
                         url_or_task=v.resolutions[0].url,
@@ -49,16 +42,22 @@ class Post(Struct):
                         duration=v.duration,
                     )
                 )
-            elif isinstance(ins, LinkStructed):
-                link = ins.link_card
+            elif link := ins.link_card:
                 content.append(
                     Creator.link(
                         text=link.title,
                         url=link.origin_url,
                     )
                 )
-            elif isinstance(ins, ImageStructed):
-                content.append(Creator.image(url=ins.image))
+            elif url := ins.image:
+                content.append(Creator.graphic(image_url=url))
+            elif custom_emoticon := ins.custom_emoticon:
+                content.append(
+                    Creator.sticker(
+                        url=custom_emoticon.url,
+                        desc=ins.backup_text,
+                    )
+                )
         if self.view_type == ViewType.IMAGE:
             content.extend(Creator.images(self.images))
         return content
@@ -92,7 +91,6 @@ class PostData(Struct):
     forum: Forum
     user: User
     stat: Stat
-    link_card_list: list[LinkCard]
 
 
 class ResponseData(Struct):
@@ -129,10 +127,6 @@ class Response(Struct):
             share_count=format_num(self.stat.share_num + self.stat.forward_num),
             comment_count=format_num(self.stat.reply_num),
         )
-
-    @property
-    def share_info(self):
-        return self.data.post.link_card_list[0]
 
 
 decoder = Decoder(Response)

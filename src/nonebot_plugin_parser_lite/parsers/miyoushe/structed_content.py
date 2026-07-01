@@ -1,4 +1,5 @@
 from msgspec import Struct
+from msgspec.json import Decoder
 
 
 class Resolution(Struct):
@@ -17,21 +18,9 @@ class Video(Struct):
     resolutions: list[Resolution]
 
 
-class VideoStructed(Struct):
-    vod: Video
-
-
 class LinkCard(Struct):
     title: str
     origin_url: str
-
-
-class LinkStructed(Struct):
-    link_card: LinkCard
-
-
-class ImageStructed(Struct):
-    image: str
 
 
 class CustomEmoticon(Struct):
@@ -39,10 +28,21 @@ class CustomEmoticon(Struct):
     url: str
 
 
-class EmotionStructed(Struct):
-    backup_text: str
-    custom_emoticon: CustomEmoticon
+class InsertObject(Struct):
+    """大一统结构体：包含所有可能出现的单键对象。
+    没有出现的键在反序列化时会自动赋值为 None。
+    """
+
+    vod: Video | None = None
+    link_card: LinkCard | None = None
+    image: str | None = None
+    custom_emoticon: CustomEmoticon | None = None
+    backup_text: str | None = None
 
 
 class StructedContent(Struct):
-    insert: str | VideoStructed | LinkStructed | ImageStructed | EmotionStructed
+    insert: InsertObject | str
+
+
+def decode_structed_content(s: str) -> list[StructedContent]:
+    return Decoder(list[StructedContent]).decode(s) if s.strip() else []
