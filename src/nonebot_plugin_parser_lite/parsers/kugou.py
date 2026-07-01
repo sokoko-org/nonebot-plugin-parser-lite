@@ -7,7 +7,7 @@ from typing import ClassVar
 from msgspec import Struct, field
 from msgspec.json import Decoder
 
-from ..data import MediaContent, Platform
+from ..data import ContentItem, Platform
 from .base import BaseParser, MatchWithParams, ParseException, PlatformEnum, handle
 
 
@@ -171,7 +171,7 @@ class KuGouParser(BaseParser):
             raise ParseException(f"酷狗音乐解析失败: 歌词获取失败: {lyrics.info}")
         lyric = base64.b64decode(lyrics.content).decode(lyrics.charset)
         cover_url = playinfo.album_img.format(size=480)
-        contents: list[MediaContent] = [
+        contents: list[ContentItem] = [
             self.create_image(url=cover_url, need_send=False)
         ]
 

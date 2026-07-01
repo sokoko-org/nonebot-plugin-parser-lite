@@ -9,8 +9,8 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from .base import (
     BaseParser,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
@@ -136,7 +136,7 @@ class NCMParser(BaseParser):
         url_no_params = audio_url.split("?", 1)[0]
         ext = url_no_params.rsplit(".", 1)[-1].lower() if "." in url_no_params else ""
         audio_type = ext if ext in {"flac", "wav", "m4a", "aac", "mp3"} else "mp3"
-        contents: list[MediaContent] = []
+        contents: list[ContentItem] = []
 
         audio_name = f"{title}-{artist}.{audio_type}"
         audio = self.create_audio(

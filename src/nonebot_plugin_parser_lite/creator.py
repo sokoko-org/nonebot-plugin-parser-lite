@@ -9,8 +9,10 @@ from .data import (
     AudioContent,
     Author,
     Comment,
+    ContentItem,
     GraphicContent,
     ImageContent,
+    LinkContent,
     LivePhotoContent,
     MediaContent,
     Stats,
@@ -324,7 +326,7 @@ class Creator:
     @staticmethod
     def comment(
         author: Author,
-        content: Sequence[MediaContent | str | None],
+        content: Sequence[ContentItem],
         timestamp: int | None = None,
         stats: Stats | None = None,
         replies: list[Comment] | None = None,
@@ -353,3 +355,15 @@ class Creator:
             replies=replies,
             parent_author=parent_author,
         )
+
+    @staticmethod
+    def link(url: str, text: str | None = None):
+        """
+        创建链接内容
+
+        :param url: 链接地址
+        :param text: 链接文本
+        """
+        if text is None:
+            text = url
+        return LinkContent(url=url, text=text)

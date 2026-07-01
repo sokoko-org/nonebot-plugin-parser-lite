@@ -9,8 +9,8 @@ from ...utils.browser import BrowserManager
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
@@ -89,7 +89,7 @@ class DouyinParser(BaseParser):
             ),
             Note,
         )
-        content: list[MediaContent | str] = [data.aweme.detail.desc]
+        content: list[ContentItem] = [data.aweme.detail.desc]
         content.extend(data.aweme.content)
         comments = [
             self.create_comment(
@@ -139,7 +139,7 @@ class DouyinParser(BaseParser):
 
         data = video_or_article_decoder.decode(matched[1].strip())
         video_data = data.video_data
-        content: list[MediaContent | str] = [video_data.desc]
+        content: list[ContentItem] = [video_data.desc]
 
         content.extend(video_data.medias)
 

@@ -222,7 +222,7 @@ class Comment:
 
     author: Author
     """作者信息"""
-    content: Sequence[MediaContent | str | None]
+    content: Sequence[ContentItem]
     """评论内容，可以是文本或媒体对象"""
     timestamp: int | None
     """发布时间戳，单位秒"""
@@ -246,6 +246,16 @@ class Comment:
         return datetime.fromtimestamp(self.timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
 
+@dataclass(slots=True)
+class LinkContent:
+    """链接信息"""
+
+    url: str
+    """链接地址"""
+    text: str
+    """链接文本"""
+
+
 @dataclass(repr=False, slots=True)
 class ParseResult:
     """完整的解析结果"""
@@ -256,7 +266,7 @@ class ParseResult:
     """作者信息"""
     url: str
     """来源链接"""
-    content: Sequence[MediaContent | str]
+    content: Sequence[ContentItem]
     """资源/文本内容"""
     title: str | None = field(default=None)
     """标题"""
@@ -331,3 +341,15 @@ class ParseResultKwargs(TypedDict, total=False):
     """评论列表"""
     ai_summary: str | None
     """AI摘要"""
+
+
+ContentItem = (
+    LinkContent
+    | LivePhotoContent
+    | StickerContent
+    | GraphicContent
+    | ImageContent
+    | VideoContent
+    | AudioContent
+    | str
+)

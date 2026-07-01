@@ -8,7 +8,7 @@ from msgspec import Struct, field
 
 from ...constants import STICKER_CDN
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 from ...utils.format import replace_placeholder_to_sticker
 
 HEYBOX_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
@@ -46,7 +46,7 @@ class CommentItem(Struct):
     imgs: list[Img] = field(default_factory=list)
 
     @property
-    def content(self) -> list[MediaContent | str]:
+    def content(self) -> list[ContentItem]:
         content = replace_placeholder_to_sticker(
             self.text, HEYBOX_PATTERN, "heybox", size_resolver
         )
@@ -94,9 +94,9 @@ class Link(Struct):
     video_thumb: str | None = None
 
     @property
-    def content(self) -> list[MediaContent | str]:
+    def content(self) -> list[ContentItem]:
         """格式化的富文本内容"""
-        content: list[MediaContent | str] = []
+        content: list[ContentItem] = []
         try:
             parts = json.loads(self.text)
             for part in parts:
@@ -126,12 +126,12 @@ class BaseResult(Struct):
     link: Link
 
 
-def extract_from_html(html: str) -> list[MediaContent | str]:
+def extract_from_html(html: str) -> list[ContentItem]:
     """
     从 HTML 内容中按顺序提取纯文本和图片
 
     :param html: 包含知乎内容的 HTML 字符串。
-    :return: 由纯文本字符串和 MediaContent 对象组成的列表
+    :return: 由纯文本字符串和 ContentItem 对象组成的列表
     """
 
     soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")
@@ -140,7 +140,7 @@ def extract_from_html(html: str) -> list[MediaContent | str]:
     for noscript in soup.find_all("noscript"):
         noscript.decompose()
 
-    result: list[MediaContent | str] = []
+    result: list[ContentItem] = []
 
     for element in soup.descendants:
         # 处理图片标签

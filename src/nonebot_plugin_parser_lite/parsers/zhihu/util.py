@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 from ...download import DOWNLOADER
 
 VIDEO_HEADER = {**DOWNLOADER.headers, "x-app-za": "OS=webplayer", "x-referer": ""}
@@ -49,14 +49,14 @@ async def fetch_video(video_id: str, content_type: str):
     )
 
 
-async def parse_rich_content(html: str, content_type: str) -> list[MediaContent | str]:
+async def parse_rich_content(html: str, content_type: str) -> list[ContentItem]:
     """
     将知乎内容 HTML 解析为有顺序的文本 + 媒体列表
     """
     soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")
     _clean_soup(soup)
 
-    result: list[MediaContent | str] = []
+    result: list[ContentItem] = []
     buffer: list[str] = []
 
     async for item in _iter_media_and_text(soup, content_type):

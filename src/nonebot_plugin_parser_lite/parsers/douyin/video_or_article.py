@@ -5,7 +5,7 @@ from msgspec import Struct, field
 from msgspec.json import Decoder
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 
 
 class Avatar(Struct):
@@ -66,8 +66,8 @@ class VideoData(Struct):
     video: Video | None = None
 
     @property
-    def medias(self) -> list[MediaContent]:
-        medias: list[MediaContent] = []
+    def medias(self) -> list[ContentItem]:
+        medias: list[ContentItem] = []
         if self.images:
             medias.extend(
                 Creator.image(

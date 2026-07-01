@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from msgspec import Struct, field
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 
 
 class BlogInfo(Struct):
@@ -42,7 +42,7 @@ class Comment(Struct):
     """子评论"""
 
     @property
-    def content(self) -> list[MediaContent | str]:
+    def content(self) -> list[ContentItem]:
         """
         将 Lofter 评论内容解析为 [文本/贴纸] 序列。
 
@@ -63,7 +63,7 @@ class Comment(Struct):
         if not emote_map:
             return [text]
 
-        contents: list[MediaContent | str] = []
+        contents: list[ContentItem] = []
         text_len = len(text)
         i = 0
         last_plain_start = 0

@@ -3,8 +3,8 @@ from typing import ClassVar
 
 from ..base import (
     BaseParser,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
@@ -38,7 +38,7 @@ class QSMusicParser(BaseParser):
         music_data = shareDecoder.decode(
             raw
         ).loaderData.track_page.audioWithLyricsOption
-        contents: list[MediaContent] = [
+        contents: list[ContentItem] = [
             self.create_audio(
                 music_data.url,
                 duration=music_data.duration,

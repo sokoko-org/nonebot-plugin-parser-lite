@@ -2,13 +2,13 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 
 
-def parse_rich_content(html: str) -> list[MediaContent | str]:
+def parse_rich_content(html: str) -> list[ContentItem]:
     soup = BeautifulSoup(html.replace(r"\"", '"'), "html.parser")
 
-    result: list[MediaContent | str] = []
+    result: list[ContentItem] = []
     buffer: list[str] = []
 
     for item in _iter_media_and_text(soup):

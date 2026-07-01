@@ -5,7 +5,7 @@ from datetime import datetime
 from msgspec import Struct, field
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 
 
 class Views(Struct):
@@ -87,12 +87,12 @@ class TweetLegacy(Struct):
     extended_entities: ExtendedEntities | None = None
 
     @property
-    def medias(self) -> list[MediaContent]:
+    def medias(self) -> list[ContentItem]:
         """返回所有媒体的资源"""
         if not self.extended_entities or not self.extended_entities.media:
             return []
 
-        medias: list[MediaContent] = []
+        medias: list[ContentItem] = []
 
         for media in self.extended_entities.media:
             # 图片：直接用 media_url_https

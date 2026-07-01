@@ -3,7 +3,7 @@ from __future__ import annotations
 from msgspec import Struct, field
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 
 
 class Author(Struct):
@@ -28,9 +28,9 @@ class Comment(Struct):
     replies: list[Comment] = field(default_factory=list)
 
     @property
-    def content(self) -> list[MediaContent | str]:
+    def content(self) -> list[ContentItem]:
         """将原始 message + pictures 转为文本 + 媒体内容列表。"""
-        contents: list[MediaContent | str] = []
+        contents: list[ContentItem] = []
         text = self.message or ""
 
         for pic in self.pictures:

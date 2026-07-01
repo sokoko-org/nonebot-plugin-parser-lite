@@ -7,8 +7,8 @@ from ...exception import TipException
 from ...utils.cookie import ck2dict
 from ..base import (
     BaseParser,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
@@ -69,7 +69,7 @@ class KuaiShouParser(BaseParser):
 
         status = vision_video_detail_data.get("status")
         if status != 1:
-            raise TipException("不支持解析的视频") # 比如图集
+            raise TipException("不支持解析的视频")  # 比如图集
 
         try:
             response = await self.httpx.post(
@@ -110,12 +110,12 @@ class KuaiShouParser(BaseParser):
             comments = []
 
         visionVideoDetail = convert(vision_video_detail_data, VisionVideoDetail)
-        contents: list[MediaContent | str] = [visionVideoDetail.photo.caption]
+        content: list[ContentItem] = [visionVideoDetail.photo.caption]
         photoUrl = visionVideoDetail.photo.media_url
         cover_url = visionVideoDetail.photo.coverUrl
 
         if photoUrl:
-            contents.append(
+            content.append(
                 self.create_video(
                     url_or_task=photoUrl,
                     cover_url=cover_url,
@@ -124,7 +124,7 @@ class KuaiShouParser(BaseParser):
             )
 
         if not photoUrl and cover_url:
-            contents.append(self.create_image(url=cover_url))
+            content.append(self.create_image(url=cover_url))
 
         author = self.create_author(
             name=visionVideoDetail.author.name,
@@ -133,7 +133,7 @@ class KuaiShouParser(BaseParser):
         )
         return self.result(
             author=author,
-            content=contents,
+            content=content,
             stats=self.create_stats(
                 view_count=visionVideoDetail.photo.viewCount,
                 like_count=visionVideoDetail.photo.likeCount,

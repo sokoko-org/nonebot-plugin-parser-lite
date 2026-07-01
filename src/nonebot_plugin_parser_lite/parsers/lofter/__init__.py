@@ -6,8 +6,8 @@ from nonebot import logger
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
@@ -76,7 +76,7 @@ class LofterParser(BaseParser):
             comment_list = convert(com_data.get("data") or {}, CommentList)
 
         # 构建正文内容：文本 + 媒体
-        contents: list[MediaContent | str] = [post.text]
+        contents: list[ContentItem] = [post.text]
         contents.extend(post.medias)
 
         author = post.blogInfo

@@ -3,7 +3,7 @@ from msgspec import Struct, field
 from msgspec.json import Decoder
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 
 
 class UserInfo(Struct):
@@ -28,7 +28,7 @@ class Data(Struct):
     @property
     def content(self):
         soup = BeautifulSoup(self.html, "html.parser")
-        content: list[MediaContent | str] = []
+        content: list[ContentItem] = []
 
         for element in soup.find_all(["p", "img"]):
             if not isinstance(element, Tag):

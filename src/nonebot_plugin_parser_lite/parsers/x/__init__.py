@@ -6,8 +6,8 @@ from msgspec import convert
 from ...utils.format import format_num
 from ..base import (
     BaseParser,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     ParseException,
     ParseResult,
     Platform,
@@ -31,7 +31,7 @@ class XParser(BaseParser):
         tweet = raw.result.as_tweet
         legacy = tweet.legacy
 
-        content: list[MediaContent | str] = [legacy.text]
+        content: list[ContentItem] = [legacy.text]
         content.extend(legacy.medias)
 
         user = tweet.core.user_results.result

@@ -7,7 +7,7 @@ from httpx import AsyncClient
 
 from ...constants import STICKER_CDN
 from ...creator import Creator
-from ...data import Comment, MediaContent
+from ...data import Comment, ContentItem
 from .models import (
     Contents,
     FragAt,
@@ -106,7 +106,7 @@ async def get_post(tid: int) -> Posts:
     return parse_res(data)
 
 
-def build_content(posts: Posts) -> list[MediaContent | str]:
+def build_content(posts: Posts) -> list[ContentItem]:
     """
     构建帖子内容
 
@@ -114,7 +114,7 @@ def build_content(posts: Posts) -> list[MediaContent | str]:
 
     :return: 富文本内容列表
     """
-    contents: list[MediaContent | str] = [posts.thread.title]
+    contents: list[ContentItem] = [posts.thread.title]
 
     # 提取帖子正文
     for part in posts.objs[0].contents.objs:
@@ -166,13 +166,13 @@ def build_content(posts: Posts) -> list[MediaContent | str]:
     return contents
 
 
-def build_comment(contents: Contents) -> list[MediaContent | str]:
+def build_comment(contents: Contents) -> list[ContentItem]:
     """
     构建帖子评论内容
 
     :param contents: 内容碎片列表
     """
-    content: list[MediaContent | str] = []
+    content: list[ContentItem] = []
     for part in contents.objs:
         if isinstance(part, FragText):
             content.append(part.text)

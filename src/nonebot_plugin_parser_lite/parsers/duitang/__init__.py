@@ -6,8 +6,8 @@ from ...utils.format import format_num
 from ..base import (
     BaseParser,
     Comment,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     Platform,
     PlatformEnum,
     handle,
@@ -30,7 +30,7 @@ class DuiTangParser(BaseParser):
             subject_type=0,
         )
 
-        content: list[MediaContent | str] = [
+        content: list[ContentItem] = [
             blog_data.msg,
             self.create_image(blog_data.photo.path),
         ]
@@ -62,7 +62,7 @@ class DuiTangParser(BaseParser):
             subject_type=23,
         )
 
-        content: list[MediaContent | str] = [
+        content: list[ContentItem] = [
             atlas_data.desc,
             *self.create_images(atlas_data.img_list),
         ]
@@ -174,7 +174,7 @@ class DuiTangParser(BaseParser):
         comments: list[Comment] = []
 
         for root_comment in comment_data.object_list:
-            root_content: list[MediaContent | str] = [
+            root_content: list[ContentItem] = [
                 root_comment.content,
                 *self.create_images(root_comment.img_list),
             ]

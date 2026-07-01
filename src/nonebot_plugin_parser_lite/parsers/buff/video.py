@@ -1,7 +1,7 @@
 from msgspec import Struct
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 from .share import ShareData
 
 
@@ -26,7 +26,7 @@ class Video(Struct):
     share_data: ShareData
 
     @property
-    def content(self) -> list[MediaContent | str]:
+    def content(self) -> list[ContentItem]:
         return [
             self.body,
             *[

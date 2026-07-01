@@ -268,10 +268,29 @@
                             '<div class="absolute bottom-2 right-2 flex items-center bg-black/60 text-white h-[19px] px-1.5 rounded-[2px] text-[10px] font-mono">' ~ cont.display_duration ~ '</div>'
                             '</div>'
                         ) %}
-        {% endif %}
-    {% endfor %}
-    {% set _ = flush_images() %}
-    {{ html_parts|join("") | safe }}
+            {# 6. 链接卡片 #}
+        {% elif cls == 'LinkContent' %}
+            {% set _ = flush_images() %}
+            {% set _ = html_parts.append(
+                            '<a href="'~(url|e)~'"
+               target="_blank"
+               rel="noreferrer noopener"
+               class="block mt-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors duration-150 shadow-sm">
+                            <div class="px-3 py-2.5">
+                                <div class="flex items-center justify-between space-x-2">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-semibold text-slate-800 truncate">'~(cont.text|e)~'</div>
+                                        <div class="mt-0.5 text-xs text-slate-500 line-clamp-2">'~(cont.url|e)~'</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>'
+                    ) %}
+    {% endif %}
+{% endif %}
+{% endfor %}
+{% set _ = flush_images() %}
+{{ html_parts|join("") | safe }}
 {% endmacro %}
 {# 3. 内容+转发宏（Tailwind 样式 + is_repost） #}
 {% macro render_content(result, is_repost=False) %}

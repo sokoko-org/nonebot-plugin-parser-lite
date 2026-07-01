@@ -32,7 +32,7 @@ from ..creator import Creator, VideoDownloadFunc
 from ..data import (
     Author,
     Comment,
-    MediaContent,
+    ContentItem,
     ParseResult,
     ParseResultKwargs,
     Platform,
@@ -303,7 +303,7 @@ class BaseParser:
         cls,
         author: Author,
         url: str,
-        content: Sequence[MediaContent | str],
+        content: Sequence[ContentItem],
         **kwargs: Unpack[ParseResultKwargs],
     ) -> ParseResult:
         """构建解析结果"""
@@ -555,7 +555,7 @@ class BaseParser:
     def create_comment(
         self,
         author: Author,
-        content: Sequence[MediaContent | str | None],
+        content: Sequence[ContentItem],
         timestamp: int | None = None,
         stats: Stats | None = None,
         replies: list[Comment] | None = None,
@@ -580,3 +580,12 @@ class BaseParser:
             replies=replies,
             parent_author=parent_author,
         )
+
+    def create_link(self, url: str, text: str | None = None):
+        """
+        创建链接内容
+
+        :param url: 链接地址
+        :param text: 链接文本
+        """
+        return Creator.link(url=url, text=text)

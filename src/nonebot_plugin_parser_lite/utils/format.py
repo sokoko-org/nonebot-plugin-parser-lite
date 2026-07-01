@@ -4,7 +4,7 @@ from typing import Final, Literal
 
 from ..constants import STICKER_CDN
 from ..creator import Creator
-from ..data import MediaContent
+from ..data import ContentItem
 
 DEFAULT_PLACEHOLDER_PATTERN: Final = re.compile(r"\[(?P<name>[^]]+)\]")
 
@@ -14,7 +14,7 @@ def replace_placeholder_to_sticker(
     placeholder_pattern: re.Pattern[str],
     platform: str,
     size_resolver: Callable[[str], Literal["small", "medium"]] | None = None,
-) -> list[MediaContent | str]:
+) -> list[ContentItem]:
     """
     将包含表情占位符的文本拆分为文本与表情。
 
@@ -24,12 +24,12 @@ def replace_placeholder_to_sticker(
     :param size_resolver: 一个接收表情名称并返回 size 字符串的函数，例如
                           lambda name: "small" / "medium"
                           若为 None，则默认使用 "small"。
-    :return: 由普通文本和 MediaContent 组成的列表，顺序与原字符串一致。
+    :return: 由普通文本和 ContentItem 组成的列表，顺序与原字符串一致。
     """
     if not placeholder_pattern.search(text):
         return [text]
 
-    result: list[MediaContent | str] = []
+    result: list[ContentItem] = []
     last_pos = 0
 
     for match in placeholder_pattern.finditer(text):

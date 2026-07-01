@@ -6,7 +6,7 @@ from msgspec import Struct, field
 from msgspec.json import Decoder
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 from ...utils.format import replace_placeholder_to_sticker
 
 REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
@@ -141,7 +141,7 @@ class NoteDetail(Struct):
         return self.user.avatar
 
     @property
-    def medias(self) -> list[MediaContent]:
+    def medias(self) -> list[ContentItem]:
         """
         统一构建当前笔记的媒体内容列表
 
@@ -149,7 +149,7 @@ class NoteDetail(Struct):
         - 普通图片   -> ImageContent
         - 主视频     -> VideoContent (如果有视频，则第一张图是封面)
         """
-        items: list[MediaContent] = []
+        items: list[ContentItem] = []
         if self.video:
             items.append(
                 Creator.video(
@@ -200,7 +200,7 @@ class Comment(Struct):
     subComments: list[Comment] = field(default_factory=list)
 
     @property
-    def content(self) -> list[MediaContent | str]:
+    def content(self) -> list[ContentItem]:
         content = replace_placeholder_to_sticker(self.text, REDNOTE_PATTERN, "rednote")
         content.extend(
             Creator.image(

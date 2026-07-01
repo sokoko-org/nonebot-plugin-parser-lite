@@ -1,6 +1,6 @@
 from typing import ClassVar
 
-from ..data import MediaContent, Platform
+from ..data import ContentItem, Platform
 from .base import (
     BaseParser,
     MatchWithParams,
@@ -56,7 +56,7 @@ class KuWoParser(BaseParser):
         audio_content = self.create_audio(audio_url, duration, audio_name=audio_name)
         dis_dura = display_duration(music_data["duration"])
 
-        contents: list[MediaContent] = []
+        contents: list[ContentItem] = []
         if cover_url := music_data.get("pic"):
             contents.append(self.create_image(cover_url, need_send=False))
 

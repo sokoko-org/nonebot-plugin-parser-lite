@@ -28,8 +28,8 @@ from ..base import (
     Author,
     BaseParser,
     Comment,
+    ContentItem,
     MatchWithParams,
-    MediaContent,
     ParseException,
     Platform,
     PlatformEnum,
@@ -440,7 +440,7 @@ class BilibiliParser(BaseParser):
         dynamic_title = dynamic_info.title
 
         # 主体内容：文字 + 图片
-        contents: list[MediaContent | str] = []
+        contents: list[ContentItem] = []
         contents.extend(await self._build_dynamic_contents(dynamic_info))
         # 统计数据
         stats = self._extract_dynamic_stats(dynamic_info)
@@ -481,7 +481,7 @@ class BilibiliParser(BaseParser):
 
     async def _build_dynamic_contents(
         self, dynamic_info: DynamicInfo
-    ) -> list[MediaContent | str]:
+    ) -> list[ContentItem]:
         """构建动态主体 contents：文字 + 图片。
 
         - 连续文本节点合并为一个字符串
@@ -492,7 +492,7 @@ class BilibiliParser(BaseParser):
         if not rich_nodes and not medias:
             return []
 
-        contents: list[MediaContent | str] = []
+        contents: list[ContentItem] = []
         text_buffer: list[str] = []
 
         def flush_text_buffer() -> None:
@@ -742,7 +742,7 @@ class BilibiliParser(BaseParser):
         )
 
         # 按顺序处理图文内容（参考 parse_read 的逻辑）
-        contents: list[MediaContent | str] = []
+        contents: list[ContentItem] = []
 
         for node in opus_data.gen_text_img():
             if isinstance(node, ImageNode):
@@ -858,7 +858,7 @@ class BilibiliParser(BaseParser):
 
         await self.raise_if_in_black_list(room_data.mid)
 
-        contents: list[MediaContent | str] = [room_data.detail]
+        contents: list[ContentItem] = [room_data.detail]
         # 下载封面
         if cover := room_data.cover:
             contents.append(self.create_image(cover))
@@ -1115,7 +1115,7 @@ class BilibiliParser(BaseParser):
 
     def _format_content_with_emote(
         self, raw: str, emote: dict[str, Any]
-    ) -> list[str | MediaContent]:
+    ) -> list[ContentItem]:
         """将原始 message + emote 渲染为媒体列表"""
         if not raw:
             return [""]
@@ -1124,10 +1124,10 @@ class BilibiliParser(BaseParser):
 
         length = len(raw)
         cursor = 0
-        parts: list[str | MediaContent] = []
+        parts: list[ContentItem] = []
 
-        # 预处理所有可用表情：表情文本及封装好的 MediaContent
-        emote_entries: list[tuple[str, MediaContent]] = []
+        # 预处理所有可用表情：表情文本及封装好的 ContentItem
+        emote_entries: list[tuple[str, ContentItem]] = []
         for e in emote.values():
             if e.get("type") == 4:
                 continue
@@ -1146,7 +1146,7 @@ class BilibiliParser(BaseParser):
         while cursor < length:
             best_pos = length  # 当前找到的最近表情位置
             best_end = cursor
-            best_media: MediaContent | None = None
+            best_media = None
 
             # 在 [cursor, length) 范围内寻找「起始位置最靠前」的一次表情命中
             for text, media in emote_entries:

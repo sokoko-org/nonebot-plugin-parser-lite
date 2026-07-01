@@ -3,7 +3,7 @@ import re
 from msgspec import Struct, field
 
 from ...creator import Creator
-from ...data import MediaContent
+from ...data import ContentItem
 from ...utils.format import replace_placeholder_to_sticker
 
 DOUYIN_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
@@ -69,8 +69,8 @@ class Aweme(Struct):
     music: Music | None = field(default=None)
 
     @property
-    def content(self) -> list[MediaContent | str]:
-        content: list[MediaContent | str] = [self.detail.desc.replace("\\n", "\n")]
+    def content(self) -> list[ContentItem]:
+        content: list[ContentItem] = [self.detail.desc.replace("\\n", "\n")]
         for image in self.detail.images:
             if image.livePhotoType == 1 and image.video:
                 content.append(
@@ -116,8 +116,8 @@ class Comment(Struct):
     ipLabel: str = ""
 
     @property
-    def content(self) -> list[MediaContent | str]:
-        content: list[MediaContent | str] = []
+    def content(self) -> list[ContentItem]:
+        content: list[ContentItem] = []
         content.extend(
             replace_placeholder_to_sticker(self.text, DOUYIN_PATTERN, "douyin")
         )
