@@ -272,7 +272,7 @@
         {% elif cls == 'LinkContent' %}
             {% set _ = flush_images() %}
             {% set _ = html_parts.append(
-                            '<a href="'~(url|e)~'"
+                            '<a href="'~(cont.url|e)~'"
                target="_blank"
                rel="noreferrer noopener"
                class="block mt-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors duration-150 shadow-sm">
