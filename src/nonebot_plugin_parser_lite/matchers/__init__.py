@@ -20,6 +20,7 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
+from ..data import MediaContent
 from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers import BilibiliParser
@@ -156,7 +157,7 @@ async def parser_handler(
     contents = list(result.content)
     if result.repost:
         contents.extend(result.repost.content)
-    has_media = any(not isinstance(c, str) and c.need_send for c in contents)
+    has_media = any(isinstance(c, MediaContent) and c.need_send for c in contents)
     if not has_media:
         return
     if pconfig.lazy_download:
