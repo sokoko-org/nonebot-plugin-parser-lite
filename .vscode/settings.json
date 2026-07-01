@@ -19,6 +19,7 @@
   "ruff.format.preview": false,
   "ruff.importStrategy": "useBundled",
   "ruff.organizeImports": false,
+  "autoDocstring.docstringFormat": "sphinx",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
