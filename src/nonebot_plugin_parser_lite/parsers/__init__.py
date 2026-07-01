@@ -11,6 +11,7 @@ from .kuaishou import KuaiShouParser
 from .kugou import KuGouParser
 from .kuwo import KuWoParser
 from .lofter import LofterParser
+from .miyoushe import MiyousheParser
 from .netease import NCMParser
 from .qsmusic import QSMusicParser
 from .rednote import RedNoteParser
@@ -33,6 +34,7 @@ __all__ = [
     "KuWoParser",
     "KuaiShouParser",
     "LofterParser",
+    "MiyousheParser",
     "NCMParser",
     "QSMusicParser",
     "RedNoteParser",

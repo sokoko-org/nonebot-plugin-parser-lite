@@ -60,6 +60,7 @@ class PlatformEnum(str, Enum):
     COOLAPK = "coolapk"
     ILLU = "illu"
     HUPU = "hupu"
+    MIYOUSHE = "miyoushe"
 
     def __str__(self) -> str:
         return self.value
