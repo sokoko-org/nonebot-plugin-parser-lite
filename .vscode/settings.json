@@ -3,7 +3,9 @@
     "PYTHONPATH": "${workspaceFolder}${pathSeparator}${env:PYTHONPATH}"
   },
   "python.analysis.autoImportCompletions": true,
-  "python.testing.pytestArgs": ["tests"],
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "[python]": {
@@ -18,8 +20,9 @@
   },
   "ruff.format.preview": false,
   "ruff.importStrategy": "useBundled",
-  "ruff.organizeImports": false,
+  "ruff.organizeImports": true,
   "autoDocstring.docstringFormat": "sphinx",
+  "python.analysis.importFormat": "relative",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
