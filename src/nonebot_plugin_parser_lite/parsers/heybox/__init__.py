@@ -13,6 +13,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .encrypt import build_url
 from .model import BaseResult
@@ -22,7 +23,6 @@ class HeyBoxParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.HEYBOX, display_name="小黑盒"
     )
-    x_xhh_tokenid: str = ""
 
     def __init__(self):
         super().__init__()
@@ -34,23 +34,30 @@ class HeyBoxParser(BaseParser):
                 "Accept": "application/json, text/plain, */*",
             }
         )
+        self.device_path = pconfig.config_dir / "heybox_device.txt"
+        self.device_id: str = ""
+
+    async def ensure_token(self):
+        if not self.device_id:
+            if await self.device_path.exists():
+                self.device_id = await self.device_path.read_text(encoding="utf-8")
+            else:
+                tab = await BrowserManager.new_tab(url="https://www.xiaoheihe.cn/")
+                self.device_id = tab.run_js("window.SMSdk.getDeviceId()", as_expr=True)
+                tab.close()
+                logger.info(f"成功获取到小黑盒tokenid: {self.device_id[:5]}...")
+                await self.device_path.write_text(self.device_id)
 
     @handle("api.xiaoheihe.cn/v3/bbs/app/api/web/share", params={"link_id": {}})
     @handle("xiaoheihe.cn/bbs/post_share", params={"link_id": {}})
     @handle("xiaoheihe.cn/app/bbs", r"link\/(?P<link_id>[A-Za-z0-9]+)")
     async def _parse(self, searched: MatchWithParams):
         link_id = searched["link_id"]
-
-        if not self.x_xhh_tokenid:
-            tab = await BrowserManager.new_tab(url="https://www.xiaoheihe.cn/")
-            self.x_xhh_tokenid = tab.run_js("window.SMSdk.getDeviceId()", as_expr=True)
-            logger.info(f"成功获取到小黑盒tokenid: {self.x_xhh_tokenid[:5]}...")
-            tab.close()
-
+        await self.ensure_token()
         response = await self.httpx.get(
             build_url(link_id),
             headers=self.headers,
-            cookies={"x_xhh_tokenid": self.x_xhh_tokenid},
+            cookies={"x_xhh_tokenid": self.device_id},
         )
         response.raise_for_status()
         res = response.json()
