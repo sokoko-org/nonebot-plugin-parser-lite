@@ -81,7 +81,7 @@ class Photo(Struct):
                 )
             )
         elif atlas := self.ext_params.atlas:
-            content.extend(atlas.img_urls)
+            content.extend(Creator.images(atlas.img_urls))
         return content
 
 
