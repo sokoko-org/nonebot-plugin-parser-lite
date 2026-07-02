@@ -40,13 +40,15 @@ class HeyBoxParser(BaseParser):
     async def ensure_token(self):
         if not self.device_id:
             if await self.device_path.exists():
-                self.device_id = await self.device_path.read_text(encoding="utf-8")
+                self.device_id = (
+                    await self.device_path.read_text(encoding="utf-8")
+                ).strip()
             else:
                 tab = await BrowserManager.new_tab(url="https://www.xiaoheihe.cn/")
                 self.device_id = tab.run_js("window.SMSdk.getDeviceId()", as_expr=True)
                 tab.close()
                 logger.info(f"成功获取到小黑盒tokenid: {self.device_id[:5]}...")
-                await self.device_path.write_text(self.device_id)
+                await self.device_path.write_text(self.device_id.strip())
 
     @handle("api.xiaoheihe.cn/v3/bbs/app/api/web/share", params={"link_id": {}})
     @handle("xiaoheihe.cn/bbs/post_share", params={"link_id": {}})
