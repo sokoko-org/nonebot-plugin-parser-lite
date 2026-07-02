@@ -120,9 +120,6 @@ plite_bili_video_codes=["avc", "av01", "hev", "unknown"]
 # 360p(16), 480p(32), 720p(64), 1080p(80), 1080p+(112), 1080p_60(116), 4k(120)
 plite_bili_video_quality=80
 
-# [必填] 快手 Cookie，此cookie无需登录态，首页匿名用户ck即可(只需要确保did字段存在)
-plite_ks_ck=""
-
 # [可选] 音频解析，是否需要上传群文件
 plite_need_upload_audio=False
 
