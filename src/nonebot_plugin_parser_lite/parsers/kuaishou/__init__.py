@@ -25,6 +25,7 @@ class KuaiShouParser(BaseParser):
     @handle("v.kuaishou", r"v\.kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("kuaishou", r"(?:www\.)?kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("chenzhongtech", r"(?:v\.m\.)?chenzhongtech\.com/fw/[A-Za-z\d._?%&+\-=/#]+")
+    @handle("m.gifshow.com", r"fw/photo/\d+")
     async def _parse_v_kuaishou(self, searched: MatchWithParams):
         url = f"https://{searched.url}"
         real_url = await self.get_final_url(url, headers=self.ios_headers)
