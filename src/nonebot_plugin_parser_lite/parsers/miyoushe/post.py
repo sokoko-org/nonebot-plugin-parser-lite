@@ -4,10 +4,8 @@ from msgspec import Struct
 from msgspec.json import Decoder
 
 from ...creator import Creator
-from ...data import ContentItem
 from ...utils.format import format_num
-from .sticker import replace_sticker
-from .structed_content import decode_structed_content
+from .structed_content import build_body
 
 
 class ViewType(IntEnum):
@@ -27,37 +25,7 @@ class Post(Struct):
 
     @property
     def content(self):
-        content: list[ContentItem] = []
-        data = decode_structed_content(self.structured_content)
-        for item in data:
-            ins = item.insert
-            if isinstance(ins, str):
-                if ins.strip():
-                    content.extend(replace_sticker(ins))
-            elif v := ins.vod:
-                content.append(
-                    Creator.video(
-                        url_or_task=v.resolutions[0].url,
-                        cover_url=v.cover,
-                        duration=v.duration,
-                    )
-                )
-            elif link := ins.link_card:
-                content.append(
-                    Creator.link(
-                        text=link.title,
-                        url=link.origin_url,
-                    )
-                )
-            elif url := ins.image:
-                content.append(Creator.graphic(image_url=url))
-            elif custom_emoticon := ins.custom_emoticon:
-                content.append(
-                    Creator.sticker(
-                        url=custom_emoticon.url,
-                        desc=ins.backup_text,
-                    )
-                )
+        content = build_body(self.structured_content)
         if self.view_type == ViewType.IMAGE:
             content.extend(Creator.images(self.images))
         return content

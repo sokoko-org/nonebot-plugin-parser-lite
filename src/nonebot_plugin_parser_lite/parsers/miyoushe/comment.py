@@ -4,10 +4,9 @@ from msgspec import Struct, field
 from msgspec.json import Decoder
 
 from ...creator import Creator
-from ...data import Comment, ContentItem
+from ...data import Comment
 from ...utils.format import format_num
-from .sticker import replace_sticker
-from .structed_content import decode_structed_content
+from .structed_content import build_body
 
 
 class Reply(Struct):
@@ -19,38 +18,7 @@ class Reply(Struct):
 
     @property
     def content(self):
-        content: list[ContentItem] = []
-        data = decode_structed_content(self.struct_content)
-        for item in data:
-            ins = item.insert
-            if isinstance(ins, str):
-                if ins.strip():
-                    content.extend(replace_sticker(ins))
-            elif v := ins.vod:
-                content.append(
-                    Creator.video(
-                        url_or_task=v.resolutions[0].url,
-                        cover_url=v.cover,
-                        duration=v.duration,
-                    )
-                )
-            elif link := ins.link_card:
-                content.append(
-                    Creator.link(
-                        text=link.title,
-                        url=link.origin_url,
-                    )
-                )
-            elif url := ins.image:
-                content.append(Creator.image(url=url))
-            elif custom_emoticon := ins.custom_emoticon:
-                content.append(
-                    Creator.sticker(
-                        url=custom_emoticon.url,
-                        desc=ins.backup_text,
-                    )
-                )
-        return content
+        return build_body(self.struct_content)
 
 
 class User(Struct):

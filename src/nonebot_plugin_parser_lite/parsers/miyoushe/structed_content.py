@@ -1,6 +1,10 @@
 from msgspec import Struct
 from msgspec.json import Decoder
 
+from ...creator import Creator
+from ...data import ContentItem
+from .sticker import replace_sticker
+
 
 class Resolution(Struct):
     url: str
@@ -38,6 +42,7 @@ class InsertObject(Struct):
     image: str | None = None
     custom_emoticon: CustomEmoticon | None = None
     backup_text: str | None = None
+    video: str | None = None
 
 
 class StructedContent(Struct):
@@ -46,3 +51,41 @@ class StructedContent(Struct):
 
 def decode_structed_content(s: str) -> list[StructedContent]:
     return Decoder(list[StructedContent]).decode(s) if s.strip() else []
+
+
+def build_body(s: str):
+    content: list[ContentItem] = []
+    data = decode_structed_content(s)
+    for item in data:
+        ins = item.insert
+        if isinstance(ins, str):
+            if ins.strip():
+                content.extend(replace_sticker(ins))
+        elif v := ins.vod:
+            content.append(
+                Creator.video(
+                    url_or_task=v.resolutions[0].url,
+                    cover_url=v.cover,
+                    duration=v.duration,
+                )
+            )
+        elif link := ins.link_card:
+            content.append(
+                Creator.link(
+                    text=link.title,
+                    url=link.origin_url,
+                )
+            )
+        elif url := ins.image:
+            content.append(Creator.graphic(image_url=url))
+        elif custom_emoticon := ins.custom_emoticon:
+            content.append(
+                Creator.sticker(
+                    url=custom_emoticon.url,
+                    desc=ins.backup_text,
+                )
+            )
+        elif iframe := ins.video:
+            content.append(Creator.link(url=iframe))
+
+    return content
