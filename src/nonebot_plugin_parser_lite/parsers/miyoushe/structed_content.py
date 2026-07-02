@@ -8,7 +8,7 @@ class Resolution(Struct):
     bitrate: int
     size: int
     format: str
-    lable: str
+    label: str
     codec: str
 
 
