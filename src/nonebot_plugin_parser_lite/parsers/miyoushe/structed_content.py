@@ -1,3 +1,5 @@
+from urllib.parse import parse_qs, urlparse
+
 from msgspec import Struct
 from msgspec.json import Decoder
 
@@ -85,7 +87,13 @@ def build_body(s: str):
                     desc=ins.backup_text,
                 )
             )
-        elif iframe := ins.video:
-            content.append(Creator.link(url=iframe))
+        elif bili_iframe := ins.video:
+            qs = parse_qs(urlparse(bili_iframe).query, keep_blank_values=True)
+            if bvid := qs.get("bvid"):
+                content.append(
+                    Creator.link(
+                        url=f"https://www.bilibili.com/video/{bvid[0]}", text=bvid[0]
+                    )
+                )
 
     return content
