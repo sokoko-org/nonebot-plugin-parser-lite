@@ -455,7 +455,7 @@ class BaseParser:
 
     def create_graphic(
         self,
-        image_url: str,
+        url: str,
         img_name: str | None = None,
         alt: str | None = None,
         need_send: bool = True,
@@ -464,7 +464,7 @@ class BaseParser:
         """
         图片,此图片不参与九宫格
 
-        :param image_url: 图片 URL
+        :param url: 图片 URL
         :param img_name: 图片名称
         :param alt: 图片描述
         :param need_send: 是否发送
@@ -472,7 +472,7 @@ class BaseParser:
         """
 
         return Creator.graphic(
-            image_url=image_url,
+            url=url,
             img_name=img_name,
             alt=alt,
             need_send=need_send,

@@ -60,7 +60,7 @@ def _iter_media_and_text(soup: BeautifulSoup):
                 if src := (
                     attrs.get("data-gif") or attrs.get("data-src") or attrs.get("src")
                 ):
-                    yield Creator.image(url=src)
+                    yield Creator.graphic(url=src)
 
         elif isinstance(element, NavigableString):
             if text := str(element).strip():

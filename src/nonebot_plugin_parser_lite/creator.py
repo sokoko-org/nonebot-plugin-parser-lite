@@ -217,7 +217,7 @@ class Creator:
 
     @staticmethod
     def graphic(
-        image_url: str,
+        url: str,
         img_name: str | None = None,
         alt: str | None = None,
         need_send: bool = True,
@@ -226,7 +226,7 @@ class Creator:
         """
         图片,此图片不参与九宫格
 
-        :param image_url: 图片 URL
+        :param url: 图片 URL
         :param img_name: 图片名称
         :param alt: 图片描述
         :param need_send: 是否发送
@@ -234,7 +234,7 @@ class Creator:
         """
 
         image_task = DOWNLOADER.download_img(
-            url=image_url, img_name=img_name, ext_headers=ext_headers
+            url=url, img_name=img_name, ext_headers=ext_headers
         )
         return _with_need_send(GraphicContent(path_task=image_task, alt=alt), need_send)
 

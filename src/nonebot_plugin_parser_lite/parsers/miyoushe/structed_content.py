@@ -79,7 +79,7 @@ def build_body(s: str):
                 )
             )
         elif url := ins.image:
-            content.append(Creator.graphic(image_url=url))
+            content.append(Creator.graphic(url=url))
         elif custom_emoticon := ins.custom_emoticon:
             content.append(
                 Creator.sticker(

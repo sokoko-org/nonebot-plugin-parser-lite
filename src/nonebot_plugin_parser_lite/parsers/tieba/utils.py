@@ -131,7 +131,7 @@ def build_content(posts: Posts) -> list[ContentItem]:
         elif isinstance(part, FragImage):
             contents.append(
                 Creator.graphic(
-                    image_url=part.origin_src,
+                    url=part.origin_src,
                     ext_headers={"Referer": "https://tieba.baidu.com/"},
                 )
             )
