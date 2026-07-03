@@ -2,6 +2,7 @@ from .acfun import AcfunParser
 from .bilibili import BilibiliParser
 from .buff import BuffParser
 from .coolapk import CoolapkParser
+from .douban import DoubanParser
 from .douyin import DouyinParser
 from .duitang import DuiTangParser
 from .heybox import HeyBoxParser
@@ -25,6 +26,7 @@ __all__ = [
     "BilibiliParser",
     "BuffParser",
     "CoolapkParser",
+    "DoubanParser",
     "DouyinParser",
     "DuiTangParser",
     "HeyBoxParser",
