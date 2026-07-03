@@ -2,6 +2,7 @@ from hashlib import md5
 from typing import ClassVar, TypeVar
 
 from msgspec.json import Decoder
+from nonebot.log import logger
 
 from ..base import (
     BaseParser,
@@ -43,20 +44,25 @@ class HupuParser(BaseParser):
         bbs = await self.fetch(
             bbsDecoder, f"https://bbs.mobileapi.hupu.com/1/7.5.51/threads/{topic_id}"
         )
-        comment_data = await self.fetch(
-            commentDecoder,
-            "https://bbs.mobileapi.hupu.com/1/7.5.51/threads/getsThreadPostList",
-            {
-                "fid": "",
-                "tid": topic_id,
-                "order": "score",
-                "page": "1",
-            },
-        )
+        try:
+            comment_data = await self.fetch(
+                commentDecoder,
+                "https://bbs.mobileapi.hupu.com/1/7.5.51/threads/getsThreadPostList",
+                {
+                    "fid": "",
+                    "tid": topic_id,
+                    "order": "score",
+                    "page": "1",
+                },
+            )
+            comments = comment_data.comments
+        except Exception:
+            logger.exception("获取帖子评论失败")
+            comments = []
         return self.result(
             author=bbs.author_obj,
             content=bbs.content,
-            comments=comment_data.comments,
+            comments=comments,
             stats=bbs.stats,
             title=bbs.title,
             timestamp=bbs.timestamp,
