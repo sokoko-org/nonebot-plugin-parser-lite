@@ -42,7 +42,7 @@ class Config(BaseModel):
     """是否需要合并转发内容(大于四项时始终转发)"""
     plite_lazy_download: bool = False
     """是否开启懒下载模式，仅在用户请求时才下载视频"""
-    plite_lazy_downlaod_tip: bool = False
+    plite_lazy_download_tip: bool = False
     """懒下载是否发送命令提示"""
     plite_lazy_download_timeout: int = 30
     """懒下载模式等待命令超时时间"""
@@ -155,9 +155,9 @@ class Config(BaseModel):
         return self.plite_lazy_download
 
     @property
-    def lazy_downlaod_tip(self) -> bool:
+    def lazy_download_tip(self) -> bool:
         """懒下载是否发送命令提示"""
-        return self.plite_lazy_downlaod_tip
+        return self.plite_lazy_download_tip
 
     @property
     def lazy_download_timeout(self) -> int:

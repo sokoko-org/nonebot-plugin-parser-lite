@@ -159,7 +159,7 @@ plite_need_forward_contents=True
 plite_lazy_download=False
 
 # [可选] 懒下载是否发送命令提示
-plite_lazy_downlaod_tip=False
+plite_lazy_download_tip=False
 
 # [可选] 懒下载模式等待命令超时时间
 plite_lazy_download_timeout=30

@@ -158,7 +158,7 @@ async def parser_handler(
     if not has_media:
         return
     if pconfig.lazy_download:
-        if pconfig.lazy_downlaod_tip:
+        if pconfig.lazy_download_tip:
             download_cmd = ", ".join(pconfig.download_command)
             await UniMessage(
                 f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
