@@ -140,7 +140,6 @@ async def parser_handler(
     """统一的解析处理器"""
     cache_key = sr.searched.cache_key
 
-    # 1. 从缓存获取或重新解析
     result = _RESULT_CACHE.get(cache_key)
     if result is None:
         parser = get_parser(sr.keyword)
@@ -150,10 +149,8 @@ async def parser_handler(
     else:
         logger.debug(f"命中缓存: {cache_key}, 结果: {result!r}")
 
-    # 2. 渲染并发送
     summary_msg = await RENDERER.render_messages(result)
     await summary_msg.send()
-    # 若所有内容都是纯文本，则无需再发送媒体
     contents = list(result.content)
     if result.repost:
         contents.extend(result.repost.content)
@@ -161,11 +158,12 @@ async def parser_handler(
     if not has_media:
         return
     if pconfig.lazy_download:
-        download_cmd = ", ".join(pconfig.download_command)
-        await UniMessage(
-            f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
-            f"\n{download_cmd}"
-        ).send()
+        if pconfig.lazy_downlaod_tip:
+            download_cmd = ", ".join(pconfig.download_command)
+            await UniMessage(
+                f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
+                f"\n{download_cmd}"
+            ).send()
         LazyManager.add(session.user.id, result)
         return
 

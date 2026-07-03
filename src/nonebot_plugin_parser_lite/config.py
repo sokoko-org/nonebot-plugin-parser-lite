@@ -42,6 +42,8 @@ class Config(BaseModel):
     """是否需要合并转发内容(大于四项时始终转发)"""
     plite_lazy_download: bool = False
     """是否开启懒下载模式，仅在用户请求时才下载视频"""
+    plite_lazy_downlaod_tip: bool = False
+    """懒下载是否发送命令提示"""
     plite_lazy_download_timeout: int = 30
     """懒下载模式等待命令超时时间"""
     plite_download_command: list[str] = ["xz", "下载"]
@@ -106,6 +108,7 @@ class Config(BaseModel):
     def bili_ck(self) -> str | None:
         """bilibili cookies"""
         return self.plite_bili_ck
+
     @property
     def need_upload_audio(self) -> bool:
         """是否需要上传音频文件"""
@@ -150,6 +153,11 @@ class Config(BaseModel):
     def lazy_download(self) -> bool:
         """是否开启懒下载模式"""
         return self.plite_lazy_download
+
+    @property
+    def lazy_downlaod_tip(self) -> bool:
+        """懒下载是否发送命令提示"""
+        return self.plite_lazy_downlaod_tip
 
     @property
     def lazy_download_timeout(self) -> int:

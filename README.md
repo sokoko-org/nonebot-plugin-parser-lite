@@ -158,6 +158,9 @@ plite_need_forward_contents=True
 # [可选] 是否开启懒下载模式，仅在用户请求时才下载视频
 plite_lazy_download=False
 
+# [可选] 懒下载是否发送命令提示
+plite_lazy_downlaod_tip=False
+
 # [可选] 懒下载模式等待命令超时时间
 plite_lazy_download_timeout=30
 
