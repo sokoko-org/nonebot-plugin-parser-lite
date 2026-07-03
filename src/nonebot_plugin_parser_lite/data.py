@@ -301,7 +301,7 @@ class ParseResult:
         for cont in self.content:
             if isinstance(cont, VideoContent):
                 return await cont.get_cover_path()
-            elif isinstance(cont, ImageContent | GraphicContent):
+            elif isinstance(cont, (ImageContent, GraphicContent)):
                 return await cont.get_path()
         return None
 
