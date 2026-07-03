@@ -240,7 +240,7 @@ class BaseParser:
         """先重定向再解析"""
         redirect_url = await self.get_final_url(
             url,
-            headers=headers,
+            headers=headers or self.headers,
             use_curl_cffi=use_curl_cffi,
         )
 
