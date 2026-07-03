@@ -56,7 +56,9 @@ class MediaContent:
         if self._size_bytes is None:
             try:
                 self._size_bytes = await DOWNLOADER.head_size(
-                    url=self.path_task.url, ext_headers=self.path_task.ext_headers
+                    url=self.path_task.url,
+                    ext_headers=self.path_task.ext_headers,
+                    use_curl_cffi=self.path_task.use_curl_cffi,
                 )
             except Exception:
                 # HEAD 失败时不抛出，避免影响主流程
@@ -299,7 +301,7 @@ class ParseResult:
         for cont in self.content:
             if isinstance(cont, VideoContent):
                 return await cont.get_cover_path()
-            elif isinstance(cont, (ImageContent, GraphicContent)):
+            elif isinstance(cont, ImageContent | GraphicContent):
                 return await cont.get_path()
         return None
 

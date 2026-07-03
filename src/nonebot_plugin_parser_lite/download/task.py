@@ -22,6 +22,7 @@ class DownloadTaskWrapper(Awaitable[T], Generic[T]):
         "_result",
         "ext_headers",
         "url",
+        "use_curl_cffi",
     )
 
     def __init__(
@@ -31,12 +32,14 @@ class DownloadTaskWrapper(Awaitable[T], Generic[T]):
         kwargs: dict[str, Any],
         url: str,
         ext_headers: dict[str, str] | None = None,
+        use_curl_cffi: bool = False,
     ):
         self._func = func
         self._args = args
         self._kwargs = kwargs
         self.url: str = url
         self.ext_headers: dict[str, str] | None = ext_headers
+        self.use_curl_cffi: bool = use_curl_cffi
         self._has_result = False
         self._lock: asyncio.Lock | None = None
         self._result: T | None = None
@@ -72,8 +75,10 @@ def auto_task(
     - 被修饰函数签名必须包含：
         url: str
         ext_headers: dict[str, str] | None = None
+        use_curl_cffi: bool = False
     - 调用方必须使用关键字传参 url=...
     - ext_headers 可以省略，不传时等价于 None（使用默认 headers）
+    - use_curl_cffi 可以省略，不传时等价于 False（使用 httpx）
     """
 
     @wraps(func)
@@ -88,6 +93,7 @@ def auto_task(
         raw_url = kwargs["url"]
         # 2) ext_headers 允许缺省，默认为 None
         ext_headers = kwargs.get("ext_headers", None)
+        use_curl_cffi = kwargs.get("use_curl_cffi", False)
 
         # 3) 运行时类型校验（防御性）
         if not isinstance(raw_url, str):
@@ -100,6 +106,11 @@ def auto_task(
                 f"@auto_task 要求 {func.__qualname__} 的 ext_headers 类型为 dict[str, str] | None, "  # noqa: E501
                 f"但实际是 {type(ext_headers)!r}"
             )
+        if not isinstance(use_curl_cffi, bool):
+            raise TypeError(
+                f"@auto_task 要求 {func.__qualname__} 的 use_curl_cffi 类型为 bool, "
+                f"但实际是 {type(use_curl_cffi)!r}"
+            )
 
         url: str = raw_url
 
@@ -110,6 +121,7 @@ def auto_task(
             kwargs=dict(kwargs),
             url=url,
             ext_headers=ext_headers,
+            use_curl_cffi=use_curl_cffi,
         )
 
     return wrapper
