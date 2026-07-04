@@ -28,7 +28,6 @@ def display_duration(duration: int) -> str:
 
 # ref https://kw-api.cenguigui.cn/
 class KuWoParser(BaseParser):
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.KUWO, display_name="酷我音乐"
     )

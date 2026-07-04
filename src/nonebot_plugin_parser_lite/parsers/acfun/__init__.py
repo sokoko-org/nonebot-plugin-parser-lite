@@ -14,7 +14,6 @@ from .video import decoder
 
 
 class AcfunParser(BaseParser):
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.ACFUN, display_name="ACFUN"
     )

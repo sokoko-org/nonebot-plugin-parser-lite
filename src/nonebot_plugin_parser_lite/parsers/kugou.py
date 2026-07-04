@@ -97,7 +97,6 @@ class Lyrics(Struct):
 
 
 class KuGouParser(BaseParser):
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.KUGOU, display_name="酷狗音乐"
     )

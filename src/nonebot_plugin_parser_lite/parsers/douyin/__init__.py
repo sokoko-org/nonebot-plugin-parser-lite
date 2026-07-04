@@ -30,7 +30,6 @@ NOTE_PATTERN = re.compile(
 
 
 class DouyinParser(BaseParser):
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.DOUYIN, display_name="抖音"
     )

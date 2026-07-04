@@ -56,7 +56,6 @@ request_settings.set("impersonate", "chrome131")
 
 
 class BilibiliParser(BaseParser):
-    # 平台信息
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.BILIBILI, display_name="哔哩哔哩"
     )
