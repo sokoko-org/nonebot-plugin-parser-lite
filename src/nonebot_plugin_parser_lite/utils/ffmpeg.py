@@ -9,6 +9,8 @@ from .common import fmt_size
 
 
 class FFmpeg:
+    _available: bool | None = None
+
     @classmethod
     def generate_file_name(cls, *args: Path) -> str:
         """
@@ -38,6 +40,44 @@ class FFmpeg:
         if process.returncode != 0:
             error_msg = stderr.decode(errors="ignore").strip()
             raise RuntimeError(f"ffmpeg 执行失败: {error_msg}")
+
+    @classmethod
+    async def is_available(cls) -> bool:
+        if cls._available is not None:
+            return cls._available
+
+        try:
+            await cls.exec_ffmpeg(["-version"])
+        except Exception:
+            cls._available = False
+        else:
+            cls._available = True
+        return cls._available
+
+    @classmethod
+    async def remux_to_mp4(cls, input_path: Path, output_path: Path) -> Path:
+        """
+        将 ts / fmp4 等容器转封装为 mp4，不重编码。
+        """
+        cmd = [
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-probesize",
+            "50M",
+            "-analyzeduration",
+            "100M",
+            "-i",
+            str(input_path),
+            "-c",
+            "copy",
+            "-bsf:a",
+            "aac_adtstoasc",
+            str(output_path),
+        ]
+        await cls.exec_ffmpeg(cmd)
+        return output_path
 
     @classmethod
     async def merge_av(
