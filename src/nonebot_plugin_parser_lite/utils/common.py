@@ -37,7 +37,7 @@ class LimitedSizeDict(OrderedDict[K, V]):
     def __setitem__(self, key: K, value: V):
         super().__setitem__(key, value)
         if len(self) > self.max_size:
-            self.popitem(last=False)  # 移除最早添加的项
+            self.popitem(last=False)
 
 
 def make_filename(text: str) -> str:
@@ -46,8 +46,6 @@ def make_filename(text: str) -> str:
     """
     illegal_chars_pattern = r'[<>:"/\\|?*\x00-\x1f]'
     cleaned_text = re.sub(illegal_chars_pattern, "", text)
-
-    # 将空格替换为下划线，避免路径访问问题
     cleaned_text = cleaned_text.replace(" ", "_")
 
     return cleaned_text

@@ -10,21 +10,18 @@ from nonebot import logger
 
 from ..cache import CacheManager
 from ..exception import DownloadException, SizeLimitException
-from ..utils.common import safe_unlink
+from ..utils.common import make_filename, safe_unlink
 from .client import DownloadHttpClient
 from .models import (
     M3U8_SEGMENT_RETRIES,
     M3U8_SEGMENT_TIMEOUT,
     MIN_VALID_VIDEO_BYTES,
     check_media_size,
-    normalize_cache_file_name,
 )
 from .progress import rich_progress
 
 
 class M3U8Downloader:
-    """Download m3u8 playlists and produce one final video file."""
-
     def __init__(
         self,
         *,
@@ -39,6 +36,7 @@ class M3U8Downloader:
         self._fetch_text = fetch_text
         self._has_ffmpeg = has_ffmpeg
         self._remux_to_mp4 = remux_to_mp4
+        self._locks: dict[str, asyncio.Lock] = {}
 
     async def download(
         self,
@@ -50,12 +48,7 @@ class M3U8Downloader:
         use_curl_cffi: bool = False,
     ) -> Path:
         file_id = hashlib.md5(url.encode()).hexdigest()[:16]
-        fallback_name = f"{file_id}.mp4"
-        final_name = (
-            normalize_cache_file_name(video_name, fallback_name)
-            if video_name
-            else fallback_name
-        )
+        final_name = make_filename(video_name) if video_name else f"{file_id}.mp4"
         cache_dir = await CacheManager.ensure_dir(cache_type)
         final_video_path = cache_dir / final_name
         temp_ts_path = cache_dir / f"{file_id}_temp.ts"
@@ -63,6 +56,31 @@ class M3U8Downloader:
         if await final_video_path.exists():
             return final_video_path
 
+        lock = self._locks.setdefault(str(temp_ts_path), asyncio.Lock())
+        async with lock:
+            if await final_video_path.exists():
+                return final_video_path
+            return await self._download_locked(
+                url=url,
+                file_id=file_id,
+                final_name=final_name,
+                final_video_path=final_video_path,
+                temp_ts_path=temp_ts_path,
+                ext_headers=ext_headers,
+                use_curl_cffi=use_curl_cffi,
+            )
+
+    async def _download_locked(
+        self,
+        *,
+        url: str,
+        file_id: str,
+        final_name: str,
+        final_video_path: Path,
+        temp_ts_path: Path,
+        ext_headers: dict[str, str] | None,
+        use_curl_cffi: bool,
+    ) -> Path:
         logger.info(f"[StreamDownloader] 开始下载 m3u8 视频: {file_id}")
         try:
             ts_urls = await self._smart_parse_m3u8(

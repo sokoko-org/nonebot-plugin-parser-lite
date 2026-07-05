@@ -63,8 +63,6 @@ class DownloadResponse:
 
 
 class DownloadHttpClient:
-    """Adapter over httpx and curl_cffi with one request interface."""
-
     def __init__(self, timeout: Timeout):
         self._timeout = timeout
         self._httpx = AsyncClient(timeout=timeout, verify=False)

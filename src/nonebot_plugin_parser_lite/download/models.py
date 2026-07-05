@@ -6,7 +6,6 @@ from nonebot import logger
 
 from ..config import pconfig
 from ..exception import SizeLimitException, ZeroSizeException
-from ..utils.common import make_filename
 from .client import DownloadResponse
 
 STREAM_CHUNK_SIZE = 1024 * 1024
@@ -40,17 +39,14 @@ class StreamWritePlan:
 
 
 def make_part_path(file_path: Path) -> Path:
-    """Return the resumable temp file next to the final cache file."""
     return file_path.parent / f"{file_path.name}.part"
 
 
-def normalize_cache_file_name(file_name: str, fallback: str) -> str:
-    clean_name = make_filename(file_name).lstrip(".")
-    return clean_name or fallback
-
-
 async def file_size(file_path: Path) -> int:
-    return (await file_path.stat()).st_size if await file_path.exists() else 0
+    try:
+        return (await file_path.stat()).st_size
+    except FileNotFoundError:
+        return 0
 
 
 def parse_int_header(header_val: str | None) -> int | None:

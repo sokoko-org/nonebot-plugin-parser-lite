@@ -16,8 +16,6 @@ from .task import auto_task
 
 
 class StreamDownloader:
-    """Public downloader facade used by parsers and message creators."""
-
     def __init__(self):
         self.headers: dict[str, str] = COMMON_HEADER.copy()
         self.client = DownloadHttpClient(timeout=DOWNLOAD_TIMEOUT)

@@ -8,7 +8,7 @@ from nonebot import logger
 
 from ..cache import CacheManager
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
-from ..utils.common import generate_file_name, safe_unlink
+from ..utils.common import generate_file_name, make_filename, safe_unlink
 from .client import DownloadHttpClient, DownloadResponse
 from .models import (
     STREAM_CHUNK_SIZE,
@@ -19,7 +19,6 @@ from .models import (
     check_media_size,
     file_size,
     make_part_path,
-    normalize_cache_file_name,
     parse_content_range_total,
     parse_int_header,
     resolve_total_size,
@@ -28,8 +27,6 @@ from .progress import rich_progress
 
 
 class FileDownloader:
-    """Download regular files with retry and Range-based resume support."""
-
     def __init__(
         self,
         *,
@@ -75,12 +72,7 @@ class FileDownloader:
         cache_type: str,
         use_curl_cffi: bool,
     ) -> StreamDownloadTarget:
-        fallback_name = generate_file_name(url)
-        final_name = (
-            normalize_cache_file_name(file_name, fallback_name)
-            if file_name
-            else fallback_name
-        )
+        final_name = make_filename(file_name) if file_name else generate_file_name(url)
         cache_dir = await CacheManager.ensure_dir(cache_type)
         file_path = cache_dir / final_name
         return StreamDownloadTarget(
@@ -223,8 +215,8 @@ class FileDownloader:
         can_resume = request.partial_size > 0 and response.status_code == 206
 
         if request.partial_size > 0 and not can_resume:
-            logger.debug(
-                f"[StreamDownloader] 服务器未响应 206，重新下载: {response.url}"
+            logger.warning(
+                f"[StreamDownloader] 服务器未响应 206, 重新下载: {response.url}"
             )
 
         return StreamWritePlan(
