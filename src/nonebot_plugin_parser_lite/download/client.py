@@ -36,6 +36,9 @@ class DownloadResponse:
     def content(self) -> bytes:
         return self._raw.content
 
+    def json(self) -> Any:
+        return self._raw.json()
+
     def raise_for_status(self) -> None:
         self._raw.raise_for_status()
 
@@ -60,8 +63,6 @@ class DownloadResponse:
 
 
 class DownloadHttpClient:
-    """Adapter over httpx and curl_cffi with one request interface."""
-
     def __init__(self, timeout: Timeout):
         self._timeout = timeout
         self._httpx = AsyncClient(timeout=timeout, verify=False)
@@ -119,6 +120,32 @@ class DownloadHttpClient:
                 url,
                 headers=headers,
                 follow_redirects=True,
+            )
+        return DownloadResponse(resp)
+
+    async def post(
+        self,
+        url: str,
+        *,
+        headers: dict[str, str],
+        use_curl_cffi: bool = False,
+        **kwargs: Any,
+    ) -> DownloadResponse:
+        if use_curl_cffi:
+            resp = await self._curl.post(
+                url,
+                headers=headers,
+                allow_redirects=True,
+                timeout=self._curl_timeout(),
+                verify=False,
+                **kwargs,
+            )
+        else:
+            resp = await self._httpx.post(
+                url,
+                headers=headers,
+                follow_redirects=True,
+                **kwargs,
             )
         return DownloadResponse(resp)
 
