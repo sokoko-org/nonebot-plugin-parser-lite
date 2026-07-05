@@ -6,7 +6,7 @@ from .topic import decoder as postDecoder
 
 class FiveEPlayParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
-        name=PlatformEnum.FiveEPlay, display_name="5EPlay"
+        name=PlatformEnum.FIVEEPLAY, display_name="5EPlay"
     )
 
     # https://csgo.5eplay.com/forum/share/1050838

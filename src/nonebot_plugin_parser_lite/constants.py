@@ -62,7 +62,7 @@ class PlatformEnum(str, Enum):
     HUPU = "hupu"
     MIYOUSHE = "miyoushe"
     DOUBAN = "douban"
-    FiveEPlay = "5eplay"
+    FIVEEPLAY = "5eplay"
 
     def __str__(self) -> str:
         return self.value
