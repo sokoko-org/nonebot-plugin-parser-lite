@@ -332,9 +332,11 @@ class BilibiliParser(BaseParser):
                 # 有单独音频流时，走 av 合并
                 if self._audio_url:
                     return await DOWNLOADER.download_av_and_merge(
-                        self.video_url,
-                        self._audio_url,
-                        file_name=file_base,
+                        video_url=self.video_url,
+                        audio_url=self._audio_url,
+                        merge_name=file_base,
+                        video_name=f"{file_base}.mp4",
+                        audio_name=f"{file_base}.m4a",
                         ext_headers=self.ext_headers,
                     )
                 # 否则直接用流式下载

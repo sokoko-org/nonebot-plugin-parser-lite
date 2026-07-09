@@ -781,6 +781,7 @@ class StreamDownloader:
     ) -> Path:
         """
         下载音频
+
         :param url: 音频下载地址
         :param audio_name: 保存到本地的音频文件名，为空时根据 url 自动生成 mp3 文件名
         :param ext_headers: 额外的请求头，会与默认请求头合并
@@ -834,40 +835,46 @@ class StreamDownloader:
 
     async def download_av_and_merge(
         self,
-        v_url: str,
-        a_url: str,
-        file_name: str,
+        video_url: str,
+        audio_url: str,
+        merge_name: str,
+        video_name: str | None = None,
+        audio_name: str | None = None,
         ext_headers: dict[str, str] | None = None,
         use_curl_cffi: bool = False,
     ) -> Path:
         """
         下载音频和视频文件并合并
 
-        :param v_url: 视频流下载地址
-        :param a_url: 音频流下载地址
-        :param file_name: 合并后输出文件名(不含扩展名)
+        :param video_url: 视频流下载地址
+        :param audio_url: 音频流下载地址
+        :param merge_name: 合并后输出文件名(不含扩展名)
+        :param video_name: 保存到本地的视频文件名，为空时根据 url 自动生成 mp4 文件名
+        :param audio_name: 保存到本地的音频文件名，为空时根据 url 自动生成 mp3 文件名
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :param use_curl_cffi: 是否使用 curl_cffi 下载
-        :return: 合并后的视频文件本地路径
+        :return: 合并后的视频文件本地路径(mp4)
         :raise DownloadException: 下载或合并过程中发生错误时抛出
         """
         cache_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
-        output_path = cache_dir / f"{file_name}.mp4"
+        output_path = cache_dir / f"{merge_name}.mp4"
         if await output_path.exists():
             return output_path
         v_path, a_path = await asyncio.gather(
             self.download_video(
-                url=v_url,
+                url=video_url,
+                video_name=video_name,
                 ext_headers=ext_headers,
                 use_curl_cffi=use_curl_cffi,
             ),
             self.download_audio(
-                url=a_url,
+                url=audio_url,
+                audio_name=audio_name,
                 ext_headers=ext_headers,
                 use_curl_cffi=use_curl_cffi,
             ),
         )
-        return await FFmpeg.merge_av(v_path=v_path, a_path=a_path, file_name=file_name)
+        return await FFmpeg.merge_av(v_path=v_path, a_path=a_path, file_name=merge_name)
 
     @staticmethod
     @contextlib.contextmanager
