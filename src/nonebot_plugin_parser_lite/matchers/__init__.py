@@ -185,7 +185,7 @@ async def register_bili_matcher():
         @on_alconna(
             Alconna(
                 "bm",
-                Args["bv", r"re:BV[A-Za-z0-9]{10}"]["page?", int, 0],
+                Args["bv", r"re:BV[A-Za-z0-9]{10}"]["page?", int, 1],
             ),
             priority=3,
             block=True,
@@ -204,9 +204,12 @@ async def register_bili_matcher():
 
             audio_path = await DOWNLOADER.download_audio(
                 url=audio_url,
+                audio_name=f"{bvid}-{page_idx + 1}.m4a",
                 ext_headers=bilip.headers,
             )
-            converted_path = await FFmpeg.convert_audio_to_mp3(audio_path)
+            converted_path = await FFmpeg.convert_audio_to_mp3(
+                audio_path=audio_path, file_name=f"{bvid}-{page_idx + 1}.mp3"
+            )
             if pconfig.need_upload_audio:
                 await UniMessage(await UniHelper.file_seg(converted_path)).send()
             else:
