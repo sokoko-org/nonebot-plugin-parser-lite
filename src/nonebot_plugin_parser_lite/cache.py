@@ -26,14 +26,12 @@ class CacheManager:
     RENDER = "render"
     LOGO = "logo"
     STICKER = "sticker"
-    LEGACY = "legacy"
 
     _POLICIES: ClassVar[dict[str, CachePolicy]] = {
-        MEDIA: CachePolicy("media", 60 * 60),
-        RENDER: CachePolicy("render", 60 * 60),
+        MEDIA: CachePolicy("media", 60 * 60 * 2),
+        RENDER: CachePolicy("render", 60 * 60 * 2),
         LOGO: CachePolicy("logo", 60 * 60 * 24 * 30),
         STICKER: CachePolicy("sticker", 60 * 60 * 24 * 15),
-        LEGACY: CachePolicy("", 60 * 60),
     }
 
     @classmethod
@@ -79,32 +77,6 @@ class CacheManager:
         return total, expired
 
     @classmethod
-    async def _collect_legacy_expired_files(cls, now: float) -> tuple[int, list[Path]]:
-        policy = cls._POLICIES[cls.LEGACY]
-
-        total = 0
-        expired: list[Path] = []
-        if not await pconfig.cache_dir.exists():
-            return total, expired
-
-        async for item in pconfig.cache_dir.iterdir():
-            if await item.is_dir():
-                continue
-            if not await item.is_file():
-                continue
-
-            total += 1
-            try:
-                mtime = (await item.stat()).st_mtime
-            except OSError:
-                expired.append(item)
-                continue
-
-            if now - mtime >= policy.ttl_seconds:
-                expired.append(item)
-        return total, expired
-
-    @classmethod
     async def clean_expired(cls) -> None:
         now = time.time()
         cleanup_types = (cls.MEDIA, cls.RENDER, cls.LOGO, cls.STICKER)
@@ -115,10 +87,6 @@ class CacheManager:
             total, expired = await cls._collect_expired_files(cache_type, now)
             totals[cache_type] = total
             expired_files.extend(expired)
-
-        legacy_total, legacy_expired = await cls._collect_legacy_expired_files(now)
-        totals[cls.LEGACY] = legacy_total
-        expired_files.extend(legacy_expired)
 
         if not expired_files:
             logger.info(

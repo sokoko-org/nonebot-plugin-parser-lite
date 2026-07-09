@@ -33,7 +33,7 @@ __plugin_meta__ = PluginMetadata(
 )
 
 
-@scheduler.scheduled_job("interval", hours=1, id="parser-clean-local-cache")
+@scheduler.scheduled_job("interval", hours=2, id="parser-clean-local-cache")
 async def clean_plugin_cache() -> None:
     """周期性清理过期缓存文件，并重置解析状态。"""
 
@@ -42,7 +42,6 @@ async def clean_plugin_cache() -> None:
     except Exception as e:
         logger.exception(f"清理缓存文件时发生异常: {e!r}")
 
-    # 资源清理完毕后，清理 result 缓存并重连浏览器
     clear_result_cache()
     BrowserManager.clear_cache()
     BrowserManager.reconnect()
