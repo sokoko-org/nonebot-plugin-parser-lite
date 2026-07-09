@@ -781,6 +781,7 @@ class StreamDownloader:
     ) -> Path:
         """
         下载音频
+
         :param url: 音频下载地址
         :param audio_name: 保存到本地的音频文件名，为空时根据 url 自动生成 mp3 文件名
         :param ext_headers: 额外的请求头，会与默认请求头合并
