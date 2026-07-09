@@ -334,7 +334,7 @@ class BilibiliParser(BaseParser):
                     return await DOWNLOADER.download_av_and_merge(
                         self.video_url,
                         self._audio_url,
-                        file_name=f"{file_base}.mp4",
+                        file_name=file_base,
                         ext_headers=self.ext_headers,
                     )
                 # 否则直接用流式下载
