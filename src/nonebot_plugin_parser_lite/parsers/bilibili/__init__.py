@@ -1,7 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator
 import contextlib
-import json
 import re
 from typing import Any, ClassVar
 
@@ -19,6 +18,7 @@ from bilibili_api.utils.network import get_buvid
 from bilibili_api.video import Video
 from msgspec import convert
 from nonebot import logger
+import ujson
 
 from ...exception import DownloadException, TipException
 from ...utils.cookie import ck2dict
@@ -41,11 +41,7 @@ from .dynamic import DynamicData, DynamicInfo
 from .favlist import FavData
 from .live import RoomData
 from .opus import ImageNode, OpusItem, TextNode
-from .utils import (
-    AudioStreamDownloadURL,
-    VideoDownloadURLDataDetecter,
-    VideoStreamDownloadURL,
-)
+from .utils import VideoDownloadURLDataDetecter
 from .video import AIConclusion, VideoInfo
 
 # 选择客户端
@@ -968,13 +964,23 @@ class BilibiliParser(BaseParser):
             no_hdr=True,
         )
         video_stream = streams[0]
-        if not isinstance(video_stream, VideoStreamDownloadURL):
-            raise DownloadException("未找到可下载的视频流")
+        if video_stream is None:
+            async with aiofiles.open(
+                f"{bvid}_{avid}_not_found_.json", "w", encoding="utf-8"
+            ) as f:
+                await f.write(ujson.dumps(download_url_data))
+            raise DownloadException(
+                "未找到可下载的视频流, "
+                f"你可以将Bot目录下的 '{bvid}_{avid}_not_found.json'"
+                " 文件提供给开发者以定位问题"
+            )
         logger.debug(
-            f"视频流质量: {video_stream.video_quality.name}, 编码: {video_stream.video_codecs}"  # noqa: E501
+            f"视频流 {type(video_stream)} 视频流质量:"
+            f" {getattr(getattr(video_stream, 'video_quality', None), 'name', None)},"
+            f" 编码: {getattr(video_stream, 'video_codecs', None)}"
         )
         audio_stream = streams[1]
-        if not isinstance(audio_stream, AudioStreamDownloadURL):
+        if audio_stream is None:
             return video_stream.url, None
         logger.debug(f"音频流质量: {audio_stream.audio_quality.name}")
         return video_stream.url, audio_stream.url
@@ -985,7 +991,7 @@ class BilibiliParser(BaseParser):
             return
 
         async with aiofiles.open(self._cookies_file, "w", encoding="utf-8") as f:
-            await f.write(json.dumps(await self._credential.get_buvid_cookies()))
+            await f.write(ujson.dumps(await self._credential.get_buvid_cookies()))
 
     async def login_with_qrcode(self) -> bytes:
         """通过二维码登录获取哔哩哔哩登录凭证"""
@@ -1030,7 +1036,7 @@ class BilibiliParser(BaseParser):
             try:
                 async with aiofiles.open(self._cookies_file, encoding="utf-8") as f:
                     cookies_raw = await f.read()
-                cookies = json.loads(cookies_raw)
+                cookies = ujson.loads(cookies_raw)
                 self._credential = Credential.from_cookies(cookies)
                 return
             except Exception as e:
