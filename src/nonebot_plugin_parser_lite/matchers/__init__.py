@@ -204,7 +204,7 @@ async def register_bili_matcher():
 
             audio_path = await DOWNLOADER.download_audio(
                 url=audio_url,
-                audio_name=f"{bvid}-{page_idx + 1}.m4a",
+                audio_name=f"{bvid}-{page_idx + 1}_audio.m4s",
                 ext_headers=bilip.headers,
             )
             converted_path = await FFmpeg.convert_audio_to_mp3(

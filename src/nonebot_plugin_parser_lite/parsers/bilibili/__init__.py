@@ -331,8 +331,8 @@ class BilibiliParser(BaseParser):
                         video_url=self.video_url,
                         audio_url=self._audio_url,
                         merge_name=file_base,
-                        video_name=f"{file_base}.mp4",
-                        audio_name=f"{file_base}.m4a",
+                        video_name=f"{file_base}_video.m4s",
+                        audio_name=f"{file_base}_audio.m4s",
                         ext_headers=self.ext_headers,
                     )
                 # 否则直接用流式下载
