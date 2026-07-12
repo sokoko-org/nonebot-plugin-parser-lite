@@ -39,7 +39,6 @@ class LofterParser(BaseParser):
         blog_id = int(searched["blog_hex"], 16)
         post_id = int(searched["post_hex"], 16)
 
-        # 帖子详情
         post_resp = await self.httpx.post(
             "https://api.lofter.com/oldapi/post/detail.api",
             params={"product": "lofter-android-8.1.20"},
@@ -57,32 +56,27 @@ class LofterParser(BaseParser):
         )
         com_data = com_resp.json()
 
-        # 校验帖子状态
         meta = post_data.get("meta") or {}
         if meta.get("status") != 200:
             raise ParseException(f"Lofter 解析失败: {meta.get('msg', '未知错误')}")
 
-        # 解析帖子主体
         post_raw = (post_data.get("response") or {}).get("posts") or []
         if not post_raw:
             raise ParseException("Lofter 解析失败: 未找到帖子内容")
         post = convert(post_raw[0]["post"], Post)
 
-        # 解析评论
         if com_data.get("code") != 0:
             logger.warning(f"Lofter 获取评论失败: {com_data.get('msg')}")
             comment_list = CommentList(hotList=[], default=[])
         else:
             comment_list = convert(com_data.get("data") or {}, CommentList)
 
-        # 构建正文内容：文本 + 媒体
         contents: list[ContentItem] = [post.text]
         contents.extend(post.medias)
 
         author = post.blogInfo
         stats = post.postCount
 
-        # 构建评论
         comments = [
             self.create_comment(
                 author=self.create_author(
@@ -121,7 +115,7 @@ class LofterParser(BaseParser):
             title=post.title,
             content=contents,
             timestamp=post.publishTime // 1000,
-            url=f"https://www.lofter.com/{searched[0]}",
+            url=f"https://{post.blogInfo.blogName}.lofter.com/{searched[0]}",
             author=self.create_author(
                 name=author.blogNickName,
                 avatar_url=author.bigAvaImg,
