@@ -121,7 +121,7 @@ class LofterParser(BaseParser):
             title=post.title,
             content=contents,
             timestamp=post.publishTime // 1000,
-            url=f"https://www.lofter.com{searched[0]}",
+            url=f"https://www.lofter.com/{searched[0]}",
             author=self.create_author(
                 name=author.blogNickName,
                 avatar_url=author.bigAvaImg,
