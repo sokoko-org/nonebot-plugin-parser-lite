@@ -72,7 +72,7 @@ class Post(Struct):
     @property
     def text(self) -> str:
         soup = BeautifulSoup(self.content, "html.parser")
-        return soup.get_text("\n", strip=True)
+        return soup.get_text(strip=True)
 
     @property
     def medias(self) -> list[ContentItem]:
