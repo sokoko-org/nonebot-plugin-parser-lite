@@ -14,8 +14,21 @@ class ViewType(IntEnum):
     TEXT = 1
 
 
+class GameId(IntEnum):
+    bh3 = 1
+    ys = 2
+    bh2 = 3
+    wd = 4
+    dby = 5
+    sr = 6
+    zzz = 8
+    hna = 9
+    planet = 10
+
+
 class Post(Struct):
     post_id: str
+    game_id: GameId
     subject: str
     structured_content: str
     images: list[str]
@@ -29,6 +42,10 @@ class Post(Struct):
         if self.view_type == ViewType.IMAGE:
             content.extend(Creator.images(self.images))
         return content
+
+    @property
+    def url(self):
+        return f"https://m.miyoushe.com/{self.game_id.name}/#/article/{self.post_id}"
 
 
 class Forum(Struct):
@@ -85,6 +102,10 @@ class Response(Struct):
     @property
     def stat(self):
         return self.data.post.stat
+
+    @property
+    def url(self):
+        return self.post.url
 
     @property
     def stats(self):

@@ -21,15 +21,18 @@ class MiyousheParser(BaseParser):
     # https://www.miyoushe.com/ys/article/75247726
     @handle(
         "miyoushe.com",
-        r"/(?P<forum>[a-zA-Z]+)(.*)/#/article/(?P<post_id>\d+)",
+        r"/[a-zA-Z]+/#/article/(?P<post_id>\d+)",
     )
     @handle(
         "miyoushe.com",
-        r"/(?P<forum>[a-zA-Z]+)/article/(?P<post_id>\d+)",
+        r"/[a-zA-Z]+\?channel=beta/#/article/(?P<post_id>\d+)",
+    )
+    @handle(
+        "miyoushe.com",
+        r"/[a-zA-Z]+/article/(?P<post_id>\d+)",
     )
     async def _(self, searched: MatchWithParams):
         post_id = searched["post_id"]
-        forum = searched["forum"]
         res = await self.httpx.get(
             "https://bbs-api.miyoushe.com/post/wapi/getPostFull",
             params={"post_id": post_id},
@@ -56,7 +59,7 @@ class MiyousheParser(BaseParser):
                 avatar_url=post.user.avatar_url,
                 id=post.user.uid,
             ),
-            url=f"https://m.miyoushe.com/{forum}/#/article/{post_id}",
+            url=post.url,
             content=post.post.content,
             title=post.post.subject,
             stats=post.stats,
