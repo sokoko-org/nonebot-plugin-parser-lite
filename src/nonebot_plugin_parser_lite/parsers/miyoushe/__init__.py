@@ -22,7 +22,7 @@ class MiyousheParser(BaseParser):
     # https://www.miyoushe.com/ys/article/75247726
     @handle(
         "miyoushe.com",
-        r"/[a-zA-Z]+(?:\?[^/]+)?/(?:#/)?article/(?P<post_id>\d+)",
+        r"article/(?P<post_id>\d+)",
     )
     async def _(self, searched: MatchWithParams):
         post_id = searched["post_id"]
