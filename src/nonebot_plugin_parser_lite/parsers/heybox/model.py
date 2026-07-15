@@ -25,7 +25,11 @@ class User(Struct):
 
     @property
     def avatar_url(self) -> str:
-        return self.avatar + "\\" if "?" in self.avatar else self.avatar
+        return (
+            self.avatar + "\\"
+            if "?" in self.avatar and not self.avatar.endswith(">")
+            else self.avatar
+        )
 
 
 class Img(Struct):
