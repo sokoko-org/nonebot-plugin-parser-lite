@@ -91,18 +91,17 @@ class UniResponse:
 
 class UniHttpClient:
     def __init__(self, timeout: Timeout):
-        self._timeout = timeout
-        self._httpx = AsyncClient(timeout=timeout, verify=False)
-        self._curl = AsyncSession(impersonate="chrome146")
+        self._httpx = AsyncClient(timeout=timeout, verify=False, follow_redirects=True)
+        self._curl = AsyncSession(
+            impersonate="chrome146",
+            timeout=float(max(timeout.connect or 15, timeout.read or 240)),
+            verify=False,
+            allow_redirects=True,
+        )
 
     async def aclose(self) -> None:
         await self._httpx.aclose()
         await self._curl.close()
-
-    def _curl_timeout(self, timeout: float | None = None) -> float:
-        if timeout is not None:
-            return float(timeout)
-        return float(max(self._timeout.connect or 15, self._timeout.read or 240))
 
     async def head(
         self,
@@ -115,15 +114,11 @@ class UniHttpClient:
             resp = await self._curl.head(
                 url=url,
                 headers=headers,
-                allow_redirects=True,
-                timeout=self._curl_timeout(),
-                verify=False,
             )
         else:
             resp = await self._httpx.head(
                 url=url,
                 headers=headers,
-                follow_redirects=True,
             )
         return UniResponse(resp)
 
@@ -140,16 +135,12 @@ class UniHttpClient:
                 url,
                 params=params,
                 headers=headers,
-                allow_redirects=True,
-                timeout=self._curl_timeout(),
-                verify=False,
             )
         else:
             resp = await self._httpx.get(
                 url,
                 params=params,
                 headers=headers,
-                follow_redirects=True,
             )
         return UniResponse(resp)
 
@@ -171,9 +162,6 @@ class UniHttpClient:
                 headers=headers,
                 data=content or data,
                 json=json,
-                allow_redirects=True,
-                timeout=self._curl_timeout(),
-                verify=False,
             )
         else:
             resp = await self._httpx.post(
@@ -183,7 +171,6 @@ class UniHttpClient:
                 content=content,
                 data=data,
                 json=json,
-                follow_redirects=True,
             )
         return UniResponse(resp)
 
@@ -196,7 +183,6 @@ class UniHttpClient:
         url: str,
         *,
         headers: dict[str, str],
-        timeout: float | None = None,
         use_curl_cffi: bool = False,
     ) -> AsyncGenerator[UniResponse]:
         if use_curl_cffi:
@@ -204,17 +190,8 @@ class UniHttpClient:
                 method,
                 url,
                 headers=headers,
-                timeout=self._curl_timeout(timeout),
-                allow_redirects=True,
-                verify=False,
             ) as resp:
                 yield UniResponse(resp)
         else:
-            kwargs: dict[str, Any] = {
-                "headers": headers,
-                "follow_redirects": True,
-            }
-            if timeout is not None:
-                kwargs["timeout"] = timeout
-            async with self._httpx.stream(method, url, **kwargs) as resp:
+            async with self._httpx.stream(method, url, headers=headers) as resp:
                 yield UniResponse(resp)

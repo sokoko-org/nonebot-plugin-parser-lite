@@ -543,7 +543,6 @@ class StreamDownloader:
                         "GET",
                         ts_url,
                         headers=headers,
-                        timeout=15,
                         use_curl_cffi=use_curl_cffi,
                     ) as resp:
                         if resp.status_code != 200:
