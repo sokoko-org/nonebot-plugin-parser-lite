@@ -57,8 +57,8 @@ class UniResponse:
     def content(self) -> bytes:
         return self._raw.content
 
-    def json(self) -> Any:
-        return self._raw.json()
+    def json(self, **kw: Any) -> Any:
+        return self._raw.json(**kw)
 
     def raise_for_status(self):
         if self.status_code >= 400 or self.status_code < 200:
@@ -131,7 +131,7 @@ class UniHttpClient:
         self,
         url: str,
         *,
-        params: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
         headers: dict[str, str],
         use_curl_cffi: bool = False,
     ) -> UniResponse:
@@ -157,7 +157,7 @@ class UniHttpClient:
         self,
         url: str,
         *,
-        params: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
         headers: dict[str, str],
         content: str | bytes | None = None,
         data: dict[str, Any] | None = None,
