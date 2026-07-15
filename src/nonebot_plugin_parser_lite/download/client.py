@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncGenerator, AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any, Literal
@@ -100,8 +101,7 @@ class UniHttpClient:
         )
 
     async def aclose(self) -> None:
-        await self._httpx.aclose()
-        await self._curl.close()
+        await asyncio.gather(self._httpx.aclose(), self._curl.close())
 
     async def head(
         self,
