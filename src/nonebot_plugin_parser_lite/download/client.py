@@ -57,6 +57,9 @@ class UniResponse:
     def content(self) -> bytes:
         return self._raw.content
 
+    def json(self) -> Any:
+        return self._raw.json()
+
     def raise_for_status(self):
         if self.status_code >= 400 or self.status_code < 200:
             status_class = self.status_code // 100
@@ -128,12 +131,14 @@ class UniHttpClient:
         self,
         url: str,
         *,
+        params: dict[str, str] | None = None,
         headers: dict[str, str],
         use_curl_cffi: bool = False,
     ) -> UniResponse:
         if use_curl_cffi:
             resp = await self._curl.get(
                 url,
+                params=params,
                 headers=headers,
                 allow_redirects=True,
                 timeout=self._curl_timeout(),
@@ -142,7 +147,42 @@ class UniHttpClient:
         else:
             resp = await self._httpx.get(
                 url,
+                params=params,
                 headers=headers,
+                follow_redirects=True,
+            )
+        return UniResponse(resp)
+
+    async def post(
+        self,
+        url: str,
+        *,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str],
+        content: str | bytes | None = None,
+        data: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+        use_curl_cffi: bool = False,
+    ) -> UniResponse:
+        if use_curl_cffi:
+            resp = await self._curl.post(
+                url,
+                params=params,
+                headers=headers,
+                data=content or data,
+                json=json,
+                allow_redirects=True,
+                timeout=self._curl_timeout(),
+                verify=False,
+            )
+        else:
+            resp = await self._httpx.post(
+                url,
+                params=params,
+                headers=headers,
+                content=content,
+                data=data,
+                json=json,
                 follow_redirects=True,
             )
         return UniResponse(resp)
