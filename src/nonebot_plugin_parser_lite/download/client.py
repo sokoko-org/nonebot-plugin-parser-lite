@@ -152,7 +152,7 @@ class UniHttpClient:
         headers: dict[str, str],
         content: str | bytes | None = None,
         data: dict[str, Any] | None = None,
-        json: dict[str, Any] | None = None,
+        json: Any | None = None,
         use_curl_cffi: bool = False,
     ) -> UniResponse:
         if use_curl_cffi:
