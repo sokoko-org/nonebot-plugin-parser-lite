@@ -138,7 +138,7 @@ async def parser_handler(
     sr: SearchResult = Searched(),
 ):
     """统一的解析处理器"""
-    cache_key = sr.searched.cache_key
+    cache_key = sr.cache_key
 
     result = _RESULT_CACHE.get(cache_key)
     if result is None:
