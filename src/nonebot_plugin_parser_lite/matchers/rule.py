@@ -60,6 +60,10 @@ class SearchResult:
         self.keyword: str = keyword
         self.searched: MatchWithParams = searched
 
+    @property
+    def cache_key(self) -> str:
+        return f"{self.keyword}:{self.searched.cache_key}"
+
 
 class UrlSearchResult(SearchResult):
     """携带 URL 及其查询参数的匹配结果"""
