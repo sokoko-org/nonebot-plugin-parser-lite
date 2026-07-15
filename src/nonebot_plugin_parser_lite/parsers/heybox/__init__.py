@@ -50,6 +50,7 @@ class HeyBoxParser(BaseParser):
             tab.listen.start(targets="fp.min.js", method="get", res_type="Script")
             tab.get("https://www.xiaoheihe.cn/")
             tab.listen.wait()
+            tab.listen.stop()
             tab.stop_loading()
             self.device_id = tab.run_js("window.SMSdk.getDeviceId()", as_expr=True)
             tab.close()
