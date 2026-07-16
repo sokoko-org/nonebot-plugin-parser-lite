@@ -7,10 +7,24 @@ from typing import Any, Literal
 
 from curl_cffi import AsyncSession
 from curl_cffi import Response as CurlResponse
-from httpx import AsyncClient, Timeout, codes
+from curl_cffi.requests.exceptions import RequestException
+from httpx import AsyncClient, Timeout, TransportError, codes
 from httpx import Response as HttpxResponse
 
 from ..exception import ParseException
+
+
+class RetryableDownloadError(ParseException):
+    """当前下载失败, 但可以通过重试恢复"""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        keep_part: bool = True,
+    ):
+        super().__init__(message)
+        self.keep_part = keep_part
 
 
 class HTTPStatusError(ParseException):
@@ -81,13 +95,22 @@ class UniResponse:
         return self
 
     async def aiter_bytes(self, chunk_size: int | None = None) -> AsyncIterator[bytes]:
-        if isinstance(self._raw, HttpxResponse):
-            async for chunk in self._raw.aiter_bytes(chunk_size):
-                yield chunk
-            return
+        """
+        Iterate streaming content chunk by chunk in bytes.
 
-        async for chunk in self._raw.aiter_content():
-            yield chunk
+        :param chunk_size: _description_, defaults to None
+        :raises RetryableDownloadError: 发生可恢复的错误时抛出
+        :yield: bytes
+        """
+        try:
+            if isinstance(self._raw, HttpxResponse):
+                async for chunk in self._raw.aiter_bytes(chunk_size):
+                    yield chunk
+            else:
+                async for chunk in self._raw.aiter_content():
+                    yield chunk
+        except (TransportError, RequestException) as e:
+            raise RetryableDownloadError(str(e)) from e
 
 
 class UniHttpClient:
@@ -185,13 +208,16 @@ class UniHttpClient:
         headers: dict[str, str],
         use_curl_cffi: bool = False,
     ) -> AsyncGenerator[UniResponse]:
-        if use_curl_cffi:
-            async with self._curl.stream(
-                method,
-                url,
-                headers=headers,
-            ) as resp:
-                yield UniResponse(resp)
-        else:
-            async with self._httpx.stream(method, url, headers=headers) as resp:
-                yield UniResponse(resp)
+        try:
+            if use_curl_cffi:
+                async with self._curl.stream(
+                    method,
+                    url,
+                    headers=headers,
+                ) as resp:
+                    yield UniResponse(resp)
+            else:
+                async with self._httpx.stream(method, url, headers=headers) as resp:
+                    yield UniResponse(resp)
+        except (TransportError, RequestException) as e:
+            raise RetryableDownloadError(str(e)) from e

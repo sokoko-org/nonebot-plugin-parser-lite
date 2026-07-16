@@ -25,7 +25,7 @@ from ..constants import COMMON_HEADER, DOWNLOAD_TIMEOUT
 from ..exception import DownloadException, SizeLimitException, ZeroSizeException
 from ..utils.common import generate_file_name, make_filename, safe_unlink
 from ..utils.ffmpeg import FFmpeg
-from .client import UniHttpClient, UniResponse
+from .client import RetryableDownloadError, UniHttpClient, UniResponse
 from .task import auto_task
 
 _RE_RANGE_PATTERN = re.compile(r"bytes\s+(\d+)-\d+/(\d+|\*)")
@@ -35,7 +35,6 @@ class StreamDownloader:
     """Downloader class for downloading files with stream"""
 
     MAX_RETRIES = pconfig.max_retries
-    _RESUME_BACKTRACK_BYTES = 256 * 1024
     _SIZE_MISMATCH_TOLERANCE_BYTES = 10 * 1024
 
     def __init__(self):
@@ -142,7 +141,7 @@ class StreamDownloader:
         async def __download_task() -> None:
             if await file_path.exists():
                 return
-            await self.__download(
+            await self.__download_with_retry(
                 url=url,
                 file_path=file_path,
                 partial_path=partial_path,
@@ -166,7 +165,7 @@ class StreamDownloader:
 
         return file_path
 
-    async def __download(
+    async def __download_with_retry(
         self,
         url: str,
         file_path: Path,
@@ -179,9 +178,9 @@ class StreamDownloader:
 
         for retry in range(self.MAX_RETRIES + 1):
             try:
-                await self.__download_single(
+                await self.__download_once(
                     url=url,
-                    partial_path=partial_path,
+                    file_path=partial_path,
                     headers=headers,
                     desc=desc,
                     use_curl_cffi=use_curl_cffi,
@@ -191,225 +190,125 @@ class StreamDownloader:
             except (SizeLimitException, ZeroSizeException):
                 await safe_unlink(partial_path)
                 raise
-            except Exception as e:
+            except RetryableDownloadError as e:
                 last_error = e
+                if not last_error.keep_part:
+                    await safe_unlink(partial_path)
                 if retry >= self.MAX_RETRIES:
                     break
 
                 delay = min(2**retry, 8)
-                if await partial_path.exists():
-                    partial_size = (await partial_path.stat()).st_size
-                    logger.warning(
-                        f"下载失败，保留已下载的 {partial_size / 1024 / 1024:.2f} MB "
-                        f"数据, {delay} 秒后使用断点续传重试 ({retry + 1}/"
-                        f"{self.MAX_RETRIES}): {last_error}"
-                    )
-                else:
-                    logger.warning(
-                        f"下载失败，{delay} 秒后重试 ({retry + 1}/"
-                        f"{self.MAX_RETRIES}): {last_error}"
-                    )
+                logger.warning(
+                    f"下载失败，{delay} 秒后重试 ({retry + 1}/"
+                    f"{self.MAX_RETRIES}): {last_error}"
+                )
                 await asyncio.sleep(delay)
 
-        if last_error is not None:
-            if await partial_path.exists():
-                partial_size = (await partial_path.stat()).st_size
-                logger.warning(
-                    "下载失败但保留了部分文件 "
-                    f"({partial_size / 1024 / 1024:.2f} MB): {partial_path}"
-                )
-            raise DownloadException(
-                f"在 {self.MAX_RETRIES} 次重试后下载失败: {last_error}"
-            ) from last_error
+        raise DownloadException(
+            f"在 {self.MAX_RETRIES} 次重试后下载失败: {last_error}"
+        ) from last_error
 
-        raise DownloadException("下载失败")
+    def __validate_response(self, response: UniResponse, downloaded: int):
+        response.raise_for_status()
+        if downloaded > 0:
+            if response.status_code != 206:
+                raise RetryableDownloadError("服务器不支持断点续传", keep_part=False)
+            if content_range := response.headers.get("content-range"):
+                if match := _RE_RANGE_PATTERN.match(content_range):
+                    server_start = int(match[1])
 
-    async def __download_single(
+                    if server_start != downloaded:
+                        raise DownloadException(
+                            f"Content-Range 错误: 请求 {downloaded}, "
+                            f"返回 {server_start}"
+                        )
+
+    def __make_range_headers(
+        self, headers: dict[str, str], downloaded: int
+    ) -> dict[str, str]:
+        result = {**headers}
+        if downloaded > 0:
+            result["Range"] = f"bytes={downloaded}-"
+        return result
+
+    async def __download_once(
         self,
         url: str,
-        partial_path: Path,
+        file_path: Path,
         headers: dict[str, str],
         desc: str,
         use_curl_cffi: bool,
     ):
-        def parse_content_length(header_val: str | None) -> int | None:
-            if not header_val:
-                return None
-            try:
-                return int(header_val)
-            except ValueError:
-                return None
-
-        def check_declared_size(content_length: int) -> None:
-            if content_length == 0:
-                logger.warning(f"媒体 url: {url}, 大小为 0, 取消下载")
-                raise ZeroSizeException
-            file_size_mb = content_length / 1024 / 1024
-            if file_size_mb > pconfig.max_size:
-                logger.warning(
-                    f"媒体 url: {url} 大小 {file_size_mb:.2f} MB "
-                    f"超过 {pconfig.max_size} MB, 取消下载"
-                )
-                raise SizeLimitException(file_size_mb)
-
-        if not await partial_path.exists():
-            start_byte = 0
-        else:
-            partial_size = (await partial_path.stat()).st_size
-            if partial_size <= 0:
-                logger.debug("检测到异常part文件, 将重新下载")
-                start_byte = 0
-            else:
-                start_byte = max(0, partial_size - self._RESUME_BACKTRACK_BYTES)
-        request_headers = headers
-        if start_byte > 0:
-            request_headers = {**headers, "Range": f"bytes={start_byte}-"}
-
+        downloaded = (await file_path.stat()).st_size if await file_path.exists() else 0
         async with self.client.stream(
             "GET",
             url,
-            headers=request_headers,
+            headers=self.__make_range_headers(headers, downloaded),
             use_curl_cffi=use_curl_cffi,
         ) as response:
-            if response.status_code == 416 and await partial_path.exists():
-                partial_size = (await partial_path.stat()).st_size
-                if partial_size > 1024:
-                    logger.debug("文件大小合理，认为下载已完成")
-                    return
-                else:
-                    logger.warning("文件太小，删除并重新下载")
-                    await safe_unlink(partial_path)
-                    raise DownloadException("收到416, 但文件大小不合理")
+            self.__validate_response(response, downloaded)
+            content_length = response.headers.get("content-length")
 
-            if response.status_code not in (200, 206):
-                try:
-                    response.raise_for_status()
-                except Exception as e:
-                    raise DownloadException(str(e)) from e
-
-            supports_range = response.status_code == 206
-            if start_byte > 0 and not supports_range:
-                logger.warning("服务器不支持断点续传，将重新下载整个文件")
-                start_byte = 0
-
-            if supports_range:
-                start_byte = await self.__validate_content_range(
-                    response=response,
-                    partial_path=partial_path,
-                    requested_start=start_byte,
-                )
-
-            try:
-                response.raise_for_status()
-            except Exception as e:
-                raise DownloadException(str(e)) from e
-            content_length = parse_content_length(
-                response.headers.get("content-length")
-            )
-            total_length = (
-                start_byte + content_length
-                if supports_range and content_length is not None
-                else content_length
-            )
-            if total_length is not None:
-                check_declared_size(total_length)
-            await self.__write_to_file(
-                response=response,
-                file_path=partial_path,
-                desc=desc,
-                declared_length=total_length,
-                downloaded_start=start_byte,
-                url=url,
+            total_size = (
+                downloaded + int(content_length)
+                if content_length and downloaded > 0
+                else int(content_length)
+                if content_length
+                else None
             )
 
-    async def __write_to_file(
-        self,
-        response: UniResponse,
-        file_path: Path,
-        desc: str,
-        declared_length: int | None,
-        downloaded_start: int,
-        url: str,
-    ) -> None:
+            if total_size is not None:
+                if total_size == 0:
+                    raise ZeroSizeException
 
-        with self.rich_progress(desc, declared_length) as update_progress:
-            if downloaded_start > 0:
-                update_progress(advance=downloaded_start)
+                if total_size / 1024 / 1024 > pconfig.max_size:
+                    logger.warning(
+                        f"媒体 url: {url} 大小 {(total_size / 1024 / 1024):.2f} MB "
+                        f"超过 {pconfig.max_size} MB, 取消下载"
+                    )
+                    raise SizeLimitException(total_size / 1024 / 1024)
 
-            mode = "r+b" if downloaded_start > 0 else "wb"
-            downloaded_bytes = downloaded_start
+            mode = "ab" if downloaded > 0 else "wb"
 
-            async with aiofiles.open(file_path, mode) as file:
-                if downloaded_bytes > 0:
-                    await file.seek(downloaded_bytes)
-                    await file.truncate(downloaded_bytes)
+            current_size = downloaded
 
-                async for chunk in response.aiter_bytes(1024 * 1024):
-                    if not chunk:
-                        continue
+            with self.rich_progress(
+                desc,
+                total_size,
+            ) as update:
+                if downloaded:
+                    update(advance=downloaded)
 
-                    await file.write(chunk)
-                    chunk_len = len(chunk)
-                    downloaded_bytes += chunk_len
+                async with aiofiles.open(
+                    file_path,
+                    mode,
+                ) as f:
+                    async for chunk in response.aiter_bytes(1024 * 1024):
+                        await f.write(chunk)
 
-                    update_progress(advance=chunk_len)
+                        current_size += len(chunk)
 
-                    # 无 Content-Length 时，按实际已下载大小做限制
-                    if declared_length is None:
-                        file_size_mb = downloaded_bytes / 1024 / 1024
-                        if file_size_mb > pconfig.max_size:
+                        update(advance=len(chunk))
+
+                        # 没有Content-Length时限制大小
+                        if (
+                            total_size is None
+                            and current_size / 1024 / 1024 > pconfig.max_size
+                        ):
                             logger.warning(
-                                f"媒体 url: {url} 实际下载大小 {file_size_mb:.2f} MB 超过 {pconfig.max_size} MB, 取消下载"  # noqa: E501
+                                f"媒体 url: {url} 实际"
+                                f"下载大小 {(current_size / 1024 / 1024):.2f} MB "
+                                f"超过 {pconfig.max_size} MB, 取消下载"
                             )
-                            raise SizeLimitException(file_size_mb)
+                            raise SizeLimitException(current_size / 1024 / 1024)
 
-            actual_size = (await file_path.stat()).st_size
-            if actual_size == 0:
+            final_size = (await file_path.stat()).st_size
+
+            if final_size == 0:
                 raise ZeroSizeException
 
-            if declared_length is None:
-                return
-
-            if actual_size < declared_length:
-                diff = declared_length - actual_size
-                logger.warning(
-                    f"文件大小不匹配: 实际 {actual_size} bytes"
-                    f" , 预期 {declared_length} bytes"
-                )
-                logger.warning(
-                    f"差异: {diff} bytes "
-                    f"({round(((diff) / declared_length) * 100, 2)}%)"
-                )
-                if diff > self._SIZE_MISMATCH_TOLERANCE_BYTES:
-                    raise DownloadException(
-                        f"文件下载不完整: 实际 {actual_size} bytes, "
-                        f"预期 {declared_length} bytes"
-                    )
-
-    async def __validate_content_range(
-        self,
-        response: UniResponse,
-        partial_path: Path,
-        requested_start: int,
-    ) -> int:
-        content_range = response.headers.get("content-range")
-        if not content_range:
-            return requested_start
-
-        match = _RE_RANGE_PATTERN.match(content_range)
-        if not match:
-            return requested_start
-
-        response_start = int(match[1])
-        if response_start == requested_start:
-            return requested_start
-
-        logger.warning(
-            "Content-Range 起始位置不匹配: "
-            f"请求 {requested_start}, 实际 {response_start}，将重新下载"
-        )
-        await safe_unlink(partial_path)
-        raise DownloadException("Content-Range 起始位置不匹配")
+            if total_size is not None and final_size != total_size:
+                raise DownloadException(f"文件大小不匹配: {final_size}/{total_size}")
 
     @auto_task
     async def download_video(
