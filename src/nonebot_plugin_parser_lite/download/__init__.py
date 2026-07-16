@@ -335,14 +335,17 @@ class StreamDownloader:
         with self.rich_progress(desc, declared_length) as update_progress:
             if downloaded_start > 0:
                 update_progress(advance=downloaded_start)
-
-            mode = "r+b" if downloaded_start > 0 else "wb"
             downloaded_bytes = downloaded_start
 
+            if downloaded_start > 0:
+                async with aiofiles.open(file_path, "r+b") as file:
+                    await file.seek(downloaded_start)
+                    await file.truncate() 
+                mode = "ab"
+            else:
+                mode = "wb"
+
             async with aiofiles.open(file_path, mode) as file:
-                if downloaded_bytes > 0:
-                    await file.seek(downloaded_bytes)
-                    await file.truncate(downloaded_bytes)
 
                 async for chunk in response.aiter_bytes(1024 * 1024):
                     if not chunk:
