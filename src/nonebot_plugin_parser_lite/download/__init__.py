@@ -176,7 +176,7 @@ class StreamDownloader:
     ) -> None:
         last_error: Exception | None = None
 
-        for retry in range(self.MAX_RETRIES):
+        for retry in range(self.MAX_RETRIES + 1):
             try:
                 await self.__download_once(
                     url=url,
