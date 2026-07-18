@@ -168,6 +168,7 @@ class BilibiliParser(BaseParser):
         params={"p": {"default": "1", "as_int": True, "required": False}},
     )
     @handle("BV", r"^(?P<bvid>BV[0-9a-zA-Z]{10})(?:\s)?(?P<p>\d{1,3})?$")
+    @handle("bilibili.com/list/watchlater", params={"bvid": {}})
     async def _parse_bv(self, searched: MatchWithParams):
         """解析视频信息"""
         bvid = searched["bvid"]
