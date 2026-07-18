@@ -44,8 +44,8 @@ MAX_FORWARD_NODES = 90
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
 
 Theme = Literal["light", "dark"]
-DAY_START_HOUR = 6
-NIGHT_START_HOUR = 19
+DAY_START_HOUR = pconfig.day_start_hour
+NIGHT_START_HOUR = pconfig.night_start_hour
 
 
 def get_theme() -> Theme:

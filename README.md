@@ -187,6 +187,13 @@ plite_forward_text_threshold=1000
 
 # [可选] 最大下载重试次数
 plite_max_retries=3
+
+# 下面的设置用于主题颜色的自动切换
+# [可选] 白天开始时间(h)
+plite_day_start_hour=6
+
+# [可选] 夜间开始时间(h)
+plite_night_start_hour=19
 ```
 
 </details>
