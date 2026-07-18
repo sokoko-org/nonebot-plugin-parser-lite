@@ -151,6 +151,9 @@ class UniHelper:
         """
         message_id = uniseg.get_message_id(event)
         target = uniseg.get_target(event)
+        if target.private:
+            logger.warning("private message not support reaction")
+            return
 
         if target.adapter in (
             SupportAdapter.onebot11,
