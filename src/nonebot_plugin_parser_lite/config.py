@@ -3,7 +3,8 @@ from nonebot import get_driver, get_plugin_config
 import nonebot_plugin_localstore as _store
 from pydantic import BaseModel
 
-from .constants import BiliVideoCodecs, BiliVideoQuality, PlatformEnum
+from .constants import PlatformEnum
+from .utils.bilibili.video import BiliVideoCodecs, BiliVideoQuality
 
 
 class Config(BaseModel):

@@ -7,10 +7,10 @@ from typing import Any, Literal, TypedDict
 
 from anyio import Path
 
-from .cache import CacheManager
 from .constants import STICKER_CDN
 from .download import DOWNLOADER
 from .download.task import DownloadTaskWrapper
+from .utils.cache import CacheManager
 from .utils.ffmpeg import FFmpeg
 
 
