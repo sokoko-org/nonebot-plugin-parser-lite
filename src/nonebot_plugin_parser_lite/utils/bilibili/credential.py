@@ -30,7 +30,7 @@ JNrRuoEUXpabUzGB8QIDAQAB
 )
 CORRESPOND_CIPHER = PKCS1_OAEP.new(CORRESPOND_KEY, SHA256)
 
-LAST_REFRESH_TIME = 0
+LAST_CHECK_TIME = 0
 
 
 class Credential:
@@ -217,13 +217,11 @@ class Credential:
         """
         刷新 cookies
         """
-        global LAST_REFRESH_TIME
         new_cred: Credential = await _refresh_cookies(self)
         self.sessdata = new_cred.sessdata
         self.bili_jct = new_cred.bili_jct
         self.dedeuserid = new_cred.dedeuserid
         self.ac_time_value = new_cred.ac_time_value
-        LAST_REFRESH_TIME = time.time()
 
     @staticmethod
     def from_cookies(cookies: dict | None = None) -> "Credential":
@@ -269,7 +267,8 @@ async def _check_refresh(credential: Credential) -> bool:
     :raises CredentialInvalidException: cookie无效
     :return: 是否需要刷新
     """
-    if time.time() - LAST_REFRESH_TIME > 60 * 30:
+    global LAST_CHECK_TIME
+    if time.time() - LAST_CHECK_TIME > 60 * 30:
         result = (
             await CLIENT.get(
                 "https://passport.bilibili.com/x/passport-login/web/cookie/info",
@@ -278,7 +277,9 @@ async def _check_refresh(credential: Credential) -> bool:
         ).json()
         if result["code"] == -101:
             raise CookieInvalidException(result)
-        return result["data"]["refresh"]
+        need_refresh = result["data"]["refresh"]
+        LAST_CHECK_TIME = time.time()
+        return need_refresh
     return False
 
 
