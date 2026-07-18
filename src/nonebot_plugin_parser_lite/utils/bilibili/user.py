@@ -25,7 +25,7 @@ async def get_black_list(
     credential = credential or Credential()
     result = (
         await CLIENT.get(
-            url="https://api.bilibili.com/x/v2/reply",
+            url="https://api.bilibili.com/x/relation/blacks",
             params={"ps": page_size, "pn": page_index},
             cookies=credential.get_cookies(),
         )
