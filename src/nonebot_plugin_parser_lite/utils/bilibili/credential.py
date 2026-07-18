@@ -149,8 +149,7 @@ class Credential:
         """
         是否提供 ac_time_value
 
-        Returns:
-            bool: 是否提供 ac_time_value
+        :return: 是否提供 ac_time_value
         """
         return self.ac_time_value is not None and self.ac_time_value != ""
 
@@ -191,7 +190,7 @@ class Credential:
 
     def raise_for_no_ac_time_value(self):
         """
-        没有提供 ac_time_value 时抛出异常。
+        没有提供 ac_time_value 时抛出异常
         """
         if not self.has_ac_time_value():
             raise BiliHelperException("no ac_time_value provided")
@@ -200,8 +199,7 @@ class Credential:
         """
         检查是否需要刷新 cookies
 
-        Returns:
-            bool: cookies 是否需要刷新
+        :return: cookies 是否需要刷新
         """
         return await _check_refresh(self)
 
@@ -362,8 +360,7 @@ async def get_buvid() -> tuple[str, str]:
     """
     获取 buvid3 和 buvid4
 
-    Returns:
-        Tuple[str, str]: 第 0 项为 buvid3，第 1 项为 buvid4。
+    :return: 第 0 项为 buvid3，第 1 项为 buvid4。
     """
     global __buvid3, __buvid4
     if not __buvid3 or not __buvid4:

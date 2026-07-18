@@ -82,8 +82,7 @@ class QrCodeLogin:
         """
         检查二维码登录状态
 
-        Returns:
-            QrCodeLoginEvents: 二维码登录状态
+        :return: 二维码登录状态
         """
         result = (
             await CLIENT.get(
