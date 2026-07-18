@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="{{ theme }}">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,7 +13,6 @@
         <style>
             body {
                 font-family: "PingFang SC", sans-serif;
-                background-color: #e2e8f0;
                 -webkit-font-smoothing: antialiased;
                 margin: 15px;
             }
@@ -39,7 +38,7 @@
             }
         </style>
     </head>
-    <body class="flex justify-center break-all">{{ render_content(result) }}</body>
+    <body class="flex justify-center break-all bg-slate-200 dark:bg-slate-950">{{ render_content(result) }}</body>
     <script defer>
         document.addEventListener("DOMContentLoaded", function() {
             document

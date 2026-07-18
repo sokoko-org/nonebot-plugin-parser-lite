@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss --cwd ./src/nonebot_plugin_parser_lite/render/templates -i ../../../../tools/tailwind.input.css -o ./tailwind.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.2.2",
+    "tailwindcss": "4.2.2"
+  }
+}
