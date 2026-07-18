@@ -217,11 +217,13 @@ class Credential:
         """
         刷新 cookies
         """
+        global LAST_REFRESH_TIME
         new_cred: Credential = await _refresh_cookies(self)
         self.sessdata = new_cred.sessdata
         self.bili_jct = new_cred.bili_jct
         self.dedeuserid = new_cred.dedeuserid
         self.ac_time_value = new_cred.ac_time_value
+        LAST_REFRESH_TIME = time.time()
 
     @staticmethod
     def from_cookies(cookies: dict | None = None) -> "Credential":
@@ -267,7 +269,7 @@ async def _check_refresh(credential: Credential) -> bool:
     :raises CredentialInvalidException: cookie无效
     :return: 是否需要刷新
     """
-    if time.time() - LAST_REFRESH_TIME > 300:
+    if time.time() - LAST_REFRESH_TIME > 60 * 30:
         result = (
             await CLIENT.get(
                 "https://passport.bilibili.com/x/passport-login/web/cookie/info",
@@ -330,7 +332,7 @@ async def _refresh_cookies(credential: Credential) -> Credential:
     return new_credential
 
 
-async def  _confirm_refresh(
+async def _confirm_refresh(
     old_credential: Credential, new_credential: Credential
 ) -> None:
     await CLIENT.post(
