@@ -61,6 +61,10 @@ class Config(BaseModel):
     """纯文本文本长度阈值，超过此长度的文本将会强制转发(最大4500)"""
     plite_max_retries: int = 3
     """最大下载重试次数"""
+    plite_day_start_hour: int = 6
+    """白天开始时间(h)"""
+    plite_night_start_hour: int = 19
+    """黑夜开始时间(h)"""
 
     @property
     def nickname(self) -> str:
@@ -196,6 +200,16 @@ class Config(BaseModel):
     def max_retries(self) -> int:
         """最大下载重试次数"""
         return self.plite_max_retries
+
+    @property
+    def day_start_hour(self) -> int:
+        """白天开始时间(h)"""
+        return self.plite_day_start_hour
+
+    @property
+    def night_start_hour(self) -> int:
+        """黑夜开始时间(h)"""
+        return self.plite_night_start_hour
 
 
 # 初始化配置实例

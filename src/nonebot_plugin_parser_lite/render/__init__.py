@@ -1,9 +1,9 @@
 import base64
 from collections.abc import AsyncGenerator, Awaitable, Callable
-import datetime
+from datetime import datetime
 from io import BytesIO
 from itertools import chain
-from typing import Any, ClassVar, cast
+from typing import Any, ClassVar, Literal, cast
 import uuid
 
 from anyio import Path
@@ -42,6 +42,18 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
+
+Theme = Literal["light", "dark"]
+DAY_START_HOUR = pconfig.day_start_hour
+NIGHT_START_HOUR = pconfig.night_start_hour
+
+
+def get_theme() -> Theme:
+    """Return the theme for the current local time."""
+    current_time = datetime.now()
+    if DAY_START_HOUR <= current_time.hour < NIGHT_START_HOUR:
+        return "light"
+    return "dark"
 
 
 def split_text_by_length_with_punct(text: str, max_len: int) -> list[str]:
@@ -412,7 +424,7 @@ class Renderer:
         ordered.extend(await build_nodes(repost))
         return ordered
 
-    async def render_image(self, result: ParseResult) -> bytes:
+    async def render_image(self, result: ParseResult, *, theme: Theme) -> bytes:
         """使用 HTML 绘制通用社交媒体帖子卡片"""
         # 准备模板数据
         template_data = await self.resolve_parse_result(result)
@@ -442,10 +454,11 @@ class Renderer:
             template = env.get_template(template_name)
             render_path = (
                 self.templates_dir.parent.parent
-                / f"{datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html"
+                / f"{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html"
             )
             await render_path.write_text(
-                await template.render_async(result=template_data), encoding="utf8"
+                await template.render_async(result=template_data, theme=theme),
+                encoding="utf8",
             )
             logger.info(f"已生成调试 HTML: {render_path}")
 
@@ -454,6 +467,7 @@ class Renderer:
             template_name=template_name,
             templates={
                 "result": template_data,
+                "theme": theme,
             },
             pages={
                 "viewport": {"width": 620, "height": 100},
@@ -486,7 +500,7 @@ class Renderer:
                 "avatar_path": await safe_src(result.author, "get_avatar_path"),
             },
             "ai_summary": result.ai_summary,
-            "rendering_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "rendering_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "bot_name": _nickname,
         }
 
@@ -514,18 +528,19 @@ class Renderer:
     async def cache_or_render_image(self, result: ParseResult):
         """获取缓存图片（支持跨重启复用）
 
-        以解析结果的 URL（或其他稳定字段）为 key，在 cache_dir 下生成稳定文件名：
+        以当前主题和解析结果 URL 为 key，在 cache_dir 下生成稳定文件名：
         - 若文件已存在：直接使用，不再重新渲染
         - 若不存在：渲染并写入该文件
         """
-        cache_key = result.url
+        theme = get_theme()
+        cache_key = f"{theme}:{result.url}"
         file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.jpeg"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
         if await image_path.exists():
             result.render_image = image_path
         else:
-            image_raw = await self.render_image(result)
+            image_raw = await self.render_image(result, theme=theme)
             await image_path.write_bytes(image_raw)
             result.render_image = image_path
             if pconfig.use_base64:

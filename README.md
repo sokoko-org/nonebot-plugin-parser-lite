@@ -187,6 +187,13 @@ plite_forward_text_threshold=1000
 
 # [可选] 最大下载重试次数
 plite_max_retries=3
+
+# 下面的设置用于主题颜色的自动切换
+# [可选] 白天开始时间(h)
+plite_day_start_hour=6
+
+# [可选] 夜间开始时间(h)
+plite_night_start_hour=19
 ```
 
 </details>
@@ -199,6 +206,24 @@ plite_max_retries=3
 | 关闭解析 |            -            | SUPERUSER/OWNER/ADMIN |  是   | 群聊 |     关闭解析      |
 |    bm    | bv号或引用一个链接/卡片 |           -           |  否   | 群聊 |   下载 B 站音频   |
 |  blogin  |            -            |       SUPERUSER       |  是   | 全部 | 扫码获取 B 站凭证 |
+
+## 🎨 构建模板样式
+
+> 此处教程适用于已修改默认模板的用户
+
+首次构建前安装 Tailwind CSS 开发依赖：
+
+```shell
+npm install
+```
+
+修改 `src/nonebot_plugin_parser_lite/render/templates` 下的 Jinja 模板后，重新生成静态样式表：
+
+```shell
+npm run build:css
+```
+
+脚本会自动输出样式文件到渲染目录
 
 ## 🎉 致谢
 
