@@ -3,7 +3,6 @@ from typing import Any, Literal, Protocol, TypeVar, runtime_checkable
 
 from anyio import Path
 
-from .cache import CacheManager
 from .config import pconfig as pconfig
 from .data import (
     AudioContent,
@@ -21,6 +20,7 @@ from .data import (
 )
 from .download import DOWNLOADER
 from .download.task import DownloadTaskWrapper
+from .utils.cache import CacheManager
 
 T = TypeVar("T", bound=MediaContent)
 

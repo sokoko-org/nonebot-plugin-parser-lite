@@ -11,7 +11,6 @@ from nonebot import logger
 from nonebot_plugin_htmlrender import template_to_pic
 import qrcode
 
-from ..cache import CacheManager
 from ..config import _nickname, gconfig, pconfig
 from ..data import (
     AudioContent,
@@ -30,6 +29,7 @@ from ..exception import (
     SizeLimitException,
 )
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
+from ..utils.cache import CacheManager
 
 PLACEHOLDER_IMAGE = (
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"

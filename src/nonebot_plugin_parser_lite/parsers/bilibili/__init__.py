@@ -6,21 +6,27 @@ from typing import Any, ClassVar
 
 import aiofiles
 from anyio import Path
-from bilibili_api import HEADERS, Credential, request_settings, select_client
-from bilibili_api.article import Article
-from bilibili_api.dynamic import Dynamic
-from bilibili_api.exceptions import CookiesRefreshException
-from bilibili_api.favorite_list import get_video_favorite_list_content
-from bilibili_api.live import LiveRoom
-from bilibili_api.login_v2 import QrCodeLogin, QrCodeLoginEvents
-from bilibili_api.opus import Opus
-from bilibili_api.utils.network import get_buvid
-from bilibili_api.video import Video
 from msgspec import convert
 from nonebot import logger
 import ujson
 
 from ...exception import DownloadException, TipException
+from ...utils.bilibili.article import Article
+from ...utils.bilibili.client import HEADERS
+from ...utils.bilibili.comment import CommentResourceType, get_comments
+from ...utils.bilibili.credential import Credential, get_buvid
+from ...utils.bilibili.dynamic import Dynamic
+from ...utils.bilibili.exceptions import (
+    BiliHelperException,
+    CookieInvalidException,
+    CookiesRefreshException,
+)
+from ...utils.bilibili.favorite_list import get_video_favorite_list_content
+from ...utils.bilibili.live import LiveRoom
+from ...utils.bilibili.login import QrCodeLogin, QrCodeLoginEvents
+from ...utils.bilibili.opus import Opus
+from ...utils.bilibili.user import get_black_list
+from ...utils.bilibili.video import Video, VideoDownloadURLDataDetecter
 from ...utils.cookie import ck2dict
 from ...utils.format import format_num
 from ..base import (
@@ -41,14 +47,7 @@ from .dynamic import DynamicData, DynamicInfo
 from .favlist import FavData
 from .live import RoomData
 from .opus import ImageNode, OpusItem, TextNode
-from .utils import VideoDownloadURLDataDetecter
 from .video import AIConclusion, VideoInfo
-
-# 选择客户端
-select_client("curl_cffi")
-# 模拟浏览器，第二参数数值参考 curl_cffi 文档
-# https://curl-cffi.readthedocs.io/en/latest/impersonate.html
-request_settings.set("impersonate", "chrome131")
 
 
 class BilibiliParser(BaseParser):
@@ -61,7 +60,6 @@ class BilibiliParser(BaseParser):
         self.headers = HEADERS.copy()
         self._credential: Credential | None = None
         self._cookies_file = pconfig.config_dir / "bilibili_cookies.json"
-        self.ck_header = self.headers.copy()
         self.black_mids: list[int] | None = None
         """黑名单作者列表"""
         self._black_list_job_added: bool = False
@@ -74,61 +72,47 @@ class BilibiliParser(BaseParser):
             self.black_mids = []
             return
 
-        cookies = ck.get_cookies()
-        if not cookies:
-            logger.info("B站 Cookie 为空，跳过黑名单加载")
+        if not ck.has_sessdata():
+            logger.info("B站 Cookie 未配置，跳过黑名单加载")
             self.black_mids = []
             return
-
-        self.ck_header["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
-
-        base_url = "https://api.bilibili.com/x/relation/blacks"
-        page_size = 50
         black_mids: list[int] = []
+        page_size = 50
 
         try:
-            resp = await self.httpx.get(
-                base_url,
-                headers=self.ck_header,
-                params={"ps": page_size, "pn": 1},
-            )
-            resp.raise_for_status()
-            data: dict[str, Any] = resp.json()
-
-            code = data.get("code")
-            if code != 0:
-                logger.error(f"获取B站黑名单列表失败: code={code}, data={data}")
+            try:
+                data = await get_black_list(
+                    page_size=page_size, credential=await self.credential
+                )
+            except BiliHelperException as e:
+                logger.error(f"获取B站黑名单列表失败: {e.msg}")
                 self.black_mids = []
                 return
 
-            data_root = data.get("data", {})
-            first_list = data_root.get("list", [])
-            total = data_root.get("total", 0)
+            first_list = data["list"]
+            total = data["total"]
 
             black_mids.extend(obj["mid"] for obj in first_list)
-
-            # 计算剩余页数
             pages = (total + page_size - 1) // page_size if total > page_size else 1
-            for pn in range(2, pages + 1):
+            for page_index in range(2, pages + 1):
                 try:
-                    resp = await self.httpx.get(
-                        base_url,
-                        headers=self.ck_header,
-                        params={"ps": page_size, "pn": pn},
-                    )
-                    resp.raise_for_status()
-                    page_data: dict[str, Any] = resp.json()
-                    if page_data.get("code") != 0:
-                        logger.warning(f"获取B站黑名单第 {pn} 页失败: {page_data!r}")
+                    try:
+                        data = await get_black_list(
+                            page_size=page_size,
+                            page_index=page_index,
+                            credential=await self.credential,
+                        )
+                    except BiliHelperException as e:
+                        logger.warning(f"获取B站黑名单第 {page_index} 页失败: {e.msg}")
                         continue
-                    page_list = page_data.get("data", {}).get("list", [])
+                    page_list = data["list"]
                     black_mids.extend(obj["mid"] for obj in page_list)
                     logger.debug(
-                        f"黑名单第 {pn} 页加载完成, 当前共 {len(black_mids)} 个"
+                        f"黑名单第 {page_index} 页加载完成, 当前共 {len(black_mids)} 个"
                     )
                     await asyncio.sleep(0.2)
                 except Exception as e:
-                    logger.warning(f"请求B站黑名单第 {pn} 页异常: {e}")
+                    logger.warning(f"请求B站黑名单第 {page_index} 页异常: {e}")
                     continue
 
             self.black_mids = black_mids
@@ -279,23 +263,18 @@ class BilibiliParser(BaseParser):
         """
 
         video = await self._get_video(bvid=bvid, avid=avid)
-        # 转换为 msgspec struct
         video_info = convert(await video.get_info(), VideoInfo)
 
         await self.raise_if_in_black_list(video_info.owner.mid)
 
-        # 获取简介
         text = f"简介: {video_info.desc}" if video_info.desc else ""
-        # up
         author = self.create_author(
             name=video_info.owner.name,
             avatar_url=video_info.owner.face,
             id=str(video_info.owner.mid),
         )
-        # 处理分 p
         page_info = video_info.extract_info_with_page(page_num)
 
-        # 获取 AI 总结
         if self._credential:
             cid = await video.get_cid(page_info.index)
             ai_conclusion = await video.get_ai_conclusion(cid)
@@ -307,7 +286,6 @@ class BilibiliParser(BaseParser):
         url = f"https://bilibili.com/{video_info.bvid}"
         url += f"?p={page_info.index + 1}" if page_info.index > 0 else ""
 
-        # 获取真实视频 / 音频 URL
         v_url, a_url = await self.extract_download_urls(
             video=video, page_index=page_info.index
         )
@@ -386,7 +364,7 @@ class BilibiliParser(BaseParser):
             logger.debug(f"使用备用方法获取oid: {video_oid}")
 
         # 获取评论数据 - _fetch_comments方法已经处理好所有数据
-        comments = await self._fetch_comments(video_oid, 1)  # type=1 表示视频
+        comments = await self._fetch_comments(video_oid, CommentResourceType.VIDEO)
         processed_comments = comments
 
         # 构造 extra_data
@@ -647,14 +625,14 @@ class BilibiliParser(BaseParser):
         dynamic_id: int,
         dynamic_info: DynamicInfo,
         dynamic_info_data: dict[str, Any],
-    ) -> tuple[int, int]:
+    ) -> tuple[int, CommentResourceType]:
         """根据动态类型确定评论 oid / type"""
         # 1. 优先使用接口返回的 basic.comment_id_str / comment_type
         basic_info = dynamic_info_data.get("item", {}).get("basic", {}) or {}
         comment_id_str = basic_info.get("comment_id_str")
         comment_type = basic_info.get("comment_type")
         if comment_id_str and comment_type:
-            return int(comment_id_str), int(comment_type)
+            return int(comment_id_str), CommentResourceType(int(comment_type))
 
         # 2. 再根据 major_type 猜测
         major_info = (
@@ -667,18 +645,18 @@ class BilibiliParser(BaseParser):
         if major_type == "MAJOR_TYPE_ARCHIVE" and major_info:
             archive_data = major_info.get("archive", {})
             if aid := archive_data.get("aid"):
-                return int(aid), 1  # 视频
+                return int(aid), CommentResourceType.VIDEO  # 视频
 
         if major_type == "MAJOR_TYPE_OPUS" and major_info:
             opus_data = major_info.get("opus", {})
             if opus_id := opus_data.get("id") or opus_data.get("opus_id"):
-                return int(opus_id), 12  # 专栏 / 图文
+                return int(opus_id), CommentResourceType.ARTICLE  # 专栏 / 图文
 
         if major_type == "MAJOR_TYPE_DRAW" and major_info:
-            return dynamic_id, 11  # 图片动态
+            return dynamic_id, CommentResourceType.DYNAMIC_DRAW  # 图片动态
 
         # 3. 默认：普通动态
-        return dynamic_id, 17
+        return dynamic_id, CommentResourceType.DYNAMIC
 
     async def parse_opus(self, opus_id: int):
         """解析图文信息
@@ -790,7 +768,7 @@ class BilibiliParser(BaseParser):
         basic_title = opus_data.title
 
         # 构建图文动态URL，用于二维码生成
-        opus_id = bili_opus.get_opus_id()
+        opus_id = bili_opus.opus_id
         opus_url = f"https://www.bilibili.com/opus/{opus_id}"
 
         # 获取opus原始数据，用于提取评论参数
@@ -812,7 +790,9 @@ class BilibiliParser(BaseParser):
         # 根据opus类型选择正确的评论参数
         if comment_id_str and comment_type:
             # 使用opus数据中提供的comment_id_str和comment_type
-            comments = await self._fetch_comments(int(comment_id_str), comment_type)
+            comments = await self._fetch_comments(
+                int(comment_id_str), CommentResourceType(int(comment_type))
+            )
             logger.debug(
                 f"使用opus数据中提供的评论参数: oid={comment_id_str}, type={comment_type}"  # noqa: E501
             )
@@ -821,7 +801,7 @@ class BilibiliParser(BaseParser):
 
             # 默认为图文动态，使用content_id作为oid，type=12
             comments = await self._fetch_comments(
-                int(content_id), 12
+                int(content_id), CommentResourceType.ARTICLE
             )  # type=12 表示专栏/图文
             logger.debug(f"使用content_id作为opus评论参数: oid={content_id}, type=12")
 
@@ -954,7 +934,6 @@ class BilibiliParser(BaseParser):
         if video is None:
             video = await self._get_video(bvid=bvid, avid=avid)
 
-        # 获取下载数据
         download_url_data = await video.get_download_url(page_index=page_index)
         detecter = VideoDownloadURLDataDetecter(download_url_data)
         streams = detecter.detect_best_streams(
@@ -966,12 +945,12 @@ class BilibiliParser(BaseParser):
         video_stream = streams[0]
         if video_stream is None:
             async with aiofiles.open(
-                f"{video.__bvid}_{video.__aid}_not_found_.json", "w", encoding="utf-8"
+                f"{video.bvid}__not_found_.json", "w", encoding="utf-8"
             ) as f:
                 await f.write(ujson.dumps(download_url_data))
             raise DownloadException(
                 "未找到可下载的视频流, "
-                f"你可以将Bot目录下的 '{bvid}_{avid}_not_found.json'"
+                f"你可以将Bot目录下的 '{video.bvid}_not_found.json'"
                 " 文件提供给开发者以定位问题"
             )
         logger.debug(
@@ -996,10 +975,7 @@ class BilibiliParser(BaseParser):
     async def login_with_qrcode(self) -> bytes:
         """通过二维码登录获取哔哩哔哩登录凭证"""
         self._qr_login = QrCodeLogin()
-        await self._qr_login.generate_qrcode()
-
-        qr_pic = self._qr_login.get_qrcode_picture()
-        return qr_pic.content
+        return await self._qr_login.generate_qrcode()
 
     async def check_qr_state(self) -> AsyncGenerator[str]:
         """检查二维码登录状态"""
@@ -1053,34 +1029,27 @@ class BilibiliParser(BaseParser):
         else:
             logger.warning("`parser_bili_ck` 已过期, 请更新 ck")
 
-    async def _fetch_comments(self, oid: int, type: int) -> list[Comment]:
+    async def _fetch_comments(
+        self, oid: int, type: CommentResourceType
+    ) -> list[Comment]:
         """从 Bilibili API 获取评论数据，优先热评，失败时兜底普通评论"""
 
         try:
-            response = await self.httpx.get(
-                "https://api.bilibili.com/x/v2/reply",
-                headers=self.ck_header,
-                params={
-                    "oid": oid,
-                    "type": type,
-                    "sort": 1,  # 按点赞数排序
-                    "ps": 7,
-                    "pn": 1,
-                    "nohot": 1,
-                },
-            )
-            response.raise_for_status()
-            data = response.json()
-
-            if data.get("code") != 0 or not data.get("data"):
-                logger.warning(
-                    f"bili评论返回数据为空或错误: code={data.get('code')}, message={data.get('message')}"  # noqa: E501
+            try:
+                data = await get_comments(
+                    oid=oid,
+                    type=type,
+                    page_index=1,
+                    page_size=pconfig.max_comments,
+                    nohot=True,
+                    credential=await self.credential,
                 )
+            except BiliHelperException as e:
+                logger.warning(f"bili评论返回数据错误: {e.msg}")
                 return []
 
-            data_root = data["data"] or {}
-            upper_top = data_root.get("upper", {}).get("top")
-            replies_raw: list[dict[str, Any]] = data_root.get("replies") or []
+            upper_top = data.get("upper", {}).get("top")
+            replies_raw: list[dict[str, Any]] = data.get("replies") or []
 
             upper_list: list[dict[str, Any]] = [upper_top] if upper_top else []
 
@@ -1243,11 +1212,12 @@ class BilibiliParser(BaseParser):
             await self._init_credential()
             return self._credential
 
-        if not await self._credential.check_valid():
-            logger.warning("哔哩哔哩凭证已过期, 请重新配置")
+        try:
+            need_refresh = await self._credential.check_refresh()
+        except CookieInvalidException as e:
+            logger.warning(f"哔哩哔哩凭证已过期, 请重新配置: {e.msg}")
             return None
-
-        if await self._credential.check_refresh():
+        if need_refresh:
             logger.info("哔哩哔哩凭证需要刷新")
             if self._credential.has_ac_time_value() and self._credential.has_bili_jct():
                 if not (
@@ -1267,7 +1237,7 @@ class BilibiliParser(BaseParser):
                 await self._save_credential()
             else:
                 logger.warning(
-                    "哔哩哔哩凭证刷新需要包含 `SESSDATA`, `ac_time_value` 项"
+                    "哔哩哔哩凭证刷新需要包含 `bili_jct`, `ac_time_value` 项"
                 )
 
         return self._credential

@@ -9,10 +9,10 @@ require("nonebot_plugin_localstore")
 
 from nonebot_plugin_apscheduler import scheduler
 
-from .cache import CacheManager
 from .config import Config
 from .matchers import clear_result_cache
 from .utils.browser import BrowserManager
+from .utils.cache import CacheManager
 
 __plugin_meta__ = PluginMetadata(
     name="链接分享解析 Lite 版",

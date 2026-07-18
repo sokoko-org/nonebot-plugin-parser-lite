@@ -1,7 +1,283 @@
 from dataclasses import dataclass
+from enum import Enum, IntEnum
 import re
+from typing import Any
 
-from ...constants import BiliAudioQuality, BiliVideoCodecs, BiliVideoQuality
+from yarl import URL
+
+from .a2v import av2bv, bv2av
+from .client import CLIENT
+from .credential import Credential
+from .exceptions import BiliHelperException
+from .sign import encWbi, getWbiKeys
+
+
+class BiliVideoQuality(IntEnum):
+    """
+    视频的视频流分辨率枚举
+
+    :cvar _360P: 流畅 360P
+    :cvar _480P: 清晰 480P
+    :cvar _720P: 高清 720P60
+    :cvar _1080P: 高清 1080P
+    :cvar AI_REPAIR: 智能修复（人工智能修复画质）
+    :cvar _1080P_PLUS: 高清 1080P 高码率
+    :cvar _1080P_60: 高清 1080P 60 帧码率
+    :cvar _4K: 超清 4K
+    :cvar HDR: 真彩 HDR
+    :cvar DOLBY: 杜比视界
+    :cvar _8K: 超高清 8K
+    """
+
+    _360P = 16
+    _480P = 32
+    _720P = 64
+    _1080P = 80
+    AI_REPAIR = 100
+    _1080P_PLUS = 112
+    _1080P_60 = 116
+    _4K = 120
+    HDR = 125
+    DOLBY = 126
+    _8K = 127
+
+
+class BiliVideoCodecs(str, Enum):
+    """
+    视频的视频流编码枚举
+
+    :cvar HEV: HEVC(H.265)
+    :cvar AVC: AVC(H.264)
+    :cvar AV1: AV1
+    :cvar UNKNOWN: 未知
+    """
+
+    HEV = "hev"
+    AVC = "avc"
+    AV1 = "av01"
+    UNKNOWN = "unknown"
+
+    @classmethod
+    def from_codec(cls, codec: str) -> "BiliVideoCodecs":
+        """根据返回的 codec 字符串推断枚举值"""
+        codec = codec.lower()
+        if any(k in codec for k in ("hev", "hvc1", "hev1")):
+            return cls.HEV
+        if any(k in codec for k in ("avc",)):
+            return cls.AVC
+        return cls.AV1 if any(k in codec for k in ("av1", "av01")) else cls.UNKNOWN
+
+
+class BiliAudioQuality(IntEnum):
+    """
+    视频的音频流清晰度枚举
+
+    :cvar _64K: 64K
+    :cvar _132K: 132K
+    :cvar _192K: 192K
+    :cvar HI_RES: Hi-Res 无损
+    :cvar DOLBY: 杜比全景声
+    """
+
+    _64K = 30216
+    _132K = 30232
+    DOLBY = 30250
+    HI_RES = 30251
+    _192K = 30280
+
+
+class Video:
+    """
+    视频类，各种对视频的操作均在里面
+    """
+
+    bvid: str
+    aid: int
+
+    def __init__(
+        self,
+        bvid: None | str = None,
+        aid: None | int = None,
+        credential: Credential | None = None,
+    ):
+        """
+        :param bvid: BV 号. bvid 和 aid 必须提供其中之一, defaults to None
+        :param aid: AV 号. bvid 和 aid 必须提供其中之一, defaults to None
+        :param credential: Credential 类, defaults to None
+        """
+        if bvid:
+            self.bvid = bvid
+            self.aid = bv2av(bvid)
+        elif aid:
+            self.aid = aid
+            self.bvid = av2bv(aid)
+        else:
+            raise BiliHelperException("请至少提供 bvid 和 aid 中的其中一个参数")
+        self.credential: Credential = credential or Credential()
+        self.info: dict[str, Any] | None = None
+
+    async def get_info(self) -> dict[str, Any]:
+        """
+        获取视频信息。
+
+        :return: 调用 API 返回的结果。
+        """
+        if not self.info:
+            result = (
+                await CLIENT.get(
+                    url="https://api.bilibili.com/x/web-interface/view",
+                    params={"bvid": self.bvid, "aid": self.aid},
+                    cookies=self.credential.get_cookies(),
+                )
+            ).json()
+            if result["code"] != 0:
+                raise BiliHelperException(result)
+            self.info = result["data"]
+            assert self.info
+        return self.info
+
+    async def get_up_mid(self) -> int:
+        """
+        获取视频 up 主的 mid。
+
+        :return: up_mid
+        """
+        info = await self.get_info()
+        return info["owner"]["mid"]
+
+    async def is_episode(self) -> bool:
+        """
+        判断视频是否是番剧
+
+        :return: 是否是番剧
+        """
+        info = await self.get_info()
+        if redirect_url := info.get("redirect_url"):
+            url = URL(redirect_url)
+            if (
+                url.host == "www.bilibili.com"
+                and len(url.parts) >= 3
+                and (url.parts[1] == "bangumi" and url.parts[2] == "play")
+            ):
+                return True
+        return False
+
+    async def get_cid(self, page_index: int) -> int:
+        """
+        根据分 p 号获取稿件 cid
+
+        :param page_index: 分 p 号
+        :raises BiliHelperError: 参数不正确
+        :raises BiliHelperError: 分 p 不存在
+        :return: _description_
+        """
+        if page_index < 0:
+            raise BiliHelperException("分 p 号必须大于或等于 0。")
+
+        info = await self.get_info()
+        pages = info["pages"]
+
+        if len(pages) <= page_index:
+            raise BiliHelperException("不存在该分 p。")
+
+        page = pages[page_index]
+        return page["cid"]
+
+    async def get_download_url(
+        self,
+        page_index: int | None = None,
+        cid: int | None = None,
+        html5: bool = False,
+    ) -> dict:
+        """
+        获取视频下载信息
+
+        返回结果可以传入 `VideoDownloadURLDataDetecter` 进行解析。
+
+        page_index 和 cid 至少提供其中一个，其中 cid 优先级最高
+
+        :param page_index: 分 P 号，从 0 开始, defaults to None
+        :param cid: 分 P 的 ID, defaults to None
+        :param html5: 是否选择移动端 HTML5 播放流（仅支持 MP4 格式）此时获得的媒体流访问无需鉴权, defaults to False
+        :raises BiliHelperException: 传参有误
+        :return: 调用 API 返回的结果
+        """  # noqa: E501
+        if cid is None:
+            if page_index is None:
+                raise BiliHelperException("page_index 和 cid 至少提供一个。")
+
+            cid = await self.get_cid(page_index)
+
+        params = {
+            "qn": "127",
+            "fnval": 4048,
+            "fnver": 0,
+            "fourk": 1,
+            "gaia_source": "pre-load",
+            "isGaiaAvoided": "true",
+            "avid": self.aid,
+            "bvid": self.bvid,
+            "cid": cid,
+            "platform": "pc",
+            "from_client": "BROWSER",
+            "web_location": 1315873,
+            "try_look": 1
+        }
+        if html5:
+            params["platform"] = "html5"
+            params["high_quality"] = "1"
+        result = (
+            await CLIENT.get(
+                url="https://api.bilibili.com/x/player/wbi/playurl",
+                params=encWbi(params, *(await getWbiKeys())),
+                cookies=self.credential.get_cookies(),
+            )
+        ).json()
+        if result["code"] != 0:
+            raise BiliHelperException(result)
+        return result["data"]
+
+    async def get_ai_conclusion(
+        self,
+        cid: int | None = None,
+        page_index: int | None = None,
+        up_mid: int | None = None,
+    ) -> dict[str, Any]:
+        """
+        获取稿件 AI 总结结果
+
+        cid 和 page_index 至少提供其中一个，其中 cid 优先级最高
+
+        :param cid: 分 P 的 cid, defaults to None
+        :param page_index: 分 P 号，从 0 开始, defaults to None
+        :param up_mid: up 主的 mid, defaults to None
+        :raises BiliHelperError: 参数不正确
+        :return: 调用 API 返回的结果
+        """
+        if cid is None:
+            if page_index is None:
+                raise BiliHelperException("page_index 和 cid 至少提供一个。")
+
+            cid = await self.get_cid(page_index)
+
+        params = {
+            "aid": self.aid,
+            "bvid": self.bvid,
+            "cid": cid,
+            "up_mid": up_mid or await self.get_up_mid(),
+            "web_location": "333.788",
+        }
+        result = (
+            await CLIENT.get(
+                url="https://api.bilibili.com/x/web-interface/view/conclusion/get",
+                params=encWbi(params, *(await getWbiKeys())),
+                cookies=self.credential.get_cookies(),
+            )
+        ).json()
+        if result["code"] != 0:
+            raise BiliHelperException(result)
+        return result["data"]
+
 
 RE_PCDN_HOST = re.compile(
     r"\.mcdn\.bilivideo\.cn|szbdyd\.com|cos\.bilibili\.com/.+pcdn", re.IGNORECASE
