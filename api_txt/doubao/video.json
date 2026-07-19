@@ -1,0 +1,20 @@
+{
+    "code": 0,
+    "msg": "",
+    "data": {
+        "play_info": {
+            "main": "https://v6-default.365yg.com/091b68aba83d8fcf475be9da0ddcebe1/6a5c9c6b/video/tos/cn/tos-cn-v-9ecd54/oYVXDieiGqOWQgZHxfx6ppGxBLUMUIxgPbDRYA/?a=0&ch=0&cr=7&dr=3&lr=video_gen_watermark_dyn&cd=0%7C0%7C0%7C1&cv=1&br=617&bt=617&cs=4&ds=4&ft=Oi.pi77JWH6BMTZSjJr0PD1IN&mime_type=video_mp4&qs=0&rc=ZDNnOjw3NDdmNjtmNjo0NUBpM2t5Nzlrb285PDczNGY5M0BeXy8xNi1eXzIxLWJiMGMzYSMwZXFxcWduNDVhLS1kNjBzcw%3D%3D&btag=c0000e00008000&cquery=10iH&dy_q=1784450641&feature_id=069767e0b4f5d9d87fcf68b96cd224a7&l=20260719164401C34415E45793BBCEDE03",
+            "backup": "https://v26-default.365yg.com/ccee94cf63e6e52387c4ca35649dcebb/6a5c9c6b/video/tos/cn/tos-cn-v-9ecd54/oYVXDieiGqOWQgZHxfx6ppGxBLUMUIxgPbDRYA/?a=0&ch=0&cr=7&dr=3&lr=video_gen_watermark_dyn&cd=0%7C0%7C0%7C1&cv=1&br=617&bt=617&cs=4&ds=4&ft=Oi.pi77JWH6BMTZSjJr0PD1IN&mime_type=video_mp4&qs=0&rc=ZDNnOjw3NDdmNjtmNjo0NUBpM2t5Nzlrb285PDczNGY5M0BeXy8xNi1eXzIxLWJiMGMzYSMwZXFxcWduNDVhLS1kNjBzcw%3D%3D&btag=c0000e00008000&cquery=10iH&dy_q=1784450641&feature_id=069767e0b4f5d9d87fcf68b96cd224a7&l=20260719164401C34415E45793BBCEDE03",
+            "height": 1280,
+            "width": 720,
+            "definition": "1080p",
+            "poster_url": "https://p5-ex-gddgtc-sign.douyinpic.com/tos-cn-p-9ecd54/oYE1Q140YADXvQ4TmvIIBesgHY4PxKAj6qGr9h~tplv-noop.image?cquery=10iH&dy_q=1784450641&l=20260719164401C34415E45793BBCEDE03&x-expires=1784454251&x-signature=Op4UlBESpbeNfVCO95nftoC08%2F0%3D"
+        },
+        "user_info": {
+            "user_id": 511706721172652,
+            "user_name": "",
+            "nickname": "jojo"
+        },
+        "prompt": "配方：一个小白兔在一个白色的房间内，镜头渐渐靠近小白兔，然后小白兔微笑地说：Hello my friend。然后小白兔疯狂还很狂野并且大声的说：我是个扫福瑞福瑞福瑞福瑞福瑞福瑞扫福瑞我是个扫福瑞扫福瑞我是个扫福瑞我是个扫福瑞我是个扫福瑞我是个扫福瑞我是个扫福瑞我是个扫福瑞。全程都是现实风格。底下要有中文字幕和英文字幕。9:16。"
+    }
+}
