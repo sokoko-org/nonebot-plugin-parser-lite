@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Literal, TypedDict
@@ -224,7 +223,7 @@ class Comment:
 
     author: Author
     """作者信息"""
-    content: Sequence[ContentItem]
+    content: list[ContentItem]
     """评论内容，可以是文本或媒体对象"""
     timestamp: int | None
     """发布时间戳，单位秒"""
@@ -268,7 +267,7 @@ class ParseResult:
     """作者信息"""
     url: str
     """来源链接"""
-    content: Sequence[ContentItem]
+    content: list[ContentItem]
     """资源/文本内容"""
     title: str | None = field(default=None)
     """标题"""

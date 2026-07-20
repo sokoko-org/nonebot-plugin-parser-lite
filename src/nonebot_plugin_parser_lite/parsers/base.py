@@ -2,7 +2,7 @@
 
 from abc import ABC
 import asyncio
-from collections.abc import Callable, Coroutine, Sequence
+from collections.abc import Callable, Coroutine
 from re import Pattern, compile, escape
 from typing import (
     TYPE_CHECKING,
@@ -308,7 +308,7 @@ class BaseParser:
         cls,
         author: Author,
         url: str,
-        content: Sequence[ContentItem],
+        content: list[ContentItem],
         **kwargs: Unpack[ParseResultKwargs],
     ) -> ParseResult:
         """构建解析结果"""
@@ -604,7 +604,7 @@ class BaseParser:
     def create_comment(
         self,
         author: Author,
-        content: Sequence[ContentItem],
+        content: list[ContentItem],
         timestamp: int | None = None,
         stats: Stats | None = None,
         replies: list[Comment] | None = None,
