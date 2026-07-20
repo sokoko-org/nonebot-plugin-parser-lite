@@ -56,6 +56,6 @@ class MiyousheParser(BaseParser):
             content=post.post.content,
             title=post.post.subject,
             stats=post.stats,
-            timestamp=post.post.updated_at,
+            timestamp=post.post.created_at,
             comments=comments,
         )

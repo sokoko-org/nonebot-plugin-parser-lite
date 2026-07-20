@@ -34,6 +34,7 @@ class Post(Struct):
     images: list[str]
     created_at: int
     updated_at: int
+    """最近评论时间"""
     view_type: ViewType
 
     @property
