@@ -119,6 +119,7 @@ class NCMParser(BaseParser):
     async def _parse_163cn(self, searched: MatchWithParams):
         return await self.parse_with_redirect(searched[0])
 
+    @handle("y.music.163.com", params={"id": {"as_int": True}})
     @handle("music.163.com", params={"id": {"as_int": True}})
     @handle("music.163.com", r"song/(?P<id>\d+)")
     async def _parse_netease(self, searched: MatchWithParams):
