@@ -88,8 +88,7 @@ class DouyinParser(BaseParser):
             ),
             Note,
         )
-        content: list[ContentItem] = [data.aweme.detail.desc]
-        content.extend(data.aweme.content)
+        content: list[ContentItem] = data.aweme.content
         comments = [
             self.create_comment(
                 author=self.create_author(
