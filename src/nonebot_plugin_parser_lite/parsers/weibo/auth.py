@@ -7,7 +7,10 @@ from httpx import AsyncClient
 from nonebot import logger
 import ujson
 
-from ...constants import COMMON_TIMEOUT
+if __name__ == "__main__":
+    COMMON_TIMEOUT = 5  # pyright: ignore[reportGeneralTypeIssues]
+else:
+    from ...constants import COMMON_TIMEOUT
 
 callback_pattern = re.compile(r"visitor_gray_callback\((.*)\)")
 
@@ -56,7 +59,9 @@ class AuthHelper:
                         "https://www.weibo.com",
                         headers={"Referer": "https://visitor.passport.weibo.cn/"},
                     )
-                    cls.xsrf_token = cls.SESSION.cookies["XSRF-TOKEN"]
+                    cls.xsrf_token = (
+                        cls.SESSION.cookies.get("XSRF-TOKEN", domain=".weibo.com") or ""
+                    )
                     cls.xsrf_obtained_at = asyncio.get_event_loop().time()
         except Exception as e:
             logger.error(f"Weibo visitor auth initialization failed: {type(e)}:{e!r}")
@@ -109,7 +114,7 @@ if __name__ == "__main__":
 
     async def main():
         a = await AuthHelper.get(
-            "https://m.weibo.cn/comments/hotflow", params={"mid": "5181502771168068"}
+            "https://m.weibo.cn/statuses/extend", params={"id": "R9JSKvDoO"}
         )
         try:
             print(a.json())  # noqa: T201
