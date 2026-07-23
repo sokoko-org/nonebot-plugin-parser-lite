@@ -1,7 +1,6 @@
 import re
 from typing import ClassVar
 
-import json_repair
 from msgspec import convert
 from nonebot import logger
 
@@ -17,14 +16,11 @@ from ..base import (
     handle,
 )
 from .note import Note
+from .util import parse_note_html
 from .video_or_article import decoder as video_or_article_decoder
 
 ROUTER_PATTERN = re.compile(
     pattern=r"window\._ROUTER_DATA\s*=\s*(.*?)</script>",
-    flags=re.DOTALL,
-)
-NOTE_PATTERN = re.compile(
-    pattern=r'self\.__pace_f\.push\(\[1,"7:.*?null,(.*?)\]\\n"\]\)</script>',
     flags=re.DOTALL,
 )
 
@@ -77,17 +73,8 @@ class DouyinParser(BaseParser):
         tab.get(f"https://www.douyin.com/note/{vid}")
         text = tab.html
         tab.close()
-        matched = NOTE_PATTERN.search(text)
-
-        if not matched or not matched[1]:
-            raise ParseException("未找到数据，可能触发验证码风控")
-        data = convert(
-            json_repair.loads(
-                matched[1].replace('\\"', '"'),
-                skip_json_loads=True,
-            ),
-            Note,
-        )
+        note = parse_note_html(text)
+        data = convert(note, Note)
         content: list[ContentItem] = data.aweme.content
         comments = [
             self.create_comment(
