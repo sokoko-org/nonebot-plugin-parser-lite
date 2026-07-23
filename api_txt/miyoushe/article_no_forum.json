@@ -1,0 +1,326 @@
+{
+  "retcode": 0,
+  "message": "OK",
+  "data": {
+    "post": {
+      "post": {
+        "game_id": 6,
+        "post_id": "69355128",
+        "f_forum_id": 0,
+        "uid": "311118145",
+        "subject": "猫狗双全",
+        "content": "{\"describe\":\"没抢到，懂了吗？（学生党的无助哭泣）\",\"imgs\":[\"https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/f67063be75485829d6da0db8f3f957d5_4512884823931641372.png\",\"https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/d393bca754d94b6355742515c00e08a6_7713119411864093068.png\",\"https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/be18f9ba960e0f255911e2216d74b145_2711585592605925787.png\",\"https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/42a519a63a1764ab1c11bbe1b2e20003_418183820834353303.png\"]}",
+        "cover": "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/f67063be75485829d6da0db8f3f957d5_4512884823931641372.png",
+        "view_type": 2,
+        "created_at": 1759742433,
+        "images": [
+          "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/f67063be75485829d6da0db8f3f957d5_4512884823931641372.png",
+          "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/d393bca754d94b6355742515c00e08a6_7713119411864093068.png",
+          "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/be18f9ba960e0f255911e2216d74b145_2711585592605925787.png",
+          "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/42a519a63a1764ab1c11bbe1b2e20003_418183820834353303.png"
+        ],
+        "post_status": {
+          "is_top": false,
+          "is_good": false,
+          "is_official": false,
+          "post_status": 0
+        },
+        "topic_ids": [
+          53,
+          1969,
+          1970,
+          2141
+        ],
+        "view_status": 1,
+        "max_floor": 1,
+        "is_original": 1,
+        "republish_authorization": 1,
+        "reply_time": "2025-10-06 17:20:33",
+        "is_deleted": 0,
+        "is_interactive": false,
+        "structured_content": "[{\"insert\":\"没抢到，懂了吗？（学生党的无助哭泣）\"}]",
+        "structured_content_rows": [],
+        "review_id": 0,
+        "is_profit": false,
+        "is_in_profit": false,
+        "updated_at": 1784822488,
+        "deleted_at": 0,
+        "pre_pub_status": 0,
+        "cate_id": 0,
+        "profit_post_status": -2,
+        "audit_status": 0,
+        "meta_content": "",
+        "is_missing": false,
+        "block_reply_img": 1,
+        "is_showing_missing": false,
+        "block_latest_reply_time": 0,
+        "selected_comment": 2,
+        "is_mentor": false,
+        "post_extra": {
+          "ugc_master_post_extra": {
+            "game_uid": "0",
+            "game_region": ""
+          },
+          "minos_aigc_info": null
+        },
+        "ai_content_type": "AI_CONTENT_TYPE_NOT_AI",
+        "user_ai_content_choice": "USER_AI_CONTENT_CHOICE_UNKNOWN",
+        "aigc_meta": {
+          "ContentPropagator": "001191310104MA1FRNHC9420000",
+          "PropagateID": "cG9zdDo2OTM1NTEyOA==",
+          "AIGCLabel": "0"
+        }
+      },
+      "forum": null,
+      "topics": [
+        {
+          "id": 53,
+          "name": "同人图",
+          "cover": "https://upload-bbs.mihoyo.com/upload/2021/09/09/61f2fe15f5fd3d976690855337ba5ba9_7313218117241578974.png",
+          "is_top": false,
+          "is_good": false,
+          "is_interactive": false,
+          "game_id": 0,
+          "content_type": 2
+        },
+        {
+          "id": 1969,
+          "name": "遐蝶",
+          "cover": "https://bbs-static.miyoushe.com/static/2025/02/11/3093565a7faf06ce66ddb09e2d13bb1e_8263892789895803835.jpg",
+          "is_top": false,
+          "is_good": false,
+          "is_interactive": false,
+          "game_id": 0,
+          "content_type": 1
+        },
+        {
+          "id": 1970,
+          "name": "白厄",
+          "cover": "https://bbs-static.miyoushe.com/static/2025/05/06/80074616e6d71cb6e43f383f6c92e765_7192620441749706166.jpg",
+          "is_top": false,
+          "is_good": false,
+          "is_interactive": false,
+          "game_id": 0,
+          "content_type": 1
+        },
+        {
+          "id": 2141,
+          "name": "于长夜重返大地",
+          "cover": "https://bbs-static.miyoushe.com/static/2025/09/12/b9ba46d9c1a08b26166813ff015f30e5_8027840748751886523.jpg",
+          "is_top": false,
+          "is_good": false,
+          "is_interactive": false,
+          "game_id": 0,
+          "content_type": 2
+        }
+      ],
+      "user": {
+        "uid": "311118145",
+        "nickname": "秈鱼",
+        "introduce": "呜呜呜1500呜呜呜",
+        "avatar": "",
+        "gender": 0,
+        "certification": {
+          "type": 0,
+          "label": ""
+        },
+        "level_exp": {
+          "level": 4,
+          "exp": 872
+        },
+        "is_following": false,
+        "is_followed": false,
+        "avatar_url": "https://bbs-static.miyoushe.com/static/2025/06/23/2dbbc2032b04dbc77879e70b5c920054_6707090509695643556.png",
+        "pendant": "https://upload-bbs.mihoyo.com/upload/2021/09/24/119acfbde04e1bd44a82c0d245795b21_9202228775542194642.png",
+        "certifications": [],
+        "is_creator": false,
+        "avatar_ext": {
+          "avatar_type": 3,
+          "avatar_assets_id": "1936998273227206656",
+          "resources": [
+            {
+              "format": 3,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/077bead2663890a66b850914f2c3ecc1_3972689222127865108.gif"
+            },
+            {
+              "format": 1,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/4ef94a6253547b6cca4e17f3af67f9fb_1026593939077315218.webp"
+            },
+            {
+              "format": 2,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/0a623f4eec95e449f2cc53e058813fe6_8057789301513612983.png"
+            },
+            {
+              "format": 4,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/2dbbc2032b04dbc77879e70b5c920054_6707090509695643556.png"
+            }
+          ],
+          "hd_resources": [
+            {
+              "format": 3,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/f793df9b1532afc8c1fb6675e94cbc78_4993996397153239227.gif"
+            },
+            {
+              "format": 1,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/26b01d70b2707d437c872794b8c47d60_3297409362611617101.webp"
+            },
+            {
+              "format": 2,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/392d4935ff97a2e15a93f970d7ff1c7f_884320941117871135.png"
+            },
+            {
+              "format": 4,
+              "url": "https://bbs-static.miyoushe.com/static/2025/06/23/2dbbc2032b04dbc77879e70b5c920054_6707090509695643556.png"
+            }
+          ]
+        }
+      },
+      "self_operation": {
+        "attitude": 0,
+        "is_collected": false,
+        "upvote_type": 0
+      },
+      "stat": {
+        "view_num": 14,
+        "reply_num": 1,
+        "like_num": 3,
+        "bookmark_num": 2,
+        "forward_num": 0,
+        "original_like_num": 3,
+        "post_upvote_stat": [
+          {
+            "upvote_type": 1,
+            "upvote_cnt": 3
+          },
+          {
+            "upvote_type": 2,
+            "upvote_cnt": 0
+          },
+          {
+            "upvote_type": 3,
+            "upvote_cnt": 0
+          },
+          {
+            "upvote_type": 4,
+            "upvote_cnt": 0
+          },
+          {
+            "upvote_type": 5,
+            "upvote_cnt": 0
+          }
+        ],
+        "share_num": 1
+      },
+      "help_sys": null,
+      "cover": {
+        "url": "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/f67063be75485829d6da0db8f3f957d5_4512884823931641372.png",
+        "height": 1080,
+        "width": 1080,
+        "format": "png",
+        "size": "574129",
+        "crop": null,
+        "is_user_set_cover": true,
+        "image_id": "239868401",
+        "entity_type": "IMG_ENTITY_POST",
+        "entity_id": "69355128",
+        "is_deleted": false,
+        "aigc_label": "AIGC_LABEL_UNKNOWN",
+        "aigc_meta": ""
+      },
+      "image_list": [
+        {
+          "url": "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/f67063be75485829d6da0db8f3f957d5_4512884823931641372.png",
+          "height": 1080,
+          "width": 1080,
+          "format": "png",
+          "size": "574129",
+          "crop": null,
+          "is_user_set_cover": false,
+          "image_id": "239868401",
+          "entity_type": "IMG_ENTITY_POST",
+          "entity_id": "69355128",
+          "is_deleted": false,
+          "aigc_label": "AIGC_LABEL_UNKNOWN",
+          "aigc_meta": "{}"
+        },
+        {
+          "url": "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/d393bca754d94b6355742515c00e08a6_7713119411864093068.png",
+          "height": 1080,
+          "width": 1080,
+          "format": "png",
+          "size": "815579",
+          "crop": null,
+          "is_user_set_cover": false,
+          "image_id": "239868400",
+          "entity_type": "IMG_ENTITY_POST",
+          "entity_id": "69355128",
+          "is_deleted": false,
+          "aigc_label": "AIGC_LABEL_UNKNOWN",
+          "aigc_meta": "{}"
+        },
+        {
+          "url": "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/be18f9ba960e0f255911e2216d74b145_2711585592605925787.png",
+          "height": 1080,
+          "width": 1080,
+          "format": "png",
+          "size": "462164",
+          "crop": null,
+          "is_user_set_cover": false,
+          "image_id": "239868397",
+          "entity_type": "IMG_ENTITY_POST",
+          "entity_id": "69355128",
+          "is_deleted": false,
+          "aigc_label": "AIGC_LABEL_UNKNOWN",
+          "aigc_meta": "{}"
+        },
+        {
+          "url": "https://upload-bbs.miyoushe.com/upload/2025/10/05/311118145/42a519a63a1764ab1c11bbe1b2e20003_418183820834353303.png",
+          "height": 1080,
+          "width": 1080,
+          "format": "png",
+          "size": "763834",
+          "crop": null,
+          "is_user_set_cover": false,
+          "image_id": "239868399",
+          "entity_type": "IMG_ENTITY_POST",
+          "entity_id": "69355128",
+          "is_deleted": false,
+          "aigc_label": "AIGC_LABEL_UNKNOWN",
+          "aigc_meta": "{}"
+        }
+      ],
+      "is_official_master": false,
+      "is_user_master": false,
+      "hot_reply_exist": false,
+      "vote_count": 0,
+      "last_modify_time": 0,
+      "recommend_type": "",
+      "collection": null,
+      "vod_list": [],
+      "is_block_on": false,
+      "forum_rank_info": null,
+      "link_card_list": [],
+      "news_meta": null,
+      "recommend_reason": {
+        "tags": [],
+        "is_mentor_rec_block": false
+      },
+      "villa_card": null,
+      "is_mentor": false,
+      "villa_room_card": null,
+      "reply_avatar_action_info": null,
+      "challenge": null,
+      "hot_reply_list": [],
+      "villa_msg_image_list": [],
+      "contribution_act": null,
+      "is_has_vote": false,
+      "is_has_lottery": false,
+      "release_time_type": "ReleaseTimeTypeNone",
+      "future_release_time": 0,
+      "external_link": null,
+      "post_full_extra_info": null,
+      "post_attachment_info": null,
+      "feed_attachment_info": null
+    }
+  }
+}
