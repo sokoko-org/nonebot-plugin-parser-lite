@@ -20,7 +20,6 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
-from ..data import MediaContent
 from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers import BilibiliParser
@@ -151,12 +150,6 @@ async def parser_handler(
 
     summary_msg = await RENDERER.render_messages(result)
     await summary_msg.send()
-    contents = list(result.content)
-    if result.repost:
-        contents.extend(result.repost.content)
-    has_media = any(isinstance(c, MediaContent) and c.need_send for c in contents)
-    if not has_media:
-        return
     if pconfig.lazy_download:
         if pconfig.lazy_download_tip:
             download_cmd = ", ".join(pconfig.download_command)
@@ -165,10 +158,9 @@ async def parser_handler(
                 f"\n{download_cmd}"
             ).send()
         LazyManager.add(session.user.id, result)
-        return
-
-    async for content_msg in RENDERER.send_content(result):
-        await content_msg.send()
+    else:
+        async for content_msg in RENDERER.send_content(result):
+            await content_msg.send()
 
 
 @driver.on_startup
