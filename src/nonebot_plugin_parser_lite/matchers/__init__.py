@@ -158,10 +158,9 @@ async def parser_handler(
                 f"\n{download_cmd}"
             ).send()
         LazyManager.add(session.user.id, result)
-        return
-
-    async for content_msg in RENDERER.send_content(result):
-        await content_msg.send()
+    else:
+        async for content_msg in RENDERER.send_content(result):
+            await content_msg.send()
 
 
 @driver.on_startup
