@@ -74,7 +74,7 @@ class Stat(Struct):
 
 class PostData(Struct):
     post: Post
-    forum: Forum
+    forum: Forum | None
     user: User
     stat: Stat
 
