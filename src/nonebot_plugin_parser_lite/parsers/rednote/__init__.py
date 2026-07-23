@@ -35,6 +35,7 @@ class RedNoteParser(BaseParser):
             }
         )
 
+    @handle("xhslink.cn", r"xhslink\.cn/[A-Za-z0-9._?%&+=/#@-]+")
     @handle("xhslink.com", r"xhslink\.com/[A-Za-z0-9._?%&+=/#@-]+")
     async def _parse_short_link(self, searched: MatchWithParams):
         url = f"https://{searched.url}"
