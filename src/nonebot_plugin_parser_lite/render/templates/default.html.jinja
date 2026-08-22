@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ theme }}">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Media Card · New</title>
+        <link rel="stylesheet" href="icon.css" />
+        <link rel="stylesheet" href="tailwind.css" />
+        {% from "macros.jinja" import render_content %}
+        <style>
+            body {
+                font-family: "PingFang SC", sans-serif;
+                -webkit-font-smoothing: antialiased;
+                margin: 15px;
+            }
+
+            .square-img {
+                aspect-ratio: 1 / 1;
+                object-fit: cover;
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
+
+            .live-tag-strict {
+                height: 19px;
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: 2px;
+                padding: 0 5px;
+                display: flex;
+                align-items: center;
+                color: #fff;
+                border: none;
+                outline: none;
+            }
+        </style>
+    </head>
+    <body class="flex justify-center break-all bg-slate-200 dark:bg-slate-950">{{ render_content(result) }}</body>
+    <script defer>
+        document.addEventListener("DOMContentLoaded", function() {
+            document
+                .querySelectorAll(".comment .single-image img")
+                .forEach((img) => {
+                    const applyStyle = () => {
+                        const h = img.offsetHeight;
+                        const w = img.offsetWidth;
+                        if (!h || !w || !isFinite(h / w)) return;
+                        const aspectRatio = h / w;
+                        if (aspectRatio >= 0.9) {
+                            // 竖图：限制宽度，放高
+                            img.classList.add("max-w-36", "h-auto");
+                        } else {
+                            // 横图：限制高度，放宽
+                            img.classList.add("max-h-36", "w-auto");
+                        }
+                    };
+                    applyStyle();
+                });
+        });
+    </script>
+</html>

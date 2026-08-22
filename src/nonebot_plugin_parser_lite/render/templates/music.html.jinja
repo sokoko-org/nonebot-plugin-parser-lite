@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ theme }}">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{ result.title }} - {{ result.author.name }}</title>
+        <link rel="stylesheet" href="tailwind.css" />
+    </head>
+    <body class="m-0 bg-gray-100 p-5 text-gray-800 dark:bg-slate-950 dark:text-slate-100">
+        <div class="relative mx-auto max-w-[600px] rounded-xl bg-white p-6 shadow-lg dark:bg-slate-900 dark:shadow-black/30">
+            {% if result.qr_code_path %}
+                <img src="{{ result.qr_code_path }}"
+                     alt="二维码"
+                     class="absolute top-6 right-6 h-20 w-20 max-[600px]:h-[60px] max-[600px]:w-[60px]" />
+            {% endif %}
+            <div class="mb-6 flex items-start gap-5 pr-[100px] max-[600px]:pr-20">
+                {% set cover_src = result | safe_src('get_cover_path', return_none_on_fail=True) %}
+                {% if cover_src %}
+                    <img src="{{ cover_src }}"
+                         alt="专辑封面"
+                         class="h-[150px] w-[150px] shrink-0 rounded-lg object-cover max-[600px]:h-[120px] max-[600px]:w-[120px]" />
+                {% endif %}
+                <div class="min-w-0 flex-1">
+                    <h1 class="mb-2 truncate text-2xl font-semibold">{{ result.title }}</h1>
+                    <p class="mb-2 truncate text-lg text-gray-600 dark:text-slate-300">{{ result.author.name }}</p>
+                    {% if result.extra and result.extra.album %}
+                        <p class="mb-3 truncate text-base text-gray-400 dark:text-slate-400">{{ result.extra.album }}</p>
+                    {% endif %}
+                    <div class="mt-2 inline-block rounded-xl bg-gray-100 px-3 py-1 text-xs text-gray-600 dark:bg-slate-800 dark:text-slate-300">
+                        {{ result.platform.display_name }}
+                    </div>
+                </div>
+            </div>
+            {% if result.extra and result.extra.lyric %}
+                <div class="my-6 pr-[120px] max-[600px]:pr-0">
+                    <h2 class="mb-4 text-lg font-semibold">歌词</h2>
+                    <div class="max-h-none overflow-y-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-4 text-base leading-[1.8] text-gray-700 dark:bg-slate-800 dark:text-slate-200 dark:[color-scheme:dark]">{{ result.extra.lyric }}</div>
+                </div>
+            {% endif %}
+            {% if result.extra.info %}
+                <div class="absolute right-6 bottom-6 rounded-lg bg-gray-50 px-4 py-2 text-sm text-gray-600 shadow-sm dark:bg-slate-800 dark:text-slate-300 dark:shadow-black/30 max-[600px]:static max-[600px]:mt-4 max-[600px]:w-fit">
+                    {{ result.extra.info }}
+                </div>
+            {% endif %}
+            {% if result.url %}
+                <div class="mt-4 break-all rounded-lg bg-gray-100 p-3 text-sm text-gray-600 dark:bg-slate-800 dark:text-slate-300">
+                    来源链接:
+                    <a href="{{ result.url }}"
+                       target="_blank"
+                       rel="noreferrer noopener"
+                       class="text-sky-600 underline dark:text-sky-400">{{ result.url }}</a>
+                </div>
+            {% endif %}
+        </div>
+    </body>
+</html>
