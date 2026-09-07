@@ -190,7 +190,7 @@ class Video:
         page_index: int | None = None,
         cid: int | None = None,
         prefer_codecs: list[BiliVideoCodecs] | None = None,
-        video_quality: BiliVideoQuality = BiliVideoQuality._4K,
+        video_quality: BiliVideoQuality = BiliVideoQuality._8K,
     ) -> playurl_pb2.PlayViewReply:
         """
         获取视频下载信息
