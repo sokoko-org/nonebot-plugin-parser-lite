@@ -671,7 +671,11 @@ class BilibiliParser(BaseParser):
         if video is None:
             video = await self._get_video(bvid=bvid, avid=avid)
 
-        download_url_data = await video.get_download_url(page_index=page_index)
+        download_url_data = await video.get_download_url(
+            page_index=page_index,
+            prefer_codecs=pconfig.bili_video_codes,
+            video_quality=pconfig.bili_video_quality,
+        )
         detecter = VideoDownloadURLDataDetecter(download_url_data)
         streams = detecter.detect_best_streams(
             video_max_quality=pconfig.bili_video_quality,

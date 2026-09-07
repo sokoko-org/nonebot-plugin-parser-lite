@@ -190,6 +190,7 @@ class Video:
         page_index: int | None = None,
         cid: int | None = None,
         prefer_codecs: list[BiliVideoCodecs] | None = None,
+        video_quality: BiliVideoQuality = BiliVideoQuality._4K,
     ) -> playurl_pb2.PlayViewReply:
         """
         获取视频下载信息
@@ -200,6 +201,8 @@ class Video:
 
         :param page_index: 分 P 号，从 0 开始, defaults to None
         :param cid: 分 P 的 ID, defaults to None
+        :param prefer_codecs: 偏好编码, defaults to None
+        :param video_quality: 请求最大视频质量, defaults to 4K
         :raises BiliHelperException: 传参有误
         :return: 调用 API 返回的结果
         """
@@ -221,9 +224,9 @@ class Video:
         req = playurl_pb2.PlayViewReq(
             aid=self.aid,
             cid=cid,
-            qn=127,
+            qn=video_quality.value,
             fnval=4048,
-            fourk=True,
+            fourk=video_quality.value >= BiliVideoQuality._4K.value,
             spmid="main.ugc-video-detail.0.0",
             from_spmid="main.my-history.0.0",
             prefer_codec_type=prefer_codec_type,
