@@ -1,4 +1,4 @@
-from nonebot import get_driver, logger, require
+from nonebot import logger, require
 from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 require("nonebot_plugin_alconna")
@@ -11,7 +11,6 @@ from nonebot_plugin_apscheduler import scheduler
 
 from .config import Config
 from .matchers import clear_result_cache
-from .utils.bilibili.cdn import load_cdn_domains, update_cdn_domains
 from .utils.cache import CacheManager
 
 __plugin_meta__ = PluginMetadata(
@@ -43,23 +42,3 @@ async def clean_plugin_cache() -> None:
         logger.exception(f"清理缓存文件时发生异常: {e!r}")
 
     clear_result_cache()
-
-
-@scheduler.scheduled_job(
-    "interval",
-    hours=24,
-    id="parser-update-bilibili-cdn",
-)
-async def update_bilibili_cdn() -> None:
-    """刷新 B 站 CDN 地区列表"""
-    try:
-        await update_cdn_domains()
-    except Exception as e:
-        logger.warning(f"更新 B 站 CDN 列表失败，继续使用本地数据: {e}")
-
-
-@get_driver().on_startup
-async def initialize_bilibili_cdn() -> None:
-    """启动时先加载快照，再尝试在线更新"""
-    await load_cdn_domains()
-    await update_bilibili_cdn()

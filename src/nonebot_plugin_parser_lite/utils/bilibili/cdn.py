@@ -1,120 +1,84 @@
-import json
-from random import choice
 import re
 from typing import Final
+from urllib.parse import urlsplit
 
-from anyio import Path
-from nonebot import logger
-
-from ...path import data_dir
-from .client import HTTP_CLIENT
-
-CDN_DATA_URL: Final[str] = "https://kanda-akihito-kun.github.io/ccb/api/cdn.json"
-CDN_DATA_PATH: Final[Path] = data_dir / "bilibili_cdn.json"
-
-# 在线列表不可用时仍可使用的稳定官方镜像
-DEFAULT_CDN_DOMAINS: Final[dict[str, tuple[str, ...]]] = {
-    "zh": ("upos-sz-mirrorcos.bilivideo.com",),
-    "en": ("upos-sz-mirroraliov.bilivideo.com",),
-    "ja": ("upos-sz-mirroralib.bilivideo.com",),
+DEFAULT_CDN_DOMAINS: Final[dict[str, str]] = {
+    "zh": "upos-sz-mirrorcos.bilivideo.com",
+    "en": "upos-sz-mirroraliov.bilivideo.com",
+    "ja": "upos-sz-mirroralib.bilivideo.com",
+    "proxy": "proxy-tf-all-ws.bilivideo.com",
 }
 _HOST_PATTERN = re.compile(
     r"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$",
     re.IGNORECASE,
 )
-_cdn_domains: dict[str, tuple[str, ...]] = dict(DEFAULT_CDN_DOMAINS)
-
-
-def _is_bilivideo_domain(domain: str) -> bool:
-    domain = domain.lower()
-    return domain == "bilivideo.com" or domain.endswith(".bilivideo.com")
-
-
-def _validate_cdn_data(data: object) -> dict[str, tuple[str, ...]]:
-    if not isinstance(data, dict):
-        raise ValueError("CDN 数据必须是对象")
-
-    result: dict[str, tuple[str, ...]] = {}
-    for region, domains in data.items():
-        if not isinstance(region, str) or not region.strip():
-            raise ValueError("CDN 地区名称无效")
-        if not isinstance(domains, list) or not domains:
-            raise ValueError(f"CDN 地区 {region!r} 没有可用域名")
-
-        normalized_domains: list[str] = []
-        seen_domains: set[str] = set()
-        for domain in domains:
-            if not isinstance(domain, str):
-                continue
-            try:
-                normalized_domain = normalize_cdn_domain(domain)
-            except ValueError:
-                continue
-            if normalized_domain not in seen_domains:
-                normalized_domains.append(normalized_domain)
-                seen_domains.add(normalized_domain)
-        if normalized_domains:
-            result[region.strip()] = tuple(normalized_domains)
-
-    if not result:
-        raise ValueError("CDN 数据为空")
-    return result
+RE_PCDN_HOST = re.compile(
+    r"\.mcdn\.bilivideo\.(?:cn|com|net)$|"
+    r"\.szbdyd\.com$|"
+    r"\.mountaintoys\.cn$|"
+    r"\.nexusedgeio\.com$|"
+    r"\.ahdohpiechei\.com$|"
+    r"^upos-sz-mirror14b\.bilivideo\.com$",
+    re.IGNORECASE,
+)
+RE_PCDN_IPV4 = re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}$")
+RE_PCDN_PATH = re.compile(r"(?:^|/)pcdn(?:/|$)", re.IGNORECASE)
+RE_PCDN_QUERY = re.compile(r"(?:^|&)os=mcdn(?:&|$)", re.IGNORECASE)
 
 
 def normalize_cdn_domain(domain: str) -> str:
     """校验并规范化不含协议、端口或路径的 CDN 域名"""
     normalized_domain = domain.strip().lower()
-    if not _HOST_PATTERN.fullmatch(normalized_domain) or not _is_bilivideo_domain(
-        normalized_domain
-    ):
+    is_bilivideo = normalized_domain == "bilivideo.com" or normalized_domain.endswith(
+        ".bilivideo.com"
+    )
+    if not _HOST_PATTERN.fullmatch(normalized_domain) or not is_bilivideo:
         raise ValueError(f"无效的 B 站 CDN 域名: {domain!r}")
     return normalized_domain
 
 
-def _set_cdn_domains(data: object) -> None:
-    global _cdn_domains
-    _cdn_domains = {**DEFAULT_CDN_DOMAINS, **_validate_cdn_data(data)}
-
-
-async def load_cdn_domains(path: Path = CDN_DATA_PATH) -> bool:
-    """从 data 目录加载 CDN 快照，失败时保留当前列表"""
-    if not await path.is_file():
-        return False
+def pick_cdn_domain(region: str) -> str:
+    """从 B 站 CDN 地区线路中选择域名"""
     try:
-        _set_cdn_domains(json.loads(await path.read_text(encoding="utf-8")))
-    except (OSError, ValueError, json.JSONDecodeError) as e:
-        logger.warning(f"加载 B 站 CDN 列表失败: {e}")
-        return False
-    return True
-
-
-def choose_cdn_domain(region: str) -> str:
-    """从指定地区随机选择 CDN；在线地区与基础线路使用同一入口"""
-    try:
-        return choice(_cdn_domains[region])
+        return DEFAULT_CDN_DOMAINS[region]
     except KeyError:
-        available_regions = ", ".join(_cdn_domains)
+        available_regions = ", ".join(DEFAULT_CDN_DOMAINS)
         raise ValueError(
             f"未知的 B 站 CDN 地区 {region!r}，可选：{available_regions}"
         ) from None
 
 
-async def update_cdn_domains(path: Path = CDN_DATA_PATH) -> None:
-    """下载 CDN 列表并原子更新 data 目录中的快照"""
-    response = await HTTP_CLIENT.get(CDN_DATA_URL)
-    response.raise_for_status()
-    data = response.json()
-    validated_data = _validate_cdn_data(data)
+def is_pcdn_url(url: str | None) -> bool:
+    """
+    检测给定 URL 是否为 PCDN / P2P 节点 URL
 
-    await path.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = path.with_suffix(f"{path.suffix}.tmp")
-    await temporary_path.write_text(
-        json.dumps(validated_data, ensure_ascii=False, indent=2),
-        encoding="utf-8",
+    :param url: 待检测的 URL 字符串
+    :return: 若为 PCDN 地址则返回 True，否则 False
+    """
+    if not url:
+        return False
+    value = url.strip()
+    if not value:
+        return False
+    try:
+        return _extracted_from_is_pcdn_url_14(value)
+    except ValueError:
+        return False
+
+
+# TODO Rename this here and in `is_pcdn_url`
+def _extracted_from_is_pcdn_url_14(value):
+    parsed = urlsplit(
+        value if "://" in value or value.startswith("//") else f"//{value}"
     )
-    await temporary_path.replace(path)
-    _set_cdn_domains(data)
-    logger.info(
-        f"已更新 B 站 CDN 列表: {len(validated_data)} 个地区，"
-        f"{sum(map(len, validated_data.values()))} 个域名"
-    )
+    host = (parsed.hostname or "").rstrip(".").lower()
+    if not host:
+        return False
+    if RE_PCDN_IPV4.fullmatch(host) or RE_PCDN_HOST.search(host):
+        return True
+    if RE_PCDN_PATH.search(parsed.path) or RE_PCDN_QUERY.search(parsed.query):
+        return True
+    if parsed.port not in (None, 80, 443):
+        return True
+    first_label = host.split(".", 1)[0]
+    return first_label.startswith("upos-") and "302" in first_label

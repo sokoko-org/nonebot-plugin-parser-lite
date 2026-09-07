@@ -82,7 +82,7 @@ class Config(BaseModel):
     plite_day_range: list[str] = ["6:00", "19:00"]
     """白天时间范围 [开始, 结束]，格式 h:m；范围内为浅色主题，范围外为夜间模式"""
     plite_bili_cdn_region: str = "zh"
-    """哔哩哔哩 CDN 地区；zh、en、ja 为内置基础线路"""
+    """哔哩哔哩 CDN 地区；支持 zh、en、ja、proxy 线路"""
     plite_bili_cdn_domain: str | None = None
     """自定义哔哩哔哩 CDN 域名，优先于地区配置"""
 

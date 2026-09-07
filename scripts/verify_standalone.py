@@ -188,11 +188,8 @@ def import_checks(root: Path) -> None:
 
     config = importlib.import_module("nonebot_plugin_parser_lite.config")
     paths = importlib.import_module("nonebot_plugin_parser_lite.path")
-    cdn = importlib.import_module("nonebot_plugin_parser_lite.utils.bilibili.cdn")
     if config.pconfig.data_dir != paths.data_dir:
         fail(["standalone config and path module use different data directories"])
-    if cdn.CDN_DATA_PATH != paths.data_dir / "bilibili_cdn.json":
-        fail(["Bilibili CDN snapshot is outside the standalone data directory"])
 
     if any(is_nonebot_module(name) for name in sys.modules):
         fail(["a framework package was loaded during smoke imports"])

@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from enum import IntEnum, StrEnum
-import re
 from typing import Any
 from urllib.parse import urlsplit
 
 from .a2v import av2bv, bv2av
 from .bilibili.app.playurl.v1 import playurl_pb2
 from .bilibili.app.view.v1 import view_pb2
-from .cdn import choose_cdn_domain, normalize_cdn_domain
+from .cdn import is_pcdn_url, normalize_cdn_domain, pick_cdn_domain
 from .client import GRPC_CLIENT, HTTP_CLIENT
 from .credential import Credential
 from .exceptions import BiliHelperException
@@ -285,31 +284,9 @@ class Video:
         return result["data"]
 
 
-RE_PCDN_HOST = re.compile(
-    r"\.mcdn\.bilivideo\.cn|szbdyd\.com|cos\.bilibili\.com/.+pcdn|\.edge\.mountaintoys\.cn",
-    re.IGNORECASE,
-)
-RE_PCDN_PATH = re.compile(r"xy\d+x\d+x\d+x\d+xy|/pcdn/|/mcdn/", re.IGNORECASE)
-RE_PRIVATE_IP = re.compile(
-    r"^https?://(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.)", re.IGNORECASE
-)
 # 枚举默认集合：用于 detect_best_streams 的默认允许清晰度列表
-DEFAULT_VIDEO_QUALITIES: list[BiliVideoQuality] = list(BiliVideoQuality)
-DEFAULT_AUDIO_QUALITIES: list[BiliAudioQuality] = list(BiliAudioQuality)
-
-
-def is_pcdn_url(url: str | None) -> bool:
-    """
-    检测给定 URL 是否为 PCDN / P2P 节点 URL
-
-    :param url: 待检测的 URL 字符串
-    :return: 若为 PCDN 地址则返回 True，否则 False
-    """
-    if not url:
-        return False
-    return bool(
-        RE_PCDN_HOST.search(url) or RE_PCDN_PATH.search(url) or RE_PRIVATE_IP.match(url)
-    )
+DEFAULT_VIDEO_QUALITIES = list(BiliVideoQuality)
+DEFAULT_AUDIO_QUALITIES = list(BiliAudioQuality)
 
 
 @dataclass
@@ -391,13 +368,13 @@ def sanitize_stream_urls(
 
     :param video: 视频流 URL 信息
     :param audio: 音频流 URL 信息
-    :param cdn_region: CDN 地区；在线列表不可用时仍可使用 zh、en、ja
+    :param cdn_region: CDN 地区；支持固定线路 zh、en、ja、proxy
     :param cdn_domain: 自定义 CDN 域名，设置后优先于地区配置
     :return: (清洗后的 video, audio)
     """
     replacement_domain = (
         normalize_cdn_domain(cdn_domain) if cdn_domain and cdn_domain.strip() else None
-    ) or choose_cdn_domain(cdn_region)
+    ) or pick_cdn_domain(cdn_region)
 
     def _replace_host(url: str) -> str:
         return urlsplit(url)._replace(netloc=replacement_domain).geturl()
