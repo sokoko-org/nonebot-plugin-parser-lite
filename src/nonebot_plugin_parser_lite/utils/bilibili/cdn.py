@@ -1,6 +1,6 @@
 import re
 from typing import Final
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 DEFAULT_CDN_DOMAINS: Final[dict[str, str]] = {
     "zh": "upos-sz-mirrorcos.bilivideo.com",
@@ -22,7 +22,6 @@ RE_PCDN_HOST = re.compile(
     re.IGNORECASE,
 )
 RE_PCDN_IPV4 = re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}$")
-RE_PCDN_PATH = re.compile(r"(?:^|/)pcdn(?:/|$)", re.IGNORECASE)
 RE_PCDN_QUERY = re.compile(r"(?:^|&)os=mcdn(?:&|$)", re.IGNORECASE)
 
 
@@ -46,6 +45,21 @@ def pick_cdn_domain(region: str) -> str:
         raise ValueError(
             f"未知的 B 站 CDN 地区 {region!r}，可选：{available_regions}"
         ) from None
+
+
+def get_szbdyd_source(url: str) -> str | None:
+    """从 szbdyd URL 提取 ``xy_usource`` 源站"""
+    try:
+        parsed = urlsplit(url if "://" in url or url.startswith("//") else f"//{url}")
+        host = (parsed.hostname or "").rstrip(".").lower()
+        if not RE_PCDN_HOST.search(host) or not host.endswith(".szbdyd.com"):
+            return None
+        source = parse_qs(parsed.query).get("xy_usource", [""])[0]
+        source = source.strip().split("://", 1)[-1].split("/", 1)[0]
+        source = source.rsplit(":", 1)[0].lower()
+        return normalize_cdn_domain(source)
+    except (ValueError, IndexError):
+        return None
 
 
 def is_pcdn_url(url: str | None) -> bool:
@@ -76,7 +90,7 @@ def _extracted_from_is_pcdn_url_14(value):
         return False
     if RE_PCDN_IPV4.fullmatch(host) or RE_PCDN_HOST.search(host):
         return True
-    if RE_PCDN_PATH.search(parsed.path) or RE_PCDN_QUERY.search(parsed.query):
+    if RE_PCDN_QUERY.search(parsed.query):
         return True
     if parsed.port not in (None, 80, 443):
         return True

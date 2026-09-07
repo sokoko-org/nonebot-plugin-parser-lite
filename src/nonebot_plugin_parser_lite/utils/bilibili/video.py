@@ -6,7 +6,12 @@ from urllib.parse import urlsplit
 from .a2v import av2bv, bv2av
 from .bilibili.app.playurl.v1 import playurl_pb2
 from .bilibili.app.view.v1 import view_pb2
-from .cdn import is_pcdn_url, normalize_cdn_domain, pick_cdn_domain
+from .cdn import (
+    get_szbdyd_source,
+    is_pcdn_url,
+    normalize_cdn_domain,
+    pick_cdn_domain,
+)
 from .client import GRPC_CLIENT, HTTP_CLIENT
 from .credential import Credential
 from .exceptions import BiliHelperException
@@ -376,8 +381,8 @@ def sanitize_stream_urls(
         normalize_cdn_domain(cdn_domain) if cdn_domain and cdn_domain.strip() else None
     ) or pick_cdn_domain(cdn_region)
 
-    def _replace_host(url: str) -> str:
-        return urlsplit(url)._replace(netloc=replacement_domain).geturl()
+    def _replace_host(url: str, domain: str = replacement_domain) -> str:
+        return urlsplit(url)._replace(netloc=domain).geturl()
 
     for stream in (video, audio):
         if stream is None:
@@ -387,7 +392,10 @@ def sanitize_stream_urls(
         clean_urls = [url for url in source_urls if not is_pcdn_url(url)] or [
             stream.url
         ]
-        download_urls = list(dict.fromkeys([_replace_host(clean_urls[0]), *clean_urls]))
+        source_domain = get_szbdyd_source(stream.url) or replacement_domain
+        download_urls = list(
+            dict.fromkeys([_replace_host(clean_urls[0], source_domain), *clean_urls])
+        )
         stream.url = download_urls[0]
         stream.backup_url = download_urls[1:]
     return video, audio
