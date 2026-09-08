@@ -18,6 +18,7 @@ class Credential:
 
     def __init__(
         self,
+        *,
         sessdata: str,
         bili_jct: str,
         dedeuserid: str,
