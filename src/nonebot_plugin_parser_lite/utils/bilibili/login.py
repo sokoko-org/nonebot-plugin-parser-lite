@@ -5,7 +5,7 @@ import time
 import qrcode
 
 from .client import HTTP_CLIENT
-from .credential import Credential, get_buvid
+from .credential import Credential
 from .exceptions import BiliHelperException
 from .sign import enc_sign
 
@@ -103,7 +103,6 @@ class QrCodeLogin:
                 cookie["name"]: cookie["value"]
                 for cookie in data["cookie_info"]["cookies"]
             }
-            buvid = await get_buvid()
             token_info = data["token_info"]
             self.credential = Credential(
                 sessdata=cookies["SESSDATA"],
@@ -113,8 +112,6 @@ class QrCodeLogin:
                 access_token=token_info["access_token"],
                 refresh_token=token_info["refresh_token"],
                 expires_at=time.time() + token_info["expires_in"],
-                buvid3=buvid[0],
-                buvid4=buvid[1],
             )
             return QrCodeLoginEvents.DONE
         elif code == 86038:
