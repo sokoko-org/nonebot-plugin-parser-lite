@@ -151,7 +151,10 @@ plite_max_size=90
 
 # [可选] 全局禁止的解析
 # 示例 plite_disabled_platforms=["bilibili", "douyin"] 表示禁止了哔哩哔哩和抖音
-# 可选值: ["bilibili", "douyin", "kuaishou", "x", "acfun", "weibo", "rednote"]
+# 可选值: ["acfun", "bilibili", "buff", "coolapk", "douban", "doubao",
+# "douyin", "ds", "duitang", "5eplay", "heybox", "hupu", "illu", "kuaishou",
+# "kugou", "kuwo", "linuxdo", "lofter", "miyoushe", "netease", "qsmusic",
+# "rednote", "taptap", "tieba", "weibo", "wmpvp", "x", "zhihu", "zlb"]
 plite_disabled_platforms=["x"]
 
 # [可选] 黑名单用户列表
