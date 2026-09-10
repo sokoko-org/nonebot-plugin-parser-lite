@@ -368,9 +368,8 @@ class StreamDownloader:
         current_size = downloaded
 
         with self.rich_progress(desc, total_size) as update:
-            if downloaded:
-                update(advance=downloaded)
-
+            if current_size:
+                update(advance=current_size)
             async with aiofiles.open(file_path, mode) as file:
                 async for chunk in response.aiter_bytes(1024 * 1024):
                     await file.write(chunk)
