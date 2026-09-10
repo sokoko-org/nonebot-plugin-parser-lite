@@ -4,6 +4,7 @@ import contextlib
 from functools import partial
 import re
 from urllib.parse import urljoin
+from uuid import uuid4
 
 import aiofiles
 from anyio import Path
@@ -32,6 +33,19 @@ from .client import RetryableDownloadError, UniHttpClient, UniResponse
 from .task import auto_task
 
 _RE_RANGE_PATTERN = re.compile(r"bytes\s+(\d+)-\d+/(\d+|\*)")
+_RE_HLS_BANDWIDTH = re.compile(r"(?:AVERAGE-)?BANDWIDTH=(\d+)")
+_RE_HLS_RESOLUTION = re.compile(r"RESOLUTION=(\d+)x(\d+)")
+_HLS_NATIVE_TAGS = (
+    "#EXT-X-KEY",
+    "#EXT-X-MAP",
+    "#EXT-X-BYTERANGE",
+    "#EXT-X-DISCONTINUITY",
+)
+
+
+class _NativeHLSRequired(Exception):
+    def __init__(self, url: str):
+        self.url = url
 
 
 def _with_identity_encoding(headers: dict[str, str]) -> dict[str, str]:
@@ -303,6 +317,97 @@ class StreamDownloader:
             result["Range"] = f"bytes={downloaded}-"
         return result
 
+    def __resolve_total_size(
+        self,
+        response: UniResponse,
+        downloaded: int,
+    ) -> int | None:
+        content_encodings = _parse_content_encodings(
+            response.headers.get("content-encoding")
+        )
+        zipped_content = any(encoding != "identity" for encoding in content_encodings)
+        if downloaded > 0 and zipped_content:
+            raise RetryableDownloadError(
+                f"压缩响应 {', '.join(content_encodings)!r} 无法安全断点续传",
+                keep_part=False,
+            )
+        # 编码响应的 Content-Length 是压缩传输体大小，而 aiter_bytes()
+        # 返回解码后的文件内容，不能用前者校验后者。
+        content_length = (
+            None if zipped_content else response.headers.get("content-length")
+        )
+        if not content_length:
+            return None
+        size = int(content_length)
+        return downloaded + size if downloaded > 0 else size
+
+    def __validate_total_size(self, url: str, total_size: int | None) -> None:
+        if total_size is None:
+            return
+        if total_size == 0:
+            raise ZeroSizeException
+
+        size_mb = total_size / 1024 / 1024
+        if size_mb > pconfig.max_size:
+            logger.warning(
+                f"媒体 url: {url} 大小 {size_mb:.2f} MB "
+                f"超过 {pconfig.max_size} MB, 取消下载"
+            )
+            raise SizeLimitException(size_mb)
+
+    async def __write_response(
+        self,
+        response: UniResponse,
+        file_path: Path,
+        desc: str,
+        downloaded: int,
+        total_size: int | None,
+        url: str,
+    ) -> None:
+        mode = "ab" if downloaded > 0 else "wb"
+        current_size = downloaded
+
+        with self.rich_progress(desc, total_size) as update:
+            if downloaded:
+                update(advance=downloaded)
+
+            async with aiofiles.open(file_path, mode) as file:
+                async for chunk in response.aiter_bytes(1024 * 1024):
+                    await file.write(chunk)
+                    current_size += len(chunk)
+                    update(advance=len(chunk))
+
+                    if (
+                        total_size is None
+                        and current_size / 1024 / 1024 > pconfig.max_size
+                    ):
+                        size_mb = current_size / 1024 / 1024
+                        logger.warning(
+                            f"媒体 url: {url} 实际下载大小 {size_mb:.2f} MB "
+                            f"超过 {pconfig.max_size} MB, 取消下载"
+                        )
+                        raise SizeLimitException(size_mb)
+
+    async def __validate_downloaded_size(
+        self,
+        file_path: Path,
+        total_size: int | None,
+    ) -> None:
+        final_size = (await file_path.stat()).st_size
+        if final_size == 0:
+            raise ZeroSizeException
+        if total_size is None or final_size == total_size:
+            return
+
+        size_diff = abs(final_size - total_size)
+        if size_diff > self._SIZE_MISMATCH_TOLERANCE_BYTES:
+            raise RetryableDownloadError(
+                f"文件大小不匹配: {final_size}/{total_size} "
+                f"(差值: {size_diff} bytes, 超过允许的 "
+                f"{self._SIZE_MISMATCH_TOLERANCE_BYTES} bytes)",
+                keep_part=final_size < total_size,
+            )
+
     async def __download_once(
         self,
         url: str,
@@ -320,93 +425,17 @@ class StreamDownloader:
             use_curl_cffi=use_curl_cffi,
         ) as response:
             self.__validate_response(response, downloaded, retry_http_statuses)
-            content_encodings = _parse_content_encodings(
-                response.headers.get("content-encoding")
-            )
-            zipped_content = any(
-                encoding != "identity" for encoding in content_encodings
-            )
-
-            if downloaded > 0 and zipped_content:
-                raise RetryableDownloadError(
-                    f"压缩响应 {', '.join(content_encodings)!r} 无法安全断点续传",
-                    keep_part=False,
-                )
-
-            # 编码响应的 Content-Length 是压缩传输体大小，而 aiter_bytes()
-            # 返回解码后的文件内容，不能用前者校验后者。正常情况下
-            # Accept-Encoding: identity 会避免进入此兼容分支
-            content_length = (
-                None if zipped_content else response.headers.get("content-length")
-            )
-            total_size = (
-                downloaded + int(content_length)
-                if content_length and downloaded > 0
-                else int(content_length)
-                if content_length
-                else None
-            )
-
-            if total_size is not None:
-                if total_size == 0:
-                    raise ZeroSizeException
-
-                if total_size / 1024 / 1024 > pconfig.max_size:
-                    logger.warning(
-                        f"媒体 url: {url} 大小 {(total_size / 1024 / 1024):.2f} MB "
-                        f"超过 {pconfig.max_size} MB, 取消下载"
-                    )
-                    raise SizeLimitException(total_size / 1024 / 1024)
-
-            mode = "ab" if downloaded > 0 else "wb"
-
-            current_size = downloaded
-
-            with self.rich_progress(
+            total_size = self.__resolve_total_size(response, downloaded)
+            self.__validate_total_size(url, total_size)
+            await self.__write_response(
+                response,
+                file_path,
                 desc,
+                downloaded,
                 total_size,
-            ) as update:
-                if downloaded:
-                    update(advance=downloaded)
-
-                async with aiofiles.open(
-                    file_path,
-                    mode,
-                ) as f:
-                    async for chunk in response.aiter_bytes(1024 * 1024):
-                        await f.write(chunk)
-
-                        current_size += len(chunk)
-
-                        update(advance=len(chunk))
-
-                        # 没有Content-Length时限制大小
-                        if (
-                            total_size is None
-                            and current_size / 1024 / 1024 > pconfig.max_size
-                        ):
-                            logger.warning(
-                                f"媒体 url: {url} 实际"
-                                f"下载大小 {(current_size / 1024 / 1024):.2f} MB "
-                                f"超过 {pconfig.max_size} MB, 取消下载"
-                            )
-                            raise SizeLimitException(current_size / 1024 / 1024)
-
-            final_size = (await file_path.stat()).st_size
-
-            if final_size == 0:
-                raise ZeroSizeException
-
-            # 允许一定范围内的大小不匹配（最多 1KB），避免因为服务器端的轻微差异导致失败
-            if total_size is not None and final_size != total_size:
-                size_diff = abs(final_size - total_size)
-                if size_diff > self._SIZE_MISMATCH_TOLERANCE_BYTES:
-                    raise RetryableDownloadError(
-                        f"文件大小不匹配: {final_size}/{total_size} "
-                        f"(差值: {size_diff} bytes, 超过允许的 "
-                        f"{self._SIZE_MISMATCH_TOLERANCE_BYTES} bytes)",
-                        keep_part=final_size < total_size,
-                    )
+                url,
+            )
+            await self.__validate_downloaded_size(file_path, total_size)
 
     @auto_task
     async def download_video(
@@ -482,7 +511,7 @@ class StreamDownloader:
 
         cache_dir = await CacheManager.ensure_dir(cache_type)
         final_video_path = cache_dir / video_name
-        temp_ts_path = cache_dir / f"{file_id}_temp.ts"
+        temp_ts_path = cache_dir / f".{file_id}.{uuid4().hex}.tmp.ts"
 
         if await final_video_path.exists():
             return final_video_path
@@ -491,9 +520,23 @@ class StreamDownloader:
 
         try:
             # 1. 智能解析 m3u8 (自动处理嵌套列表)
-            ts_urls = await self._smart_parse_m3u8(
-                url, ext_headers=ext_headers, use_curl_cffi=use_curl_cffi
-            )
+            try:
+                ts_urls = await self._smart_parse_m3u8(
+                    url, ext_headers=ext_headers, use_curl_cffi=use_curl_cffi
+                )
+            except _NativeHLSRequired as native_hls:
+                headers = {**self.headers, **(ext_headers or {})}
+                await FFmpeg.download_hls_to_mp4(
+                    native_hls.url, final_video_path, headers=headers
+                )
+                size_mb = (await final_video_path.stat()).st_size / 1024 / 1024
+                if size_mb > pconfig.max_size:
+                    await safe_unlink(final_video_path)
+                    raise SizeLimitException(size_mb) from native_hls
+                logger.success(
+                    f"[StreamDownloader] HLS 视频下载完成: {final_video_path}"
+                )
+                return final_video_path
             if not ts_urls:
                 raise DownloadException("m3u8 解析结果为空")
 
@@ -513,6 +556,7 @@ class StreamDownloader:
                 final_video_path=final_video_path,
                 downloaded_bytes=downloaded_bytes,
             )
+            await safe_unlink(temp_ts_path)
 
             logger.success(f"[StreamDownloader] m3u8 视频下载完成: {final_video_path}")
             return final_video_path
@@ -612,7 +656,7 @@ class StreamDownloader:
         if await FFmpeg.is_available():
             await FFmpeg.remux_to_mp4(temp_ts_path, final_video_path)
         elif await temp_ts_path.exists():
-            await temp_ts_path.rename(final_video_path)
+            await temp_ts_path.replace(final_video_path)
 
         if (
             not await final_video_path.exists()
@@ -641,50 +685,75 @@ class StreamDownloader:
         )
         base_url = m3u8_url.rsplit("/", 1)[0] + "/"
 
-        # 检查是否是 Master Playlist (包含子 m3u8 链接)
         if "#EXT-X-STREAM-INF" in content:
             logger.debug(
                 "[StreamDownloader] 检测到 Master Playlist，正在提取最高画质链接..."
             )
-            lines = content.splitlines()
-            sub_playlists = []
+            selected_url = self._select_hls_variant(content, base_url)
+            logger.debug(f"[StreamDownloader] 转向子播放列表: {selected_url}")
+            return await self._smart_parse_m3u8(
+                selected_url,
+                ext_headers=ext_headers,
+                use_curl_cffi=use_curl_cffi,
+            )
 
-            for line in lines:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    # 处理相对路径
-                    if not line.startswith("http"):
-                        line = urljoin(base_url, line)
-                    sub_playlists.append(line)
+        if any(tag in content for tag in _HLS_NATIVE_TAGS):
+            raise _NativeHLSRequired(m3u8_url)
 
-            if sub_playlists:
-                # 通常最后一个是最高画质，或者是第一个
-                logger.debug(f"[StreamDownloader] 转向子播放列表: {sub_playlists[-1]}")
-                return await self._smart_parse_m3u8(
-                    sub_playlists[-1],
-                    ext_headers=ext_headers,
-                    use_curl_cffi=use_curl_cffi,
-                )
-            else:
-                raise DownloadException("Master Playlist 解析失败，未找到子链接")
-
-        # 处理 Media Playlist (真正的 TS 列表)
-        ts_urls = []
-        lines = content.splitlines()
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-
-            if line.startswith("http"):
-                ts_urls.append(line)
-            else:
-                ts_urls.append(urljoin(base_url, line))
-
+        ts_urls = self._extract_hls_segments(content, base_url)
         logger.info(
             f"[StreamDownloader] m3u8 解析完成，共找到 {len(ts_urls)} 个 ts 文件"
         )
         return ts_urls
+
+    @staticmethod
+    def _hls_variant_score(stream_info: str) -> tuple[int, int]:
+        bandwidth_match = _RE_HLS_BANDWIDTH.search(stream_info)
+        resolution_match = _RE_HLS_RESOLUTION.search(stream_info)
+        bandwidth = int(bandwidth_match[1]) if bandwidth_match is not None else 0
+        pixels = (
+            int(resolution_match[1]) * int(resolution_match[2])
+            if resolution_match is not None
+            else 0
+        )
+        return pixels, bandwidth
+
+    @staticmethod
+    def _absolute_hls_url(base_url: str, value: str) -> str:
+        return value if value.startswith("http") else urljoin(base_url, value)
+
+    @classmethod
+    def _extract_hls_variants(
+        cls,
+        content: str,
+        base_url: str,
+    ) -> list[tuple[tuple[int, int], str]]:
+        variants: list[tuple[tuple[int, int], str]] = []
+        variant_score: tuple[int, int] | None = None
+        for raw_line in content.splitlines():
+            line = raw_line.strip()
+            if line.startswith("#EXT-X-STREAM-INF:"):
+                variant_score = cls._hls_variant_score(line)
+            elif variant_score is not None and line and not line.startswith("#"):
+                variants.append((variant_score, cls._absolute_hls_url(base_url, line)))
+                variant_score = None
+        return variants
+
+    @classmethod
+    def _select_hls_variant(cls, content: str, base_url: str) -> str:
+        variants = cls._extract_hls_variants(content, base_url)
+        if not variants:
+            raise DownloadException("Master Playlist 解析失败，未找到子链接")
+        _, selected_url = max(variants, key=lambda item: item[0])
+        return selected_url
+
+    @classmethod
+    def _extract_hls_segments(cls, content: str, base_url: str) -> list[str]:
+        return [
+            cls._absolute_hls_url(base_url, line)
+            for raw_line in content.splitlines()
+            if (line := raw_line.strip()) and not line.startswith("#")
+        ]
 
     async def text(
         self,

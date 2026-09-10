@@ -652,7 +652,14 @@ class Renderer:
             image_raw = await FFmpeg.png_to_jpeg(
                 await self.render_image(result, theme=theme)
             )
-            await image_path.write_bytes(image_raw)
+            temp_path = image_path.with_name(
+                f".{image_path.stem}.{uuid.uuid4().hex}.tmp{image_path.suffix}"
+            )
+            try:
+                await temp_path.write_bytes(image_raw)
+                await temp_path.replace(image_path)
+            finally:
+                await temp_path.unlink(missing_ok=True)
         result.render_image = image_path
         if (await image_path.stat()).st_size >= 5 * 1024 * 1024:
             return await UniHelper.file_seg(image_path)

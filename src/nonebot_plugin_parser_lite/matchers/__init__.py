@@ -23,7 +23,6 @@ from ..config import pconfig
 from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
-from ..parsers.weibo.auth import AuthHelper as WeiboAuthHelper
 from ..render import RENDERER
 from ..utils.common import LimitedSizeDict
 from .rule import Searched, SearchResult, _extract_text, on_keyword_regex
@@ -40,6 +39,7 @@ _KEYWORD_CLASS_MAP: dict[str, type[BaseParser]] = {}
 _ALL_PARSERS: list[BaseParser] = []
 # 缓存结果
 _RESULT_CACHE = LimitedSizeDict[str, ParseResult](max_size=50)
+_PARSE_TASKS: dict[str, asyncio.Task[ParseResult]] = {}
 _BV_PATTERN = re.compile(r"BV[0-9A-Za-z]{10}")
 _URL_PATTERN = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 
@@ -118,8 +118,35 @@ async def close_http_clients() -> None:
     await asyncio.gather(
         *(parser.aclose() for parser in _ALL_PARSERS),
         DOWNLOADER.aclose(),
-        WeiboAuthHelper.aclose(),
     )
+
+
+async def _get_or_parse_result(sr: SearchResult) -> ParseResult:
+    cache_key = sr.cache_key
+    if result := _RESULT_CACHE.get(cache_key):
+        logger.debug(f"命中缓存: {cache_key}, 结果: {result!r}")
+        return result
+
+    task = _PARSE_TASKS.get(cache_key)
+    if task is None:
+
+        async def parse_and_cache() -> ParseResult:
+            parser = get_parser(sr.keyword)
+            parsed = await parser.parse(sr.keyword, sr.searched)
+            logger.debug(f"解析结果: {parsed!r}")
+            _RESULT_CACHE[cache_key] = parsed
+            return parsed
+
+        task = asyncio.create_task(parse_and_cache())
+        _PARSE_TASKS[cache_key] = task
+
+        def discard_finished(finished: asyncio.Task[ParseResult]) -> None:
+            if _PARSE_TASKS.get(cache_key) is finished:
+                _PARSE_TASKS.pop(cache_key, None)
+
+        task.add_done_callback(discard_finished)
+
+    return await asyncio.shield(task)
 
 
 @UniHelper.with_reaction
@@ -128,16 +155,7 @@ async def parser_handler(
     sr: SearchResult = Searched(),
 ):
     """统一的解析处理器"""
-    cache_key = sr.cache_key
-
-    result = _RESULT_CACHE.get(cache_key)
-    if result is None:
-        parser = get_parser(sr.keyword)
-        result = await parser.parse(sr.keyword, sr.searched)
-        logger.debug(f"解析结果: {result!r}")
-        _RESULT_CACHE[cache_key] = result
-    else:
-        logger.debug(f"命中缓存: {cache_key}, 结果: {result!r}")
+    result = await _get_or_parse_result(sr)
 
     summary_msg = await RENDERER.render_messages(result)
     await summary_msg.send()
@@ -148,7 +166,7 @@ async def parser_handler(
                 f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
                 f"\n{download_cmd}"
             ).send()
-        await LazyManager.add(session.user.id, result)
+        await LazyManager.add(LazyManager.session_key(session), result)
     else:
         async for content_msg in RENDERER.send_content(result):
             await content_msg.send()
@@ -219,7 +237,7 @@ async def register_bili_matcher():
 if pconfig.lazy_download:
 
     async def has_lazy(session: Uninfo) -> bool:
-        return await LazyManager.has(session.user.id)
+        return await LazyManager.has(LazyManager.session_key(session))
 
     lazy_matcher = on_alconna(
         Alconna(pconfig.download_command[0]),
@@ -232,8 +250,8 @@ if pconfig.lazy_download:
     @UniHelper.with_reaction
     async def _(session: Uninfo):
         """懒下载命令：发送上次解析结果中的媒体内容"""
-        user_id = session.user.id
-        result = await LazyManager.claim(user_id)
+        session_key = LazyManager.session_key(session)
+        result = await LazyManager.claim(session_key)
         if result is None:
             await UniMessage("资源正在下载或发送中，请勿重复请求").send()
             return
@@ -242,7 +260,7 @@ if pconfig.lazy_download:
             async for message in RENDERER.send_content(result):
                 await message.send()
         finally:
-            await LazyManager.release(user_id)
+            await LazyManager.release(session_key)
 
 
 class LazyManager:
@@ -254,54 +272,63 @@ class LazyManager:
     class Session:
         result: ParseResult
 
-    # user_id -> Session
-    SESSIONS: ClassVar[dict[str, "LazyManager.Session"]] = {}
-    ACTIVE_USERS: ClassVar[set[str]] = set()
+    SessionKey = tuple[str, str, str, str]
+    SESSIONS: ClassVar[dict[SessionKey, "LazyManager.Session"]] = {}
+    ACTIVE_USERS: ClassVar[set[SessionKey]] = set()
     LOCK: ClassVar[asyncio.Lock] = asyncio.Lock()
     TIMEOUT_TASKS: ClassVar[set[asyncio.Task[None]]] = set()
 
     @classmethod
-    async def add(cls, user_id: str, parse_result: ParseResult) -> None:
+    def session_key(cls, session: Uninfo) -> SessionKey:
+        return (
+            str(session.scope),
+            session.self_id,
+            session.scene_path,
+            session.user.id,
+        )
+
+    @classmethod
+    async def add(cls, key: SessionKey, parse_result: ParseResult) -> None:
         """为用户创建/刷新懒下载会话"""
         session = cls.Session(result=parse_result)
         async with cls.LOCK:
-            cls.SESSIONS[user_id] = session
-            task = asyncio.create_task(cls._timeout_handler(user_id, session))
+            cls.SESSIONS[key] = session
+            task = asyncio.create_task(cls._timeout_handler(key, session))
             cls.TIMEOUT_TASKS.add(task)
             task.add_done_callback(cls.TIMEOUT_TASKS.discard)
 
     @classmethod
-    async def claim(cls, user_id: str) -> ParseResult | None:
+    async def claim(cls, key: SessionKey) -> ParseResult | None:
         """原子领取待下载结果；同一用户已有任务运行时返回 None"""
         async with cls.LOCK:
-            if user_id in cls.ACTIVE_USERS:
+            if key in cls.ACTIVE_USERS:
                 return None
 
-            session = cls.SESSIONS.pop(user_id, None)
+            session = cls.SESSIONS.pop(key, None)
             if session is None:
                 return None
 
-            cls.ACTIVE_USERS.add(user_id)
+            cls.ACTIVE_USERS.add(key)
             return session.result
 
     @classmethod
-    async def has(cls, user_id: str) -> bool:
+    async def has(cls, key: SessionKey) -> bool:
         async with cls.LOCK:
-            return user_id in cls.SESSIONS or user_id in cls.ACTIVE_USERS
+            return key in cls.SESSIONS or key in cls.ACTIVE_USERS
 
     @classmethod
-    async def release(cls, user_id: str) -> None:
+    async def release(cls, key: SessionKey) -> None:
         """标记该用户的下载发送流程结束"""
         async with cls.LOCK:
-            cls.ACTIVE_USERS.discard(user_id)
+            cls.ACTIVE_USERS.discard(key)
 
     @classmethod
-    async def _timeout_handler(cls, user_id: str, session: Session) -> None:
+    async def _timeout_handler(cls, key: SessionKey, session: Session) -> None:
         """会话超时自动清理"""
         await asyncio.sleep(cls.TIMEOUT_SECONDS)
         async with cls.LOCK:
-            if cls.SESSIONS.get(user_id) is session:
-                cls.SESSIONS.pop(user_id)
+            if cls.SESSIONS.get(key) is session:
+                cls.SESSIONS.pop(key)
 
 
 class BvReplyMergeExtension(Extension):

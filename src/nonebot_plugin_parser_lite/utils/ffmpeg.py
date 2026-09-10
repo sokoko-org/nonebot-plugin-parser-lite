@@ -25,6 +25,12 @@ class FFmpeg:
         raw = ",".join(sorted(parts))
         return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
+    @staticmethod
+    def temporary_output_path(output_path: Path) -> Path:
+        return output_path.with_name(
+            f".{output_path.stem}.{uuid4().hex}.tmp{output_path.suffix}"
+        )
+
     @classmethod
     async def exec_ffmpeg(cls, cmd: list[str], input: bytes | None = None) -> bytes:
         """执行 ffmpeg 命令
@@ -387,6 +393,7 @@ class FFmpeg:
         """
         将 ts / fmp4 等容器转封装为 mp4，不重编码
         """
+        temp_path = cls.temporary_output_path(output_path)
         cmd = [
             "-y",
             "-hide_banner",
@@ -402,9 +409,51 @@ class FFmpeg:
             "copy",
             "-bsf:a",
             "aac_adtstoasc",
-            str(output_path),
+            str(temp_path),
         ]
-        await cls.exec_ffmpeg(cmd)
+        try:
+            await cls.exec_ffmpeg(cmd)
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
+        return output_path
+
+    @classmethod
+    async def download_hls_to_mp4(
+        cls,
+        url: str,
+        output_path: Path,
+        headers: dict[str, str] | None = None,
+    ) -> Path:
+        """让 ffmpeg 处理加密、初始化段和字节范围等完整 HLS 语义。"""
+        temp_path = cls.temporary_output_path(output_path)
+        input_options: list[str] = []
+        if headers:
+            header_text = "\r\n".join(
+                f"{key}: {value}" for key, value in headers.items()
+            )
+            input_options = ["-headers", f"{header_text}\r\n"]
+        cmd = [
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            *input_options,
+            "-i",
+            url,
+            "-c",
+            "copy",
+            "-bsf:a",
+            "aac_adtstoasc",
+            "-movflags",
+            "+faststart",
+            str(temp_path),
+        ]
+        try:
+            await cls.exec_ffmpeg(cmd)
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
         return output_path
 
     @classmethod
@@ -424,6 +473,7 @@ class FFmpeg:
             return output_path
         logger.info(f"Merging {v_path.name} and {a_path.name} to {output_path.name}")
 
+        temp_path = cls.temporary_output_path(output_path)
         cmd = [
             "-y",
             "-hide_banner",
@@ -444,10 +494,13 @@ class FFmpeg:
             "1:a:0",
             "-movflags",
             "+faststart",  # 将 moov 前移，优化流式播放
-            str(output_path),
+            str(temp_path),
         ]
-
-        await cls.exec_ffmpeg(cmd)
+        try:
+            await cls.exec_ffmpeg(cmd)
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
         logger.success(f"Merged {output_path.name}, {await fmt_size(output_path)}")
         return output_path
 
@@ -495,8 +548,13 @@ class FFmpeg:
         audio_options = await cls._configure_live_audio(
             inputs, filter_parts, bgm_path, has_bgm, composed_duration
         )
-        cmd = cls._build_live_command(inputs, filter_parts, *audio_options, output_path)
-        await cls.exec_ffmpeg(cmd)
+        temp_path = cls.temporary_output_path(output_path)
+        cmd = cls._build_live_command(inputs, filter_parts, *audio_options, temp_path)
+        try:
+            await cls.exec_ffmpeg(cmd)
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
         logger.success(
             f"Created Live Photo video {output_path.name}, "
             f"{await fmt_size(output_path)}"
@@ -529,11 +587,7 @@ class FFmpeg:
         if replaces_input and await cls._is_mp3_audio(audio_path):
             return audio_path
 
-        ffmpeg_output_path = output_path
-        if replaces_input:
-            ffmpeg_output_path = output_path.with_name(
-                f".{output_path.stem}.{uuid4().hex}.tmp.mp3"
-            )
+        ffmpeg_output_path = cls.temporary_output_path(output_path)
 
         logger.info(
             f"Converting audio '{audio_path.name}' to mp3 as '{output_path.name}'"
@@ -554,11 +608,9 @@ class FFmpeg:
 
         try:
             await cls.exec_ffmpeg(cmd)
-            if replaces_input:
-                await ffmpeg_output_path.replace(output_path)
+            await ffmpeg_output_path.replace(output_path)
         finally:
-            if ffmpeg_output_path != output_path:
-                await ffmpeg_output_path.unlink(missing_ok=True)
+            await ffmpeg_output_path.unlink(missing_ok=True)
         logger.success(
             f"Converted to mp3: {output_path.name}, size={await fmt_size(output_path)}"
         )

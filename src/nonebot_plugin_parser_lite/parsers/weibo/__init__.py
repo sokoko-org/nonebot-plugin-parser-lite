@@ -46,6 +46,12 @@ class WeiBoParser(BaseParser):
         name=PlatformEnum.WEIBO, display_name="微博"
     )
 
+    async def aclose(self) -> None:
+        try:
+            await super().aclose()
+        finally:
+            await AuthHelper.aclose()
+
     # https://weibo.com/tv/show/1034:5007449447661594?mid=5007452630158934
     @handle(
         "weibo.com/tv",
