@@ -50,20 +50,18 @@
 
             .poster-media .single-image,
             .poster-media .poster-video {
-                -webkit-mask-image: linear-gradient(
-                    to bottom,
-                    transparent 0%,
-                    #000 9%,
-                    #000 78%,
-                    transparent 100%
-                );
-                mask-image: linear-gradient(
-                    to bottom,
-                    transparent 0%,
-                    #000 9%,
-                    #000 78%,
-                    transparent 100%
-                );
+            /* 多图引用添加类 `,
+            .poster-media .media-foreground.media-grid`, 但是不好看 */
+                -webkit-mask-image: linear-gradient(to bottom,
+                        transparent 0%,
+                        #000 9%,
+                        #000 78%,
+                        transparent 100%);
+                mask-image: linear-gradient(to bottom,
+                        transparent 0%,
+                        #000 9%,
+                        #000 78%,
+                        transparent 100%);
             }
 
             [data-theme="dark"] .media-glow {
