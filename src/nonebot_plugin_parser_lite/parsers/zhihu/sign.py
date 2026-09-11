@@ -29,7 +29,6 @@ ZB = [
     49, 181, 46, 243, 88, 101, 183, 8, 23, 72, 188, 104, 179, 210, 134, 250, 201, 164, 89, 216,
     202, 220, 50, 221, 152, 140, 33, 235, 214,
 ]
-# ruff: enable [E501]
 # fmt:on
 
 ALPHABET = "6fpLRqJO8M/c3jnYxFkUVC4ZIG12SiH=5v0mXDazWBTsuw7QetbKdoPyAl+hN9rgE"
