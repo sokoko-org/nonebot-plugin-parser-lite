@@ -361,7 +361,6 @@ class Renderer:
 
         :raise ZeroSizeException: 资源大小为 0 时抛出
         :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raise DurationLimitException: 媒体时长超过配置的最大限制时抛出
         :raise DownloadException: 重试多次仍失败时抛出
         """
         if not isinstance(cont, VideoContent | AudioContent):
