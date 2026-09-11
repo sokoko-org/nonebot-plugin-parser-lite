@@ -29,13 +29,12 @@ def fail(messages: list[str]) -> None:
 
 
 def static_checks(root: Path) -> None:
-    errors: list[str] = []
     package = root / "src/nonebot_plugin_parser_lite"
-    for path in (package / "render", package / "utils/browser.py"):
-        if path.exists() or path.is_symlink():
-            errors.append(
-                f"{path.relative_to(root)} is still present in the standalone tree"
-            )
+    errors: list[str] = [
+        f"{path.relative_to(root)} is still present in the standalone tree"
+        for path in (package / "render", package / "utils/browser.py")
+        if path.exists() or path.is_symlink()
+    ]
     generated_bilibili = package / "utils/bilibili/bilibili"
     for path in package.rglob("*.py"):
         if generated_bilibili in path.parents:
