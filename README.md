@@ -143,9 +143,6 @@ plite_need_upload_video=False
 # 因此该配置项仅推荐 nonebot 和 协议端不在同一机器的用户配置
 plite_use_base64=False
 
-# [可选] 视频最大解析时长，单位：秒
-plite_duration_maximum=480
-
 # [可选] 音视频下载最大文件大小，单位 MB，超过该配置将阻断下载
 plite_max_size=90
 

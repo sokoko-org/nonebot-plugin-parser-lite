@@ -28,7 +28,6 @@ from ..data import (
 )
 from ..exception import (
     DownloadException,
-    DurationLimitException,
     SizeLimitException,
 )
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
@@ -271,11 +270,6 @@ class Renderer:
                     f"媒体太大啦，还是去{result.platform.display_name}看看吧~"
                 )
                 continue
-            except DurationLimitException:
-                yield UniMessage(
-                    f"媒体太长啦，还是去{result.platform.display_name}看看吧~"
-                )
-                continue
             except DownloadException as e:
                 failed_count += 1
                 logger.exception(f"{cont.__class__.__name__} 下载失败: {e!r}")
@@ -367,14 +361,10 @@ class Renderer:
 
         :raise ZeroSizeException: 资源大小为 0 时抛出
         :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raise DurationLimitException: 媒体时长超过配置的最大限制时抛出
         :raise DownloadException: 重试多次仍失败时抛出
         """
         if not isinstance(cont, VideoContent | AudioContent):
             return
-        if cont.duration > pconfig.duration_maximum:
-            raise DurationLimitException(cont.duration)
-
         path = await cont.get_path()
         if (isinstance(cont, VideoContent) and pconfig.need_upload_video) or (
             not isinstance(cont, VideoContent)
