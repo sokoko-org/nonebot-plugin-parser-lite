@@ -226,6 +226,14 @@ def ffmpeg_module():
     class CacheManager:
         MEDIA = "media"
 
+    class SizeLimitException(Exception):
+        def __init__(self, size):
+            self.size = size
+
+    _module(
+        f"{FFMPEG_TEST_PACKAGE}.exception",
+        SizeLimitException=SizeLimitException,
+    )
     _module(f"{FFMPEG_TEST_PACKAGE}.utils.cache", CacheManager=CacheManager)
 
     async def fmt_size(_path):
@@ -618,24 +626,16 @@ async def test_m3u8_reuses_final_mp4_after_removing_task_ts(
 ):
     download, _, cache_manager = downloader_modules
     downloader = _new_downloader(download, FakeClient([]))
-    calls = {"parse": 0, "download": 0, "finalize": 0}
+    calls = 0
 
-    async def fake_parse(*args, **kwargs):
-        calls["parse"] += 1
-        return ["https://cdn.example/segment.ts"]
+    class FakeFFmpeg:
+        @classmethod
+        async def download_hls_to_mp4(cls, url, output_path, **kwargs):
+            nonlocal calls
+            calls += 1
+            await output_path.write_bytes(b"mp4-cache")
 
-    async def fake_download(*, temp_ts_path, **kwargs):
-        calls["download"] += 1
-        await temp_ts_path.write_bytes(b"t" * 2048)
-        return 2048
-
-    async def fake_finalize(*, final_video_path, **kwargs):
-        calls["finalize"] += 1
-        await final_video_path.write_bytes(b"mp4-cache")
-
-    monkeypatch.setattr(downloader, "_smart_parse_m3u8", fake_parse)
-    monkeypatch.setattr(downloader, "_download_m3u8_ts_files", fake_download)
-    monkeypatch.setattr(downloader, "_finalize_m3u8_download", fake_finalize)
+    monkeypatch.setattr(download, "FFmpeg", FakeFFmpeg)
 
     kwargs = {
         "url": "https://cdn.example/master.m3u8",
@@ -647,43 +647,8 @@ async def test_m3u8_reuses_final_mp4_after_removing_task_ts(
 
     assert str(first_path) == str(second_path)
     assert await second_path.read_bytes() == b"mp4-cache"
-    assert calls == {"parse": 1, "download": 1, "finalize": 1}
+    assert calls == 1
     assert not list((tmp_path / cache_manager.MEDIA).glob("*.tmp.ts"))
-
-
-@pytest.mark.asyncio
-async def test_m3u8_master_selects_highest_resolution_even_when_listed_first(
-    downloader_modules, monkeypatch
-):
-    download, _, _ = downloader_modules
-    downloader = _new_downloader(download, FakeClient([]))
-    requested_urls = []
-    playlists = {
-        "https://cdn.example/master.m3u8": """#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=5000000,RESOLUTION=1920x1080
-high/index.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=1000000,RESOLUTION=640x360
-low/index.m3u8
-""",
-        "https://cdn.example/high/index.m3u8": """#EXTM3U
-#EXTINF:10,
-segment.ts
-""",
-    }
-
-    async def fake_text(url, **kwargs):
-        requested_urls.append(url)
-        return playlists[url]
-
-    monkeypatch.setattr(downloader, "text", fake_text)
-
-    urls = await downloader._smart_parse_m3u8("https://cdn.example/master.m3u8")
-
-    assert urls == ["https://cdn.example/high/segment.ts"]
-    assert requested_urls == [
-        "https://cdn.example/master.m3u8",
-        "https://cdn.example/high/index.m3u8",
-    ]
 
 
 @pytest.mark.asyncio
@@ -692,20 +657,14 @@ async def test_complex_hls_is_delegated_to_ffmpeg(downloader_modules, monkeypatc
     downloader = _new_downloader(download, FakeClient([]))
     delegated = []
 
-    async def fake_text(url, **kwargs):
-        return """#EXTM3U
-#EXT-X-KEY:METHOD=AES-128,URI=\"key.bin\"
-#EXTINF:10,
-segment.ts
-"""
-
     class FakeFFmpeg:
         @classmethod
-        async def download_hls_to_mp4(cls, url, output_path, headers=None):
+        async def download_hls_to_mp4(
+            cls, url, output_path, headers=None, max_size_mb=None
+        ):
             delegated.append((url, headers))
             await output_path.write_bytes(b"mp4-cache")
 
-    monkeypatch.setattr(downloader, "text", fake_text)
     monkeypatch.setattr(download, "FFmpeg", FakeFFmpeg)
 
     path = await downloader.download_m3u8_video(
@@ -724,6 +683,26 @@ segment.ts
             },
         )
     ]
+
+
+@pytest.mark.asyncio
+async def test_native_hls_zero_output_raises_zero_size(downloader_modules, monkeypatch):
+    download, _, cache_manager = downloader_modules
+    downloader = _new_downloader(download, FakeClient([]))
+
+    class FakeFFmpeg:
+        @classmethod
+        async def download_hls_to_mp4(cls, url, output_path, **kwargs):
+            await output_path.write_bytes(b"")
+
+    monkeypatch.setattr(download, "FFmpeg", FakeFFmpeg)
+
+    with pytest.raises(download.ZeroSizeException):
+        await downloader.download_m3u8_video(
+            url="https://cdn.example/empty.m3u8",
+            cache_key="empty-video",
+            cache_type=cache_manager.MEDIA,
+        )
 
 
 @pytest.mark.asyncio

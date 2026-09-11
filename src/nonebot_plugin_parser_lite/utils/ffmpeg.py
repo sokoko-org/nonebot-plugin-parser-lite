@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.subprocess import Process
 from fractions import Fraction
 import hashlib
 import json
@@ -9,6 +10,7 @@ from uuid import uuid4
 from anyio import Path
 from nonebot import logger
 
+from ..exception import SizeLimitException
 from .cache import CacheManager
 from .common import fmt_size
 
@@ -38,7 +40,7 @@ class FFmpeg:
         :param cmd: 不包含 'ffmpeg' 本身的命令参数列表
         :param input: _description_, defaults to None
 
-        :return: bytes, if exists
+        :return: bytes
         """
         full_cmd = ["ffmpeg", *cmd]
         try:
@@ -56,6 +58,64 @@ class FFmpeg:
             error_msg = stderr.decode(errors="ignore").strip()
             raise RuntimeError(f"ffmpeg 执行失败: {error_msg}")
         return stdout
+
+    @classmethod
+    async def exec_ffmpeg_monitored(
+        cls,
+        cmd: list[str],
+        output_path: Path,
+        max_size_mb: int,
+    ) -> bytes:
+        """执行 FFmpeg，并在输出文件超过上限时终止进程
+
+        :param cmd: 不包含 'ffmpeg' 本身的命令参数列表
+        :param output_path: 需要监视大小的输出文件路径
+        :param max_size_mb: 最大大小 MB
+
+        :return: bytes
+        """
+        try:
+            process = await asyncio.create_subprocess_exec(
+                "ffmpeg",
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+        except FileNotFoundError as e:
+            raise RuntimeError("ffmpeg 未安装或无法找到可执行文件") from e
+
+        communicate = asyncio.create_task(process.communicate())
+        max_size_bytes = max_size_mb * 1024 * 1024
+        try:
+            while not communicate.done():
+                await asyncio.sleep(0.1)
+                if await output_path.exists():
+                    size = (await output_path.stat()).st_size
+                    if size > max_size_bytes:
+                        await cls.stop_process(process, communicate)
+                        raise SizeLimitException(size / 1024 / 1024)
+
+            stdout, stderr = await communicate
+        except BaseException:
+            await cls.stop_process(process, communicate)
+            raise
+
+        if process.returncode != 0:
+            error_msg = stderr.decode(errors="ignore").strip()
+            raise RuntimeError(f"ffmpeg 执行失败: {error_msg}")
+        if await output_path.exists():
+            size = (await output_path.stat()).st_size
+            if size > max_size_bytes:
+                raise SizeLimitException(size / 1024 / 1024)
+        return stdout
+
+    @staticmethod
+    async def stop_process(process: Process, communicate: asyncio.Task) -> None:
+        if process.returncode is None:
+            process.kill()
+        if communicate.done():
+            return
+        await communicate
 
     @classmethod
     async def exec_probe(cls, cmd: list[str]) -> bytes:
@@ -424,6 +484,7 @@ class FFmpeg:
         url: str,
         output_path: Path,
         headers: dict[str, str] | None = None,
+        max_size_mb: int = 90,
     ) -> Path:
         """让 ffmpeg 处理加密、初始化段和字节范围等完整 HLS 语义。"""
         temp_path = cls.temporary_output_path(output_path)
@@ -450,7 +511,11 @@ class FFmpeg:
             str(temp_path),
         ]
         try:
-            await cls.exec_ffmpeg(cmd)
+            await cls.exec_ffmpeg_monitored(
+                cmd,
+                output_path=temp_path,
+                max_size_mb=max_size_mb,
+            )
             await temp_path.replace(output_path)
         finally:
             await temp_path.unlink(missing_ok=True)
