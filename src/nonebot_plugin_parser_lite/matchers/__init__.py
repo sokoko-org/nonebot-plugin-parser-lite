@@ -273,8 +273,9 @@ class LazyManager:
         result: ParseResult
 
     SessionKey = tuple[str, str, str, str]
+    UserKey = tuple[str, str]
     SESSIONS: ClassVar[dict[SessionKey, "LazyManager.Session"]] = {}
-    ACTIVE_USERS: ClassVar[set[SessionKey]] = set()
+    ACTIVE_USERS: ClassVar[set[UserKey]] = set()
     LOCK: ClassVar[asyncio.Lock] = asyncio.Lock()
     TIMEOUT_TASKS: ClassVar[set[asyncio.Task[None]]] = set()
 
@@ -286,6 +287,10 @@ class LazyManager:
             session.scene_path,
             session.user.id,
         )
+
+    @staticmethod
+    def user_key(key: SessionKey) -> UserKey:
+        return key[0], key[-1]
 
     @classmethod
     async def add(cls, key: SessionKey, parse_result: ParseResult) -> None:
@@ -300,27 +305,31 @@ class LazyManager:
     @classmethod
     async def claim(cls, key: SessionKey) -> ParseResult | None:
         """原子领取待下载结果；同一用户已有任务运行时返回 None"""
+        user_key = cls.user_key(key)
         async with cls.LOCK:
-            if key in cls.ACTIVE_USERS:
+            if user_key in cls.ACTIVE_USERS:
                 return None
 
             session = cls.SESSIONS.pop(key, None)
             if session is None:
                 return None
 
-            cls.ACTIVE_USERS.add(key)
+            for pending_key in tuple(cls.SESSIONS):
+                if cls.user_key(pending_key) == user_key:
+                    cls.SESSIONS.pop(pending_key)
+            cls.ACTIVE_USERS.add(user_key)
             return session.result
 
     @classmethod
     async def has(cls, key: SessionKey) -> bool:
         async with cls.LOCK:
-            return key in cls.SESSIONS or key in cls.ACTIVE_USERS
+            return key in cls.SESSIONS or cls.user_key(key) in cls.ACTIVE_USERS
 
     @classmethod
     async def release(cls, key: SessionKey) -> None:
         """标记该用户的下载发送流程结束"""
         async with cls.LOCK:
-            cls.ACTIVE_USERS.discard(key)
+            cls.ACTIVE_USERS.discard(cls.user_key(key))
 
     @classmethod
     async def _timeout_handler(cls, key: SessionKey, session: Session) -> None:
