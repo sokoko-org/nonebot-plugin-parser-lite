@@ -45,7 +45,7 @@ jobs:
         with:
           args: >-
             check --config ruff.toml --fix
-            src/nonebot_plugin_parser_lite
+          src: src/nonebot_plugin_parser_lite
 
       - name: Verify generated source
         run: python scripts/verify_standalone.py

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from importlib import import_module
 from typing import Any, Self, overload
 
@@ -51,7 +51,7 @@ async def shutdown_runtime() -> None:
     clear_result_cache()
 
 
-class ParseStep(str, Enum):
+class ParseStep(StrEnum):
     MATCH = "match"
     PARSE = "parse"
 
