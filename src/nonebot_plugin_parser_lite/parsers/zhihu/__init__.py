@@ -85,8 +85,8 @@ class ZhiHuParser(BaseParser):
                 comment_count=format_num(statistics.comment_count),
                 collect_count=format_num(statistics.favorites),
                 extra={
-                    "down_vote": format_num(statistics.down_vote_count),
-                    "up_vote": format_num(statistics.up_vote_count),
+                    "down_vote": ("反对", format_num(statistics.down_vote_count)),
+                    "up_vote": ("赞成", format_num(statistics.up_vote_count)),
                 },
             ),
             comments=comments,
@@ -152,8 +152,8 @@ class ZhiHuParser(BaseParser):
                 comment_count=format_num(statistics.comment_count),
                 collect_count=format_num(statistics.favorites),
                 extra={
-                    "down_vote": format_num(statistics.down_vote_count),
-                    "up_vote": format_num(statistics.up_vote_count),
+                    "down_vote": ("反对", format_num(statistics.down_vote_count)),
+                    "up_vote": ("赞成", format_num(statistics.up_vote_count)),
                 },
             ),
             comments=comments,
@@ -211,8 +211,8 @@ class ZhiHuParser(BaseParser):
                 view_count=format_num(question_data.visit_count),
                 comment_count=format_num(question_data.comment_count),
                 extra={
-                    "up_vote": format_num(question_data.voteup_count),
-                    "follow": format_num(question_data.follower_count),
+                    "up_vote": ("赞成", format_num(question_data.voteup_count)),
+                    "follow": ("关注", format_num(question_data.follower_count)),
                 },
             ),
             comments=comments,

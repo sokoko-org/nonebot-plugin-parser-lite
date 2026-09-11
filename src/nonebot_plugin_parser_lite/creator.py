@@ -17,6 +17,7 @@ from .data import (
     PollContent,
     PollOption,
     QuoteContent,
+    StatExtra,
     Stats,
     StickerContent,
     VideoContent,
@@ -427,7 +428,7 @@ class Creator:
         collect_count: str | None = None,
         share_count: str | None = None,
         comment_count: str | None = None,
-        extra: dict[str, Any] | None = None,
+        extra: dict[str, StatExtra] | None = None,
     ):
         """
         创建统计信息
@@ -437,7 +438,7 @@ class Creator:
         :param collect_count: 收藏数
         :param share_count: 分享数
         :param comment_count: 评论数
-        :param extra: 额外的信息
+        :param extra: 额外的信息，值为（显示标签、数值）
         """
         if extra is None:
             extra = {}

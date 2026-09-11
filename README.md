@@ -97,7 +97,7 @@ uv add --requirements requirements.txt
 
 |                                                                              哔哩哔哩                                                                               |                                                                               小红书                                                                                |
 | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| <img width="1240" height="2772" alt="029e59fa-8808-58e6-b403-031bb7696295" src="https://github.com/user-attachments/assets/a3eb71c9-61a4-4479-8ea2-e9b17dd96430" /> | <img width="1240" height="4856" alt="02db1e9c-691b-5485-b312-3280a1d02898" src="https://github.com/user-attachments/assets/0e615688-063e-453c-83d3-c328c17eae12" /> |
+| <img width="1240" height="2772" alt="029e59fa-8808-58e6-b403-031bb7696295" src="https://github.com/user-attachments/assets/6bd2817a-69bd-4952-9093-f71de637c8aa" /> | <img width="1240" height="4856" alt="02db1e9c-691b-5485-b312-3280a1d02898" src="https://github.com/user-attachments/assets/0e615688-063e-453c-83d3-c328c17eae12" /> |
 
 </details>
 

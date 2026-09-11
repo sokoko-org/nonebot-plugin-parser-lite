@@ -221,6 +221,9 @@ class Author:
         return None if self.avatar is None else await self.avatar
 
 
+StatExtra = tuple[str, Any]
+
+
 @dataclass(slots=True)
 class Stats:
     """统计信息"""
@@ -235,8 +238,8 @@ class Stats:
     """分享数"""
     comment_count: str | None = None
     """评论数"""
-    extra: dict[str, Any] = field(default_factory=dict)
-    """额外信息, 比如弹幕数/硬币数"""
+    extra: dict[str, StatExtra] = field(default_factory=dict)
+    """额外信息，键为图标标识，值为（显示标签、数值）"""
 
 
 @dataclass(repr=False, slots=True)
