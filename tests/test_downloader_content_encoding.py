@@ -11,6 +11,7 @@ import pytest
 ROOT = Path(__file__).parents[1]
 SOURCE = ROOT / "src/nonebot_plugin_parser_lite"
 TEST_PACKAGE = "_parser_lite_downloader_test"
+FFMPEG_TEST_PACKAGE = "_parser_lite_ffmpeg_test"
 
 
 class AsyncPathStub:
@@ -36,6 +37,14 @@ class AsyncPathStub:
     def name(self):
         return self._path.name
 
+    @property
+    def stem(self):
+        return self._path.stem
+
+    @property
+    def suffix(self):
+        return self._path.suffix
+
     async def exists(self):
         return self._path.exists()
 
@@ -44,6 +53,9 @@ class AsyncPathStub:
 
     async def rename(self, target):
         self._path.rename(Path(target))
+
+    async def replace(self, target):
+        self._path.replace(Path(target))
 
     async def stat(self):
         return self._path.stat()
@@ -54,8 +66,14 @@ class AsyncPathStub:
     async def read_bytes(self):
         return self._path.read_bytes()
 
+    async def write_bytes(self, data):
+        return self._path.write_bytes(data)
+
     def with_suffix(self, suffix):
         return type(self)(self._path.with_suffix(suffix))
+
+    def with_name(self, name):
+        return type(self)(self._path.with_name(name))
 
 
 class AsyncFileStub:
@@ -160,8 +178,12 @@ def downloader_modules(tmp_path):
     _module(f"{TEST_PACKAGE}.utils.cache", CacheManager=CacheManager)
     _module(
         f"{TEST_PACKAGE}.utils.common",
-        compose_cache_key=lambda *parts: ":".join(str(part) for part in parts),
-        generate_file_name=lambda _url, cache_key=None: cache_key or "download",
+        compose_cache_key=lambda *parts: ":".join(
+            str(part) for part in parts if part is not None
+        ),
+        generate_file_name=lambda url, cache_key=None: (
+            cache_key or "download"
+        ).replace(":", "-"),
         safe_unlink=safe_unlink,
     )
     _module(f"{TEST_PACKAGE}.utils.ffmpeg", FFmpeg=object)
@@ -187,6 +209,42 @@ def downloader_modules(tmp_path):
 
     for name in list(sys.modules):
         if name == TEST_PACKAGE or name.startswith(f"{TEST_PACKAGE}."):
+            sys.modules.pop(name)
+
+
+@pytest.fixture
+def ffmpeg_module():
+    for name in list(sys.modules):
+        if name == FFMPEG_TEST_PACKAGE or name.startswith(f"{FFMPEG_TEST_PACKAGE}."):
+            sys.modules.pop(name)
+
+    package = _module(FFMPEG_TEST_PACKAGE)
+    package.__path__ = [str(SOURCE)]
+    utils = _module(f"{FFMPEG_TEST_PACKAGE}.utils")
+    utils.__path__ = [str(SOURCE / "utils")]
+
+    class CacheManager:
+        MEDIA = "media"
+
+    class SizeLimitException(Exception):
+        def __init__(self, size):
+            self.size = size
+
+    _module(
+        f"{FFMPEG_TEST_PACKAGE}.exception",
+        SizeLimitException=SizeLimitException,
+    )
+    _module(f"{FFMPEG_TEST_PACKAGE}.utils.cache", CacheManager=CacheManager)
+
+    async def fmt_size(_path):
+        return "0 B"
+
+    _module(f"{FFMPEG_TEST_PACKAGE}.utils.common", fmt_size=fmt_size)
+    yield _load_module(
+        f"{FFMPEG_TEST_PACKAGE}.utils.ffmpeg", SOURCE / "utils/ffmpeg.py"
+    )
+    for name in list(sys.modules):
+        if name == FFMPEG_TEST_PACKAGE or name.startswith(f"{FFMPEG_TEST_PACKAGE}."):
             sys.modules.pop(name)
 
 
@@ -543,6 +601,7 @@ async def test_decoding_error_discards_partial_file(downloader_modules, monkeypa
 
     class BrokenHttpxResponse:
         async def aiter_bytes(self, _chunk_size=None):
+            yield b"partial"
             raise DecodingError(
                 "invalid gzip stream",
                 request=Request("GET", "https://cdn.example/image.webp"),
@@ -551,8 +610,121 @@ async def test_decoding_error_discards_partial_file(downloader_modules, monkeypa
     monkeypatch.setattr(client_module, "HttpxResponse", BrokenHttpxResponse)
     response = client_module.UniResponse(BrokenHttpxResponse())
 
-    with pytest.raises(client_module.RetryableDownloadError) as exc_info:
+    async def consume_response():
         async for _ in response.aiter_bytes():
             pass
 
+    with pytest.raises(client_module.RetryableDownloadError) as exc_info:
+        await consume_response()
+
     assert exc_info.value.keep_part is False
+
+
+@pytest.mark.asyncio
+async def test_m3u8_reuses_final_mp4_after_removing_task_ts(
+    downloader_modules, tmp_path, monkeypatch
+):
+    download, _, cache_manager = downloader_modules
+    downloader = _new_downloader(download, FakeClient([]))
+    calls = 0
+
+    class FakeFFmpeg:
+        @classmethod
+        async def download_hls_to_mp4(cls, url, output_path, **kwargs):
+            nonlocal calls
+            calls += 1
+            await output_path.write_bytes(b"mp4-cache")
+
+    monkeypatch.setattr(download, "FFmpeg", FakeFFmpeg)
+
+    kwargs = {
+        "url": "https://cdn.example/master.m3u8",
+        "cache_key": "same-video",
+        "cache_type": cache_manager.MEDIA,
+    }
+    first_path = await downloader.download_m3u8_video(**kwargs)
+    second_path = await downloader.download_m3u8_video(**kwargs)
+
+    assert str(first_path) == str(second_path)
+    assert await second_path.read_bytes() == b"mp4-cache"
+    assert calls == 1
+    assert not list((tmp_path / cache_manager.MEDIA).glob("*.tmp.ts"))
+
+
+@pytest.mark.asyncio
+async def test_complex_hls_is_delegated_to_ffmpeg(downloader_modules, monkeypatch):
+    download, _, cache_manager = downloader_modules
+    downloader = _new_downloader(download, FakeClient([]))
+    delegated = []
+
+    class FakeFFmpeg:
+        @classmethod
+        async def download_hls_to_mp4(
+            cls, url, output_path, headers=None, max_size_mb=None
+        ):
+            delegated.append((url, headers))
+            await output_path.write_bytes(b"mp4-cache")
+
+    monkeypatch.setattr(download, "FFmpeg", FakeFFmpeg)
+
+    path = await downloader.download_m3u8_video(
+        url="https://cdn.example/encrypted.m3u8",
+        cache_key="encrypted-video",
+        cache_type=cache_manager.MEDIA,
+    )
+
+    assert await path.read_bytes() == b"mp4-cache"
+    assert delegated == [
+        (
+            "https://cdn.example/encrypted.m3u8",
+            {
+                "User-Agent": "downloader-test",
+                "accept-encoding": "gzip, deflate, br",
+            },
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_native_hls_zero_output_raises_zero_size(downloader_modules, monkeypatch):
+    download, _, cache_manager = downloader_modules
+    downloader = _new_downloader(download, FakeClient([]))
+
+    class FakeFFmpeg:
+        @classmethod
+        async def download_hls_to_mp4(cls, url, output_path, **kwargs):
+            await output_path.write_bytes(b"")
+
+    monkeypatch.setattr(download, "FFmpeg", FakeFFmpeg)
+
+    with pytest.raises(download.ZeroSizeException):
+        await downloader.download_m3u8_video(
+            url="https://cdn.example/empty.m3u8",
+            cache_key="empty-video",
+            cache_type=cache_manager.MEDIA,
+        )
+
+
+@pytest.mark.asyncio
+async def test_ffmpeg_failure_does_not_publish_partial_output(
+    ffmpeg_module, tmp_path, monkeypatch
+):
+    input_path = ffmpeg_module.Path(tmp_path / "input.ts")
+    output_path = ffmpeg_module.Path(tmp_path / "video.mp4")
+    await input_path.write_bytes(b"input")
+
+    async def fail_after_partial_write(cls, cmd, input=None):
+        await ffmpeg_module.Path(cmd[-1]).write_bytes(b"partial")
+        raise RuntimeError("ffmpeg failed")
+
+    monkeypatch.setattr(
+        ffmpeg_module.FFmpeg,
+        "exec_ffmpeg",
+        classmethod(fail_after_partial_write),
+    )
+
+    with pytest.raises(RuntimeError, match="ffmpeg failed"):
+        await ffmpeg_module.FFmpeg.remux_to_mp4(input_path, output_path)
+
+    assert not await output_path.exists()
+    assert not list(tmp_path.glob(".video.*.tmp.mp4"))

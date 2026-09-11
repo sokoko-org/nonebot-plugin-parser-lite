@@ -1,6 +1,6 @@
 from anyio import Path
 from nonebot import get_driver, get_plugin_config
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, model_validator
 
 from .constants import PlatformEnum
 from .path import cache_dir as _cache_dir
@@ -85,6 +85,29 @@ class Config(BaseModel):
     """哔哩哔哩 CDN 地区；支持 zh、en、ja、proxy 线路"""
     plite_bili_cdn_domain: str | None = None
     """自定义哔哩哔哩 CDN 域名，优先于地区配置"""
+
+    @field_validator("plite_download_command")
+    @classmethod
+    def validate_download_commands(cls, value: list[str]) -> list[str]:
+        commands = list(dict.fromkeys(command.strip() for command in value))
+        if not all(commands):
+            raise ValueError("懒下载命令不能为空字符串")
+        return commands
+
+    @field_validator("plite_day_range")
+    @classmethod
+    def validate_day_range(cls, value: list[str]) -> list[str]:
+        if len(value) != 2:
+            raise ValueError("白天时间范围必须包含开始和结束两个时间")
+        for item in value:
+            parse_hm_to_minutes(item)
+        return value
+
+    @model_validator(mode="after")
+    def validate_lazy_download(self) -> "Config":
+        if self.plite_lazy_download and not self.plite_download_command:
+            raise ValueError("开启懒下载时至少需要配置一条下载命令")
+        return self
 
     @property
     def nickname(self) -> str:

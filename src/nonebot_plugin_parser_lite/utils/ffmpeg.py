@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.subprocess import Process
 from fractions import Fraction
 import hashlib
 import json
@@ -9,6 +10,7 @@ from uuid import uuid4
 from anyio import Path
 from nonebot import logger
 
+from ..exception import SizeLimitException
 from .cache import CacheManager
 from .common import fmt_size
 
@@ -25,6 +27,12 @@ class FFmpeg:
         raw = ",".join(sorted(parts))
         return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
+    @staticmethod
+    def temporary_output_path(output_path: Path) -> Path:
+        return output_path.with_name(
+            f".{output_path.stem}.{uuid4().hex}.tmp{output_path.suffix}"
+        )
+
     @classmethod
     async def exec_ffmpeg(cls, cmd: list[str], input: bytes | None = None) -> bytes:
         """执行 ffmpeg 命令
@@ -32,7 +40,7 @@ class FFmpeg:
         :param cmd: 不包含 'ffmpeg' 本身的命令参数列表
         :param input: _description_, defaults to None
 
-        :return: bytes, if exists
+        :return: bytes
         """
         full_cmd = ["ffmpeg", *cmd]
         try:
@@ -50,6 +58,64 @@ class FFmpeg:
             error_msg = stderr.decode(errors="ignore").strip()
             raise RuntimeError(f"ffmpeg 执行失败: {error_msg}")
         return stdout
+
+    @classmethod
+    async def exec_ffmpeg_monitored(
+        cls,
+        cmd: list[str],
+        output_path: Path,
+        max_size_mb: int,
+    ) -> bytes:
+        """执行 FFmpeg，并在输出文件超过上限时终止进程
+
+        :param cmd: 不包含 'ffmpeg' 本身的命令参数列表
+        :param output_path: 需要监视大小的输出文件路径
+        :param max_size_mb: 最大大小 MB
+
+        :return: bytes
+        """
+        try:
+            process = await asyncio.create_subprocess_exec(
+                "ffmpeg",
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+        except FileNotFoundError as e:
+            raise RuntimeError("ffmpeg 未安装或无法找到可执行文件") from e
+
+        communicate = asyncio.create_task(process.communicate())
+        max_size_bytes = max_size_mb * 1024 * 1024
+        try:
+            while not communicate.done():
+                await asyncio.sleep(0.1)
+                if await output_path.exists():
+                    size = (await output_path.stat()).st_size
+                    if size > max_size_bytes:
+                        await cls.stop_process(process, communicate)
+                        raise SizeLimitException(size / 1024 / 1024)
+
+            stdout, stderr = await communicate
+        except BaseException:
+            await cls.stop_process(process, communicate)
+            raise
+
+        if process.returncode != 0:
+            error_msg = stderr.decode(errors="ignore").strip()
+            raise RuntimeError(f"ffmpeg 执行失败: {error_msg}")
+        if await output_path.exists():
+            size = (await output_path.stat()).st_size
+            if size > max_size_bytes:
+                raise SizeLimitException(size / 1024 / 1024)
+        return stdout
+
+    @staticmethod
+    async def stop_process(process: Process, communicate: asyncio.Task) -> None:
+        if process.returncode is None:
+            process.kill()
+        if communicate.done():
+            return
+        await communicate
 
     @classmethod
     async def exec_probe(cls, cmd: list[str]) -> bytes:
@@ -387,6 +453,7 @@ class FFmpeg:
         """
         将 ts / fmp4 等容器转封装为 mp4，不重编码
         """
+        temp_path = cls.temporary_output_path(output_path)
         cmd = [
             "-y",
             "-hide_banner",
@@ -402,9 +469,56 @@ class FFmpeg:
             "copy",
             "-bsf:a",
             "aac_adtstoasc",
-            str(output_path),
+            str(temp_path),
         ]
-        await cls.exec_ffmpeg(cmd)
+        try:
+            await cls.exec_ffmpeg(cmd)
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
+        return output_path
+
+    @classmethod
+    async def download_hls_to_mp4(
+        cls,
+        url: str,
+        output_path: Path,
+        headers: dict[str, str] | None = None,
+        max_size_mb: int = 90,
+    ) -> Path:
+        """让 ffmpeg 处理加密、初始化段和字节范围等完整 HLS 语义。"""
+        temp_path = cls.temporary_output_path(output_path)
+        input_options: list[str] = []
+        if headers:
+            header_text = "\r\n".join(
+                f"{key}: {value}" for key, value in headers.items()
+            )
+            input_options = ["-headers", f"{header_text}\r\n"]
+        cmd = [
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            *input_options,
+            "-i",
+            url,
+            "-c",
+            "copy",
+            "-bsf:a",
+            "aac_adtstoasc",
+            "-movflags",
+            "+faststart",
+            str(temp_path),
+        ]
+        try:
+            await cls.exec_ffmpeg_monitored(
+                cmd,
+                output_path=temp_path,
+                max_size_mb=max_size_mb,
+            )
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
         return output_path
 
     @classmethod
@@ -424,6 +538,7 @@ class FFmpeg:
             return output_path
         logger.info(f"Merging {v_path.name} and {a_path.name} to {output_path.name}")
 
+        temp_path = cls.temporary_output_path(output_path)
         cmd = [
             "-y",
             "-hide_banner",
@@ -444,10 +559,13 @@ class FFmpeg:
             "1:a:0",
             "-movflags",
             "+faststart",  # 将 moov 前移，优化流式播放
-            str(output_path),
+            str(temp_path),
         ]
-
-        await cls.exec_ffmpeg(cmd)
+        try:
+            await cls.exec_ffmpeg(cmd)
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
         logger.success(f"Merged {output_path.name}, {await fmt_size(output_path)}")
         return output_path
 
@@ -495,8 +613,13 @@ class FFmpeg:
         audio_options = await cls._configure_live_audio(
             inputs, filter_parts, bgm_path, has_bgm, composed_duration
         )
-        cmd = cls._build_live_command(inputs, filter_parts, *audio_options, output_path)
-        await cls.exec_ffmpeg(cmd)
+        temp_path = cls.temporary_output_path(output_path)
+        cmd = cls._build_live_command(inputs, filter_parts, *audio_options, temp_path)
+        try:
+            await cls.exec_ffmpeg(cmd)
+            await temp_path.replace(output_path)
+        finally:
+            await temp_path.unlink(missing_ok=True)
         logger.success(
             f"Created Live Photo video {output_path.name}, "
             f"{await fmt_size(output_path)}"
@@ -529,11 +652,7 @@ class FFmpeg:
         if replaces_input and await cls._is_mp3_audio(audio_path):
             return audio_path
 
-        ffmpeg_output_path = output_path
-        if replaces_input:
-            ffmpeg_output_path = output_path.with_name(
-                f".{output_path.stem}.{uuid4().hex}.tmp.mp3"
-            )
+        ffmpeg_output_path = cls.temporary_output_path(output_path)
 
         logger.info(
             f"Converting audio '{audio_path.name}' to mp3 as '{output_path.name}'"
@@ -554,11 +673,9 @@ class FFmpeg:
 
         try:
             await cls.exec_ffmpeg(cmd)
-            if replaces_input:
-                await ffmpeg_output_path.replace(output_path)
+            await ffmpeg_output_path.replace(output_path)
         finally:
-            if ffmpeg_output_path != output_path:
-                await ffmpeg_output_path.unlink(missing_ok=True)
+            await ffmpeg_output_path.unlink(missing_ok=True)
         logger.success(
             f"Converted to mp3: {output_path.name}, size={await fmt_size(output_path)}"
         )

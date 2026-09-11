@@ -20,7 +20,11 @@ def load_enabled_parsers() -> list[type[BaseParser]]:
 
         import_module(f".{mod_name}", package=__package__)
 
-    return BaseParser.get_all_subclass()
+    return [
+        parser_cls
+        for parser_cls in BaseParser.get_all_subclass()
+        if parser_cls.platform.name not in disabled
+    ]
 
 
 __all__ = ["load_enabled_parsers"]
