@@ -17,4 +17,4 @@ jobs:
       - name: Install Ruff
         uses: astral-sh/ruff-action@v3
       - name: Run Ruff Check
-        run: ruff check --exclude src/nonebot_plugin_parser_lite/utils/bilibili/bilibili
+        run: ruff check --config ruff.toml

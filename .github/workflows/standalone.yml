@@ -44,8 +44,7 @@ jobs:
         uses: astral-sh/ruff-action@v3
         with:
           args: >-
-            check --select I --fix
-            --exclude src/nonebot_plugin_parser_lite/utils/bilibili/bilibili
+            check --config ruff.toml --fix
             src/nonebot_plugin_parser_lite
 
       - name: Verify generated source
