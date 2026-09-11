@@ -26,11 +26,66 @@ def is_nonebot_distribution(name: str) -> bool:
     return normalized == "nonebot2" or normalized.startswith("nonebot-plugin-")
 
 
-def replace_once(text: str, old: str, new: str, path: Path) -> str:
-    count = text.count(old)
-    if count != 1:
-        raise RuntimeError(f"{path}: expected one transformation marker, found {count}")
-    return text.replace(old, new, 1)
+def replace_statement(text: str, node: ast.stmt, replacement: str) -> str:
+    if node.end_lineno is None:
+        raise RuntimeError("Python AST node has no end position")
+    lines = text.splitlines(keepends=True)
+    if replacement and not replacement.endswith("\n"):
+        replacement += "\n"
+    return (
+        "".join(lines[: node.lineno - 1])
+        + replacement
+        + "".join(lines[node.end_lineno :])
+    )
+
+
+def assigned_names(node: ast.stmt) -> set[str]:
+    if isinstance(node, ast.Assign):
+        return {target.id for target in node.targets if isinstance(target, ast.Name)}
+    if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+        return {node.target.id}
+    return set()
+
+
+def ensure_config_imports(text: str) -> str:
+    tree = ast.parse(text)
+    imported_modules = {
+        alias.asname or alias.name
+        for node in tree.body
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    }
+    typing_names = {
+        alias.asname or alias.name
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module == "typing"
+        for alias in node.names
+    }
+    imports = []
+    if "json" not in imported_modules:
+        imports.append("import json")
+    if "os" not in imported_modules:
+        imports.append("import os")
+    if "Any" not in typing_names:
+        imports.append("from typing import Any")
+    if not imports:
+        return text
+
+    insertion_line = 0
+    for node in tree.body:
+        is_docstring = (
+            isinstance(node, ast.Expr)
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+        )
+        is_future = isinstance(node, ast.ImportFrom) and node.module == "__future__"
+        if not (is_docstring or is_future):
+            break
+        insertion_line = node.end_lineno or insertion_line
+
+    lines = text.splitlines(keepends=True)
+    block = "\n".join(imports) + "\n\n"
+    return "".join(lines[:insertion_line]) + block + "".join(lines[insertion_line:])
 
 
 def copy_template(
@@ -55,33 +110,65 @@ def copy_template(
 def rewrite_config(root: Path) -> None:
     path = root / PACKAGE / "config.py"
     text = path.read_text(encoding="utf-8")
-    old_header = """from anyio import Path
-from nonebot import get_driver, get_plugin_config
-from pydantic import BaseModel
-"""
-    new_header = """import json
-import os
-from typing import Any
+    framework_names = {"get_driver", "get_plugin_config"}
+    found_names: set[str] = set()
+    tree = ast.parse(text, filename=str(path))
+    framework_imports = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module == "nonebot"
+    ]
+    for node in reversed(framework_imports):
+        removed = [alias for alias in node.names if alias.name in framework_names]
+        if not removed:
+            continue
+        found_names.update(alias.name for alias in removed)
+        remaining = [alias for alias in node.names if alias.name not in framework_names]
+        replacement = ""
+        if remaining:
+            replacement = ast.unparse(
+                ast.ImportFrom(module=node.module, names=remaining, level=node.level)
+            )
+        text = replace_statement(text, node, replacement)
+    if found_names != framework_names:
+        missing = ", ".join(sorted(framework_names - found_names))
+        raise RuntimeError(f"{path}: missing NoneBot configuration imports: {missing}")
 
-from anyio import Path
-from pydantic import BaseModel
-"""
-    text = replace_once(text, old_header, new_header, path)
-    marker = "# 初始化配置实例\n"
-    if text.count(marker) != 1:
-        raise RuntimeError(f"{path}: configuration footer marker changed")
+    text = ensure_config_imports(text)
+    tree = ast.parse(text, filename=str(path))
+    runtime_names = {"_driver", "pconfig", "gconfig", "_nickname"}
+    runtime_indexes = [
+        index
+        for index, node in enumerate(tree.body)
+        if assigned_names(node) & runtime_names
+    ]
+    if not runtime_indexes or all(
+        "pconfig" not in assigned_names(node) for node in tree.body
+    ):
+        raise RuntimeError(f"{path}: could not locate configuration runtime")
+    runtime_index = min(runtime_indexes)
+    for node in tree.body[runtime_index:]:
+        is_runtime_assignment = (
+            bool(assigned_names(node)) and assigned_names(node) <= runtime_names
+        )
+        is_assignment_docstring = (
+            isinstance(node, ast.Expr)
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+        )
+        if not (is_runtime_assignment or is_assignment_docstring):
+            raise RuntimeError(f"{path}: configuration runtime is not at end of module")
+
     footer = root / TEMPLATES / "config_footer.py.tmpl"
-    text = text.split(marker, 1)[0] + footer.read_text(encoding="utf-8")
+    runtime_line = tree.body[runtime_index].lineno - 1
+    prefix = "".join(text.splitlines(keepends=True)[:runtime_line]).rstrip()
+    text = prefix + "\n\n" + footer.read_text(encoding="utf-8")
     path.write_text(text, encoding="utf-8")
     migration_log(f"迁移配置运行时: {path.relative_to(root).as_posix()}")
 
 
 def rewrite_logging(root: Path) -> None:
     package = root / PACKAGE
-    patterns = (
-        re.compile(r"^from nonebot import logger\s*$", re.MULTILINE),
-        re.compile(r"^from nonebot\.log import logger\s*$", re.MULTILINE),
-    )
     for path in package.rglob("*.py"):
         text = path.read_text(encoding="utf-8")
         original = text
@@ -95,8 +182,35 @@ def rewrite_logging(root: Path) -> None:
         level = len(parent_parts) - common + 1
         suffix = ".".join(target_parts[common:])
         module = "." * level + suffix
-        for pattern in patterns:
-            text = pattern.sub(f"from {module} import logger", text)
+        tree = ast.parse(text, filename=str(path))
+        logger_imports = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom)
+            and node.module in {"nonebot", "nonebot.log"}
+            and any(alias.name == "logger" for alias in node.names)
+        ]
+        for node in sorted(logger_imports, key=lambda item: item.lineno, reverse=True):
+            indent = text.splitlines()[node.lineno - 1][: node.col_offset]
+            logger_alias = next(alias for alias in node.names if alias.name == "logger")
+            logger_name = (
+                f"logger as {logger_alias.asname}" if logger_alias.asname else "logger"
+            )
+            replacement_lines = []
+            remaining = [alias for alias in node.names if alias.name != "logger"]
+            if remaining:
+                replacement_lines.append(
+                    ast.unparse(
+                        ast.ImportFrom(
+                            module=node.module,
+                            names=remaining,
+                            level=node.level,
+                        )
+                    )
+                )
+            replacement_lines.append(f"from {module} import {logger_name}")
+            replacement = "\n".join(f"{indent}{line}" for line in replacement_lines)
+            text = replace_statement(text, node, replacement)
         path.write_text(text, encoding="utf-8")
         if text != original:
             migration_log(
@@ -107,27 +221,40 @@ def rewrite_logging(root: Path) -> None:
 def rewrite_bilibili_scheduler(root: Path) -> None:
     path = root / PACKAGE / "parsers/bilibili/__init__.py"
     text = path.read_text(encoding="utf-8")
-    start = "            # 首次成功加载黑名单后，注册定时刷新任务（最多注册一次）\n"
-    end = "\n        except Exception as e:\n"
-    if text.count(start) != 1:
-        raise RuntimeError(f"{path}: Bilibili scheduler marker changed")
-    before, tail = text.split(start, 1)
-    if end not in tail:
-        raise RuntimeError(f"{path}: Bilibili scheduler end marker changed")
-    _, after = tail.split(end, 1)
-    replacement = """            # 首次成功加载黑名单后注册小时刷新任务
-            if not self._black_list_job_added:
-                from ...utils.scheduler import scheduler
-
-                scheduler.add_job(
-                    self.load_black_list,
-                    seconds=60 * 60,
-                    id="sync-bili-black-list",
-                )
-                self._black_list_job_added = True
-                logger.info("已注册 B 站黑名单异步同步任务（每 1 小时刷新一次）")
-"""
-    text = before + replacement + end + after
+    tree = ast.parse(text, filename=str(path))
+    scheduler_blocks = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.If)
+        and any(
+            isinstance(child, ast.ImportFrom)
+            and child.module == "nonebot_plugin_apscheduler"
+            for child in ast.walk(node)
+        )
+    ]
+    if len(scheduler_blocks) != 1:
+        raise RuntimeError(
+            f"{path}: expected one NoneBot scheduler block, found "
+            f"{len(scheduler_blocks)}"
+        )
+    block = scheduler_blocks[0]
+    indent = text.splitlines()[block.lineno - 1][: block.col_offset]
+    replacement = "\n".join(
+        f"{indent}{line}" if line else ""
+        for line in (
+            "if not self._black_list_job_added:",
+            "    from ...utils.scheduler import scheduler",
+            "",
+            "    scheduler.add_job(",
+            "        self.load_black_list,",
+            "        seconds=60 * 60,",
+            '        id="sync-bili-black-list",',
+            "    )",
+            "    self._black_list_job_added = True",
+            '    logger.info("已注册 B 站黑名单异步同步任务（每 1 小时刷新一次）")',
+        )
+    )
+    text = replace_statement(text, block, replacement)
     path.write_text(text, encoding="utf-8")
     migration_log(
         f"迁移定时任务: {path.relative_to(root).as_posix()} -> asyncio scheduler"
