@@ -40,8 +40,6 @@ class Config(BaseModel):
     """是否使用 base64 编码发送图片，音频，视频"""
     plite_max_size: int = 90
     """资源最大大小，默认 90 单位 MB"""
-    plite_duration_maximum: int = 480
-    """视频/音频最大时长"""
     plite_append_url: bool = False
     """是否在解析结果中添加原始URL"""
     plite_embed_url: bool = False
@@ -133,11 +131,6 @@ class Config(BaseModel):
     def max_size(self) -> int:
         """资源最大大小(mb)"""
         return self.plite_max_size
-
-    @property
-    def duration_maximum(self) -> int:
-        """视频/音频最大时长(s)"""
-        return self.plite_duration_maximum
 
     @property
     def disabled_platforms(self) -> list[PlatformEnum]:
