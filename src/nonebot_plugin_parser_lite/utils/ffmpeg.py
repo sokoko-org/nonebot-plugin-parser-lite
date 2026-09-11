@@ -431,19 +431,25 @@ class FFmpeg:
         return cls._available
 
     @classmethod
-    async def png_to_jpeg(cls, png_data: bytes, quality: int = 85) -> bytes:
+    async def compress_png(cls, png_data: bytes, compression_level: int = 6) -> bytes:
+        """使用 FFmpeg 无损压缩 PNG，并保留 alpha 通道"""
+        if not isinstance(compression_level, int) or not 0 <= compression_level <= 9:
+            raise ValueError("compression_level 必须是 0 到 9 之间的整数")
+
         cmd = [
             "-hide_banner",
             "-loglevel",
             "error",
             "-i",
             "pipe:0",
+            "-frames:v",
+            "1",
             "-f",
-            "image2",
+            "image2pipe",
             "-c:v",
-            "mjpeg",
-            "-q:v",
-            str(round((100 - quality) * 31 / 100)),
+            "png",
+            "-compression_level",
+            str(compression_level),
             "pipe:1",
         ]
         return await cls.exec_ffmpeg(cmd, png_data)
