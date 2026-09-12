@@ -24,7 +24,7 @@ __plugin_meta__ = PluginMetadata(
         "nonebot_plugin_alconna", "nonebot_plugin_uninfo"
     ),
     extra={
-        "author": "molanp",
+        "author": "sokoko-org",
         "homepage": "https://github.com/sokoko-org/nonebot-plugin-parser-lite",
         "version": "1.3.7-pre-release.1",
         "plugin_type": "NORMAL",
