@@ -39,7 +39,7 @@ class DouyinParser(BaseParser):
         )
 
     async def ensure_ttwid(self):
-        if self.ttwid and self.ttwid_update_at - time.time() < 3600:
+        if self.ttwid and time.time() - self.ttwid_update_at < 3600:
             return
         resp = await self.httpx.post(
             "https://ttwid.bytedance.com/ttwid/union/register/",
