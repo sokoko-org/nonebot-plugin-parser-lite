@@ -45,7 +45,7 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "2"
+RENDER_TEMPLATE_VERSION = "20260913"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -585,7 +585,7 @@ class Renderer:
                 "theme": theme,
             },
             pages={
-                "viewport": {"width": 620, "height": 100},
+                "viewport": {"width": 620, "height": 1},
                 "base_url": f"file://{self.templates_dir}",
             },
             filters={"safe_src": safe_src},
@@ -638,11 +638,11 @@ class Renderer:
         """
         theme = get_theme()
         cache_key = f"{RENDER_TEMPLATE_VERSION}:{theme}:{result.url}"
-        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.png"
+        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.jpeg"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
         if not await image_path.exists():
-            image_raw = await FFmpeg.compress_png(
+            image_raw = await FFmpeg.png_to_jpeg(
                 await self.render_image(result, theme=theme)
             )
             temp_path = image_path.with_name(
