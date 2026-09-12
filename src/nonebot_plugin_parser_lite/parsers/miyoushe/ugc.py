@@ -223,7 +223,7 @@ class RespMap(Struct):
             like_count=self.level_info.good_rate,
             comment_count=format_num(self.reply_card_response.reply_count),
             extra={
-                "hot": self.level_info.hot_score,
+                "hot": ("热度", self.level_info.hot_score),
             },
         )
 

@@ -85,7 +85,7 @@ class HeyBoxParser(BaseParser):
                 comment_count=format_num(data.link.comment_num),
                 share_count=format_num(data.link.forward_num),
                 collect_count=format_num(data.link.favour_count),
-                extra={"battery": format_num(data.link.battery.count)},
+                extra={"battery": ("电池", format_num(data.link.battery.count))},
             ),
         )
 

@@ -172,9 +172,6 @@ class BilibiliParser(BaseParser):
         season_id = searched.get("season_id")
         bangumi_info = await Bangumi(ep_id=ep_id, season_id=season_id).get_info()
 
-        def format_stat(value: int) -> str:
-            return format_num(value)
-
         return self.result(
             author=self.create_author(
                 name=bangumi_info.season_title,
@@ -185,14 +182,14 @@ class BilibiliParser(BaseParser):
                 bangumi_info.evaluate,
             ],
             stats=self.create_stats(
-                view_count=format_stat(bangumi_info.stat.views),
-                like_count=format_stat(bangumi_info.stat.likes),
-                collect_count=format_stat(bangumi_info.stat.favorite),
-                share_count=format_stat(bangumi_info.stat.share),
-                comment_count=format_stat(bangumi_info.stat.reply),
+                view_count=format_num(bangumi_info.stat.views),
+                like_count=format_num(bangumi_info.stat.likes),
+                collect_count=format_num(bangumi_info.stat.favorite),
+                share_count=format_num(bangumi_info.stat.share),
+                comment_count=format_num(bangumi_info.stat.reply),
                 extra={
-                    "danmaku": format_stat(bangumi_info.stat.danmakus),
-                    "coin": format_stat(bangumi_info.stat.coins),
+                    "danmaku": ("弹幕", format_num(bangumi_info.stat.danmakus)),
+                    "coin": ("硬币", format_num(bangumi_info.stat.coins)),
                 },
             ),
             title=bangumi_info.title,
@@ -396,8 +393,8 @@ class BilibiliParser(BaseParser):
                 stats.share_count = format_num(arc.stat.share)
                 stats.comment_count = format_num(arc.stat.reply)
                 stats.extra = {
-                    "danmaku": format_num(arc.stat.danmaku),
-                    "coin": format_num(arc.stat.coin),
+                    "danmaku": ("弹幕", format_num(arc.stat.danmaku)),
+                    "coin": ("硬币", format_num(arc.stat.coin)),
                 }
                 logger.debug(f"视频统计数据: {stats}")
         except Exception as e:

@@ -73,6 +73,7 @@ class RedNoteParser(BaseParser):
             name=note_detail.nickname,
             avatar_url=note_detail.avatar_url,
             avatar_cache_key=f"rednote:{note_detail.user.userId}",
+            id=note_detail.user.userId,
         )
         comment_list: list[Comment] = []
 
@@ -83,6 +84,7 @@ class RedNoteParser(BaseParser):
                     avatar_url=c.user.image,
                     location=c.ipLocation,
                     avatar_cache_key=f"rednote:{c.user.userId}",
+                    id=c.user.userId,
                 ),
                 content=c.content,
                 timestamp=c.time // 1000,
@@ -99,6 +101,7 @@ class RedNoteParser(BaseParser):
                             name=sub.user.nickname,
                             avatar_url=sub.user.image,
                             avatar_cache_key=f"rednote:{sub.user.userId}",
+                            id=sub.user.userId,
                         ),
                         content=sub.content,
                         timestamp=sub.time // 1000,

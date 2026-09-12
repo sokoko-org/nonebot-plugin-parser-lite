@@ -6,12 +6,109 @@
         <title>Media Card · New</title>
         <link rel="stylesheet" href="icon.css" />
         <link rel="stylesheet" href="tailwind.css" />
-        {% from "macros.jinja" import render_content %}
+        <link rel="stylesheet" href="ambient.css" />
+        {% from "macros.jinja" import render_ambient, render_content, resolve_cover_src %}
         <style>
             body {
                 font-family: "PingFang SC", sans-serif;
                 -webkit-font-smoothing: antialiased;
-                margin: 15px;
+                margin: 0;
+                width: 620px;
+            }
+
+            .media-shell {
+                position: relative;
+                isolation: isolate;
+            }
+
+            .media-glow {
+                position: absolute;
+                z-index: -1;
+                inset: 6%;
+                width: 88%;
+                height: 88%;
+                object-fit: cover;
+                filter: blur(28px) saturate(1.55);
+                opacity: 0.38;
+                transform: translateY(14px) scale(1.02);
+            }
+
+            .poster-media {
+                width: calc(100% + 4rem);
+                margin-left: -2rem;
+                margin-right: -2rem;
+            }
+
+            .poster-media .media-foreground {
+                border-radius: 0;
+            }
+
+            .poster-media .single-image {
+                display: block;
+                width: 100%;
+            }
+
+            .poster-media .single-image,
+            .poster-media .poster-video {
+            /* 多图引用添加类 `,
+            .poster-media .media-foreground.media-grid`, 但是不好看 */
+                -webkit-mask-image: linear-gradient(to bottom,
+                        transparent 0%,
+                        #000 9%,
+                        #000 78%,
+                        transparent 100%);
+                mask-image: linear-gradient(to bottom,
+                        transparent 0%,
+                        #000 9%,
+                        #000 78%,
+                        transparent 100%);
+            }
+
+            [data-theme="dark"] .media-glow {
+                opacity: 0.56;
+            }
+
+            .media-foreground {
+                position: relative;
+                z-index: 1;
+            }
+
+            .media-overlay {
+                position: absolute;
+                z-index: 3;
+                inset: 0;
+                pointer-events: none;
+            }
+
+            .video-meta {
+                position: absolute;
+                top: 18px;
+                left: 24px;
+                right: 24px;
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                color: rgba(255, 255, 255, 0.9);
+                font-size: 13px;
+                font-weight: 800;
+                line-height: 1.15;
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .video-meta-size {
+                text-align: right;
+            }
+
+            .video-playmark {
+                position: absolute;
+                right: 24px;
+                bottom: 20px;
+                --icon-color: rgba(255, 255, 255, 0.48);
+                font-size: 88px;
+                line-height: 1;
+                text-shadow: 0 4px 24px rgba(0, 0, 0, 0.42);
+                transform: translateX(5px);
             }
 
             .square-img {
@@ -35,7 +132,14 @@
             }
         </style>
     </head>
-    <body class="flex justify-center break-all bg-slate-200 dark:bg-slate-950">{{ render_content(result) }}</body>
+    <body class="break-all">
+        {% set cover_src = resolve_cover_src(result) %}
+        {% set logo_src = result.platform | safe_src('get_logo_path') %}
+        <main class="ambient-canvas">
+            {{ render_ambient(cover_src, logo_src) }}
+            <div class="ambient-content">{{ render_content(result) }}</div>
+        </main>
+    </body>
     <script defer>
         document.addEventListener("DOMContentLoaded", function() {
             document

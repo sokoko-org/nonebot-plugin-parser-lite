@@ -55,7 +55,7 @@ class IlluParser(BaseParser):
                 like_count=format_num(detail.thumbUpCount),
                 comment_count=format_num(detail.commentCount),
                 extra={
-                    "rewardCoin": format_num(detail.rewardCoin),
+                    "rewardCoin": ("打赏硬币", format_num(detail.rewardCoin)),
                 },
             ),
             comments=await self._build_comments(object_id, BizType.Article),
@@ -83,7 +83,7 @@ class IlluParser(BaseParser):
                 collect_count=format_num(detail.collectCount),
                 comment_count=format_num(detail.commentCount),
                 extra={
-                    "rewardCoin": format_num(detail.rewardCoin),
+                    "rewardCoin": ("灵感", format_num(detail.rewardCoin)),
                 },
             ),
             comments=await self._build_comments(object_id, BizType.Drawing),

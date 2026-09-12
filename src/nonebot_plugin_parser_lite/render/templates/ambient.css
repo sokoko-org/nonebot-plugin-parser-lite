@@ -1,0 +1,78 @@
+.ambient-canvas {
+    position: relative;
+    isolation: isolate;
+    width: 620px;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.ambient-cover {
+    position: absolute;
+    z-index: 0;
+    inset: -96px;
+    width: calc(100% + 192px);
+    height: calc(100% + 192px);
+    object-fit: cover;
+    filter: blur(80px) saturate(1.65);
+    opacity: 0.58;
+    transform: scale(1.2);
+}
+
+.logo-light {
+    position: absolute;
+    z-index: 0;
+    width: 280px;
+    height: 280px;
+    object-fit: contain;
+    filter: blur(96px) saturate(3.2);
+    mix-blend-mode: multiply;
+    opacity: 0.2;
+}
+
+.logo-light-top {
+    top: 4%;
+    right: -90px;
+    transform: scale(1.25);
+}
+
+.logo-light-middle {
+    top: 44%;
+    left: -110px;
+    transform: scale(1.45) rotate(18deg);
+}
+
+.logo-light-bottom {
+    right: -80px;
+    bottom: 5%;
+    transform: scale(1.35) rotate(-12deg);
+}
+
+.ambient-wash {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background: rgba(248, 250, 252, 0.68);
+}
+
+.ambient-content {
+    position: relative;
+    z-index: 1;
+}
+
+[data-theme="dark"] .ambient-canvas {
+    background: #020617;
+}
+
+[data-theme="dark"] .ambient-cover {
+    opacity: 0.5;
+}
+
+[data-theme="dark"] .logo-light {
+    filter: blur(100px) saturate(3.5);
+    mix-blend-mode: screen;
+    opacity: 0.28;
+}
+
+[data-theme="dark"] .ambient-wash {
+    background: rgba(2, 6, 23, 0.68);
+}

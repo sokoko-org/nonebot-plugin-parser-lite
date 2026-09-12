@@ -45,6 +45,7 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
+RENDER_TEMPLATE_VERSION = "2"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -210,6 +211,8 @@ async def safe_src(
         method_attr = cast(Callable[[], Path | Awaitable[Path]], attr)
         call_result = method_attr()
         src = await call_result if isinstance(call_result, Awaitable) else call_result
+        if src is None:
+            return None if return_none_on_fail else PLACEHOLDER_IMAGE
         return src.as_uri()
     except Exception as e:
         logger.warning(f"safe_src({method}) 处理 {type(obj).__name__} 时失败: {e!r}")
@@ -403,7 +406,7 @@ class Renderer:
             author_prefix_pending = True
             if title := pr.title:
                 nodes.append(
-                    _ForwardText(author_name, [_ForwardTextPart(title)], False)
+                    _ForwardText(author_name, [_ForwardTextPart(f"{title}\n")], False)
                 )
 
             async def flush_text() -> None:
@@ -634,12 +637,12 @@ class Renderer:
         - 若不存在：渲染并写入该文件
         """
         theme = get_theme()
-        cache_key = f"{theme}:{result.url}"
-        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.jpeg"
+        cache_key = f"{RENDER_TEMPLATE_VERSION}:{theme}:{result.url}"
+        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.png"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
         if not await image_path.exists():
-            image_raw = await FFmpeg.png_to_jpeg(
+            image_raw = await FFmpeg.compress_png(
                 await self.render_image(result, theme=theme)
             )
             temp_path = image_path.with_name(
