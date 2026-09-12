@@ -1,3 +1,8 @@
+html,
+body {
+    background: #f8fafc;
+}
+
 .ambient-canvas {
     position: relative;
     isolation: isolate;
@@ -60,6 +65,11 @@
 }
 
 [data-theme="dark"] .ambient-canvas {
+    background: #020617;
+}
+
+[data-theme="dark"],
+[data-theme="dark"] body {
     background: #020617;
 }
 
