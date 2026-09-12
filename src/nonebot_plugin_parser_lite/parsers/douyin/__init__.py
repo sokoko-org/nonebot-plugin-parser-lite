@@ -1,4 +1,5 @@
 import re
+import time
 from typing import ClassVar
 
 from msgspec import convert
@@ -27,6 +28,7 @@ class DouyinParser(BaseParser):
         name=PlatformEnum.DOUYIN, display_name="抖音"
     )
     ttwid: str = ""
+    ttwid_update_at: float = 0
 
     def __init__(self):
         super().__init__()
@@ -37,7 +39,7 @@ class DouyinParser(BaseParser):
         )
 
     async def ensure_ttwid(self):
-        if self.ttwid:
+        if self.ttwid and time.time() - self.ttwid_update_at < 3600:
             return
         resp = await self.httpx.post(
             "https://ttwid.bytedance.com/ttwid/union/register/",
@@ -56,6 +58,7 @@ class DouyinParser(BaseParser):
         if ttwid is None:
             raise ParseException(f"抖音 ttwid 注册成功但未返回 cookie: {resp.cookies}")
         self.ttwid = ttwid
+        self.ttwid_update_at = time.time()
 
     # https://v.douyin.com/_2ljF4AmKL8
     @handle("v.douyin", r"v\.douyin\.com/[a-zA-Z0-9_\-]+")
