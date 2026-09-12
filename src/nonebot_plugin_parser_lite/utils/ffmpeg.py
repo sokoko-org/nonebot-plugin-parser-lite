@@ -439,7 +439,7 @@ class FFmpeg:
             "-i",
             "pipe:0",
             "-f",
-            "image2",
+            "image2pipe",
             "-c:v",
             "mjpeg",
             "-q:v",
