@@ -134,9 +134,6 @@ class Video:
         :return: 调用 API 返回的结果
         """
         if not self.info:
-            from .bilibili.app.view.v1 import view_pb2
-            from .client import GRPC_CLIENT
-
             req = view_pb2.ViewReq(bvid=self.bvid)
             access_token = self.credential.access_token if self.credential else ""
             self.info = await GRPC_CLIENT.request(
