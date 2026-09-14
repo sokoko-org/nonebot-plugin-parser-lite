@@ -24,7 +24,7 @@ class KuWoParser(BaseParser):
 
         resp = await self.httpx.get(
             "https://parse-api.sokoko.org/api/kuwo/song/",
-            params={"music_id ": rid, "quality": "320k"},
+            params={"music_id": rid, "quality": "320k"},
         )
         resp.raise_for_status()
         data = resp.json()
