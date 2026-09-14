@@ -515,7 +515,9 @@ class BilibiliParser(BaseParser):
                     name=author.author.name,
                     avatar_url=author.author.face or None,
                     id=str(author.mid),
+                    description=author.author.sign,
                     avatar_cache_key=f"bilibili:{author.mid}",
+                    location=author.ptime_location_text,
                 )
                 if result.timestamp is None:
                     result.timestamp = _parse_timestamp(author.ptime_label_text)
@@ -593,6 +595,7 @@ class BilibiliParser(BaseParser):
             avatar_url=user_info.face if user_info else None,
             id=user_info.mid if user_info else str(room_data.uid),
             avatar_cache_key=f"bilibili:{room_data.uid}",
+            description=user_info.sign if user_info else None,
         )
 
         url = f"https://www.bilibili.com/blackboard/live/live-activity-player.html?enterTheRoom=0&cid={room_id}"

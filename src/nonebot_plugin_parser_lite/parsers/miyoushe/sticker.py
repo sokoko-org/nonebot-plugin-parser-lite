@@ -15,7 +15,7 @@ def replace_sticker(s: str) -> list[ContentItem]:
     content: list[ContentItem] = []
     last_end = 0
     if not STICKER_MAP:
-        STICKER_MAP = ujson.loads(STICKER_PATH.read_text())
+        STICKER_MAP = ujson.loads(STICKER_PATH.read_text(encoding="utf8"))
 
     for m in STICKER_PATTERN.finditer(s):
         start, end = m.span()

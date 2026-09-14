@@ -128,8 +128,8 @@ class Result(Struct):
             name=author.user.nick,
             avatar_url=author.user.icon,
             location=location,
+            description=author.user.intro,
         )
-
 
 
 decoder = Decoder(Result)

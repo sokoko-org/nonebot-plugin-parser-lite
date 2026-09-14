@@ -464,6 +464,7 @@
                             {% if result.author.location %}{{ result.author.location }}{% endif %}
                             {% if result.author.location and result.author.id %} · {% endif %}
                             {% if result.author.id %}ID: {{ result.author.id }}{% endif %}
+                            {% if result.author.description %} <br />{{ result.author.description }}{% endif %}
                         </div>
                     </div>
                 </div>

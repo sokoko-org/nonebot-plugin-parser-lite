@@ -55,12 +55,16 @@ class Forum(Struct):
     icon: str
 
 
+class Certification(Struct):
+    label: str
+
 class User(Struct):
     uid: str
     nickname: str
     introduce: str
     gender: int
     avatar_url: str
+    certification: Certification
 
 
 class Stat(Struct):

@@ -52,6 +52,7 @@ class MiyousheParser(BaseParser):
                 name=post.user.nickname,
                 avatar_url=post.user.avatar_url,
                 id=post.user.uid,
+                description=post.user.introduce or post.user.certification.label,
                 avatar_cache_key=f"miyoushe:{post.user.uid}",
             ),
             url=post.url,
