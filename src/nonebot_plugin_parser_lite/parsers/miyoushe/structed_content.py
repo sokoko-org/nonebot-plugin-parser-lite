@@ -66,8 +66,7 @@ def build_body(s: str):
     for item in data:
         ins = item.insert
         if isinstance(ins, str):
-            if ins.strip():
-                content.extend(replace_sticker(ins))
+            content.extend(replace_sticker(ins))
         elif v := ins.vod:
             content.append(
                 Creator.video(
