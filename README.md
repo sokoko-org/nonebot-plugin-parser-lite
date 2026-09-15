@@ -66,13 +66,21 @@
 
 ## 💿 安装
 
-把`src/nonebot_plugin_parser_lite`文件夹复制到插件加载目录(比如`plugins`)
+需要 Python **3.11 或更高版本**
+
+### 从 Git 安装(main 或指定 tag)
 
 <details>
 <summary>pip</summary>
 
 ```shell
-pip install -r requirements.txt
+python -m pip install "nonebot-plugin-parser-lite @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@main"
+```
+
+指定版本安装时，将 `main` 替换为实际 tag 名称：
+
+```shell
+python -m pip install "nonebot-plugin-parser-lite @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@<tag>"
 ```
 
 </details>
@@ -81,7 +89,37 @@ pip install -r requirements.txt
 <summary>uv</summary>
 
 ```shell
-uv add --requirements requirements.txt
+uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --branch main
+```
+
+指定版本安装时，使用 `--tag`：
+
+```shell
+uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --tag <tag>
+```
+
+</details>
+
+指定版本安装仅支持 `1.3.7+`, 更早的版本请使用手动安装。
+
+### 手动安装
+
+将 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录(比如 `plugins`)后手动安装依赖
+
+<details>
+<summary>pip</summary>
+
+```shell
+python -m pip install -r requirements.txt
+```
+
+</details>
+
+<details>
+<summary>uv</summary>
+
+```shell
+uv add --requirements ./xxx/requirements.txt
 ```
 
 </details>

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nonebot-plugin-parser-lite"
+version = "1.3.7rc4"
+description = "NoneBot2 通用媒体链接分享解析插件"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "sokoko-org" }]
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/sokoko-org/nonebot-plugin-parser-lite"
+Repository = "https://github.com/sokoko-org/nonebot-plugin-parser-lite"
+Issues = "https://github.com/sokoko-org/nonebot-plugin-parser-lite/issues"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["nonebot_plugin_parser_lite*"]
+
+[tool.setuptools.package-data]
+nonebot_plugin_parser_lite = [
+    "render/templates/*.jinja",
+    "render/templates/*.css",
+    "parsers/tieba/*.desc",
+    "parsers/miyoushe/sticker.json",
+]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.proto", "*.pyi"]

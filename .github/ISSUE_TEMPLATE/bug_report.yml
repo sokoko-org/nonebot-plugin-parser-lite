@@ -28,7 +28,7 @@ body:
           required: true
         - label: 我已搜索现有 Issues 和 Discussions，确认没有相同问题
           required: true
-        - label: 我已更新到当前最新稳定版，并在更新后重新复现
+        - label: 我已按 README 更新到最新版本或 main 最新提交，并在更新后重新复现；若安装失败，已附完整安装日志
           required: true
         - label: 我确认下方日志、截图和配置均已移除敏感信息
           required: true
@@ -115,13 +115,16 @@ body:
     id: environment
     attributes:
       label: 运行环境
-      description: 请完整填写实际版本或版本哈希，不要写“最新版”或“默认”。
+      description: 请填写实际版本；Git 安装请提供锁文件或 pip freeze 中的完整 commit SHA。安装失败时也请填写目标分支或 commit、安装命令和包管理器版本，不要写“最新版”或“默认”。
       value: |
         - 插件版本：
+        - Git 分支 / commit SHA（Git 安装必填）：
         - Python 版本：
+        - NoneBot2 版本：
         - 操作系统：
         - 适配器 / 协议端：
-        - 安装方式（真寻插件商店 / 手动安装）：
+        - 安装方式（nb-cli / uv / pip / 真寻插件商店 / 源码开发安装）：
+        - 包管理器版本与完整安装 / 更新命令：
     validations:
       required: true
 

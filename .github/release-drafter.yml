@@ -29,6 +29,7 @@ autolabeler:
   - label: "dependencies"
     files:
       - "requirements.txt"
+      - "pyproject.toml"
     title:
       - "/:wrench:.+/"
       - "/🔧.+/"
