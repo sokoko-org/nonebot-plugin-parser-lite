@@ -142,23 +142,23 @@ class DouyinParser(BaseParser):
         r"jingxuan\.douyin.com/m/[a-z]+/(?P<aweme_id>\d+)",
     )
     async def parse_work(self, searched: MatchWithParams):
-        await self.ensure_ttwid()
         aweme_id = searched["aweme_id"]
         note = await self.httpx.get(
             "https://www.douyin.com/aweme/v1/web/aweme/detail/",
             params={
                 "aweme_id": aweme_id,
                 "aid": "6383",
-                "device_platform": "webapp",
-                "channel": "channel_pc_web",
-                "request_source": 0,
             },
-            cookies={"ttwid": self.ttwid},
+            headers={
+                "Origin": "https://open.douyin.com",
+                "Referer": "https://open.douyin.com/",
+            },
         )
         if not note.is_success:
             raise ParseException(f"解析抖音内容失败, 可能是作品已删除: {note.text}")
 
         try:
+            await self.ensure_ttwid()
             resp = await self.httpx.get(
                 "https://www.douyin.com/aweme/v1/web/comment/list/",
                 params={
