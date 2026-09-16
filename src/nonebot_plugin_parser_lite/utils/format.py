@@ -89,9 +89,11 @@ def append_html_text(
         result.append(normalized)
 
 
-def html_to_text(root: BeautifulSoup | Tag) -> str:
+def html_to_text(root: BeautifulSoup | Tag | str) -> str:
     """按 HTML 标签语义提取文本"""
     parts: list[str] = []
+    if isinstance(root, str):
+        root = BeautifulSoup(root)
     for element in root.descendants:
         if isinstance(element, Tag):
             if element.name in HTML_NEWLINE_TAGS:

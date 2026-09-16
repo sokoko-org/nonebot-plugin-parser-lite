@@ -1,37 +1,34 @@
 from msgspec import Struct
 from msgspec.json import Decoder
 
+from ...utils.format import html_to_text
+
 
 class User(Struct):
     name: str
     headUrl: str
+    gender: int
+    fanCountValue: int
+    followingCountValue: int
+    ipLocation: str
+    id: str
 
 
-class Representation(Struct):
+class cdnUrl(Struct):
     url: str
-    m3u8Slice: str
-    qualityType: str
-
-    @property
-    def m3u8_slice(self) -> str:
-        return self.m3u8Slice.replace("\\\\n", "\n")
 
 
-class AdaptationSet(Struct):
-    representation: list[Representation]
-
-
-class KsPlay(Struct):
-    adaptationSet: list[AdaptationSet]
+class PlayInfo(Struct):
+    qualityLabel: str
+    fps: int
+    playUrls: list[str]
+    cdnUrls: list[cdnUrl]
 
 
 class CurrentVideoInfo(Struct):
-    ksPlayJson: KsPlay
-    durationMillis: int
-
-    @property
-    def representations(self) -> list[Representation]:
-        return self.ksPlayJson.adaptationSet[0].representation
+    playInfos: list[PlayInfo]
+    fileName: str
+    id: str
 
 
 class VideoInfo(Struct, kw_only=True):
@@ -41,37 +38,22 @@ class VideoInfo(Struct, kw_only=True):
     user: User
     currentVideoInfo: CurrentVideoInfo
     coverUrl: str
+    viewCount: int
+    bananaCount: int
+    commentCount: int
+    danmakuCount: int
+    shareCount: int
+    likeCount: int
+    stowCount: int
+    durationMillis: int
 
     @property
-    def name(self) -> str:
-        return self.user.name
-
-    @property
-    def avatar_url(self) -> str:
-        return self.user.headUrl
-
-    @property
-    def text(self) -> str | None:
-        return f"简介: {self.description}" if self.description else None
+    def text(self) -> str:
+        return f"简介: {html_to_text(self.description)}" if self.description else ""
 
     @property
     def timestamp(self) -> int:
         return self.createTimeMillis // 1000
-
-    @property
-    def duration(self) -> int:
-        return self.currentVideoInfo.durationMillis // 1000
-
-    @property
-    def m3u8_url(self) -> str:
-        representations = self.currentVideoInfo.representations
-
-        quality_types = ("1080p", "720p", "480p", "360p")
-        for r in representations:
-            if r.qualityType in quality_types:
-                return r.url
-
-        return representations[0].url
 
 
 decoder = Decoder(VideoInfo)

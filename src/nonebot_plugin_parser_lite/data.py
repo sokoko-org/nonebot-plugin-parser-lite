@@ -25,6 +25,8 @@ class MediaContent:
 
     # 以字节为单位的文件大小缓存
     _size_bytes: int | None = field(default=None, init=False, repr=False)
+    is_dynamic_size: bool = field(default=False, init=False)
+    """流媒体在下载完成前无法确定文件大小"""
 
     async def get_path(self) -> Path:
         """
@@ -52,6 +54,8 @@ class MediaContent:
 
     async def get_display_size(self) -> str:
         """获取媒体文件大小"""
+        if self.is_dynamic_size:
+            return "动态大小"
         if self._size_bytes is None:
             try:
                 self._size_bytes = await DOWNLOADER.head_size(
