@@ -1,5 +1,6 @@
 import asyncio
 from asyncio.subprocess import Process
+from collections.abc import Callable
 from fractions import Fraction
 import hashlib
 import json
@@ -65,6 +66,7 @@ class FFmpeg:
         cmd: list[str],
         output_path: Path,
         max_size_mb: int,
+        on_progress: Callable[[int], None] | None = None,
     ) -> bytes:
         """执行 FFmpeg，并在输出文件超过上限时终止进程
 
@@ -91,6 +93,8 @@ class FFmpeg:
                 await asyncio.sleep(0.1)
                 if await output_path.exists():
                     size = (await output_path.stat()).st_size
+                    if on_progress is not None:
+                        on_progress(size)
                     if size > max_size_bytes:
                         await cls.stop_process(process, communicate)
                         raise SizeLimitException(size / 1024 / 1024)
@@ -107,6 +111,8 @@ class FFmpeg:
             size = (await output_path.stat()).st_size
             if size > max_size_bytes:
                 raise SizeLimitException(size / 1024 / 1024)
+            if on_progress is not None:
+                on_progress(size)
         return stdout
 
     @staticmethod
@@ -485,6 +491,7 @@ class FFmpeg:
         output_path: Path,
         headers: dict[str, str] | None = None,
         max_size_mb: int = 90,
+        on_progress: Callable[[int], None] | None = None,
     ) -> Path:
         """让 ffmpeg 处理加密、初始化段和字节范围等完整 HLS 语义。"""
         temp_path = cls.temporary_output_path(output_path)
@@ -515,6 +522,7 @@ class FFmpeg:
                 cmd,
                 output_path=temp_path,
                 max_size_mb=max_size_mb,
+                on_progress=on_progress,
             )
             await temp_path.replace(output_path)
         finally:

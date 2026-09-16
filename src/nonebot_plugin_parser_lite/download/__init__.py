@@ -500,7 +500,6 @@ class StreamDownloader:
         cache_variant: str | None = None,
         ext_headers: dict[str, str] | None = None,
         cache_type: str = CacheManager.MEDIA,
-        use_curl_cffi: bool = False,
     ) -> Path:
         """
         下载 m3u8 视频并合并到 mp4
@@ -510,7 +509,6 @@ class StreamDownloader:
         :param cache_variant: 同一资源下的视频用途标识
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :param cache_type: 缓存类型
-        :param use_curl_cffi: 是否使用 curl_cffi 下载
 
         :return: 最终合并并转封装后的 mp4 文件路径
         :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
@@ -532,12 +530,16 @@ class StreamDownloader:
 
         headers = {**self.headers, **(ext_headers or {})}
         try:
-            await FFmpeg.download_hls_to_mp4(
-                url,
-                final_video_path,
-                headers=headers,
-                max_size_mb=pconfig.max_size,
-            )
+            with self.rich_progress(f"m3u8 {file_id}") as update:
+                await FFmpeg.download_hls_to_mp4(
+                    url,
+                    final_video_path,
+                    headers=headers,
+                    max_size_mb=pconfig.max_size,
+                    on_progress=lambda size: update(completed=size),
+                )
+                size = (await final_video_path.stat()).st_size
+                update(completed=size, total=size, refresh=True)
             output_size = (
                 (await final_video_path.stat()).st_size
                 if await final_video_path.exists()
