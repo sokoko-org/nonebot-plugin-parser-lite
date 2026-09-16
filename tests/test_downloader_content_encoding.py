@@ -660,7 +660,7 @@ async def test_complex_hls_is_delegated_to_ffmpeg(downloader_modules, monkeypatc
     class FakeFFmpeg:
         @classmethod
         async def download_hls_to_mp4(
-            cls, url, output_path, headers=None, max_size_mb=None
+            cls, url, output_path, headers=None, max_size_mb=None, on_progress=None
         ):
             delegated.append((url, headers))
             await output_path.write_bytes(b"mp4-cache")
