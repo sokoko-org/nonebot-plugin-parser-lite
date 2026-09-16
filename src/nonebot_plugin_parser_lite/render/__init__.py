@@ -33,6 +33,7 @@ from ..exception import (
 )
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..utils.cache import CacheManager
+from ..utils.common import crop_png
 from ..utils.ffmpeg import FFmpeg
 
 PLACEHOLDER_IMAGE = (
@@ -587,16 +588,14 @@ class Renderer:
             page.on("console", lambda msg: logger.debug(f"浏览器控制台: {msg.text}"))
             await page.goto(self.templates_dir.as_uri())
             await page.set_content(html, wait_until="networkidle")
-            body = page.locator("body")
-            width, height = await body.evaluate(
-                "el => [el.scrollWidth, el.scrollHeight]"
-            )
-            await page.set_viewport_size({"width": width, "height": height})
-            return await page.screenshot(
+            image = await page.screenshot(
                 type="png",
-                full_page=False,
-                clip={"x": 0, "y": 0, "width": width, "height": height},
+                full_page=True,
             )
+            height = await page.locator("body").evaluate(
+                "el => Math.ceil(el.getBoundingClientRect().height)"
+            )
+        return await crop_png(image, height * 2)
 
     async def resolve_parse_result(self, result: ParseResult) -> dict[str, Any]:
         """解析 ParseResult 为模板可用的字典数据"""

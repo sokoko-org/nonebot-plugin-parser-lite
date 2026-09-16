@@ -16,3 +16,4 @@ ujson>=5.0.0,<6.0.0
 cryptography>45.0.0
 qrcode>=8.0,<9.0
 puremagic>=1.30
+Pillow>=9.0.0

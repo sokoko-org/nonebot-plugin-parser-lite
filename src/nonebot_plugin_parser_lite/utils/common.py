@@ -1,13 +1,17 @@
+import asyncio
 from collections import OrderedDict
 import hashlib
+from io import BytesIO
 from typing import TypeVar
 from urllib.parse import urlparse
 
 from anyio import Path
 from nonebot import logger
+from PIL import Image
 
 K = TypeVar("K")
 V = TypeVar("V")
+
 
 class LimitedSizeDict(OrderedDict[K, V]):
     """
@@ -65,3 +69,17 @@ def generate_file_name(url: str, cache_key: str | None = None) -> str:
         raise ValueError("cache_key 不能为空字符串")
     identity = cache_key or parsed._replace(fragment="").geturl()
     return hashlib.md5(identity.encode("utf-8")).hexdigest()[:16]
+
+
+def _crop_png(png: bytes, height: int) -> bytes:
+    with Image.open(BytesIO(png)) as image:
+        if height >= image.height:
+            return png
+        cropped = image.crop((0, 0, image.width, height))
+        output = BytesIO()
+        cropped.save(output, format="PNG")
+        return output.getvalue()
+
+
+async def crop_png(png: bytes, height: int) -> bytes:
+    return await asyncio.to_thread(_crop_png, png, height)
