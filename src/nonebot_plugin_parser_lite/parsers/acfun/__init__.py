@@ -33,6 +33,8 @@ class AcfunParser(BaseParser):
             "https://api-new.app.acfun.cn/rest/app/douga/info",
             params={"mkey": MKEY, "dougaId": acid},
         )
+        if not resp.is_success:
+            raise ParseException(resp.text)
         video_info = videoDecoder.decode(resp.content)
         author = self.create_author(
             name=video_info.user.name,
@@ -71,5 +73,3 @@ class AcfunParser(BaseParser):
             ),
             url=f"https://www.acfun.cn/v/ac{acid}",
         )
-
-    async def fetch_comment(self, sourceId: int, sourceType: int): ...
