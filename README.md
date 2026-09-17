@@ -28,7 +28,7 @@
 | **小红书**           | ✅   | ✅         | ✅   | ✅         |
 | **快手**             | ✅   | ✅         | ✅   | 🚫         |
 | **AcFun**            | ✅   | ❌         | ✅   | 🚫         |
-| **X (Twitter)**      | ✅   | ✅         | ✅   | 🚫         |
+| **X (Twitter)**      | ✅   | ❌         | ✅   | 🚫         |
 | **百度贴吧**         | ✅   | ✅         | ✅   | 🚫         |
 | **知乎**             | ✅   | ✅         | ✅   | 🚫         |
 | **堆糖**             | ✅   | ✅         | 🚫   | 🚫         |
@@ -245,6 +245,9 @@ plite_zhihu_ck="z_c0=xxxx"
 
 # [可选] linuxdo cookie, 部分帖子需要登录或有一定的阅读等级才可以查看
 plite_linuxdo_ck="xxxx"
+
+# [可选] X cookie, R18帖子和帖子翻译需要登录才可以查看
+plite_x_ck="auth_token=xxx"
 ```
 
 </details>

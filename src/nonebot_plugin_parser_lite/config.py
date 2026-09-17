@@ -30,6 +30,8 @@ class Config(BaseModel):
     """知乎 cookies"""
     plite_linuxdo_ck: str | None = None
     """linuxdo cookies"""
+    plite_x_ck: str | None = None
+    """X cookies"""
     plite_need_upload: bool = False
     """是否需要上传音视频文件（兼容旧配置）"""
     plite_need_upload_audio: bool = False
@@ -156,6 +158,11 @@ class Config(BaseModel):
     def linuxdo_ck(self) -> str | None:
         """linuxdo cookies"""
         return self.plite_linuxdo_ck
+
+    @property
+    def x_ck(self) -> str | None:
+        """X cookies"""
+        return self.plite_x_ck
 
     @property
     def need_upload_audio(self) -> bool:

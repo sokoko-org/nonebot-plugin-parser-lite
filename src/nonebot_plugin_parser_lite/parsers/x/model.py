@@ -203,8 +203,11 @@ class TweetLegacy(Struct):
         return int(dt_local.timestamp())
 
 
+class Profile(Struct):
+    description: str
+
+
 class UserData(Struct):
-    legacy: UserLegacy
     is_blue_verified: bool
     """蓝标认证"""
     id: str
@@ -212,6 +215,7 @@ class UserData(Struct):
     rest_id: str
     """用户数字id"""
     core: UserCore
+    profile_bio: Profile
     avatar: UserAvatar = field(default_factory=UserAvatar)
 
     @property
