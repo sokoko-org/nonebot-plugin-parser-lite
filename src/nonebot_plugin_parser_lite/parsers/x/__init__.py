@@ -97,7 +97,11 @@ class XParser(BaseParser):
                     "Authorization": V2_BEARER,
                 },
             )
-            self.guestToken = ujson.loads(r.content)["guest_token"]
+            try:
+                r.raise_for_status()
+                self.guestToken = ujson.loads(r.content)["guest_token"]
+            except Exception as e:
+                raise ParseException(r.text) from e
             self.guestTokenUses = 0
         else:
             self.guestTokenUses += 1
