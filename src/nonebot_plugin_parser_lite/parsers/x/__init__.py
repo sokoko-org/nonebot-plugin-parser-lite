@@ -86,6 +86,11 @@ class XParser(BaseParser):
 
     def __init__(self):
         super().__init__()
+        self.httpx.headers.update(
+            {
+                "Authorization": V2_BEARER,
+            }
+        )
         if ck := pconfig.x_ck:
             self.cookies = ck2dict(ck)
 
@@ -93,9 +98,6 @@ class XParser(BaseParser):
         if self.guestToken is None:
             r = await self.httpx.post(
                 "https://api.x.com/1.1/guest/activate.json",
-                headers={
-                    "Authorization": V2_BEARER,
-                },
             )
             try:
                 r.raise_for_status()
@@ -118,7 +120,6 @@ class XParser(BaseParser):
             "x-twitter-active-user": "yes",
             "x-twitter-client-language": "zh-cn",
             "x-csrf-token": csrfToken,
-            "Authorization": V2_BEARER,
         }
         if self.cookies:
             headers["Cookie"] = (
@@ -148,7 +149,9 @@ class XParser(BaseParser):
             content.append(link_card)
         return content
 
-    def collect_data(self, raw: TweetEntry, is_repost: bool = False) -> ParseResult:
+    async def collect_data(
+        self, raw: TweetEntry, is_repost: bool = False
+    ) -> ParseResult:
         tweet = raw.result.as_tweet
         legacy = tweet.legacy
 
@@ -159,7 +162,25 @@ class XParser(BaseParser):
         repost = None
         repost_status = tweet.quoted_status_result or tweet.retweeted_status_result
         if not is_repost and repost_status:
-            repost = self.collect_data(repost_status, True)
+            repost = await self.collect_data(repost_status, True)
+        ai_summary = None
+        if self.cookies:
+            try:
+                r = await self.httpx.post(
+                    "https://api.x.com/2/grok/translation.json",
+                    json={
+                        "content_type": "POST",
+                        "id": tweet.rest_id,
+                        "dst_lang": "zh",
+                    },
+                )
+                r.raise_for_status()
+                try:
+                    ai_summary = r.json()["result"]["text"]
+                except Exception:
+                    logger.exception(f"翻译解析失败: {r.text}")
+            except Exception:
+                logger.exception("获取翻译失败")
 
         return self.result(
             content=content,
@@ -180,6 +201,7 @@ class XParser(BaseParser):
             ),
             url=f"https://x.com/{user.core.screen_name}/status/{tweet.rest_id}",
             repost=repost,
+            ai_summary=ai_summary,
         )
 
     @handle("twitter.com", r"twitter.com/[0-9-a-zA-Z_]{1,20}/status/([0-9]+)")
@@ -220,4 +242,4 @@ class XParser(BaseParser):
         except Exception as e:
             logger.exception(f"fail to parse entry: {tweet_result}")
             raise ParseException("fail to parse entry") from e
-        return self.collect_data(tweet)
+        return await self.collect_data(tweet)
