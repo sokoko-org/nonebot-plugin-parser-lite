@@ -1,3 +1,4 @@
+import asyncio
 import base64
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from dataclasses import dataclass, field
@@ -11,6 +12,7 @@ from anyio import Path
 from jinja2 import Environment, FileSystemLoader
 from nonebot import logger
 from nonebot_plugin_htmlrender import get_new_page
+from PIL import Image
 import qrcode
 
 from ..config import _nickname, gconfig, pconfig
@@ -33,7 +35,6 @@ from ..exception import (
 )
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..utils.cache import CacheManager
-from ..utils.common import crop_png
 from ..utils.ffmpeg import FFmpeg
 
 PLACEHOLDER_IMAGE = (
@@ -581,21 +582,62 @@ class Renderer:
         async with get_new_page(
             2,
             **{
-                "viewport": {"width": 620, "height": 100},
+                "viewport": {"width": 620, "height": 1000},
                 "base_url": self.templates_dir.as_uri(),
             },
         ) as page:
             page.on("console", lambda msg: logger.debug(f"浏览器控制台: {msg.text}"))
             await page.goto(self.templates_dir.as_uri())
             await page.set_content(html, wait_until="networkidle")
-            image = await page.screenshot(
-                type="png",
-                full_page=True,
-            )
-            height = await page.locator("body").evaluate(
+            height = await page.locator(".ambient-content").evaluate(
                 "el => Math.ceil(el.getBoundingClientRect().height)"
             )
-        return await crop_png(image, height * 2)
+            viewport_height = 1000
+            # 分段滚动并截图。每段只包含当前视口，避免 full_page 的大位图限制
+            segments: list[tuple[int, bytes]] = []
+            offsets = list(range(0, max(height - viewport_height, 0), viewport_height))
+            final_offset = max(height - viewport_height, 0)
+            if not offsets or offsets[-1] != final_offset:
+                offsets.append(final_offset)
+            for offset in offsets:
+                await page.evaluate("y => window.scrollTo(0, y)", offset)
+                # 等待滚动位置生效，避免截到上一段内容
+                await page.evaluate("() => new Promise(requestAnimationFrame)")
+                segments.append(
+                    (offset, await page.screenshot(type="png", full_page=False))
+                )
+
+        def stitch() -> bytes:
+            images = [
+                (offset, Image.open(BytesIO(segment)).convert("RGBA"))
+                for offset, segment in segments
+            ]
+            try:
+                scale = images[0][1].height / viewport_height
+                output_height = round(height * scale)
+                canvas = Image.new(
+                    "RGBA", (images[0][1].width, output_height), (255, 255, 255, 0)
+                )
+                for index, (offset, image) in enumerate(images):
+                    start = round(offset * scale)
+                    end = (
+                        output_height
+                        if index + 1 == len(images)
+                        else round(images[index + 1][0] * scale)
+                    )
+                    remaining = max(end - start, 0)
+                    if remaining <= 0:
+                        continue
+                    part = image.crop((0, 0, image.width, min(image.height, remaining)))
+                    canvas.paste(part, (0, start))
+                output = BytesIO()
+                canvas.save(output, format="PNG")
+                return output.getvalue()
+            finally:
+                for _, image in images:
+                    image.close()
+
+        return await asyncio.to_thread(stitch)
 
     async def resolve_parse_result(self, result: ParseResult) -> dict[str, Any]:
         """解析 ParseResult 为模板可用的字典数据"""
