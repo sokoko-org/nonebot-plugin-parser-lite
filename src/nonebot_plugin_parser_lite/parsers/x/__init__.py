@@ -168,6 +168,7 @@ class XParser(BaseParser):
             try:
                 r = await self.httpx.post(
                     "https://api.x.com/2/grok/translation.json",
+                    headers=await self.getAuthHeaders(),
                     json={
                         "content_type": "POST",
                         "id": tweet.rest_id,
