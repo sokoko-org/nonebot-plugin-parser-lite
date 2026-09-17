@@ -65,4 +65,5 @@ def _iter_media_and_text(soup: BeautifulSoup):
 
 
 def parse_date(s: str) -> int:
-    return int(datetime.strptime(s, "%Y-%m-%d %H:%M:%S").timestamp())
+    """Parse Douban's local datetime, with optional fractional seconds."""
+    return int(datetime.fromisoformat(s).timestamp())
