@@ -1,0 +1,379 @@
+{
+  "data": {
+    "tweetResult": {
+      "result": {
+        "__typename": "Tweet",
+        "cashtag_attachments": [],
+        "core": {
+          "user_results": {
+            "result": {
+              "__typename": "User",
+              "action_counts": {
+                "favorites_count": 43
+              },
+              "affiliates_highlighted_label": {},
+              "avatar": {
+                "image_url": "https://pbs.twimg.com/profile_images/2079106834821251072/bw_w9ya5_normal.png"
+              },
+              "banner": {
+                "image_url": "https://pbs.twimg.com/profile_banners/2072630220310654977/1784532673"
+              },
+              "core": {
+                "created_at": "Thu Jul 02 10:38:54 +0000 2026",
+                "name": "【公式】パールインブルー",
+                "screen_name": "Pearl_in_Blue"
+              },
+              "follow_request_sent": false,
+              "has_graduated_access": true,
+              "id": "VXNlcjoyMDcyNjMwMjIwMzEwNjU0OTc3",
+              "is_blue_verified": false,
+              "location": {
+                "location": "剣安島"
+              },
+              "media_permissions": {
+                "can_media_tag": true
+              },
+              "notifications_settings": {
+                "notifications_enabled": false
+              },
+              "parody_commentary_fan_label": "None",
+              "pinned_items": {
+                "tweet_ids_str": ["2100510086045053285"]
+              },
+              "possibly_sensitive": false,
+              "privacy": {
+                "protected": false
+              },
+              "profile_bio": {
+                "description": "美少女系RPG「パールインブルー」の公式Xアカウントです。\n新たに就任するマネージャーに、ゲームの最新情報をお届けします。\n#パールインブルー",
+                "entities": {
+                  "description": {},
+                  "url": {
+                    "urls": [
+                      {
+                        "display_url": "pearlinblue.netmarble.com",
+                        "expanded_url": "https://pearlinblue.netmarble.com/",
+                        "indices": [0, 23],
+                        "url": "https://t.co/IHWxgEiZc1"
+                      }
+                    ]
+                  }
+                }
+              },
+              "profile_description_language": "ja",
+              "profile_image_shape": "Square",
+              "profile_metadata": {
+                "profile_interstitial_type": ""
+              },
+              "profile_translation": {
+                "translator_type": "none"
+              },
+              "relationship_counts": {
+                "followers": 23431,
+                "following": 4
+              },
+              "relationship_perspectives": {
+                "blocked_by": false,
+                "blocking": false,
+                "followed_by": false,
+                "following": false,
+                "live_following": false,
+                "muting": false
+              },
+              "rest_id": "2072630220310654977",
+              "super_follow_eligible": false,
+              "super_followed_by": false,
+              "super_following": false,
+              "tweet_counts": {
+                "media_tweets": 65,
+                "tweets": 106
+              },
+              "verification": {
+                "verified": false,
+                "verified_type": "Business"
+              },
+              "website": {
+                "url": "https://t.co/IHWxgEiZc1"
+              }
+            }
+          }
+        },
+        "edit_control": {
+          "edit_tweet_ids": ["2100177878122148249"],
+          "editable_until_msecs": "1789560000000",
+          "edits_remaining": "5",
+          "is_edit_eligible": true
+        },
+        "grok_analysis_button": true,
+        "grok_annotations": {
+          "is_image_editable_by_grok": true
+        },
+        "grok_translated_post_with_availability": {
+          "data": {
+            "associated_data": {},
+            "destination_language": "zh",
+            "entities": {
+              "hashtags": [
+                {
+                  "indices": [90, 99],
+                  "text": "パールインブルー"
+                }
+              ],
+              "symbols": [],
+              "urls": [],
+              "user_mentions": [
+                {
+                  "id": "1459490226095943685",
+                  "id_str": "1459490226095943685",
+                  "indices": [66, 77],
+                  "name": "みらつ/밋다다@SD작법서많관부",
+                  "screen_name": "miratsu169"
+                }
+              ]
+            },
+            "source_language": "ja",
+            "translation": "【Pearl in Blue 庆祝插图公开】\n\n为了纪念 Pearl in Blue 的 TGS 参展，\n我们公开了来自みらつ老师(@miratsu169)的\n精彩庆祝插图！🎉\n\n#パールインブルー"
+          },
+          "is_available": true
+        },
+        "has_birdwatch_notes": false,
+        "is_translatable": true,
+        "legacy": {
+          "bookmark_count": 11,
+          "bookmarked": false,
+          "conversation_id_str": "2100177878122148249",
+          "created_at": "Wed Sep 16 11:00:00 +0000 2026",
+          "display_text_range": [0, 94],
+          "entities": {
+            "hashtags": [
+              {
+                "indices": [85, 94],
+                "text": "パールインブルー"
+              }
+            ],
+            "media": [
+              {
+                "allow_download_status": {
+                  "allow_download": true
+                },
+                "display_url": "pic.x.com/2P7ixtw94W",
+                "expanded_url": "https://x.com/Pearl_in_Blue/status/2100177878122148249/photo/1",
+                "ext_media_availability": {
+                  "status": "Available"
+                },
+                "features": {
+                  "large": {
+                    "faces": []
+                  },
+                  "medium": {
+                    "faces": []
+                  },
+                  "orig": {
+                    "faces": []
+                  },
+                  "small": {
+                    "faces": []
+                  }
+                },
+                "id_str": "2100087825169620992",
+                "indices": [95, 118],
+                "media_key": "3_2100087825169620992",
+                "media_results": {
+                  "result": {
+                    "media_key": "3_2100087825169620992"
+                  }
+                },
+                "media_url_https": "https://pbs.twimg.com/media/HSUCwBBboAAQq2d.jpg",
+                "original_info": {
+                  "focus_rects": [
+                    {
+                      "h": 2007,
+                      "w": 3584,
+                      "x": 0,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 2007,
+                      "x": 0,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 1761,
+                      "x": 0,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 1004,
+                      "x": 213,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 4096,
+                      "x": 0,
+                      "y": 0
+                    }
+                  ],
+                  "height": 2007,
+                  "width": 4096
+                },
+                "sizes": {
+                  "large": {
+                    "h": 1004,
+                    "resize": "fit",
+                    "w": 2048
+                  },
+                  "medium": {
+                    "h": 588,
+                    "resize": "fit",
+                    "w": 1200
+                  },
+                  "small": {
+                    "h": 333,
+                    "resize": "fit",
+                    "w": 680
+                  },
+                  "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                  }
+                },
+                "type": "photo",
+                "url": "https://t.co/2P7ixtw94W"
+              }
+            ],
+            "user_mentions": [
+              {
+                "id_str": "1459490226095943685",
+                "indices": [48, 59],
+                "name": "みらつ/밋다다@SD작법서많관부",
+                "screen_name": "miratsu169"
+              }
+            ]
+          },
+          "extended_entities": {
+            "media": [
+              {
+                "allow_download_status": {
+                  "allow_download": true
+                },
+                "display_url": "pic.x.com/2P7ixtw94W",
+                "expanded_url": "https://x.com/Pearl_in_Blue/status/2100177878122148249/photo/1",
+                "ext_media_availability": {
+                  "status": "Available"
+                },
+                "features": {
+                  "large": {
+                    "faces": []
+                  },
+                  "medium": {
+                    "faces": []
+                  },
+                  "orig": {
+                    "faces": []
+                  },
+                  "small": {
+                    "faces": []
+                  }
+                },
+                "id_str": "2100087825169620992",
+                "indices": [95, 118],
+                "media_key": "3_2100087825169620992",
+                "media_results": {
+                  "result": {
+                    "media_key": "3_2100087825169620992"
+                  }
+                },
+                "media_url_https": "https://pbs.twimg.com/media/HSUCwBBboAAQq2d.jpg",
+                "original_info": {
+                  "focus_rects": [
+                    {
+                      "h": 2007,
+                      "w": 3584,
+                      "x": 0,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 2007,
+                      "x": 0,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 1761,
+                      "x": 0,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 1004,
+                      "x": 213,
+                      "y": 0
+                    },
+                    {
+                      "h": 2007,
+                      "w": 4096,
+                      "x": 0,
+                      "y": 0
+                    }
+                  ],
+                  "height": 2007,
+                  "width": 4096
+                },
+                "sizes": {
+                  "large": {
+                    "h": 1004,
+                    "resize": "fit",
+                    "w": 2048
+                  },
+                  "medium": {
+                    "h": 588,
+                    "resize": "fit",
+                    "w": 1200
+                  },
+                  "small": {
+                    "h": 333,
+                    "resize": "fit",
+                    "w": 680
+                  },
+                  "thumb": {
+                    "h": 150,
+                    "resize": "crop",
+                    "w": 150
+                  }
+                },
+                "type": "photo",
+                "url": "https://t.co/2P7ixtw94W"
+              }
+            ]
+          },
+          "favorite_count": 140,
+          "favorited": false,
+          "full_text": "【パールインブルーお祝いイラスト公開】\n\nパールインブルーのTGS出展を記念して、\nみらつ先生(@miratsu169)からいただいた\n素敵なお祝いイラストを公開！🎉\n\n#パールインブルー https://t.co/2P7ixtw94W",
+          "id_str": "2100177878122148249",
+          "is_quote_status": false,
+          "lang": "ja",
+          "possibly_sensitive": false,
+          "possibly_sensitive_editable": true,
+          "quote_count": 1,
+          "reply_count": 0,
+          "retweet_count": 23,
+          "retweeted": false,
+          "user_id_str": "2072630220310654977"
+        },
+        "rest_id": "2100177878122148249",
+        "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+        "unmention_data": {},
+        "views": {
+          "count": "19285",
+          "state": "EnabledWithCount"
+        }
+      }
+    }
+  }
+}

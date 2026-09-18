@@ -8,6 +8,17 @@ from ...creator import Creator
 from ...data import ContentItem
 
 
+class GrokTranslatedPostWithAvailabilityData(Struct):
+    destination_language: str
+    source_language: str
+    translation: str
+
+
+class GrokTranslatedPostWithAvailability(Struct):
+    data: GrokTranslatedPostWithAvailabilityData | None = None
+    is_available: bool = False
+
+
 class Views(Struct):
     count: str
     """浏览数"""
@@ -150,6 +161,7 @@ class TweetLegacy(Struct):
     """utc时间戳字符串，例如'"Fri Feb 20 16:33:16 +0000 2026'"""
     display_text_range: tuple[int, int]
     """推文文本内容范围"""
+    lang: str
     possibly_sensitive: bool = field(default=False)
     """是否敏感内容"""
     extended_entities: ExtendedEntities | None = None
@@ -463,9 +475,11 @@ class Tweet(Struct):
     core: TweetCore
     legacy: TweetLegacy
     """原始推文"""
+    is_translatable: bool
     views: Views
     rest_id: str
     """推文id"""
+    grok_translated_post_with_availability: GrokTranslatedPostWithAvailability
     card: TweetCard | None = None
     """推文链接卡片"""
     note_tweet: NoteTweet | None = None
@@ -551,8 +565,12 @@ class TweetData(Struct):
     card: TweetCard | None = None
     note_tweet: NoteTweet | None = None
     article: Article | None = None
+    is_translatable: bool = False
     quoted_status_result: TweetEntry | None = None
     retweeted_status_result: TweetEntry | None = None
+    grok_translated_post_with_availability: GrokTranslatedPostWithAvailability = (
+        GrokTranslatedPostWithAvailability()
+    )
 
     @property
     def as_tweet(self) -> Tweet:
@@ -571,8 +589,10 @@ class TweetData(Struct):
             card=self.card,
             note_tweet=self.note_tweet,
             article=self.article,
+            is_translatable=self.is_translatable,
             quoted_status_result=self.quoted_status_result,
             retweeted_status_result=self.retweeted_status_result,
+            grok_translated_post_with_availability=self.grok_translated_post_with_availability,
         )
 
 
