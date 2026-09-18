@@ -54,10 +54,6 @@ class XParser(BaseParser):
     platform: ClassVar[Platform] = Platform(name=PlatformEnum.X, display_name="X")
     guest_token_ttl: ClassVar[float] = 2 * 60 * 60
 
-    guestToken: Any | None
-    guestTokenCreatedAt: float
-    cookies: dict | None
-
     def __init__(self):
         super().__init__()
         self.guestToken = None
