@@ -5,35 +5,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{{ result.title }} - {{ result.author.name }}</title>
         <link rel="stylesheet" href="tailwind.css" />
-        <link rel="stylesheet" href="ambient.css" />
         {% from "macros.jinja" import render_ambient, resolve_cover_src %}
-        <style>
-            body {
-                width: 620px;
-            }
-
-            .cover-glow {
-                position: absolute;
-                inset: 8%;
-                width: 84%;
-                height: 84%;
-                object-fit: cover;
-                filter: blur(28px) saturate(1.55);
-                opacity: 0.42;
-                transform: translateY(12px);
-            }
-
-            [data-theme="dark"] .cover-glow {
-                opacity: 0.62;
-            }
-        </style>
     </head>
-    <body class="m-0 text-gray-800 dark:text-slate-100">
+    <body class="m-0 w-[620px] bg-slate-50 font-sans text-gray-800 antialiased dark:bg-slate-950 dark:text-slate-100">
         {% set cover_src = resolve_cover_src(result) %}
         {% set logo_src = result.platform | safe_src('get_logo_path') %}
-        <main class="ambient-canvas">
+        <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 dark:bg-slate-950">
             {{ render_ambient(cover_src, logo_src) }}
-            <div class="ambient-content p-6">
+            <div class="relative z-[1] p-6">
             {% if result.qr_code_path %}
                 <img src="{{ result.qr_code_path }}"
                      alt="二维码"
@@ -42,7 +21,7 @@
             <div class="mb-6 flex items-start gap-5 pr-[100px] max-[600px]:pr-20">
                 {% if cover_src %}
                     <div class="relative isolate h-[150px] w-[150px] shrink-0 max-[600px]:h-[120px] max-[600px]:w-[120px]">
-                        <img src="{{ cover_src }}" alt="" class="cover-glow" />
+                        <img src="{{ cover_src }}" alt="" class="absolute inset-[8%] h-[84%] w-[84%] translate-y-[12px] object-cover blur-[28px] saturate-[1.55] opacity-[0.42] dark:opacity-[0.62]" />
                         <img src="{{ cover_src }}"
                              alt="专辑封面"
                              class="relative h-full w-full rounded-lg object-cover" />

@@ -589,7 +589,7 @@ class Renderer:
             page.on("console", lambda msg: logger.debug(f"浏览器控制台: {msg.text}"))
             await page.goto(self.templates_dir.as_uri())
             await page.set_content(html, wait_until="networkidle")
-            height = await page.locator(".ambient-content").evaluate(
+            height = await page.locator("main").evaluate(
                 "el => Math.ceil(el.getBoundingClientRect().height)"
             )
             viewport_height = 1000

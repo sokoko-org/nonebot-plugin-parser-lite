@@ -11,6 +11,7 @@ from .data import (
     ContentItem,
     GraphicContent,
     ImageContent,
+    ImageLayout,
     LinkContent,
     LivePhotoContent,
     MediaContent,
@@ -197,12 +198,14 @@ class Creator:
         ext_headers: dict[str, str] | None = None,
         use_curl_cffi: bool = False,
         cache_key: str | None = None,
+        layout: ImageLayout = "grid",
     ):
         """
         创建图片内容
 
         :param url: 图片 URL
         :param cache_key: 稳定缓存标识，为空时根据 URL 生成
+        :param layout: 多图布局，`grid` 为默认宫格，`x` 为 X 风格竖向排列
         :param need_send: 是否发送
         :param ext_headers: 额外请求头
         :param use_curl_cffi: 是否使用 curl_cffi 下载
@@ -215,7 +218,7 @@ class Creator:
             use_curl_cffi=use_curl_cffi,
         )
 
-        return _with_need_send(ImageContent(path_task=task), need_send)
+        return _with_need_send(ImageContent(path_task=task, layout=layout), need_send)
 
     @staticmethod
     def images(
@@ -223,12 +226,14 @@ class Creator:
         ext_headers: dict[str, str] | None = None,
         use_curl_cffi: bool = False,
         cache_keys: list[str | None] | None = None,
+        layout: ImageLayout = "grid",
     ):
         """
         创建图片内容列表
 
         :param image_urls: 图片 URL 列表
         :param cache_keys: 与图片 URL 一一对应的稳定缓存标识
+        :param layout: 多图布局，`grid` 为默认宫格，`x` 为 X 风格竖向排列
         :param ext_headers: 额外请求头
         :param use_curl_cffi: 是否使用 curl_cffi 下载
         """
@@ -242,6 +247,7 @@ class Creator:
                 ext_headers=ext_headers,
                 use_curl_cffi=use_curl_cffi,
                 cache_key=cache_key,
+                layout=layout,
             )
             for url, cache_key in zip(image_urls, _cache_keys, strict=True)
         ]

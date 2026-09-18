@@ -177,7 +177,9 @@ class TweetLegacy(Struct):
         for media in self.extended_entities.media:
             # 图片：直接用 media_url_https
             if media.type == "photo":
-                medias.append(Creator.image(url=f"{media.media_url_https}:orig"))
+                medias.append(
+                    Creator.image(url=f"{media.media_url_https}:orig", layout="x")
+                )
                 continue
 
             # 视频 / 动图：挑最高码率 mp4

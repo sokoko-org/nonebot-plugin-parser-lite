@@ -12,6 +12,8 @@ from .download.task import DownloadTaskWrapper
 from .utils.cache import CacheManager
 from .utils.ffmpeg import FFmpeg
 
+ImageLayout = Literal["grid", "x"]
+
 
 def repr_path_task(path_task: DownloadTaskWrapper[Path]) -> str:
     return f"url={path_task.url!r}"
@@ -130,7 +132,7 @@ class VideoContent(MediaContent):
 class ImageContent(MediaContent):
     """图片内容"""
 
-    pass
+    layout: ImageLayout = "grid"
 
 
 @dataclass(repr=False, slots=True)

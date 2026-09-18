@@ -1,4 +1,11 @@
-{# 环境光层 #}
+{# Tailwind utility classes shared by rendered media and ambient layers #}
+{% set MEDIA_SHELL_CLASS = 'relative isolate' %}
+{% set MEDIA_GLOW_CLASS = 'absolute inset-[6%] z-[-1] h-[88%] w-[88%] translate-y-[14px] scale-[1.02] object-cover blur-[28px] saturate-[1.55] opacity-[0.38] dark:opacity-[0.56]' %}
+{% set MEDIA_FOREGROUND_CLASS = 'relative z-[1]' %}
+{% set MEDIA_OVERLAY_CLASS = 'pointer-events-none absolute inset-0 z-[3]' %}
+{% set POSTER_MEDIA_CLASS = 'w-[calc(100%+4rem)] -ml-8 -mr-8' %}
+{% set POSTER_MASK_CLASS = '[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)]' %}
+{% set LIVE_TAG_CLASS = 'h-[19px] rounded-[2px] border-0 bg-black/50 px-[5px] text-white outline-none' %}
 {% macro resolve_cover_src(result) -%}
     {% set cover = namespace(src=none) -%}
     {% for item in result.content if not cover.src -%}
@@ -14,18 +21,17 @@
     {{- cover.src or '' -}}
 {%- endmacro %}
 {% macro render_ambient(cover_src, logo_src) %}
-    {% if cover_src %}<img src="{{ cover_src }}" alt="" class="ambient-cover" />{% endif %}
+    {% if cover_src %}<img src="{{ cover_src }}" alt="" class="absolute -inset-24 z-0 h-[calc(100%+192px)] w-[calc(100%+192px)] scale-[1.2] object-cover blur-[80px] saturate-[1.65] opacity-[0.58] dark:opacity-50" />{% endif %}
     {% if logo_src %}
-        <img src="{{ logo_src }}" alt="" class="logo-light logo-light-top" />
-        <img src="{{ logo_src }}" alt="" class="logo-light logo-light-middle" />
-        <img src="{{ logo_src }}" alt="" class="logo-light logo-light-bottom" />
+        <img src="{{ logo_src }}" alt="" class="absolute top-[4%] -right-[90px] z-0 h-[280px] w-[280px] scale-[1.25] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
+        <img src="{{ logo_src }}" alt="" class="absolute top-[44%] -left-[110px] z-0 h-[280px] w-[280px] rotate-[18deg] scale-[1.45] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
+        <img src="{{ logo_src }}" alt="" class="absolute -right-[80px] bottom-[5%] z-0 h-[280px] w-[280px] -rotate-[12deg] scale-[1.35] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
     {% endif %}
-    <div class="ambient-wash"></div>
+    <div class="absolute inset-0 z-0 bg-slate-50/70 dark:bg-slate-950/70"></div>
 {% endmacro %}
 {# 1. 统计宏（Tailwind 样式） #}
 {% macro render_stats(stats) %}
-    <div class="flex flex-wrap items-end gap-x-8 gap-y-5 px-8 pt-5 pb-4"
-         style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr))">
+    <div class="flex flex-wrap items-end gap-x-8 gap-y-5 px-8 pt-5 pb-4">
         {% if stats.view_count and stats.view_count != '-' %}
             <div class="min-w-[92px]">
                 <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><i class="fa-icon stat-icon fa-eye"></i><span>浏览</span></div>
@@ -136,6 +142,7 @@
 {# 图片布局：仿 new.html 的 1 / 2 / 3 / 9 图效果 #}
 {% macro build_images(img_list, full_bleed=False) %}
     {% set count = img_list|length %}
+    {% set layout = img_list[0].layout|default('grid') if count else 'grid' %}
     {% set visible_imgs = img_list[:MAX_VISIBLE_IMAGES] %}
     {% set hidden_count = (count - MAX_VISIBLE_IMAGES) if count > MAX_VISIBLE_IMAGES else 0 %}
     {# 单图：大图 + live #}
@@ -143,49 +150,71 @@
         {% set item = visible_imgs[0] %}
         {% set src = item.src %}
         {% set is_live = item.is_live %}
-        <div class="media-shell {{ 'poster-media' if full_bleed else '' }} mt-4">
-            <img src="{{ src }}" alt="" class="media-glow" />
-            <div class="media-foreground single-image relative overflow-hidden inline-block">
+        <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+            <img src="{{ src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <div class="{{ MEDIA_FOREGROUND_CLASS }} {{ POSTER_MASK_CLASS if full_bleed else '' }} single-image relative block w-full overflow-hidden">
                 <img src="{{ src }}" class="w-full h-auto max-h-[400px] object-cover" />
             </div>
             {% if is_live %}
-                <div class="media-overlay">
-                    <div class="live-tag-strict absolute bottom-2 right-2 flex items-center">
-                        <i class="live-icon"
-                           style="width: 16px;
-                                  height: 17px"
-                           aria-hidden="true"></i>
-                        <span class="text-[9px] font-bold uppercase tracking-widest"
-                              style="padding-left: 1.3px">实况</span>
+                <div class="{{ MEDIA_OVERLAY_CLASS }}">
+                    <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                        <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
+                        <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
                     </div>
                 </div>
             {% endif %}
         </div>
         {# 2 / 4 张使用两列，3 张使用单行三列 #}
+    {% elif layout == 'x' %}
+        {% set visible_imgs = img_list[:4] %}
+        {% set hidden_count = (count - 4) if count > 4 else 0 %}
+        <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <div class="{{ MEDIA_FOREGROUND_CLASS }} flex h-[400px] w-full gap-[2px] overflow-hidden">
+                {% for item in visible_imgs %}
+                    <div class="relative min-w-0 flex-1 overflow-hidden">
+                        <img src="{{ item.src }}" class="block h-[400px] w-full object-cover" />
+                        {% if hidden_count and loop.last %}
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="text-white text-[22px] font-black tracking-tighter">+{{ hidden_count }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="{{ MEDIA_OVERLAY_CLASS }} flex h-[400px] w-full gap-[2px] overflow-hidden">
+                {% for item in visible_imgs %}
+                    <div class="relative min-w-0 flex-1 overflow-hidden">
+                        {% if item.is_live %}
+                            <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                                <i class="live-icon" aria-hidden="true"></i>
+                                <span class="text-[9px] font-bold uppercase tracking-widest">实况</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     {% elif count <= 4 %}
         {% set grid_cols = "grid-cols-3" if count == 3 else "grid-cols-2" %}
-        <div class="media-shell {{ 'poster-media' if full_bleed else '' }} mt-4">
-            <img src="{{ visible_imgs[0].src }}" alt="" class="media-glow" />
-            <div class="media-foreground media-grid overflow-hidden grid {{ grid_cols }} gap-[2px]">
+        <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <div class="{{ MEDIA_FOREGROUND_CLASS }} overflow-hidden grid {{ grid_cols }} gap-[2px]">
                 {% for item in visible_imgs %}
                     {% set src = item.src %}
                     {% set is_live = item.is_live %}
                     <div class="relative w-full h-full">
-                        <img src="{{ src }}" class="square-img" />
+                        <img src="{{ src }}" class="block aspect-square h-full w-full object-cover" />
                     </div>
                 {% endfor %}
             </div>
-            <div class="media-overlay media-grid grid {{ grid_cols }} gap-[2px]">
+            <div class="{{ MEDIA_OVERLAY_CLASS }} grid {{ grid_cols }} gap-[2px]">
                 {% for item in visible_imgs %}
                     <div class="relative w-full h-full">
                         {% if item.is_live %}
-                            <div class="live-tag-strict absolute bottom-2 right-2 flex items-center">
-                                <i class="live-icon"
-                                   style="width: 16px;
-                                          height: 17px"
-                                   aria-hidden="true"></i>
-                                <span class="text-[9px] font-bold uppercase tracking-widest"
-                                      style="padding-left: 1.3px">实况</span>
+                            <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                                <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
+                                <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
                             </div>
                         {% endif %}
                     </div>
@@ -194,20 +223,20 @@
         </div>
         {# 其他 ≥5 张：九宫格 media-grid #}
     {% else %}
-        <div class="media-shell {{ 'poster-media' if full_bleed else '' }} mt-4">
-            <img src="{{ visible_imgs[0].src }}" alt="" class="media-glow" />
-            <div class="media-foreground media-grid overflow-hidden grid grid-cols-3 gap-[2px]">
+        <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <div class="{{ MEDIA_FOREGROUND_CLASS }} overflow-hidden grid grid-cols-3 gap-[2px]">
                 {% for item in visible_imgs %}
                     {% set src = item.src %}
                     {% set is_live = item.is_live %}
                     {% if loop.index < MAX_VISIBLE_IMAGES or hidden_count == 0 %}
                         <div class="relative w-full h-full">
-                            <img src="{{ src }}" class="square-img" />
+                            <img src="{{ src }}" class="block aspect-square h-full w-full object-cover" />
                         </div>
                     {% else %}
                         {# 最后一张：+N 覆盖层 #}
                         <div class="relative w-full h-full">
-                            <img src="{{ src }}" class="square-img" />
+                            <img src="{{ src }}" class="block aspect-square h-full w-full object-cover" />
                             <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
                                 <span class="text-white text-[22px] font-black tracking-tighter">+{{ hidden_count }}</span>
                             </div>
@@ -215,17 +244,13 @@
                     {% endif %}
                 {% endfor %}
             </div>
-            <div class="media-overlay media-grid grid grid-cols-3 gap-[2px]">
+            <div class="{{ MEDIA_OVERLAY_CLASS }} grid grid-cols-3 gap-[2px]">
                 {% for item in visible_imgs %}
                     <div class="relative w-full h-full">
                         {% if item.is_live and (loop.index < MAX_VISIBLE_IMAGES or hidden_count == 0) %}
-                            <div class="live-tag-strict absolute bottom-2 right-2 flex items-center">
-                                <i class="live-icon"
-                                   style="width: 16px;
-                                          height: 17px"
-                                   aria-hidden="true"></i>
-                                <span class="text-[9px] font-bold uppercase tracking-widest"
-                                      style="padding-left: 1.3px">Live</span>
+                            <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                                <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
+                                <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">Live</span>
                             </div>
                         {% endif %}
                     </div>
@@ -281,11 +306,11 @@
         {# 1. 图片类：积累，最后统一 flush 成宫格 #}
         {% if cls == 'ImageContent' %}
             {% set src = cont | safe_src if ns.current_img_index < MAX_VISIBLE_IMAGES else "" %}
-            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : false}) %}
+            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : false, 'layout': cont.layout|default('grid')}) %}
             {% set ns.current_img_index = ns.current_img_index + 1 %}
         {% elif cls=='LivePhotoContent' %}
             {% set src = cont | safe_src("get_base") if ns.current_img_index < MAX_VISIBLE_IMAGES else "" %}
-            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : true}) %}
+            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : true, 'layout': 'grid'}) %}
             {% set ns.current_img_index = ns.current_img_index + 1 %}
             {# 2. 文本：遇到非图片前先 flush，避免跨段 #}
         {% elif cont is string %}
@@ -299,9 +324,9 @@
             {% set src = cont | safe_src %}
             {% set alt = cont.alt or "" %}
             {% set _ = html_parts.append(
-                            '<div class="media-shell ' ~ ('poster-media ' if full_bleed else '') ~ 'mt-3 space-y-1">'
-                            '<img src="' ~ src ~ '" alt="" class="media-glow" />'
-                            '<div class="media-foreground single-image relative overflow-hidden">'
+                            '<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1">'
+                            '<img src="' ~ src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" />'
+                            '<div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden">'
                             '<img src="' ~ src ~ '" class="w-full h-auto object-cover" />'
                             '</div>'
                             '<p class="whitespace-pre-wrap text-xs text-slate-500 dark:text-slate-400">' ~ (alt|e) ~ '</p>'
@@ -326,17 +351,17 @@
             {% set _ = flush_images() %}
             {% set src = cont | safe_src("get_cover_path") %}
             {% set _ = html_parts.append(
-                            '<div class="media-shell ' ~ ('poster-media ' if full_bleed else '') ~ 'mt-3">'
-                            '<img src="' ~ src ~ '" alt="" class="media-glow" />'
-                            '<div class="media-foreground poster-video relative overflow-hidden bg-black">'
+                            '<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3">'
+                            '<img src="' ~ src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" />'
+                            '<div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' poster-video relative overflow-hidden bg-black">'
                             '<img src="' ~ src ~ '" class="w-full h-full object-cover opacity-80" />'
                             '</div>'
-                            '<div class="media-overlay">'
-                            '<div class="video-meta">'
+                            '<div class="' ~ MEDIA_OVERLAY_CLASS ~ '">'
+                            '<div class="absolute top-[18px] right-6 left-6 flex items-start justify-between gap-4 text-[13px] font-extrabold leading-[1.15] text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">'
                             '<span>' ~ cont.display_duration ~ '</span>'
-                            '<span class="video-meta-size">' ~ cont.get_display_size() ~ '</span>'
+                            '<span class="text-right">' ~ cont.get_display_size() ~ '</span>'
                             '</div>'
-                            '<i class="fa-icon fa-play video-playmark"></i>'
+                            '<i class="fa-icon fa-play absolute right-6 bottom-5 translate-x-[5px] text-[88px] leading-none text-white/50 [text-shadow:0_4px_24px_rgba(0,0,0,0.42)]"></i>'
                             '</div>'
                             '</div>'
                         ) %}
@@ -460,7 +485,7 @@
                          class="h-12 w-12 shrink-0 rounded-full object-cover" />
                     <div class="min-w-0">
                         <div class="truncate text-lg font-black text-slate-800 dark:text-slate-100">{{ result.author.name }}</div>
-                        <div class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                             {% if result.author.location %}{{ result.author.location }}{% endif %}
                             {% if result.author.location and result.author.id %} · {% endif %}
                             {% if result.author.id %}ID: {{ result.author.id }}{% endif %}

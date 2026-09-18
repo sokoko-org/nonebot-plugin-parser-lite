@@ -33,6 +33,7 @@ from ..data import (
     Author,
     Comment,
     ContentItem,
+    ImageLayout,
     ParseResult,
     ParseResultKwargs,
     Platform,
@@ -432,12 +433,14 @@ class BaseParser:
         ext_headers: dict[str, str] | None = None,
         use_curl_cffi: bool = False,
         cache_keys: list[str | None] | None = None,
+        layout: ImageLayout = "grid",
     ):
         """
         创建图片内容列表
 
         :param image_urls: 图片 URL 列表
         :param cache_keys: 与图片 URL 一一对应的稳定缓存标识
+        :param layout: 多图布局，`grid` 为默认宫格，`x` 为 X 风格竖向排列
         :param ext_headers: 额外请求头
         :param use_curl_cffi: 是否使用 curl_cffi 下载
         """
@@ -447,6 +450,7 @@ class BaseParser:
             ext_headers=ext_headers,
             use_curl_cffi=use_curl_cffi,
             cache_keys=cache_keys,
+            layout=layout,
         )
 
     def create_image(
@@ -456,6 +460,7 @@ class BaseParser:
         ext_headers: dict[str, str] | None = None,
         use_curl_cffi: bool = False,
         cache_key: str | None = None,
+        layout: Literal["grid", "x"] = "grid",
     ):
         """
         创建图片内容
@@ -465,6 +470,7 @@ class BaseParser:
         :param need_send: 是否发送
         :param ext_headers: 额外请求头
         :param use_curl_cffi: 是否使用 curl_cffi 下载
+        :param layout: 多图布局，`grid` 为默认宫格，`x` 为 X 风格竖向排列
         """
 
         return Creator.image(
@@ -473,6 +479,7 @@ class BaseParser:
             ext_headers=ext_headers,
             use_curl_cffi=use_curl_cffi,
             cache_key=cache_key,
+            layout=layout,
         )
 
     def create_audio(
