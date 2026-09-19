@@ -11,7 +11,7 @@
     <body class="m-0 w-[620px] break-all bg-slate-50 font-sans antialiased dark:bg-slate-950">
         {% set cover_src = resolve_cover_src(result) %}
         {% set logo_src = result.platform | safe_src('get_logo_path') %}
-        <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 dark:bg-slate-950">
+        <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 rounded-lg dark:bg-slate-950">
             {{ render_ambient(cover_src, logo_src) }}
             <div class="relative z-[1]">{{ render_content(result) }}</div>
         </main>

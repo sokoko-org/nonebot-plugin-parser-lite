@@ -48,7 +48,7 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20260913"
+RENDER_TEMPLATE_VERSION = "20260919"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -604,7 +604,12 @@ class Renderer:
                 # 等待滚动位置生效，避免截到上一段内容
                 await page.evaluate("() => new Promise(requestAnimationFrame)")
                 segments.append(
-                    (offset, await page.screenshot(type="png", full_page=False))
+                    (
+                        offset,
+                        await page.screenshot(
+                            type="png", full_page=False, omit_background=True
+                        ),
+                    )
                 )
 
         def stitch() -> bytes:
@@ -686,11 +691,11 @@ class Renderer:
         """
         theme = get_theme()
         cache_key = f"{RENDER_TEMPLATE_VERSION}:{theme}:{result.url}"
-        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.jpeg"
+        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.png"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
         if not await image_path.exists():
-            image_raw = await FFmpeg.png_to_jpeg(
+            image_raw = await FFmpeg.compress_png(
                 await self.render_image(result, theme=theme)
             )
             temp_path = image_path.with_name(

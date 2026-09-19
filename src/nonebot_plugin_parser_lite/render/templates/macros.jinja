@@ -448,7 +448,6 @@
                 {{ render_content_items(result.content, not is_repost) }}
             </div>
         </div>
-        {{ render_stats(result.stats) }}
         {# AI 总结 / 锐评 #}
         {% if result.ai_summary %}
             <div class="px-8 pb-5">
@@ -471,6 +470,7 @@
                 {{ render_content(result.repost, True) }}
             </div>
         {% endif %}
+        {{ render_stats(result.stats) }}
         {# 主体内容和评论之间的间隔 #}
         {% if comments and comments|length > 0 %}
             <div class="px-8 mt-2 mb-4">
