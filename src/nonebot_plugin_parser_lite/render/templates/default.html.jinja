@@ -8,10 +8,10 @@
         <link rel="stylesheet" href="tailwind.css" />
         {% from "macros.jinja" import render_ambient, render_content, resolve_cover_src %}
     </head>
-    <body class="m-0 w-[620px] break-all bg-slate-50 font-sans antialiased dark:bg-slate-950">
+    <body class="m-0 w-[620px] break-all font-sans antialiased">
         {% set cover_src = resolve_cover_src(result) %}
         {% set logo_src = result.platform | safe_src('get_logo_path') %}
-        <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 rounded-lg dark:bg-slate-950">
+        <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 rounded-2xl dark:bg-slate-950">
             {{ render_ambient(cover_src, logo_src) }}
             <div class="relative z-[1]">{{ render_content(result) }}</div>
         </main>
