@@ -185,7 +185,9 @@ class XParser(BaseParser):
                 id=user.core.screen_name,
             ),
             stats=self.create_stats(
-                view_count=format_num(int(tweet.views.count)),
+                view_count=format_num(
+                    int(tweet.views.count) if tweet.views.count is not None else None
+                ),
                 like_count=format_num(legacy.favorite_count),
                 comment_count=format_num(legacy.reply_count),
                 collect_count=format_num(legacy.bookmark_count),
@@ -236,6 +238,5 @@ class XParser(BaseParser):
         try:
             tweet = convert(tweet_result, TweetEntry)
         except Exception as e:
-            logger.exception(f"fail to parse entry: {tweet_result}")
-            raise ParseException("fail to parse entry") from e
+            raise ParseException(f"fail to parse entry: {tweet_result}") from e
         return await self.collect_data(tweet)

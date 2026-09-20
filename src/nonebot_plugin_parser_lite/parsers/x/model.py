@@ -20,7 +20,7 @@ class GrokTranslatedPostWithAvailability(Struct):
 
 
 class Views(Struct):
-    count: str
+    count: str | None = None
     """浏览数"""
 
 
