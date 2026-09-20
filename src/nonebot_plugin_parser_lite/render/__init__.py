@@ -48,7 +48,7 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20260919"
+RENDER_TEMPLATE_VERSION = "20260920"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -580,7 +580,7 @@ class Renderer:
             logger.info(f"已生成调试 HTML: {render_path}")
 
         async with get_new_page(
-            2,
+            1,
             **{
                 "viewport": {"width": 620, "height": 1000},
                 "base_url": self.templates_dir.as_uri(),

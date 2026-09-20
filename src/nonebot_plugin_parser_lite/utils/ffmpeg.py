@@ -437,11 +437,14 @@ class FFmpeg:
         return cls._available
 
     @classmethod
-    async def compress_png(cls, png_data: bytes, compression_level: int = 6) -> bytes:
+    async def compress_png(
+        cls,
+        png_data: bytes,
+        compression_level: int = 6,
+    ) -> bytes:
         """压缩 PNG"""
         if not isinstance(compression_level, int) or not 0 <= compression_level <= 9:
             raise ValueError("compression_level 必须是 0 到 9 之间的整数")
-
         cmd = [
             "-hide_banner",
             "-loglevel",

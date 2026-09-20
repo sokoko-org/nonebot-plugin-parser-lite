@@ -145,15 +145,15 @@
     {% set layout = img_list[0].layout|default('grid') if count else 'grid' %}
     {% set visible_imgs = img_list[:MAX_VISIBLE_IMAGES] %}
     {% set hidden_count = (count - MAX_VISIBLE_IMAGES) if count > MAX_VISIBLE_IMAGES else 0 %}
-    {# 单图：大图 + live #}
+    {# 单图：使用 GraphicContent 的原图比例样式 + live #}
     {% if count == 1 %}
         {% set item = visible_imgs[0] %}
         {% set src = item.src %}
         {% set is_live = item.is_live %}
-        <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+        <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-3 space-y-1">
             <img src="{{ src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
-            <div class="{{ MEDIA_FOREGROUND_CLASS }} {{ POSTER_MASK_CLASS if full_bleed else '' }} single-image relative block w-full overflow-hidden">
-                <img src="{{ src }}" class="w-full h-auto max-h-[400px] object-cover" />
+            <div class="{{ MEDIA_FOREGROUND_CLASS }} {{ POSTER_MASK_CLASS if full_bleed else '' }} single-image relative overflow-hidden">
+                <img src="{{ src }}" class="w-full h-auto object-cover" />
             </div>
             {% if is_live %}
                 <div class="{{ MEDIA_OVERLAY_CLASS }}">
