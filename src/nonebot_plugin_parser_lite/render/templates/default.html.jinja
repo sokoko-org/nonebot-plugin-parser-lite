@@ -10,9 +10,9 @@
     </head>
     <body class="m-0 w-[620px] break-all font-sans antialiased">
         {% set cover_src = resolve_cover_src(result) %}
-        {% set logo_src = result.platform | safe_src('get_logo_path') %}
+        {% set cover_sample_src = resolve_cover_src(result, as_data=True) %}
         <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 rounded-2xl dark:bg-slate-950">
-            {{ render_ambient(cover_src, logo_src) }}
+            {{ render_ambient(cover_src, cover_sample_src) }}
             <div class="relative z-[1]">{{ render_content(result) }}</div>
         </main>
     </body>

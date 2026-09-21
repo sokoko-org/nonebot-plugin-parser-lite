@@ -1,0 +1,119 @@
+{% import "macros/common.jinja" as common %}
+{% import "macros/media.jinja" as media %}
+
+{# 文本、图片、视频和平台资源组成的内容流。 #}
+{% macro render_content_items(content, full_bleed=False) %}
+    {% set html_parts = [] %}
+    {% set ns = namespace(current_imgs=[], current_img_index=0) %}
+    {% macro flush_images() %}
+        {% if ns.current_imgs %}
+            {% set _ = html_parts.append(media.build_images(ns.current_imgs, full_bleed)) %}
+            {% set ns.current_imgs = [] %}
+            {% set ns.current_img_index = 0 %}
+        {% endif %}
+    {% endmacro %}
+    {% for cont in content %}
+        {% set cls = cont.__class__.__name__ if cont is not string else 'str' %}
+        {% if cls == 'ImageContent' %}
+            {% set src = cont | safe_src if ns.current_img_index < common.MAX_VISIBLE_IMAGES else "" %}
+            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : false, 'layout': cont.layout|default('grid')}) %}
+            {% set ns.current_img_index = ns.current_img_index + 1 %}
+        {% elif cls=='LivePhotoContent' %}
+            {% set src = cont | safe_src("get_base") if ns.current_img_index < common.MAX_VISIBLE_IMAGES else "" %}
+            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : true, 'layout': 'grid'}) %}
+            {% set ns.current_img_index = ns.current_img_index + 1 %}
+        {% elif cont is string %}
+            {% set _ = flush_images() %}
+            {% set text = cont | e %}
+            {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ text ~ '</span>') %}
+        {% elif cls == 'GraphicContent' %}
+            {% set _ = flush_images() %}
+            {% set src = cont | safe_src %}
+            {% set alt = cont.alt or "" %}
+            {% set _ = html_parts.append(
+                            '<div class="' ~ common.MEDIA_SHELL_CLASS ~ ' ' ~ (common.POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1">'
+                            '<img src="' ~ src ~ '" alt="" class="' ~ common.MEDIA_GLOW_CLASS ~ '" />'
+                            '<div class="' ~ common.MEDIA_FOREGROUND_CLASS ~ ' ' ~ (common.POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden">'
+                            '<img src="' ~ src ~ '" class="w-full h-auto object-cover" />'
+                            '</div>'
+                            '<p class="whitespace-pre-wrap text-xs text-slate-500 dark:text-slate-400">' ~ (alt|e) ~ '</p>'
+                            '</div>'
+                        ) %}
+        {% elif cls == 'StickerContent' %}
+            {% set src = cont | safe_src(return_none_on_fail=True) %}
+            {% if not src %}
+                {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ cont.desc|e ~ '</span>') %}
+            {% else %}
+                {% set size = cont.size %}
+                {% set size_class = 'h-6' if size == 'small' else 'h-12' %}
+                {% set _ = html_parts.append(
+                                    '<img class="inline-block align-text-bottom ' ~ size_class ~ '"
+                     src="' ~ src ~ '"
+                     alt="' ~ (cont.desc|e) ~ '" />'
+                                ) %}
+            {% endif %}
+        {% elif cls == 'VideoContent' %}
+            {% set _ = flush_images() %}
+            {% set src = cont | safe_src("get_cover_path") %}
+            {% set _ = html_parts.append(
+                            '<div class="' ~ common.MEDIA_SHELL_CLASS ~ ' ' ~ (common.POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3">'
+                            '<img src="' ~ src ~ '" alt="" class="' ~ common.MEDIA_GLOW_CLASS ~ '" />'
+                            '<div class="' ~ common.MEDIA_FOREGROUND_CLASS ~ ' ' ~ (common.POSTER_MASK_CLASS if full_bleed else '') ~ ' poster-video relative overflow-hidden bg-black">'
+                            '<img src="' ~ src ~ '" class="w-full h-full object-cover opacity-80" />'
+                            '</div>'
+                            '<div class="' ~ common.MEDIA_OVERLAY_CLASS ~ '">'
+                            '<div class="absolute top-[18px] right-6 left-6 flex items-start justify-between gap-4 text-[13px] font-extrabold leading-[1.15] text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">'
+                            '<span>' ~ cont.display_duration ~ '</span>'
+                            '<span class="text-right">' ~ cont.get_display_size() ~ '</span>'
+                            '</div>'
+                            '<i class="fa-icon fa-play absolute right-6 bottom-5 translate-x-[5px] text-[88px] leading-none text-white/50 [text-shadow:0_4px_24px_rgba(0,0,0,0.42)]"></i>'
+                            '</div>'
+                            '</div>'
+                        ) %}
+        {% elif cls == 'LinkContent' %}
+            {% set _ = flush_images() %}
+            {% set icon_src = cont | safe_src("get_icon_path", return_none_on_fail=True) %}
+            {% set preview_src = cont | safe_src("get_preview_path", return_none_on_fail=True) %}
+            {% set rich_link = cont.site_name or cont.description or icon_src or preview_src %}
+            {% set preview_html = '<img src="' ~ preview_src ~ '" class="h-auto object-contain" />' if preview_src else '' %}
+            {% set icon_html = '<img src="' ~ icon_src ~ '" class="h-4 w-4 shrink-0 rounded-[2px] object-cover" />' if icon_src else '' %}
+            {% set source_html = '<div class="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">' ~ icon_html ~ '<span class="truncate">' ~ ((cont.site_name or cont.url)|e) ~ '</span></div>' if rich_link else '' %}
+            {% set description_html = '<div class="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2 dark:text-slate-400">' ~ (cont.description|e) ~ '</div>' if cont.description else '' %}
+            {% set url_html = '' if rich_link else '<div class="mt-0.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">' ~ (cont.url|e) ~ '</div>' %}
+            {% set _ = html_parts.append(
+                            '<a href="'~(cont.url|e)~'"
+               target="_blank"
+               rel="noreferrer noopener"
+               class="mt-3 inline-block overflow-hidden border-y border-slate-100 bg-slate-50/50 transition-colors max-w-full duration-150 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/40 dark:hover:bg-slate-800">'
+                            ~ preview_html ~
+                            '<div class="w-full px-3 py-2.5">'
+                                ~ source_html ~
+                                '<div class="text-sm font-semibold leading-snug text-slate-800 line-clamp-2 dark:text-slate-100">' ~ (cont.title|e) ~ '</div>'
+                                ~ description_html ~ url_html ~
+                            '</div>
+                        </a>'
+                    ) %}
+        {% elif cls == 'QuoteContent' %}
+            {% set _ = flush_images() %}
+            {% set icon_src = cont | safe_src("get_icon_path", return_none_on_fail=True) %}
+            {% set quote_title = cont.title or cont.url or '引用内容' %}
+            {% set icon_html = '<img src="' ~ icon_src ~ '" class="h-5 w-5 shrink-0 rounded-[2px] object-cover" />' if icon_src else '' %}
+            {% if cont.url %}
+                {% set title_html = '<a href="' ~ (cont.url|e) ~ '" target="_blank" rel="noreferrer noopener" class="min-w-0 truncate text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">' ~ (quote_title|e) ~ '</a>' %}
+            {% else %}
+                {% set title_html = '<span class="min-w-0 truncate text-xs font-semibold text-slate-600 dark:text-slate-300">' ~ (quote_title|e) ~ '</span>' %}
+            {% endif %}
+            {% set _ = html_parts.append(
+                            '<div class="mt-3 border-l-[3px] border-slate-300 py-1 pl-3 dark:border-slate-600">'
+                            '<div class="flex items-center gap-2">' ~ icon_html ~ title_html ~ '</div>'
+                            '<div class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">' ~ (cont.text|e) ~ '</div>'
+                            '</div>'
+                        ) %}
+        {% elif cls == 'PollContent' %}
+            {% set _ = flush_images() %}
+            {% set _ = html_parts.append(media.render_poll(cont)) %}
+        {% endif %}
+    {% endfor %}
+    {% set _ = flush_images() %}
+    {{ html_parts|join("") | safe }}
+{% endmacro %}

@@ -1,0 +1,145 @@
+{% import "macros/common.jinja" as common %}
+
+{# 图片布局：仿 1 / 2 / 3 / 9 图效果。 #}
+{% macro build_images(img_list, full_bleed=False) %}
+    {% set count = img_list|length %}
+    {% set layout = img_list[0].layout|default('grid') if count else 'grid' %}
+    {% set visible_imgs = img_list[:common.MAX_VISIBLE_IMAGES] %}
+    {% set hidden_count = (count - common.MAX_VISIBLE_IMAGES) if count > common.MAX_VISIBLE_IMAGES else 0 %}
+    {% if count == 1 %}
+        {% set item = visible_imgs[0] %}
+        {% set src = item.src %}
+        {% set is_live = item.is_live %}
+        <div class="{{ common.MEDIA_SHELL_CLASS }} {{ common.POSTER_MEDIA_CLASS if full_bleed else '' }} mt-3 space-y-1">
+            <img src="{{ src }}" alt="" class="{{ common.MEDIA_GLOW_CLASS }}" />
+            <div class="{{ common.MEDIA_FOREGROUND_CLASS }} {{ common.POSTER_MASK_CLASS if full_bleed else '' }} single-image relative overflow-hidden">
+                <img src="{{ src }}" class="w-full h-auto object-cover" />
+            </div>
+            {% if is_live %}
+                <div class="{{ common.MEDIA_OVERLAY_CLASS }}">
+                    <div class="{{ common.LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                        <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
+                        <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% elif layout == 'x' %}
+        {% set visible_imgs = img_list[:4] %}
+        {% set hidden_count = (count - 4) if count > 4 else 0 %}
+        <div class="{{ common.MEDIA_SHELL_CLASS }} {{ common.POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ common.MEDIA_GLOW_CLASS }}" />
+            <div class="{{ common.MEDIA_FOREGROUND_CLASS }} flex h-[400px] w-full gap-[2px] overflow-hidden">
+                {% for item in visible_imgs %}
+                    <div class="relative min-w-0 flex-1 overflow-hidden">
+                        <img src="{{ item.src }}" class="block h-[400px] w-full object-cover" />
+                        {% if hidden_count and loop.last %}
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="text-white text-[22px] font-black tracking-tighter">+{{ hidden_count }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="{{ common.MEDIA_OVERLAY_CLASS }} flex h-[400px] w-full gap-[2px] overflow-hidden">
+                {% for item in visible_imgs %}
+                    <div class="relative min-w-0 flex-1 overflow-hidden">
+                        {% if item.is_live %}
+                            <div class="{{ common.LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                                <i class="live-icon" aria-hidden="true"></i>
+                                <span class="text-[9px] font-bold uppercase tracking-widest">实况</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% elif count <= 4 %}
+        {% set grid_cols = "grid-cols-3" if count == 3 else "grid-cols-2" %}
+        <div class="{{ common.MEDIA_SHELL_CLASS }} {{ common.POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ common.MEDIA_GLOW_CLASS }}" />
+            <div class="{{ common.MEDIA_FOREGROUND_CLASS }} overflow-hidden grid {{ grid_cols }} gap-[2px]">
+                {% for item in visible_imgs %}
+                    <div class="relative w-full h-full">
+                        <img src="{{ item.src }}" class="block aspect-square h-full w-full object-cover" />
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="{{ common.MEDIA_OVERLAY_CLASS }} grid {{ grid_cols }} gap-[2px]">
+                {% for item in visible_imgs %}
+                    <div class="relative w-full h-full">
+                        {% if item.is_live %}
+                            <div class="{{ common.LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                                <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
+                                <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="{{ common.MEDIA_SHELL_CLASS }} {{ common.POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ common.MEDIA_GLOW_CLASS }}" />
+            <div class="{{ common.MEDIA_FOREGROUND_CLASS }} overflow-hidden grid grid-cols-3 gap-[2px]">
+                {% for item in visible_imgs %}
+                    {% if loop.index < common.MAX_VISIBLE_IMAGES or hidden_count == 0 %}
+                        <div class="relative w-full h-full">
+                            <img src="{{ item.src }}" class="block aspect-square h-full w-full object-cover" />
+                        </div>
+                    {% else %}
+                        <div class="relative w-full h-full">
+                            <img src="{{ item.src }}" class="block aspect-square h-full w-full object-cover" />
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="text-white text-[22px] font-black tracking-tighter">+{{ hidden_count }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="{{ common.MEDIA_OVERLAY_CLASS }} grid grid-cols-3 gap-[2px]">
+                {% for item in visible_imgs %}
+                    <div class="relative w-full h-full">
+                        {% if item.is_live and (loop.index < common.MAX_VISIBLE_IMAGES or hidden_count == 0) %}
+                            <div class="{{ common.LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
+                                <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
+                                <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">Live</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_poll(poll) %}
+    {% set option_vote_total = poll.option_vote_total %}
+    <div class="mt-4 border-y border-slate-100 py-3 dark:border-slate-700">
+        <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0 text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">{{ (poll.title or '投票') | e }}</div>
+            <div class="shrink-0 text-xs font-medium {{ 'text-slate-400 dark:text-slate-500' if poll.closed else 'text-emerald-600 dark:text-emerald-400' }}">
+                {{ '已结束' if poll.closed else '进行中' }}
+            </div>
+        </div>
+        <div class="mt-2.5 space-y-2.5">
+            {% for option in poll.options %}
+                {% set percentage = poll.option_percentage(option, option_vote_total) %}
+                <div>
+                    <div class="mb-1 flex items-baseline justify-between gap-3 text-xs">
+                        <span class="min-w-0 text-slate-700 dark:text-slate-200">{{ option.text | e }}</span>
+                        <span class="shrink-0 font-medium text-slate-500 dark:text-slate-400">{{ option.votes }} 票 · {{ '%.1f' | format(percentage) }}%</span>
+                    </div>
+                    <div class="h-1.5 overflow-hidden rounded-sm bg-slate-200 dark:bg-slate-700">
+                        <div class="h-full rounded-sm bg-cyan-600 dark:bg-cyan-500" style="width: {{ '%.2f' | format(percentage) }}%"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="mt-2.5 flex gap-2 text-xs text-slate-500 dark:text-slate-400">
+            {% if poll.total_voters is not none %}<span>{{ poll.total_voters }} 人参与</span>{% endif %}
+            {% if poll.multiple %}<span>多选</span>{% endif %}
+            {% if poll.total_votes is not none and poll.total_votes != poll.total_voters %}<span>{{ poll.total_votes }} 票</span>{% endif %}
+        </div>
+    </div>
+{% endmacro %}

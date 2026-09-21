@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from io import BytesIO
 from itertools import chain
+import mimetypes
 from typing import Any, ClassVar, Literal, cast
 import uuid
 
@@ -48,7 +49,7 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20260920"
+RENDER_TEMPLATE_VERSION = "20260921"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -184,7 +185,11 @@ class _ForwardText:
 
 
 async def safe_src(
-    obj: Any, method: str = "get_path", *, return_none_on_fail: bool = False
+    obj: Any,
+    method: str = "get_path",
+    *,
+    return_none_on_fail: bool = False,
+    as_data: bool = False,
 ) -> str | None:
     """
     通用安全资源获取过滤器
@@ -199,6 +204,8 @@ async def safe_src(
         {{ cont | safe_src("get_cover_path") }}
         #调用 get_avatar_path(), 在获取失败时返回`None`而不是空白图片
         {{ author | safe_src("get_avatar_path", return_none_on_fail=True) }}
+        # 返回 data URI
+        {{ cont | safe_src("get_cover_path", as_data=True) }}
     ```
     """
     try:
@@ -216,6 +223,11 @@ async def safe_src(
         src = await call_result if isinstance(call_result, Awaitable) else call_result
         if src is None:
             return None if return_none_on_fail else PLACEHOLDER_IMAGE
+        if as_data:
+            content = await src.read_bytes()
+            mime = mimetypes.guess_type(src.name)[0] or "application/octet-stream"
+            encoded = base64.b64encode(content).decode("ascii")
+            return f"data:{mime};base64,{encoded}"
         return src.as_uri()
     except Exception as e:
         logger.warning(f"safe_src({method}) 处理 {type(obj).__name__} 时失败: {e!r}")
@@ -589,6 +601,8 @@ class Renderer:
             page.on("console", lambda msg: logger.debug(f"浏览器控制台: {msg.text}"))
             await page.goto(self.templates_dir.as_uri())
             await page.set_content(html, wait_until="networkidle")
+            # 封面氛围色在模板脚本中异步计算，等待它完成后再测量并截图。
+            await page.evaluate("() => window.__coverAmbientReady ?? true")
             height = await page.locator("main").evaluate(
                 "el => Math.ceil(el.getBoundingClientRect().height)"
             )

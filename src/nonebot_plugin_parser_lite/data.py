@@ -401,16 +401,6 @@ class ParseResult:
     def repost_display_url(self) -> str | None:
         return f"引帖: {self.repost.url}" if self.repost else None
 
-    async def get_cover_path(self) -> Path | None:
-        """获取封面路径"""
-        # 先检查视频内容
-        for cont in self.content:
-            if isinstance(cont, VideoContent):
-                return await cont.get_cover_path()
-            elif isinstance(cont, ImageContent | GraphicContent):
-                return await cont.get_path()
-        return None
-
     @property
     def formatted_datetime(self) -> str:
         """格式化时间戳"""

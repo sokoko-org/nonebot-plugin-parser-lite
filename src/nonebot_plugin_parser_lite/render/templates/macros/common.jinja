@@ -1,0 +1,184 @@
+{# Shared classes, cover lookup, ambient background and cover palette script. #}
+{% set MEDIA_SHELL_CLASS = 'relative isolate' %}
+{% set MEDIA_GLOW_CLASS = 'absolute inset-[6%] z-[-1] h-[88%] w-[88%] translate-y-[14px] scale-[1.02] object-cover blur-[28px] saturate-[1.55] opacity-[0.38] dark:opacity-[0.56]' %}
+{% set MEDIA_FOREGROUND_CLASS = 'relative z-[1]' %}
+{% set MEDIA_OVERLAY_CLASS = 'pointer-events-none absolute inset-0 z-[3]' %}
+{% set POSTER_MEDIA_CLASS = 'w-[calc(100%+4rem)] -ml-8 -mr-8' %}
+{% set POSTER_MASK_CLASS = '[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)]' %}
+{% set LIVE_TAG_CLASS = 'h-[19px] rounded-[2px] border-0 bg-black/50 px-[5px] text-white outline-none' %}
+{% set MAX_VISIBLE_IMAGES = 9 %}
+
+{% macro resolve_cover_src(result, as_data=False) -%}
+    {% set cover = namespace(src=none) -%}
+    {% for item in result.content if not cover.src -%}
+        {% set cls = item.__class__.__name__ if item is not string else 'str' -%}
+        {% if cls == 'VideoContent' -%}
+            {% set cover.src = item | safe_src("get_cover_path", return_none_on_fail=True, as_data=as_data) -%}
+        {% elif cls == 'LivePhotoContent' -%}
+            {% set cover.src = item | safe_src("get_base", return_none_on_fail=True, as_data=as_data) -%}
+        {% elif cls in ['ImageContent', 'GraphicContent'] -%}
+            {% set cover.src = item | safe_src(return_none_on_fail=True, as_data=as_data) -%}
+        {% endif -%}
+    {% endfor -%}
+    {{- cover.src or '' -}}
+{%- endmacro %}
+
+{% macro render_ambient(cover_src, cover_sample_src='') %}
+    {% if cover_src %}
+        <img src="{{ cover_src }}" alt="" class="absolute -inset-24 z-0 h-[calc(100%+192px)] w-[calc(100%+192px)] scale-[1.2] object-cover blur-[96px] saturate-[1.65] opacity-[0.58] dark:opacity-50" />
+        <div data-cover-ambient class="absolute inset-0 z-0" style="--cover-overlay-light: rgba(248,250,252,0.70); --cover-overlay-dark: rgba(2,6,23,0.70); --cover-tint: rgba(148,163,184,0.32);">
+            <div class="absolute inset-0 [background-color:var(--cover-overlay-light)] dark:[background-color:var(--cover-overlay-dark)]"></div>
+            <div class="absolute inset-0 opacity-[0.30] mix-blend-multiply [background-color:var(--cover-tint)] dark:mix-blend-screen dark:opacity-[0.34]"></div>
+        </div>
+    {% else %}
+        <div class="absolute inset-0 z-0 bg-slate-50/70 dark:bg-slate-950/70"></div>
+    {% endif %}
+    <script>
+        (() => {
+            const ambient = document.querySelector("[data-cover-ambient]");
+            const source = {{ cover_sample_src | tojson }};
+
+            const clampByte = (value) => Math.max(0, Math.min(255, Math.round(value)));
+            const relativeLuma = (r, g, b) =>
+                (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+            const rgbToHsl = (r, g, b) => {
+                const nr = r / 255;
+                const ng = g / 255;
+                const nb = b / 255;
+                const max = Math.max(nr, ng, nb);
+                const min = Math.min(nr, ng, nb);
+                const lightness = (max + min) / 2;
+                const delta = max - min;
+                if (delta === 0) return { saturation: 0, lightness };
+
+                const saturation = lightness > 0.5
+                    ? delta / (2 - max - min)
+                    : delta / (max + min);
+                return { saturation, lightness };
+            };
+
+            const mix = (first, second, secondWeight) => ({
+                r: first.r * (1 - secondWeight) + second.r * secondWeight,
+                g: first.g * (1 - secondWeight) + second.g * secondWeight,
+                b: first.b * (1 - secondWeight) + second.b * secondWeight,
+            });
+
+            const rgba = (color, alpha) =>
+                `rgba(${clampByte(color.r)}, ${clampByte(color.g)}, ${clampByte(color.b)}, ${alpha})`;
+
+            const readCoverPalette = (image) => {
+                const maxSide = 96;
+                const sourceWidth = image.naturalWidth || image.width;
+                const sourceHeight = image.naturalHeight || image.height;
+                if (!sourceWidth || !sourceHeight) return null;
+
+                const scale = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
+                const width = Math.max(1, Math.round(sourceWidth * scale));
+                const height = Math.max(1, Math.round(sourceHeight * scale));
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const context = canvas.getContext("2d", { willReadFrequently: true });
+                if (!context) return null;
+
+                context.drawImage(image, 0, 0, width, height);
+                const pixels = context.getImageData(0, 0, width, height).data;
+                const pixelCount = pixels.length / 4;
+                const pixelStep = Math.max(1, Math.floor(pixelCount / 1800));
+                let total = 0;
+                let lumaSum = 0;
+                let redSum = 0;
+                let greenSum = 0;
+                let blueSum = 0;
+                let accentWeight = 0;
+                let accentRed = 0;
+                let accentGreen = 0;
+                let accentBlue = 0;
+
+                for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex += pixelStep) {
+                    const offset = pixelIndex * 4;
+                    if (pixels[offset + 3] < 20) continue;
+
+                    const red = pixels[offset];
+                    const green = pixels[offset + 1];
+                    const blue = pixels[offset + 2];
+                    const luma = relativeLuma(red, green, blue);
+                    const { saturation, lightness } = rgbToHsl(red, green, blue);
+                    total += 1;
+                    lumaSum += luma;
+                    redSum += red;
+                    greenSum += green;
+                    blueSum += blue;
+
+                    if (saturation > 0.20 && lightness > 0.12 && lightness < 0.90) {
+                        const weight = 0.45 + saturation;
+                        accentWeight += weight;
+                        accentRed += red * weight;
+                        accentGreen += green * weight;
+                        accentBlue += blue * weight;
+                    }
+                }
+
+                if (!total) return null;
+                const averageLuma = lumaSum / total;
+                const average = {
+                    r: redSum / total,
+                    g: greenSum / total,
+                    b: blueSum / total,
+                };
+                const accent = accentWeight
+                    ? {
+                        r: accentRed / accentWeight,
+                        g: accentGreen / accentWeight,
+                        b: accentBlue / accentWeight,
+                    }
+                    : average;
+
+                return { accent, averageLuma };
+            };
+
+            window.__coverAmbientReady = new Promise((resolve) => {
+                let settled = false;
+                const finish = () => {
+                    if (settled) return;
+                    settled = true;
+                    resolve(true);
+                };
+                const timeout = setTimeout(finish, 1500);
+
+                const complete = () => {
+                    clearTimeout(timeout);
+                    finish();
+                };
+
+                if (!ambient || !source) {
+                    complete();
+                    return;
+                }
+
+                const image = new Image();
+                image.onload = () => {
+                    try {
+                        const palette = readCoverPalette(image);
+                        if (palette) {
+                            const white = { r: 248, g: 250, b: 252 };
+                            const night = { r: 2, g: 6, b: 23 };
+                            const lightOverlay = mix(palette.accent, white, 0.70);
+                            const darkOverlay = mix(palette.accent, night, 0.70);
+                            const tintAlpha = palette.averageLuma < 0.45 ? 0.48 : 0.36;
+                            ambient.style.setProperty("--cover-overlay-light", rgba(lightOverlay, 0.70));
+                            ambient.style.setProperty("--cover-overlay-dark", rgba(darkOverlay, 0.70));
+                            ambient.style.setProperty("--cover-tint", rgba(palette.accent, tintAlpha));
+                        }
+                    } catch (error) {
+                        console.debug("封面氛围色计算失败", error);
+                    }
+                    complete();
+                };
+                image.onerror = complete;
+                image.src = source;
+            });
+        })();
+    </script>
+{% endmacro %}
