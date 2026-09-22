@@ -105,17 +105,3 @@ class AuthHelper:
             headers=await cls.get_headers(),
             follow_redirects=follow_redirects,
         )
-
-
-if __name__ == "__main__":
-
-    async def main():
-        a = await AuthHelper.get(
-            "https://m.weibo.cn/statuses/extend", params={"id": "P2AFBk387"}
-        )
-        try:
-            print(a.json())  # noqa: T201
-        except Exception:
-            print(a.text)  # noqa: T201
-
-    asyncio.run(main())
