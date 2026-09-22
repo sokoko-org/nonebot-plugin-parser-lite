@@ -73,7 +73,7 @@ def format_num(num: int | None) -> str:
     return str(num) if num < 10000 else f"{num / 10000:.1f}万"
 
 
-def clean_clank(value: str) -> str | None:
+def clean_blank(value: str) -> str | None:
     """清理文本中的空白符号(包括换行)"""
     text = re.sub(r"\s+", " ", value).strip()
     return text or None
@@ -99,7 +99,7 @@ def html_to_text(root: BeautifulSoup | Tag | str) -> str:
             if element.name in HTML_NEWLINE_TAGS:
                 parts.append("\n")
         elif isinstance(element, NavigableString):
-            if text := clean_clank(str(element)):
+            if text := clean_blank(str(element)):
                 parts.append(text)
     return "".join(parts).strip()
 

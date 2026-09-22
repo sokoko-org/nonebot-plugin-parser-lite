@@ -10,7 +10,7 @@ from ...utils.format import (
     HTML_NEWLINE_TAGS,
     anchor_text,
     append_html_text,
-    clean_clank,
+    clean_blank,
 )
 
 
@@ -116,7 +116,7 @@ def _iter_media_and_text(
                         yield Creator.image(url=src)
 
         elif isinstance(element, NavigableString):
-            if text := clean_clank(str(element)):
+            if text := clean_blank(str(element)):
                 yield text
 
 

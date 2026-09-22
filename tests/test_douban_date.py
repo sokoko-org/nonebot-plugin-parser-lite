@@ -36,7 +36,7 @@ def _load_parse_date():
     formatting.HTML_NEWLINE_TAGS = frozenset()
     formatting.anchor_text = lambda *_args: None
     formatting.append_html_text = lambda *_args: None
-    formatting.clean_clank = lambda *_args: None
+    formatting.clean_blank = lambda *_args: None
     sys.modules[formatting.__name__] = formatting
 
     module_name = f"{TEST_PACKAGE}.parsers.douban.util"

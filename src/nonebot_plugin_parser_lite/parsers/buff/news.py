@@ -7,7 +7,7 @@ from ...data import ContentItem
 from ...utils.format import (
     HTML_NEWLINE_TAGS,
     append_html_text,
-    clean_clank,
+    clean_blank,
     replace_anchor_hrefs,
 )
 from .share import ShareData
@@ -75,7 +75,7 @@ class News(Struct):
                         data.append(Creator.graphic(url=str(src_attr)))
 
             elif isinstance(element, NavigableString):
-                if text := clean_clank(str(element)):
+                if text := clean_blank(str(element)):
                     text_buffer.append(text)
 
         flush_text()

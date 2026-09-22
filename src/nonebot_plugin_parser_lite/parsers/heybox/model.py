@@ -12,7 +12,7 @@ from ...data import ContentItem
 from ...utils.format import (
     HTML_NEWLINE_TAGS,
     append_html_text,
-    clean_clank,
+    clean_blank,
     replace_anchor_hrefs,
     replace_placeholder_to_sticker,
 )
@@ -193,7 +193,7 @@ def extract_from_html(html: str) -> list[ContentItem]:
             text_buffer.append("\n")
         # 处理纯文本节点
         elif isinstance(element, NavigableString):
-            if text := clean_clank(str(element)):
+            if text := clean_blank(str(element)):
                 text_buffer.append(text)
 
     flush_text()
