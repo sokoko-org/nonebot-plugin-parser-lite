@@ -16,7 +16,8 @@ if str(ROOT / "src") not in sys.path:
 # Load render as a unit under test without running the plugin entrypoint or
 # requiring localstore/htmlrender to initialize their application state.
 nonebot.init()
-store_root = SyncPath(tempfile.mkdtemp(prefix="parser-lite-render-test-"))
+_store_tempdir = tempfile.TemporaryDirectory(prefix="parser-lite-render-test-")
+store_root = SyncPath(_store_tempdir.name)
 localstore = ModuleType("nonebot_plugin_localstore")
 localstore.get_plugin_cache_dir = lambda: store_root / "cache"  # type: ignore[attr-defined]
 localstore.get_plugin_config_dir = lambda: store_root / "config"  # type: ignore[attr-defined]
