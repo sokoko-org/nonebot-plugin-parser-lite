@@ -256,10 +256,11 @@ class Renderer:
         """发送媒体内容消息
 
         将解析结果中的媒体内容拆分为：
-        - 需要立即发送的音视频（逐条 yield）
+        - 需要立即发送的音视频（逐条 yield）或待合并转发的视频
         - 可合并转发的图文 / 图片（统一收集后一次发送）
         """
         failed_count = 0
+        forward_video_segs: dict[int, ForwardNodeInner] = {}
         repost_medias = result.repost.content if result.repost else []
         media_contents = (
             cont
@@ -267,8 +268,11 @@ class Renderer:
             if isinstance(cont, MediaContent) and cont.need_send
         )
         for cont in media_contents:
-            # 先处理需要立即发送的音视频
+            # 先处理需要立即发送的音视频，或准备待合并转发的视频节点
             try:
+                if isinstance(cont, VideoContent) and pconfig.video_in_forward:
+                    forward_video_segs[id(cont)] = await self.__build_video_seg(cont)
+                    continue
                 async for msg in self.__handle_immediate_media(cont):
                     yield msg
             except SizeLimitException:
@@ -282,7 +286,7 @@ class Renderer:
                 continue
 
         # 2 构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
-        ordered_segs = await self.__build_forward_segs(result)
+        ordered_segs = await self.__build_forward_segs(result, forward_video_segs)
         if ordered_segs:
             # 一次遍历：统计+长文本拆分
             processed_segs: list[ForwardNodeInner] = []
@@ -310,10 +314,12 @@ class Renderer:
             # 1) 配置项 need_forward_contents
             # 2) 纯文字部分超过阈值
             # 3) 节点数较多
+            # 4) 包含配置为合并转发的视频
             need_forward = (
                 pconfig.need_forward_contents
                 or total_plain_len > SPLIT_THRESHOLD
                 or node_count > 4
+                or bool(forward_video_segs)
             )
 
             if not need_forward:
@@ -372,24 +378,29 @@ class Renderer:
         if not isinstance(cont, VideoContent | AudioContent):
             return
         path = await cont.get_path()
-        if (isinstance(cont, VideoContent) and pconfig.need_upload_video) or (
-            not isinstance(cont, VideoContent)
-            and isinstance(cont, AudioContent)
-            and pconfig.need_upload_audio
-        ):
+        if isinstance(cont, VideoContent):
+            yield UniMessage(await self.__build_video_seg(cont, path))
+        elif isinstance(cont, AudioContent) and pconfig.need_upload_audio:
             yield UniMessage(await UniHelper.file_seg(path))
-        elif isinstance(cont, VideoContent):
-            yield UniMessage(
-                await UniHelper.video_seg(
-                    file=path, thumbnail=await cont.get_cover_path()
-                )
-            )
         elif isinstance(cont, AudioContent):
             yield UniMessage(await UniHelper.record_seg(path))
+
+    @staticmethod
+    async def __build_video_seg(
+        cont: VideoContent, path: Path | None = None
+    ) -> ForwardNodeInner:
+        """构建视频或视频文件消息段"""
+        video_path = path or await cont.get_path()
+        if pconfig.need_upload_video:
+            return await UniHelper.file_seg(video_path)
+        return await UniHelper.video_seg(
+            file=video_path, thumbnail=await cont.get_cover_path()
+        )
 
     async def __build_forward_segs(
         self,
         result: ParseResult,
+        forward_video_segs: dict[int, ForwardNodeInner],
     ) -> list[ForwardNodeInner | _ForwardText]:
         """根据当前内容和转发内容构造有序的转发段列表（文本 + 媒体，保持顺序）
 
@@ -438,14 +449,24 @@ class Renderer:
 
             async def append_media(cont: MediaContent) -> None:
                 """将单个媒体内容转换为若干 ForwardNodeInner，并追加到 nodes"""
-                try:
-                    # 视频：使用封面图作为转发节点
-                    if isinstance(cont, VideoContent):
+                # 视频：始终保留封面，并按配置追加视频本体。两者分别处理，
+                # 避免封面构建失败时丢失已经准备好的视频节点。
+                if isinstance(cont, VideoContent):
+                    try:
                         path = await cont.get_cover_path()
                         if path:
                             nodes.append(await UniHelper.img_seg(file=path))
-                        return
+                    except Exception as e:
+                        logger.warning(
+                            f"构建转发媒体片段失败: {type(cont).__name__}: {e}"
+                        )
+                        nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
+                    video_seg = forward_video_segs.get(id(cont))
+                    if video_seg is not None:
+                        nodes.append(video_seg)
+                    return
 
+                try:
                     # 图片
                     if isinstance(cont, ImageContent):
                         path = await cont.get_path()

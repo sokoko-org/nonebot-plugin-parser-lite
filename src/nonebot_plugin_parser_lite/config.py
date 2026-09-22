@@ -63,6 +63,8 @@ class Config(BaseModel):
     """B站视频清晰度"""
     plite_need_forward_contents: bool = True
     """是否需要合并转发内容(大于四项时始终转发)"""
+    plite_video_in_forward: bool = False
+    """是否将视频放入内容合并转发"""
     plite_lazy_download: bool = False
     """是否开启懒下载模式，仅在用户请求时才下载视频"""
     plite_lazy_download_tip: bool = False
@@ -198,6 +200,11 @@ class Config(BaseModel):
     def need_forward_contents(self) -> bool:
         """是否需要合并转发"""
         return self.plite_need_forward_contents
+
+    @property
+    def video_in_forward(self) -> bool:
+        """是否将视频放入内容合并转发"""
+        return self.plite_video_in_forward
 
     @property
     def blacklist_users(self) -> list[str]:
