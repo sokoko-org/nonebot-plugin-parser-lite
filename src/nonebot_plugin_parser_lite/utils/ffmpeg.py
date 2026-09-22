@@ -437,14 +437,10 @@ class FFmpeg:
         return cls._available
 
     @classmethod
-    async def compress_png(
-        cls,
-        png_data: bytes,
-        compression_level: int = 6,
-    ) -> bytes:
-        """压缩 PNG"""
-        if not isinstance(compression_level, int) or not 0 <= compression_level <= 9:
-            raise ValueError("compression_level 必须是 0 到 9 之间的整数")
+    async def png_to_webp(cls, png_data: bytes, quality: int = 85) -> bytes:
+        """PNG to WebP"""
+        if not isinstance(quality, int) or not 0 <= quality <= 100:
+            raise ValueError("quality 必须是 0 到 100 之间的整数")
         cmd = [
             "-hide_banner",
             "-loglevel",
@@ -454,11 +450,13 @@ class FFmpeg:
             "-frames:v",
             "1",
             "-f",
-            "image2pipe",
+            "webp",
             "-c:v",
-            "png",
-            "-compression_level",
-            str(compression_level),
+            "libwebp",
+            "-lossless",
+            "0",
+            "-quality",
+            str(quality),
             "pipe:1",
         ]
         return await cls.exec_ffmpeg(cmd, png_data)

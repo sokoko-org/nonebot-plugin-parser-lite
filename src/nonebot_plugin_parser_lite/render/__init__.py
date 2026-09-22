@@ -48,7 +48,8 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20260920"
+RENDER_TEMPLATE_VERSION = "20260922"
+RENDER_WEBP_QUALITY = 95
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -691,12 +692,13 @@ class Renderer:
         """
         theme = get_theme()
         cache_key = f"{RENDER_TEMPLATE_VERSION}:{theme}:{result.url}"
-        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.png"
+        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.webp"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
         if not await image_path.exists():
-            image_raw = await FFmpeg.compress_png(
-                await self.render_image(result, theme=theme)
+            image_raw = await FFmpeg.png_to_webp(
+                await self.render_image(result, theme=theme),
+                quality=RENDER_WEBP_QUALITY,
             )
             temp_path = image_path.with_name(
                 f".{image_path.stem}.{uuid.uuid4().hex}.tmp{image_path.suffix}"
