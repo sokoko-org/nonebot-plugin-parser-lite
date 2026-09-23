@@ -231,7 +231,7 @@ plite_download_command=["xz", "下载"]
 # 禁用后将分别发送 Live Photo 底图和动图部分
 plite_live_photo=True
 
-# [可选] 最大评论数量
+# [可选] 最大评论数量,设为零则不请求评论
 plite_max_comments=5
 
 # [可选] 纯文本文本长度阈值，超过此长度的文本将会强制转发
