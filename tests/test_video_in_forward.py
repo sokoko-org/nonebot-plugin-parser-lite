@@ -1,72 +1,12 @@
-from collections.abc import Iterator
-from pathlib import Path as SyncPath
-import sys
-import tempfile
-from types import ModuleType
-from typing import Any
-
-import nonebot
-import pytest
-
-ROOT = SyncPath(__file__).parents[1]
-SOURCE = ROOT / "src" / "nonebot_plugin_parser_lite"
-if str(ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(ROOT / "src"))
-
-# Load render as a unit under test without running the plugin entrypoint or
-# requiring localstore/htmlrender to initialize their application state.
-nonebot.init()
-_store_tempdir = tempfile.TemporaryDirectory(prefix="parser-lite-render-test-")
-store_root = SyncPath(_store_tempdir.name)
-localstore = ModuleType("nonebot_plugin_localstore")
-localstore.get_plugin_cache_dir = lambda: store_root / "cache"  # type: ignore[attr-defined]
-localstore.get_plugin_config_dir = lambda: store_root / "config"  # type: ignore[attr-defined]
-localstore.get_plugin_data_dir = lambda: store_root / "data"  # type: ignore[attr-defined]
-sys.modules[localstore.__name__] = localstore
-
-htmlrender = ModuleType("nonebot_plugin_htmlrender")
-htmlrender.get_new_page = None  # type: ignore[attr-defined]
-sys.modules[htmlrender.__name__] = htmlrender
-
-parser_package = ModuleType("nonebot_plugin_parser_lite")
-parser_package.__path__ = [str(SOURCE)]
-parser_package.__package__ = parser_package.__name__
-sys.modules[parser_package.__name__] = parser_package
-
 from nonebot_plugin_alconna.uniseg import File, Image, Reference, Video
-
-from nonebot_plugin_parser_lite.config import pconfig
-from nonebot_plugin_parser_lite.constants import PlatformEnum
-from nonebot_plugin_parser_lite.data import Author, ParseResult, Platform, VideoContent
-from nonebot_plugin_parser_lite.helper import ForwardNodeInner, UniHelper
-from nonebot_plugin_parser_lite.render import Renderer
-
-
-class ResolvedPathTask:
-    def __init__(self, path: SyncPath):
-        self.path = path
-        self.url = str(path)
-        self.ext_headers = {}
-        self.use_curl_cffi = False
-
-    def __await__(self) -> Iterator[Any]:
-        async def resolve() -> SyncPath:
-            return self.path
-
-        return resolve().__await__()
-
-
-def make_result() -> ParseResult:
-    video = VideoContent(
-        path_task=ResolvedPathTask(SyncPath("video.mp4")),  # type: ignore[arg-type]
-        cover=ResolvedPathTask(SyncPath("cover.png")),  # type: ignore[arg-type]
-    )
-    return ParseResult(
-        platform=Platform(PlatformEnum.BILIBILI, "哔哩哔哩"),
-        author=Author("tester"),
-        url="https://example.com/video",
-        content=[video],
-    )
+import pytest
+from render_test_support import (
+    ForwardNodeInner,
+    Renderer,
+    UniHelper,
+    make_result,
+    pconfig,
+)
 
 
 @pytest.fixture
@@ -97,9 +37,7 @@ def capture_forward_nodes(monkeypatch) -> list[list[ForwardNodeInner]]:
 
 
 @pytest.mark.asyncio
-async def test_video_is_sent_separately_by_default(
-    monkeypatch, fake_media_segments
-):
+async def test_video_is_sent_separately_by_default(monkeypatch, fake_media_segments):
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
     monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
@@ -137,9 +75,7 @@ async def test_video_is_appended_after_cover_in_forward(
 
 
 @pytest.mark.asyncio
-async def test_uploaded_video_is_appended_as_file(
-    monkeypatch, fake_media_segments
-):
+async def test_uploaded_video_is_appended_as_file(monkeypatch, fake_media_segments):
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
     monkeypatch.setattr(pconfig, "plite_video_in_forward", True)

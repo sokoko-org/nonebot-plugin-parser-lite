@@ -244,6 +244,12 @@ plite_max_retries=3
 # 支持跨午夜范围，例如 ["22:30", "6:00"]
 plite_day_range=["6:00", "19:00"]
 
+# [可选] 渲染主题 ID，默认使用 default
+plite_render_theme="default"
+
+# [可选] 额外主题目录；可填写主题目录，或包含多个主题子目录的目录
+plite_theme_dirs=[]
+
 # [可选] 知乎 cookie, 需要具有登录态的cookie才能完整获取回答内容
 # 必须包含 z_c0 项，建议包含 d_c0, _xsrf 项
 plite_zhihu_ck="z_c0=xxxx"
@@ -266,9 +272,11 @@ plite_x_ck="auth_token=xxx"
 |    bm    | bv号或引用一个链接/卡片 |           -           |  否   | 全部 |   下载 B 站音频   |
 |  blogin  |            -            |       SUPERUSER       |  是   | 全部 | 扫码获取 B 站凭证 |
 
-## 🎨 构建模板样式
+## 🎨 渲染主题
 
-> 此处教程适用于已修改默认模板的用户
+主题模板、清单格式、统一数据接口和本地主题目录配置见 [`THEME.md`](THEME.md)。主题可以放入插件数据目录下的 `themes`，或通过 `plite_theme_dirs` 指定外部目录。
+
+默认主题的 Tailwind 构建方式仍如下：
 
 首次构建前安装 Tailwind CSS 开发依赖：
 

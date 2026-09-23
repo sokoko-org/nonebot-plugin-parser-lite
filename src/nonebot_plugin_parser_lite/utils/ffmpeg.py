@@ -437,10 +437,8 @@ class FFmpeg:
         return cls._available
 
     @classmethod
-    async def png_to_webp(cls, png_data: bytes, quality: int = 85) -> bytes:
+    async def png_to_webp(cls, png_data: bytes) -> bytes:
         """PNG to WebP"""
-        if not isinstance(quality, int) or not 0 <= quality <= 100:
-            raise ValueError("quality 必须是 0 到 100 之间的整数")
         cmd = [
             "-hide_banner",
             "-loglevel",
@@ -456,7 +454,7 @@ class FFmpeg:
             "-lossless",
             "0",
             "-quality",
-            str(quality),
+            "100",
             "pipe:1",
         ]
         return await cls.exec_ffmpeg(cmd, png_data)

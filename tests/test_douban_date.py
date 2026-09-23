@@ -25,18 +25,18 @@ def _load_parse_date():
     _package(f"{TEST_PACKAGE}.utils")
 
     creator = ModuleType(f"{TEST_PACKAGE}.creator")
-    creator.Creator = object
+    creator.Creator = object  # pyright: ignore[reportAttributeAccessIssue]
     sys.modules[creator.__name__] = creator
 
     data = ModuleType(f"{TEST_PACKAGE}.data")
-    data.ContentItem = object
+    data.ContentItem = object  # pyright: ignore[reportAttributeAccessIssue]
     sys.modules[data.__name__] = data
 
     formatting = ModuleType(f"{TEST_PACKAGE}.utils.format")
-    formatting.HTML_NEWLINE_TAGS = frozenset()
-    formatting.anchor_text = lambda *_args: None
-    formatting.append_html_text = lambda *_args: None
-    formatting.clean_blank = lambda *_args: None
+    formatting.HTML_NEWLINE_TAGS = frozenset()  # pyright: ignore[reportAttributeAccessIssue]
+    formatting.anchor_text = lambda *_args: None  # pyright: ignore[reportAttributeAccessIssue]
+    formatting.append_html_text = lambda *_args: None  # pyright: ignore[reportAttributeAccessIssue]
+    formatting.clean_blank = lambda *_args: None  # pyright: ignore[reportAttributeAccessIssue]
     sys.modules[formatting.__name__] = formatting
 
     module_name = f"{TEST_PACKAGE}.parsers.douban.util"
@@ -60,9 +60,7 @@ parse_date = _load_parse_date()
         ("2026-09-17 20:54:08.010189", "2026-09-17 20:54:08"),
     ],
 )
-def test_parse_date_accepts_optional_fractional_seconds(
-    value: str, expected: str
-):
+def test_parse_date_accepts_optional_fractional_seconds(value: str, expected: str):
     expected_timestamp = int(
         datetime.strptime(expected, "%Y-%m-%d %H:%M:%S").timestamp()
     )

@@ -46,9 +46,12 @@ class QSMusicParser(BaseParser):
                 cache_key=f"qsmusic:{track.track_id}",
             )
         ]
+        if music_data.coverURL:
+            contents.insert(0, self.create_image(music_data.coverURL, need_send=False))
+        if music_data.lyrics:
+            contents.append(music_data.lyrics)
         extra = {
             "album": music_data.trackInfo.album.name,
-            "lyric": music_data.lyrics,
             "type": "audio",
             "type_tag": "音乐",
             "type_icon": "fa-music",

@@ -83,6 +83,10 @@ class Config(BaseModel):
     """最大下载重试次数"""
     plite_day_range: list[str] = ["6:00", "19:00"]
     """白天时间范围 [开始, 结束]，格式 h:m；范围内为浅色主题，范围外为夜间模式"""
+    plite_render_theme: str = "default"
+    """渲染主题 ID，主题目录可放在插件数据目录的 themes 下"""
+    plite_theme_dirs: list[str] = []
+    """额外的主题目录，可填写主题目录或包含多个主题的目录"""
     plite_bili_cdn_region: str = "zh"
     """哔哩哔哩 CDN 地区；支持 zh、en、ja、proxy 线路"""
     plite_bili_cdn_domain: str | None = None
@@ -258,6 +262,16 @@ class Config(BaseModel):
             parse_hm_to_minutes(self.plite_day_range[0]),
             parse_hm_to_minutes(self.plite_day_range[1]),
         )
+
+    @property
+    def render_theme(self) -> str:
+        """渲染主题 ID"""
+        return self.plite_render_theme
+
+    @property
+    def theme_dirs(self) -> list[str]:
+        """额外的主题目录"""
+        return self.plite_theme_dirs
 
     @property
     def bili_cdn_region(self) -> str:

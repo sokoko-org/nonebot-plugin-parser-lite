@@ -1,11 +1,11 @@
 import asyncio
-import base64
-from collections.abc import AsyncGenerator, Awaitable, Callable
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from datetime import datetime
 from io import BytesIO
 from itertools import chain
-from typing import Any, ClassVar, Literal, cast
+import re
+from typing import Any, ClassVar, Literal
 import uuid
 
 from anyio import Path
@@ -13,7 +13,6 @@ from jinja2 import Environment, FileSystemLoader
 from nonebot import logger
 from nonebot_plugin_htmlrender import get_new_page
 from PIL import Image
-import qrcode
 
 from ..config import _nickname, gconfig, pconfig
 from ..data import (
@@ -36,10 +35,11 @@ from ..exception import (
 from ..helper import ForwardNodeInner, UniHelper, UniMessage
 from ..utils.cache import CacheManager
 from ..utils.ffmpeg import FFmpeg
+from .context import PLACEHOLDER_IMAGE, ThemeData, build_theme_data, safe_src
+from .theme import ThemeDefinition, ThemeManager
 
-PLACEHOLDER_IMAGE = (
-    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-)
+__all__ = ["PLACEHOLDER_IMAGE", "ThemeData", "ThemeManager", "safe_src"]
+
 SPLIT_THRESHOLD = pconfig.forward_text_threshold
 """单段文本拆分阈值"""
 MAX_FORWARD_TEXT_LEN = 30000
@@ -48,8 +48,7 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20260922"
-RENDER_WEBP_QUALITY = 95
+RENDER_TEMPLATE_VERSION = "20260923"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -182,45 +181,6 @@ class _ForwardText:
 
         flush()
         return chunks
-
-
-async def safe_src(
-    obj: Any, method: str = "get_path", *, return_none_on_fail: bool = False
-) -> str | None:
-    """
-    通用安全资源获取过滤器
-
-    用法：
-    ```
-        # 默认调用 get_path()
-        {{ cont | safe_src }}
-        # 调用 get_base()
-        {{ cont | safe_src("get_base") }}
-        # 调用 get_cover_path()
-        {{ cont | safe_src("get_cover_path") }}
-        #调用 get_avatar_path(), 在获取失败时返回`None`而不是空白图片
-        {{ author | safe_src("get_avatar_path", return_none_on_fail=True) }}
-    ```
-    """
-    try:
-        if obj is None:
-            return None if return_none_on_fail else PLACEHOLDER_IMAGE
-        if not hasattr(obj, method):
-            logger.warning(f"对象 {type(obj).__name__} 不存在方法 '{method}'")
-            return None if return_none_on_fail else PLACEHOLDER_IMAGE
-        attr = getattr(obj, method)
-        if not callable(attr):
-            logger.warning(f"{type(obj).__name__} 的属性 '{method}' 不是可调用对象")
-            return None if return_none_on_fail else PLACEHOLDER_IMAGE
-        method_attr = cast(Callable[[], Path | Awaitable[Path]], attr)
-        call_result = method_attr()
-        src = await call_result if isinstance(call_result, Awaitable) else call_result
-        if src is None:
-            return None if return_none_on_fail else PLACEHOLDER_IMAGE
-        return src.as_uri()
-    except Exception as e:
-        logger.warning(f"safe_src({method}) 处理 {type(obj).__name__} 时失败: {e!r}")
-        return None if return_none_on_fail else PLACEHOLDER_IMAGE
 
 
 class Renderer:
@@ -564,52 +524,42 @@ class Renderer:
         ordered.extend(await build_nodes(repost))
         return ordered
 
-    async def render_image(self, result: ParseResult, *, theme: Theme) -> bytes:
-        """使用 HTML 绘制通用社交媒体帖子卡片"""
-        # 准备模板数据
-        template_data = await self.resolve_parse_result(result)
-
-        # 处理模板针对
-        template_name = "default.html.jinja"
-        if result.platform:
-            # 音乐平台使用音乐模板
-            music_platforms = ["kugou", "netease", "kuwo", "qsmusic"]
-            platform_name = result.platform.name.lower()
-
-            if platform_name in music_platforms:
-                template_name = "music.html.jinja"
-            else:
-                file_name = f"{platform_name}.html.jinja"
-                if await (self.templates_dir / file_name).exists():
-                    template_name = file_name
+    async def render_image(
+        self,
+        result: ParseResult,
+        *,
+        theme: Theme,
+        theme_definition: ThemeDefinition | None = None,
+    ) -> bytes:
+        """使用选定主题绘制卡片"""
+        selected_theme = theme_definition or await self._resolve_theme()
+        template_data = await self.resolve_parse_result(
+            result,
+            color_scheme=theme,
+            theme_id=selected_theme.id,
+        )
+        selected_template = await selected_theme.resolve_template(
+            str(result.platform.name)
+        )
 
         env = Environment(
-            loader=FileSystemLoader(self.templates_dir),
+            loader=FileSystemLoader(str(selected_template.root)),
             enable_async=True,
+            autoescape=False,
         )
-        env.filters["safe_src"] = safe_src
-        template = env.get_template(template_name)
-        html = await template.render_async(result=template_data, theme=theme)
-        if IS_DEBUG:
-            render_path = (
-                self.templates_dir
-                / f"{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html"
-            )
-            await render_path.write_text(
-                html,
-                encoding="utf8",
-            )
-            logger.info(f"已生成调试 HTML: {render_path}")
+        template = env.get_template(selected_template.name)
+        html = await template.render_async(data=template_data)
+        html = await self._inject_fallback_icon_css(html)
 
         async with get_new_page(
             1,
             **{
                 "viewport": {"width": 620, "height": 1000},
-                "base_url": self.templates_dir.as_uri(),
+                "base_url": selected_template.base_url,
             },
         ) as page:
             page.on("console", lambda msg: logger.debug(f"浏览器控制台: {msg.text}"))
-            await page.goto(self.templates_dir.as_uri())
+            await page.goto(selected_template.base_url)
             await page.set_content(html, wait_until="networkidle")
             height = await page.locator("main").evaluate(
                 "el => Math.ceil(el.getBoundingClientRect().height)"
@@ -666,43 +616,57 @@ class Renderer:
 
         return await asyncio.to_thread(stitch)
 
-    async def resolve_parse_result(self, result: ParseResult) -> dict[str, Any]:
-        """解析 ParseResult 为模板可用的字典数据"""
+    async def _resolve_theme(self) -> ThemeDefinition:
+        return await ThemeManager(
+            self.templates_dir,
+            pconfig.theme_dirs,
+        ).resolve(pconfig.render_theme)
 
-        data: dict[str, Any] = {
-            "title": result.title,
-            "formatted_datetime": result.formatted_datetime,
-            "extra": result.extra,
-            "platform": result.platform,
-            "content": result.content,
-            "stats": result.stats,
-            "comments": result.comments[: pconfig.max_comments],
-            "author": result.author,
-            "ai_summary": result.ai_summary,
-            "rendering_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "bot_name": _nickname,
-        }
+    async def list_themes(self) -> list[ThemeDefinition]:
+        """列出当前配置可用的主题"""
+        return await ThemeManager(
+            self.templates_dir,
+            pconfig.theme_dirs,
+        ).list_themes()
 
-        if result.repost:
-            data["repost"] = await self.resolve_parse_result(result.repost)
-
-        if pconfig.append_qrcode:
-            qr = qrcode.QRCode(
-                version=1,
-                error_correction=1,
-                box_size=10,
-                border=1,
+    async def _inject_fallback_icon_css(self, html: str) -> str:
+        """把内置图标样式注入所有主题，供自定义样式覆盖前使用"""
+        try:
+            icon_css = await (self.templates_dir / "icon.css").read_text(
+                encoding="utf-8"
             )
-            qr.add_data(result.url)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="black", back_color="white")
-            buffer = BytesIO()
-            img.save(buffer, format="PNG")  # pyright: ignore[reportCallIssue]
-            buffer.seek(0)
-            img_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-            data["qrcode_path"] = f"data:image/png;base64,{img_base64}"
+        except OSError as error:
+            logger.warning(f"读取内置 icon.css 失败: {error!r}")
+            return html
 
-        return data
+        style = (
+            '<style data-parser-fallback="icon-css">\n'
+            f"{icon_css}\n"
+            "</style>"
+        )
+        head_match = re.search(r"<head\b[^>]*>", html, flags=re.IGNORECASE)
+        if head_match is None:
+            return style + html
+        index = head_match.end()
+        return f"{html[:index]}\n{style}{html[index:]}"
+
+    async def resolve_parse_result(
+        self,
+        result: ParseResult,
+        *,
+        color_scheme: Theme | None = None,
+        theme_id: str | None = None,
+    ) -> ThemeData:
+        """解析 ParseResult 为主题 API v1 数据"""
+        selected_theme_id = theme_id or (await self._resolve_theme()).id
+        return await build_theme_data(
+            result,
+            color_scheme=color_scheme or get_theme(),
+            theme_id=selected_theme_id,
+            bot_name=_nickname,
+            max_comments=pconfig.max_comments,
+            append_qrcode=pconfig.append_qrcode,
+        )
 
     async def cache_or_render_image(self, result: ParseResult):
         """获取缓存图片（支持跨重启复用）
@@ -712,14 +676,22 @@ class Renderer:
         - 若不存在：渲染并写入该文件
         """
         theme = get_theme()
-        cache_key = f"{RENDER_TEMPLATE_VERSION}:{theme}:{result.url}"
+        selected_theme = await self._resolve_theme()
+        cache_key = (
+            f"{RENDER_TEMPLATE_VERSION}:{selected_theme.id}:"
+            f"{selected_theme.version}:{theme}:{result.url}"
+        )
         file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.webp"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
+        logger.info(f"渲染主题: {selected_theme.name}")
         if not await image_path.exists():
             image_raw = await FFmpeg.png_to_webp(
-                await self.render_image(result, theme=theme),
-                quality=RENDER_WEBP_QUALITY,
+                await self.render_image(
+                    result,
+                    theme=theme,
+                    theme_definition=selected_theme,
+                ),
             )
             temp_path = image_path.with_name(
                 f".{image_path.stem}.{uuid.uuid4().hex}.tmp{image_path.suffix}"

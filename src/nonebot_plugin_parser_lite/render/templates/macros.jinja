@@ -1,89 +1,77 @@
-{# Tailwind utility classes shared by rendered media and ambient layers #}
-{% set MEDIA_SHELL_CLASS = 'relative isolate' %}
-{% set MEDIA_GLOW_CLASS = 'absolute inset-[6%] z-[-1] h-[88%] w-[88%] translate-y-[14px] scale-[1.02] object-cover blur-[28px] saturate-[1.55] opacity-[0.38] dark:opacity-[0.56]' %}
-{% set MEDIA_FOREGROUND_CLASS = 'relative z-[1]' %}
-{% set MEDIA_OVERLAY_CLASS = 'pointer-events-none absolute inset-0 z-[3]' %}
-{% set POSTER_MEDIA_CLASS = 'w-[calc(100%+4rem)] -ml-8 -mr-8' %}
-{% set POSTER_MASK_CLASS = '[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)]' %}
-{% set LIVE_TAG_CLASS = 'h-[19px] rounded-[2px] border-0 bg-black/50 px-[5px] text-white outline-none' %}
-{% macro resolve_cover_src(result) -%}
-    {% set cover = namespace(src=none) -%}
-    {% for item in result.content if not cover.src -%}
-        {% set cls = item.__class__.__name__ if item is not string else 'str' -%}
-        {% if cls == 'VideoContent' -%}
-            {% set cover.src = item | safe_src("get_cover_path", return_none_on_fail=True) -%}
-        {% elif cls == 'LivePhotoContent' -%}
-            {% set cover.src = item | safe_src("get_base", return_none_on_fail=True) -%}
-        {% elif cls in ['ImageContent', 'GraphicContent'] -%}
-            {% set cover.src = item | safe_src(return_none_on_fail=True) -%}
+{# Theme API v1: this file only consumes JSON-like data from data.post. #}
+{% set MEDIA_SHELL_CLASS = "relative isolate" %}
+{% set MEDIA_GLOW_CLASS = "absolute inset-[6%] z-[-1] h-[88%] w-[88%] translate-y-[14px] scale-[1.02] object-cover blur-[28px] saturate-[1.55] opacity-[0.38] dark:opacity-[0.56]" %}
+{% set MEDIA_FOREGROUND_CLASS = "relative z-[1]" %}
+{% set MEDIA_OVERLAY_CLASS = "pointer-events-none absolute inset-0 z-[3]" %}
+{% set POSTER_MEDIA_CLASS = "w-[calc(100%+4rem)] -ml-8 -mr-8" %}
+{% set POSTER_MASK_CLASS = "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)]" %}
+{% set LIVE_TAG_CLASS = "h-[19px] rounded-[2px] border-0 bg-black/50 px-[5px] text-white outline-none" %}
+{% macro resolve_cover_src(post) -%}
+    {% set cover = namespace(src='') -%}
+    {% for item in post.content if not cover.src -%}
+        {% if item.type in ['video', 'image', 'live_photo', 'graphic', 'cover'] -%}
+            {% set cover.src = item.src or '' -%}
         {% endif -%}
     {% endfor -%}
-    {{- cover.src or '' -}}
+    {{- cover.src -}}
 {%- endmacro %}
 {% macro render_ambient(cover_src, logo_src) %}
-    {% if cover_src %}<img src="{{ cover_src }}" alt="" class="absolute -inset-24 z-0 h-[calc(100%+192px)] w-[calc(100%+192px)] scale-[1.2] object-cover blur-[80px] saturate-[1.65] opacity-[0.58] dark:opacity-50" />{% endif %}
+    {% if cover_src %}
+        <img src="{{ cover_src }}"
+             alt=""
+             class="absolute -inset-24 z-0 h-[calc(100%+192px)] w-[calc(100%+192px)] scale-[1.2] object-cover blur-[80px] saturate-[1.65] opacity-[0.58] dark:opacity-50" />
+    {% endif %}
     {% if logo_src %}
-        <img src="{{ logo_src }}" alt="" class="absolute top-[4%] -right-[90px] z-0 h-[280px] w-[280px] scale-[1.25] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
-        <img src="{{ logo_src }}" alt="" class="absolute top-[44%] -left-[110px] z-0 h-[280px] w-[280px] rotate-[18deg] scale-[1.45] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
-        <img src="{{ logo_src }}" alt="" class="absolute -right-[80px] bottom-[5%] z-0 h-[280px] w-[280px] -rotate-[12deg] scale-[1.35] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
+        <img src="{{ logo_src }}"
+             alt=""
+             class="absolute top-[4%] -right-[90px] z-0 h-[280px] w-[280px] scale-[1.25] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
+        <img src="{{ logo_src }}"
+             alt=""
+             class="absolute top-[44%] -left-[110px] z-0 h-[280px] w-[280px] rotate-[18deg] scale-[1.45] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
+        <img src="{{ logo_src }}"
+             alt=""
+             class="absolute -right-[80px] bottom-[5%] z-0 h-[280px] w-[280px] -rotate-[12deg] scale-[1.35] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
     {% endif %}
     <div class="absolute inset-0 z-0 bg-slate-50/70 dark:bg-slate-950/70"></div>
 {% endmacro %}
-{# 1. 统计宏（Tailwind 样式） #}
 {% macro render_stats(stats) %}
     <div class="flex flex-wrap items-end gap-x-8 gap-y-5 px-8 pt-5 pb-4">
-        {% if stats.view_count and stats.view_count != '-' %}
-            <div class="min-w-[85px]">
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><i class="fa-icon stat-icon fa-eye"></i><span>浏览</span></div>
-                <div class="mt-1 text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ stats.view_count }}</div>
-            </div>
-        {% endif %}
-        {% if stats.like_count and stats.like_count != '-' %}
-            <div class="min-w-[85px]">
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><i class="fa-icon stat-icon fa-heart"></i><span>点赞</span></div>
-                <div class="mt-1 text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ stats.like_count }}</div>
-            </div>
-        {% endif %}
-        {% if stats.comment_count and stats.comment_count != '-' %}
-            <div class="min-w-[85px]">
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><i class="fa-icon stat-icon fa-comment-dots"></i><span>评论</span></div>
-                <span class="mt-1 block text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ stats.comment_count }}</span>
-            </div>
-        {% endif %}
-        {% if stats.collect_count and stats.collect_count != '-' %}
-            <div class="min-w-[85px]">
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><i class="fa-icon stat-icon fa-star"></i><span>收藏</span></div>
-                <span class="mt-1 block text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ stats.collect_count }}</span>
-            </div>
-        {% endif %}
-        {% if stats.share_count and stats.share_count != '-' %}
-            <div class="min-w-[85px]">
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><i class="fa-icon stat-icon fa-share-nodes"></i><span>分享</span></div>
-                <span class="mt-1 block text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ stats.share_count }}</span>
-            </div>
-        {% endif %}
-        {# 遍历 extra：键为图标类名，值为（显示标签、数值） #}
-        {% if stats.extra %}
-            {% for key, value in stats.extra.items() %}
-                {% set label, amount = value %}
-                {% if amount and amount != '-' %}
-                    <div class="min-w-[92px]">
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><i class="fa-icon stat-icon fa-{{ key }}"></i><span>{{ label }}</span></div>
-                        <span class="mt-1 block text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ amount }}</span>
+        {% set fixed_stats = [
+                    {'key': 'eye', 'label': '浏览', 'value': stats.view_count},
+                    {'key': 'heart', 'label': '点赞', 'value': stats.like_count},
+                    {'key': 'comment-dots', 'label': '评论', 'value': stats.comment_count},
+                    {'key': 'star', 'label': '收藏', 'value': stats.collect_count},
+                    {'key': 'share-nodes', 'label': '分享', 'value': stats.share_count}
+                ] %}
+        {% for item in fixed_stats %}
+            {% if item.value is not none and item.value != '-' and item.value != '' %}
+                <div class="min-w-[85px]">
+                    <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <i class="fa-icon stat-icon fa-{{ item.key }}"></i><span>{{ item.label }}</span>
                     </div>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
+                    <div class="mt-1 text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ item.value }}</div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        {% for item in stats.extra %}
+            {% if item.value is not none and item.value != '-' and item.value != '' %}
+                <div class="min-w-[92px]">
+                    <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <i class="fa-icon stat-icon fa-{{ item.key }}"></i><span>{{ item.label }}</span>
+                    </div>
+                    <span class="mt-1 block text-xl font-black leading-none text-gray-800 dark:text-slate-100">{{ item.value }}</span>
+                </div>
+            {% endif %}
+        {% endfor %}
     </div>
 {% endmacro %}
-{# 2. 评论宏（Tailwind 样式） #}
 {% macro render_comments(comments) %}
-    {% if comments and comments|length > 0 %}
+    {% if comments %}
         <div class="px-8 pb-10 space-y-6">
             <h4 class="text-lg font-black text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-700 pb-1">评论</h4>
             {% for comment in comments %}
                 <div class="comment space-y-3 flex space-x-2">
-                    <img src="{{ comment.author | safe_src('get_avatar_path') }}"
+                    <img src="{{ comment.author.avatar }}"
                          class="w-10 h-10 rounded-full object-cover" />
                     <div class="content">
                         <div class="text-sm font-black text-gray-500 dark:text-slate-300">{{ comment.author.name }}</div>
@@ -94,21 +82,17 @@
                             <span>{{ comment.formatted_datetime }}</span>
                             {% if comment.author.location %}<span>{{ comment.author.location }}</span>{% endif %}
                             {% if comment.stats.like_count %}
-                                <span class="flex items-center">
-                                    <i class="fa-icon fa-heart mr-1 mt-0.5"></i> {{ comment.stats.like_count }}
-                                </span>
+                                <span class="flex items-center"><i class="fa-icon fa-heart mr-1 mt-0.5"></i>{{ comment.stats.like_count }}</span>
                             {% endif %}
                             {% if comment.stats.comment_count %}
-                                <span class="flex items-center">
-                                    <i class="fa-icon fa-comment-dots mr-1 mt-0.5"></i> {{ comment.stats.comment_count }}
-                                </span>
+                                <span class="flex items-center"><i class="fa-icon fa-comment-dots mr-1 mt-0.5"></i>{{ comment.stats.comment_count }}</span>
                             {% endif %}
                         </div>
-                        {% if comment.replies and comment.replies|length > 0 %}
+                        {% if comment.replies %}
                             <div class="comment mt-3 space-y-3">
                                 {% for reply in comment.replies[:5] %}
                                     <div class="space-y-1.5 flex space-x-2">
-                                        <img src="{{ reply.author | safe_src('get_avatar_path') }}"
+                                        <img src="{{ reply.author.avatar }}"
                                              class="w-6 h-6 rounded-full object-cover" />
                                         <div class="content">
                                             <div class="text-sm font-bold text-gray-500 dark:text-slate-300">{{ reply.author.name }}</div>
@@ -117,14 +101,10 @@
                                                 <span>{{ reply.formatted_datetime }}</span>
                                                 {% if reply.author.location %}<span>{{ reply.author.location }}</span>{% endif %}
                                                 {% if reply.stats.like_count %}
-                                                    <span class="flex items-center">
-                                                        <i class="fa-icon fa-heart mr-1 mt-0.5"></i> {{ reply.stats.like_count }}
-                                                    </span>
+                                                    <span class="flex items-center"><i class="fa-icon fa-heart mr-1 mt-0.5"></i>{{ reply.stats.like_count }}</span>
                                                 {% endif %}
                                                 {% if reply.stats.comment_count %}
-                                                    <span class="flex items-center">
-                                                        <i class="fa-icon fa-comment-dots mr-1 mt-0.5"></i> {{ reply.stats.comment_count }}
-                                                    </span>
+                                                    <span class="flex items-center"><i class="fa-icon fa-comment-dots mr-1 mt-0.5"></i>{{ reply.stats.comment_count }}</span>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -139,35 +119,29 @@
     {% endif %}
 {% endmacro %}
 {% set MAX_VISIBLE_IMAGES = 9 %}
-{# 图片布局：仿 new.html 的 1 / 2 / 3 / 9 图效果 #}
 {% macro build_images(img_list, full_bleed=False) %}
     {% set count = img_list|length %}
-    {% set layout = img_list[0].layout|default('grid') if count else 'grid' %}
+    {% set layout = grid %}
     {% set visible_imgs = img_list[:MAX_VISIBLE_IMAGES] %}
     {% set hidden_count = (count - MAX_VISIBLE_IMAGES) if count > MAX_VISIBLE_IMAGES else 0 %}
-    {# 单图：使用 GraphicContent 的原图比例样式 + live #}
     {% if count == 1 %}
         {% set item = visible_imgs[0] %}
-        {% set src = item.src %}
-        {% set is_live = item.is_live %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-3 space-y-1">
-            <img src="{{ src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <img src="{{ item.src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} {{ POSTER_MASK_CLASS if full_bleed else '' }} single-image relative overflow-hidden">
-                <img src="{{ src }}" class="w-full h-auto object-cover" />
+                <img src="{{ item.src }}" class="w-full h-auto object-cover" />
             </div>
-            {% if is_live %}
+            {% if item.is_live %}
                 <div class="{{ MEDIA_OVERLAY_CLASS }}">
                     <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
-                        <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
-                        <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
+                        <i class="live-icon h-[17px] w-4" aria-hidden="true"></i><span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
                     </div>
                 </div>
             {% endif %}
         </div>
-        {# 2 / 4 张使用两列，3 张使用单行三列 #}
     {% elif layout == 'x' %}
         {% set visible_imgs = img_list[:4] %}
-        {% set hidden_count = (count - 4) if count > 4 else 0 %}
+        {% set hidden_count = 0 %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
             <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} flex h-[400px] w-full gap-[2px] overflow-hidden">
@@ -187,8 +161,7 @@
                     <div class="relative min-w-0 flex-1 overflow-hidden">
                         {% if item.is_live %}
                             <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
-                                <i class="live-icon" aria-hidden="true"></i>
-                                <span class="text-[9px] font-bold uppercase tracking-widest">实况</span>
+                                <i class="live-icon" aria-hidden="true"></i><span class="text-[9px] font-bold uppercase tracking-widest">实况</span>
                             </div>
                         {% endif %}
                     </div>
@@ -196,15 +169,14 @@
             </div>
         </div>
     {% elif count <= 4 %}
-        {% set grid_cols = "grid-cols-3" if count == 3 else "grid-cols-2" %}
+        {% set grid_cols = grid-cols-2 %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
             <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} overflow-hidden grid {{ grid_cols }} gap-[2px]">
                 {% for item in visible_imgs %}
-                    {% set src = item.src %}
-                    {% set is_live = item.is_live %}
                     <div class="relative w-full h-full">
-                        <img src="{{ src }}" class="block aspect-square h-full w-full object-cover" />
+                        <img src="{{ item.src }}"
+                             class="block aspect-square h-full w-full object-cover" />
                     </div>
                 {% endfor %}
             </div>
@@ -213,35 +185,27 @@
                     <div class="relative w-full h-full">
                         {% if item.is_live %}
                             <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
-                                <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
-                                <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
+                                <i class="live-icon h-[17px] w-4" aria-hidden="true"></i><span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">实况</span>
                             </div>
                         {% endif %}
                     </div>
                 {% endfor %}
             </div>
         </div>
-        {# 其他 ≥5 张：九宫格 media-grid #}
     {% else %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
             <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} overflow-hidden grid grid-cols-3 gap-[2px]">
                 {% for item in visible_imgs %}
-                    {% set src = item.src %}
-                    {% set is_live = item.is_live %}
-                    {% if loop.index < MAX_VISIBLE_IMAGES or hidden_count == 0 %}
-                        <div class="relative w-full h-full">
-                            <img src="{{ src }}" class="block aspect-square h-full w-full object-cover" />
-                        </div>
-                    {% else %}
-                        {# 最后一张：+N 覆盖层 #}
-                        <div class="relative w-full h-full">
-                            <img src="{{ src }}" class="block aspect-square h-full w-full object-cover" />
+                    <div class="relative w-full h-full">
+                        <img src="{{ item.src }}"
+                             class="block aspect-square h-full w-full object-cover" />
+                        {% if hidden_count and loop.last %}
                             <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
                                 <span class="text-white text-[22px] font-black tracking-tighter">+{{ hidden_count }}</span>
                             </div>
-                        </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 {% endfor %}
             </div>
             <div class="{{ MEDIA_OVERLAY_CLASS }} grid grid-cols-3 gap-[2px]">
@@ -249,8 +213,7 @@
                     <div class="relative w-full h-full">
                         {% if item.is_live and (loop.index < MAX_VISIBLE_IMAGES or hidden_count == 0) %}
                             <div class="{{ LIVE_TAG_CLASS }} absolute bottom-2 right-2 flex items-center">
-                                <i class="live-icon h-[17px] w-4" aria-hidden="true"></i>
-                                <span class="pl-[1.3px] text-[9px] font-bold uppercase tracking-widest">Live</span>
+                                <i class="live-icon" aria-hidden="true"></i><span class="text-[9px] font-bold uppercase tracking-widest">实况</span>
                             </div>
                         {% endif %}
                     </div>
@@ -259,26 +222,25 @@
         </div>
     {% endif %}
 {% endmacro %}
-{# 投票内容 #}
 {% macro render_poll(poll) %}
-    {% set option_vote_total = poll.option_vote_total %}
     <div class="mt-4 border-y border-slate-100 py-3 dark:border-slate-700">
         <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0 text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">{{ (poll.title or '投票') | e }}</div>
+            <div class="min-w-0 text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
+                {{ poll.title or '投票' }}
+            </div>
             <div class="shrink-0 text-xs font-medium {{ 'text-slate-400 dark:text-slate-500' if poll.closed else 'text-emerald-600 dark:text-emerald-400' }}">
                 {{ '已结束' if poll.closed else '进行中' }}
             </div>
         </div>
         <div class="mt-2.5 space-y-2.5">
             {% for option in poll.options %}
-                {% set percentage = poll.option_percentage(option, option_vote_total) %}
                 <div>
                     <div class="mb-1 flex items-baseline justify-between gap-3 text-xs">
-                        <span class="min-w-0 text-slate-700 dark:text-slate-200">{{ option.text | e }}</span>
-                        <span class="shrink-0 font-medium text-slate-500 dark:text-slate-400">{{ option.votes }} 票 · {{ '%.1f' | format(percentage) }}%</span>
+                        <span class="min-w-0 text-slate-700 dark:text-slate-200">{{ option.text }}</span><span class="shrink-0 font-medium text-slate-500 dark:text-slate-400">{{ option.votes }} 票 · {{ '%.1f' | format(option.percentage) }}%</span>
                     </div>
                     <div class="h-1.5 overflow-hidden rounded-sm bg-slate-200 dark:bg-slate-700">
-                        <div class="h-full rounded-sm bg-cyan-600 dark:bg-cyan-500" style="width: {{ '%.2f' | format(percentage) }}%"></div>
+                        <div class="h-full rounded-sm bg-cyan-600 dark:bg-cyan-500"
+                             style="width: {{ '%.2f' | format(option.percentage) }}%"></div>
                     </div>
                 </div>
             {% endfor %}
@@ -286,11 +248,12 @@
         <div class="mt-2.5 flex gap-2 text-xs text-slate-500 dark:text-slate-400">
             {% if poll.total_voters is not none %}<span>{{ poll.total_voters }} 人参与</span>{% endif %}
             {% if poll.multiple %}<span>多选</span>{% endif %}
-            {% if poll.total_votes is not none and poll.total_votes != poll.total_voters %}<span>{{ poll.total_votes }} 票</span>{% endif %}
+            {% if poll.total_votes is not none and poll.total_votes != poll.total_voters %}
+                <span>{{ poll.total_votes }} 票</span>
+            {% endif %}
         </div>
     </div>
 {% endmacro %}
-{# 内容渲染（Tailwind 版本） #}
 {% macro render_content_items(content, full_bleed=False) %}
     {% set html_parts = [] %}
     {% set ns = namespace(current_imgs=[], current_img_index=0) %}
@@ -302,154 +265,95 @@
         {% endif %}
     {% endmacro %}
     {% for cont in content %}
-        {% set cls = cont.__class__.__name__ if cont is not string else 'str' %}
-        {# 1. 图片类：积累，最后统一 flush 成宫格 #}
-        {% if cls == 'ImageContent' %}
-            {% set src = cont | safe_src if ns.current_img_index < MAX_VISIBLE_IMAGES else "" %}
-            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : false, 'layout': cont.layout|default('grid')}) %}
+        {% if cont.type in ['image', 'live_photo', 'cover'] %}
+            {% set src = cont.src if ns.current_img_index < MAX_VISIBLE_IMAGES else '' %}
+            {% set _ = ns.current_imgs.append({'src': src, 'is_live': cont.is_live, 'layout': cont.layout|default('grid')}) %}
             {% set ns.current_img_index = ns.current_img_index + 1 %}
-        {% elif cls=='LivePhotoContent' %}
-            {% set src = cont | safe_src("get_base") if ns.current_img_index < MAX_VISIBLE_IMAGES else "" %}
-            {% set _ = ns.current_imgs.append({'src': src, 'is_live' : true, 'layout': 'grid'}) %}
-            {% set ns.current_img_index = ns.current_img_index + 1 %}
-            {# 2. 文本：遇到非图片前先 flush，避免跨段 #}
-        {% elif cont is string %}
+        {% elif cont.type == 'text' %}
             {% set _ = flush_images() %}
-            {% set text = cont | e %}
-            {# 换行完全由文本中的 \n 控制 #}
-            {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ text ~ '</span>') %}
-            {# 3. Graphic 图文 #}
-        {% elif cls == 'GraphicContent' %}
+            {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ cont.text ~ '</span>') %}
+        {% elif cont.type == 'graphic' %}
             {% set _ = flush_images() %}
-            {% set src = cont | safe_src %}
-            {% set alt = cont.alt or "" %}
-            {% set _ = html_parts.append(
-                            '<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1">'
-                            '<img src="' ~ src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" />'
-                            '<div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden">'
-                            '<img src="' ~ src ~ '" class="w-full h-auto object-cover" />'
-                            '</div>'
-                            '<p class="whitespace-pre-wrap text-xs text-slate-500 dark:text-slate-400">' ~ (alt|e) ~ '</p>'
-                            '</div>'
-                        ) %}
-            {# 4. 贴纸 #}
-        {% elif cls == 'StickerContent' %}
-            {% set src = cont | safe_src(return_none_on_fail=True) %}
-            {% if not src %}
-                {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ cont.desc|e ~ '</span>') %}
-            {% else %}
-                {% set size = cont.size %}
-                {% set size_class = 'h-6' if size == 'small' else 'h-12' %}
-                {% set _ = html_parts.append(
-                                    '<img class="inline-block align-text-bottom ' ~ size_class ~ '"
-                     src="' ~ src ~ '"
-                     alt="' ~ (cont.desc|e) ~ '" />'
-                                ) %}
-            {% endif %}
-            {# 5. 视频封面 + 播放按钮 #}
-        {% elif cls == 'VideoContent' %}
+            {% set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1"><img src="' ~ cont.src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden"><img src="' ~ cont.src ~ '" class="w-full h-auto object-cover" /></div><p class="whitespace-pre-wrap text-xs text-slate-500 dark:text-slate-400">' ~ (cont.alt|default('')) ~ '</p></div>') %}
+        {% elif cont.type == 'sticker' %}
+            {% set _ = html_parts.append('<img class="inline-block align-text-bottom ' ~ ('h-6' if cont.size == 'small' else 'h-12') ~ '"
+                 src="' ~ cont.src ~ '"
+                 alt="' ~ (cont.description|default('')) ~ '" />' if cont.src else '<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ (cont.description|default('')) ~ '</span>') %}
+        {% elif cont.type == 'video' %}
             {% set _ = flush_images() %}
-            {% set src = cont | safe_src("get_cover_path") %}
-            {% set _ = html_parts.append(
-                            '<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3">'
-                            '<img src="' ~ src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" />'
-                            '<div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' poster-video relative overflow-hidden bg-black">'
-                            '<img src="' ~ src ~ '" class="w-full h-full object-cover opacity-80" />'
-                            '</div>'
-                            '<div class="' ~ MEDIA_OVERLAY_CLASS ~ '">'
-                            '<div class="absolute top-[18px] right-6 left-6 flex items-start justify-between gap-4 text-[13px] font-extrabold leading-[1.15] text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">'
-                            '<span>' ~ cont.display_duration ~ '</span>'
-                            '<span class="text-right">' ~ cont.get_display_size() ~ '</span>'
-                            '</div>'
-                            '<i class="fa-icon fa-play absolute right-6 bottom-5 translate-x-[5px] text-[88px] leading-none text-white/50 [text-shadow:0_4px_24px_rgba(0,0,0,0.42)]"></i>'
-                            '</div>'
-                            '</div>'
-                        ) %}
-            {# 6. 链接卡片 #}
-        {% elif cls == 'LinkContent' %}
+            {% set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3"><img src="' ~ cont.src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' poster-video relative overflow-hidden bg-black"><img src="' ~ cont.src ~ '" class="w-full h-full object-cover opacity-80" /></div><div class="' ~ MEDIA_OVERLAY_CLASS ~ '"><div class="absolute top-[18px] right-6 left-6 flex items-start justify-between gap-4 text-[13px] font-extrabold leading-[1.15] text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]"><span>' ~ cont.duration ~ '</span><span class="text-right">' ~ cont.size ~ '</span></div><i class="fa-icon fa-play absolute right-6 bottom-5 translate-x-[5px] text-[88px] leading-none text-white/50 [text-shadow:0_4px_24px_rgba(0,0,0,0.42)]"></i></div></div>') %}
+        {% elif cont.type == 'audio' %}
             {% set _ = flush_images() %}
-            {% set icon_src = cont | safe_src("get_icon_path", return_none_on_fail=True) %}
-            {% set preview_src = cont | safe_src("get_preview_path", return_none_on_fail=True) %}
-            {% set rich_link = cont.site_name or cont.description or icon_src or preview_src %}
-            {% set preview_html = '<img src="' ~ preview_src ~ '" class="h-auto object-contain" />' if preview_src else '' %}
-            {% set icon_html = '<img src="' ~ icon_src ~ '" class="h-4 w-4 shrink-0 rounded-[2px] object-cover" />' if icon_src else '' %}
-            {% set source_html = '<div class="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">' ~ icon_html ~ '<span class="truncate">' ~ ((cont.site_name or cont.url)|e) ~ '</span></div>' if rich_link else '' %}
-            {% set description_html = '<div class="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2 dark:text-slate-400">' ~ (cont.description|e) ~ '</div>' if cont.description else '' %}
-            {% set url_html = '' if rich_link else '<div class="mt-0.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">' ~ (cont.url|e) ~ '</div>' %}
-            {% set _ = html_parts.append(
-                            '<a href="'~(cont.url|e)~'"
+            {% set _ = html_parts.append('<div class="mt-3 flex items-center gap-3 border-y border-slate-100 py-3 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300"><i class="fa-icon fa-music text-sky-500"></i><span>音频</span><span>' ~ cont.duration ~ '</span><span>' ~ cont.size ~ '</span></div>') %}
+        {% elif cont.type == 'link' %}
+            {% set _ = flush_images() %}
+            {% set rich_link = cont.site_name or cont.description or cont.icon or cont.preview %}
+            {% set preview_html = '<img src="' ~ cont.preview ~ '" class="h-auto object-contain" />' if cont.preview else '' %}
+            {% set icon_html = '<img src="' ~ cont.icon ~ '"
+                 class="h-4 w-4 shrink-0 rounded-[2px] object-cover" />' if cont.icon else '' %}
+            {% set source_html = '<div class="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">' ~ icon_html ~ '<span class="truncate">' ~ (cont.site_name or cont.url) ~ '</span></div>' if rich_link else '' %}
+            {% set description_html = '<div class="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2 dark:text-slate-400">' ~ cont.description ~ '</div>' if cont.description else '' %}
+            {% set url_html = '' if rich_link else '<div class="mt-0.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">' ~ cont.url ~ '</div>' %}
+            {% set _ = html_parts.append('<a href="' ~ cont.url ~ '"
                target="_blank"
                rel="noreferrer noopener"
-               class="mt-3 inline-block overflow-hidden border-y border-slate-100 bg-slate-50/50 transition-colors max-w-full duration-150 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/40 dark:hover:bg-slate-800">'
-                            ~ preview_html ~
-                            '<div class="w-full px-3 py-2.5">'
-                                ~ source_html ~
-                                '<div class="text-sm font-semibold leading-snug text-slate-800 line-clamp-2 dark:text-slate-100">' ~ (cont.title|e) ~ '</div>'
-                                ~ description_html ~ url_html ~
-                            '</div>
-                        </a>'
-                    ) %}
-        {% elif cls == 'QuoteContent' %}
+               class="mt-3 inline-block overflow-hidden border-y border-slate-100 bg-slate-50/50 transition-colors max-w-full duration-150 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/40 dark:hover:bg-slate-800">' ~ preview_html ~ '<div class="w-full px-3 py-2.5">' ~ source_html ~ '<div class="text-sm font-semibold leading-snug text-slate-800 line-clamp-2 dark:text-slate-100">' ~ cont.title ~ '</div>' ~ description_html ~ url_html ~ '</div></a>') %}
+        {% elif cont.type == 'quote' %}
             {% set _ = flush_images() %}
-            {% set icon_src = cont | safe_src("get_icon_path", return_none_on_fail=True) %}
             {% set quote_title = cont.title or cont.url or '引用内容' %}
-            {% set icon_html = '<img src="' ~ icon_src ~ '" class="h-5 w-5 shrink-0 rounded-[2px] object-cover" />' if icon_src else '' %}
-            {% if cont.url %}
-                {% set title_html = '<a href="' ~ (cont.url|e) ~ '" target="_blank" rel="noreferrer noopener" class="min-w-0 truncate text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">' ~ (quote_title|e) ~ '</a>' %}
-            {% else %}
-                {% set title_html = '<span class="min-w-0 truncate text-xs font-semibold text-slate-600 dark:text-slate-300">' ~ (quote_title|e) ~ '</span>' %}
-            {% endif %}
-            {% set _ = html_parts.append(
-                            '<div class="mt-3 border-l-[3px] border-slate-300 py-1 pl-3 dark:border-slate-600">'
-                            '<div class="flex items-center gap-2">' ~ icon_html ~ title_html ~ '</div>'
-                            '<div class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">' ~ (cont.text|e) ~ '</div>'
-                            '</div>'
-                        ) %}
-        {% elif cls == 'PollContent' %}
+            {% set icon_html = '<img src="' ~ cont.icon ~ '"
+                 class="h-5 w-5 shrink-0 rounded-[2px] object-cover" />' if cont.icon else '' %}
+            {% set title_html = '<a href="' ~ cont.url ~ '"
+               target="_blank"
+               rel="noreferrer noopener"
+               class="min-w-0 truncate text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">' ~ quote_title ~ '</a>' if cont.url else '<span class="min-w-0 truncate text-xs font-semibold text-slate-600 dark:text-slate-300">' ~ quote_title ~ '</span>' %}
+            {% set _ = html_parts.append('<div class="mt-3 border-l-[3px] border-slate-300 py-1 pl-3 dark:border-slate-600"><div class="flex items-center gap-2">' ~ icon_html ~ title_html ~ '</div><div class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">' ~ cont.text ~ '</div></div>') %}
+        {% elif cont.type == 'poll' %}
             {% set _ = flush_images() %}
             {% set _ = html_parts.append(render_poll(cont)) %}
-    {% endif %}
-{% endfor %}
-{% set _ = flush_images() %}
-{{ html_parts|join("") | safe }}
+        {% else %}
+            {% set _ = flush_images() %}
+            {% if cont.text %}
+                {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ cont.text ~ '</span>') %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% set _ = flush_images() %}
+    {{ html_parts|join("") }}
 {% endmacro %}
-{# 3. 内容+转发宏（Tailwind 样式 + is_repost） #}
-{% macro render_content(result, is_repost=False) %}
-    {% set comments = result.comments %}
+{% macro render_content(post, meta, is_repost=False) %}
+    {% set comments = post.comments %}
     <div class="{{ 'w-full' if is_repost else 'w-[620px]' }} overflow-hidden flex flex-col">
-        {# Header #}
         <div class="px-8 pt-10 pb-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <img src="{{ result.author | safe_src('get_avatar_path') }}"
+                <img src="{{ post.author.avatar }}"
                      class="w-12 h-12 rounded-full object-cover" />
                 <div>
                     <div class="flex items-center space-x-2">
-                        <h2 class="text-xl font-black text-slate-800 dark:text-slate-100 leading-none">{{ result.author.name }}</h2>
+                        <h2 class="text-xl font-black text-slate-800 dark:text-slate-100 leading-none">{{ post.author.name }}</h2>
                     </div>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium space-x-2">
-                        <span>{{ result.formatted_datetime }}</span>
-                        {% if result.author.location %}<span>{{ result.author.location }}</span>{% endif %}
+                        <span>{{ post.formatted_datetime }}</span>
+                        {% if post.author.location %}<span>{{ post.author.location }}</span>{% endif %}
                     </p>
                 </div>
             </div>
             {% if not is_repost %}
                 <div class="flex items-center space-x-1.5 px-4 py-2">
-                    <img src="{{ result.platform | safe_src('get_logo_path') }}"
-                         class="w-4 h-4 rounded-[2px]" />
-                    <span class="text-xs font-black text-gray-500 dark:text-slate-300 tracking-widest">{{ result.platform.display_name }}</span>
+                    <img src="{{ post.platform.logo }}" class="w-4 h-4 rounded-[2px]" />
+                    <span class="text-xs font-black text-gray-500 dark:text-slate-300 tracking-widest">{{ post.platform.name }}</span>
                 </div>
             {% endif %}
         </div>
         <div class="px-8 space-y-3 pb-5">
-            {% if result.title %}
-                <p class="title text-2xl font-black leading-tight text-gray-800 dark:text-slate-100">{{ result.title | e }}</p>
+            {% if post.title %}
+                <p class="title text-2xl font-black leading-tight text-gray-800 dark:text-slate-100">{{ post.title }}</p>
             {% endif %}
             <div class="text-gray-800 dark:text-slate-200 text-base leading-relaxed">
-                {{ render_content_items(result.content, not is_repost) }}
+                {{ render_content_items(post.content, not is_repost) }}
             </div>
         </div>
-        {# AI 总结 / 锐评 #}
-        {% if result.ai_summary %}
+        {% if post.ai_summary %}
             <div class="px-8 pb-5">
                 <div class="flex items-start space-x-2.5 border-l-2 border-indigo-400 py-1 pl-3 dark:border-indigo-500">
                     <div class="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500">
@@ -459,20 +363,18 @@
                         <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500 mb-0.5">
                             AI 总结
                         </div>
-                        <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{{ result.ai_summary }}</p>
+                        <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{{ post.ai_summary }}</p>
                     </div>
                 </div>
             </div>
         {% endif %}
-        {# 转发内容：使用引用式层级，避免嵌套卡片割裂主体 #}
-        {% if result.repost %}
+        {% if post.repost %}
             <div class="mx-8 mb-6 border-l-2 border-slate-200 pl-3 dark:border-slate-700">
-                {{ render_content(result.repost, True) }}
+                {{ render_content(post.repost, meta, True) }}
             </div>
         {% endif %}
-        {{ render_stats(result.stats) }}
-        {# 主体内容和评论之间的间隔 #}
-        {% if comments and comments|length > 0 %}
+        {{ render_stats(post.stats) }}
+        {% if comments %}
             <div class="px-8 mt-2 mb-4">
                 <div class="h-px bg-slate-100 dark:bg-slate-700"></div>
             </div>
@@ -481,25 +383,29 @@
         {% if not is_repost %}
             <div class="mx-8 mt-4 mb-7 flex items-end justify-between gap-6">
                 <div class="flex min-w-0 items-center gap-3">
-                    <img src="{{ result.author | safe_src('get_avatar_path') }}"
+                    <img src="{{ post.author.avatar }}"
                          class="h-12 w-12 shrink-0 rounded-full object-cover" />
                     <div class="min-w-0">
-                        <div class="truncate text-lg font-black text-slate-800 dark:text-slate-100">{{ result.author.name }}</div>
+                        <div class="truncate text-lg font-black text-slate-800 dark:text-slate-100">{{ post.author.name }}</div>
                         <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                            {% if result.author.location %}{{ result.author.location }}{% endif %}
-                            {% if result.author.location and result.author.id %} · {% endif %}
-                            {% if result.author.id %}ID: {{ result.author.id }}{% endif %}
-                            {% if result.author.description %} <br />{{ result.author.description }}{% endif %}
+                            {% if post.author.location %}{{ post.author.location }}{% endif %}
+                            {% if post.author.location and post.author.id %}·{% endif %}
+                            {% if post.author.id %}ID: {{ post.author.id }}{% endif %}
+                            {% if post.author.description %}
+                                <br />
+                                {{ post.author.description }}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                {% if result.qrcode_path %}
-                    <img src="{{ result.qrcode_path }}" alt="二维码" class="h-24 w-24 shrink-0 rounded-lg" />
+                {% if post.qrcode %}
+                    <img src="{{ post.qrcode }}"
+                         alt="二维码"
+                         class="h-24 w-24 shrink-0 rounded-lg" />
                 {% endif %}
             </div>
             <footer class="mx-8 border-t border-gray-100 py-5 dark:border-slate-800 flex justify-between items-center text-[10px] font-black text-gray-300 dark:text-slate-600 uppercase tracking-widest antialiased">
-                <span>{{ result.bot_name }} Parser · Design negichan</span>
-                <span>Rendering at {{ result.rendering_time }}</span>
+                <span>{{ meta.bot_name }} Parser · Design negichan</span><span>Rendering at {{ meta.rendering_time }}</span>
             </footer>
         {% endif %}
     </div>

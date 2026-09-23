@@ -47,12 +47,13 @@ class KuWoParser(BaseParser):
             contents.append(self.create_image(cover_url, need_send=False))
 
         contents.append(audio_content)
+        if lyric := music_data["lyric"]:
+            contents.append(lyric)
         quality = music_data["quality"]["name"]
 
         extra = {
             "album": music_data["album"],
             "info": f"时长: {dis_dura} | {quality}",
-            "lyric": music_data["lyric"],
             "type": "audio",
             "type_tag": "音乐",
             "type_icon": "fa-music",

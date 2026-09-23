@@ -185,13 +185,14 @@ class KuGouParser(BaseParser):
         ]
 
         contents.append(audio_content)
+        if lyric:
+            contents.append(lyric)
 
         # 构建额外信息
         extra = {
             "info": f"比特率: {playinfo.bitRate}K | "
             f"时长: {int(float(playinfo.timeLength) // 60)}"
             f":{int(float(playinfo.timeLength) % 60):02d}",
-            "lyric": lyric,
             "type": "audio",
             "type_tag": "音乐",
             "type_icon": "fa-music",

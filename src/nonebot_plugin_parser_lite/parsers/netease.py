@@ -109,6 +109,8 @@ class NCMParser(BaseParser):
 
         if cover_url := song.get("picimg"):
             contents.append(self.create_image(cover_url))
+        if lyric:
+            contents.append(lyric)
 
         audio_info = (
             f"音质: {level} | 大小: {await audio.get_display_size()} |"
@@ -117,7 +119,6 @@ class NCMParser(BaseParser):
 
         extra = {
             "info": audio_info,
-            "lyric": lyric,
         }
 
         return self.result(
