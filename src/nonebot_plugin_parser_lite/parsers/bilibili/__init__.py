@@ -764,7 +764,10 @@ class BilibiliParser(BaseParser):
     async def _fetch_comments(
         self, oid: int, type: CommentResourceType
     ) -> list[Comment]:
-        """从 Bilibili API 获取评论数据，优先热评，失败时兜底普通评论；禁用评论获取时不请求 API，直接返回空列表。""" 
+        """
+        从 Bilibili API 获取评论数据，优先热评，失败时兜底普通评论.
+        禁用评论获取时不请求 API，直接返回空列表。
+        """
         if not pconfig.max_comments:
             return []
 

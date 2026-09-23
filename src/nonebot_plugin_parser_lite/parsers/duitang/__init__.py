@@ -26,19 +26,18 @@ class DuiTangParser(BaseParser):
         blog_id = searched["id"]
 
         blog_data = await self._fetch_blog_detail(blog_id=blog_id)
-        comment_data = await self._fetch_comments(
-            subject_id=blog_data.id,
-            subject_type=0,
-        )
-
+        if pconfig.max_comments:
+            comment_data = await self._fetch_comments(
+                subject_id=blog_data.id,
+                subject_type=0,
+            )
+            comments = self._build_comments(comment_data)
+        else:
+            comments = []
         content: list[ContentItem] = [
             blog_data.msg,
             self.create_image(blog_data.photo.path),
         ]
-        if pconfig.max_comments:
-            comments = self._build_comments(comment_data)
-        else:
-            comments = []
 
         return self.result(
             content=content,
@@ -61,16 +60,19 @@ class DuiTangParser(BaseParser):
         atlas_id = searched["id"]
 
         atlas_data = await self._fetch_atlas_detail(atlas_id=atlas_id)
-        comment_data = await self._fetch_comments(
-            subject_id=atlas_data.id,
-            subject_type=23,
-        )
+        if pconfig.max_comments:
+            comment_data = await self._fetch_comments(
+                subject_id=atlas_data.id,
+                subject_type=23,
+            )
+            comments = self._build_comments(comment_data)
+        else:
+            comments = []
 
         content: list[ContentItem] = [
             atlas_data.desc,
             *self.create_images(atlas_data.img_list),
         ]
-        comments = self._build_comments(comment_data)
 
         return self.result(
             content=content,

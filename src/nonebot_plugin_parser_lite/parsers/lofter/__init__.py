@@ -50,36 +50,21 @@ class LofterParser(BaseParser):
         )
         post_data = post_resp.json()
 
-        # 评论数据
-        com_resp = await self.httpx.get(
-            "https://www.lofter.com/comment/l1/hotnew.json",
-            params={"postId": post_id, "blogId": blog_id},
-        )
-        com_data = com_resp.json()
+        if pconfig.max_comments:
+            # 评论数据
+            com_resp = await self.httpx.get(
+                "https://www.lofter.com/comment/l1/hotnew.json",
+                params={"postId": post_id, "blogId": blog_id},
+            )
+            com_data = com_resp.json()
 
-        meta = post_data.get("meta") or {}
-        if meta.get("status") != 200:
-            raise ParseException(f"Lofter 解析失败: {meta.get('msg', '未知错误')}")
+            if com_data.get("code") != 0:
+                logger.warning(f"Lofter 获取评论失败: {com_data.get('msg')}")
+                comment_list = CommentList(hotList=[], default=[])
+            else:
+                comment_list = convert(com_data.get("data") or {}, CommentList)
 
-        post_raw = (post_data.get("response") or {}).get("posts") or []
-        if not post_raw:
-            raise ParseException("Lofter 解析失败: 未找到帖子内容")
-        post = convert(post_raw[0]["post"], Post)
-
-        if com_data.get("code") != 0:
-            logger.warning(f"Lofter 获取评论失败: {com_data.get('msg')}")
-            comment_list = CommentList(hotList=[], default=[])
-        else:
-            comment_list = convert(com_data.get("data") or {}, CommentList)
-
-        contents: list[ContentItem] = [post.text]
-        contents.extend(post.medias)
-
-        author = post.blogInfo
-        stats = post.postCount
-
-        comments = (
-            [
+            comments = [
                 self.create_comment(
                     author=self.create_author(
                         name=c.publisherBlogInfo.blogNickName,
@@ -112,9 +97,22 @@ class LofterParser(BaseParser):
                 )
                 for c in comment_list.comments
             ]
-            if pconfig.max_comments
-            else []
-        )
+        else:
+            comments = []
+        meta = post_data.get("meta") or {}
+        if meta.get("status") != 200:
+            raise ParseException(f"Lofter 解析失败: {meta.get('msg', '未知错误')}")
+
+        post_raw = (post_data.get("response") or {}).get("posts") or []
+        if not post_raw:
+            raise ParseException("Lofter 解析失败: 未找到帖子内容")
+        post = convert(post_raw[0]["post"], Post)
+
+        contents: list[ContentItem] = [post.text]
+        contents.extend(post.medias)
+
+        author = post.blogInfo
+        stats = post.postCount
 
         return self.result(
             title=post.title,
