@@ -157,25 +157,28 @@ class DouyinParser(BaseParser):
         if not note.is_success:
             raise ParseException(f"解析抖音内容失败, 可能是作品已删除: {note.text}")
 
-        try:
-            await self.ensure_ttwid()
-            resp = await self.httpx.get(
-                "https://www.douyin.com/aweme/v1/web/comment/list/",
-                params={
-                    "device_platform": "webapp",
-                    "aid": 6383,
-                    "channel": "channel_pc_web",
-                    "aweme_id": aweme_id,
-                    "cursor": 0,
-                    "count": pconfig.max_comments,
-                    "msToken": "",
-                    "X-Bogus": "",
-                },
-                cookies={"ttwid": self.ttwid},
-            )
-            comments = commentDecoder.decode(resp.content).comment_list
-        except Exception:
-            logger.exception(f"抖音获取评论失败, aweme_id: {aweme_id}")
+        if pconfig.max_comments:
+            try:
+                await self.ensure_ttwid()
+                resp = await self.httpx.get(
+                    "https://www.douyin.com/aweme/v1/web/comment/list/",
+                    params={
+                        "device_platform": "webapp",
+                        "aid": 6383,
+                        "channel": "channel_pc_web",
+                        "aweme_id": aweme_id,
+                        "cursor": 0,
+                        "count": pconfig.max_comments,
+                        "msToken": "",
+                        "X-Bogus": "",
+                    },
+                    cookies={"ttwid": self.ttwid},
+                )
+                comments = commentDecoder.decode(resp.content).comment_list
+            except Exception:
+                logger.exception(f"抖音获取评论失败, aweme_id: {aweme_id}")
+                comments = []
+        else:
             comments = []
 
         aweme = convert(note.json(), Response).aweme_detail

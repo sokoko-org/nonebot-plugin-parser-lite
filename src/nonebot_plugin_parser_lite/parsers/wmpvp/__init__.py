@@ -47,24 +47,27 @@ class WMPVPParser(BaseParser):
                 params={"postId": post_id},
             )
         ).result.post
-        try:
-            comment_data = await self.fetch(
-                decoder=commentDecoder,
-                url="https://gwapi.pwesports.cn/appuser/community/comment/getCommentList",
-                params={
-                    "entityId": post_id,
-                    "entityType": 11,
-                    "pageNum": 1,
-                    "pageSize": pconfig.max_comments,
-                    "sort": 4,
-                    "type": 1,
-                    "onlyOwner": False,
-                    "ratingType": 0,
-                },
-            )
-            comments = comment_data.comments
-        except Exception:
-            logger.exception("获取帖子评论失败")
+        if pconfig.max_comments:
+            try:
+                comment_data = await self.fetch(
+                    decoder=commentDecoder,
+                    url="https://gwapi.pwesports.cn/appuser/community/comment/getCommentList",
+                    params={
+                        "entityId": post_id,
+                        "entityType": 11,
+                        "pageNum": 1,
+                        "pageSize": pconfig.max_comments,
+                        "sort": 4,
+                        "type": 1,
+                        "onlyOwner": False,
+                        "ratingType": 0,
+                    },
+                )
+                comments = comment_data.comments
+            except Exception:
+                logger.exception("获取帖子评论失败")
+                comments = []
+        else:
             comments = []
         return self.result(
             author=post.author,
@@ -92,24 +95,27 @@ class WMPVPParser(BaseParser):
                 params={"gameType": gameTypeStr, "newsId": news_id},
             )
         ).result.news
-        try:
-            comment_data = await self.fetch(
-                decoder=commentDecoder,
-                url="https://gwapi.pwesports.cn/appuser/community/comment/getCommentList",
-                params={
-                    "entityId": news_id,
-                    "entityType": 2,
-                    "pageNum": 1,
-                    "pageSize": pconfig.max_comments,
-                    "sort": 4,
-                    "type": 1,
-                    "onlyOwner": False,
-                    "ratingType": 0,
-                },
-            )
-            comments = comment_data.comments
-        except Exception:
-            logger.exception("获取新闻评论失败")
+        if pconfig.max_comments:
+            try:
+                comment_data = await self.fetch(
+                    decoder=commentDecoder,
+                    url="https://gwapi.pwesports.cn/appuser/community/comment/getCommentList",
+                    params={
+                        "entityId": news_id,
+                        "entityType": 2,
+                        "pageNum": 1,
+                        "pageSize": pconfig.max_comments,
+                        "sort": 4,
+                        "type": 1,
+                        "onlyOwner": False,
+                        "ratingType": 0,
+                    },
+                )
+                comments = comment_data.comments
+            except Exception:
+                logger.exception("获取新闻评论失败")
+                comments = []
+        else:
             comments = []
         return self.result(
             author=news.author,

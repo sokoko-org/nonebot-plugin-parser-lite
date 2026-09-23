@@ -4,13 +4,7 @@ from typing import ClassVar, TypeVar
 from msgspec.json import Decoder
 from nonebot.log import logger
 
-from ..base import (
-    BaseParser,
-    MatchWithParams,
-    Platform,
-    PlatformEnum,
-    handle,
-)
+from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle, pconfig
 from .bbs import decoder as bbsDecoder
 from .comment import decoder as commentDecoder
 
@@ -45,20 +39,23 @@ class HupuParser(BaseParser):
         bbs = await self.fetch(
             bbsDecoder, f"https://bbs.mobileapi.hupu.com/1/7.5.51/threads/{topic_id}"
         )
-        try:
-            comment_data = await self.fetch(
-                commentDecoder,
-                "https://bbs.mobileapi.hupu.com/1/7.5.51/threads/getsThreadPostList",
-                {
-                    "fid": "",
-                    "tid": topic_id,
-                    "order": "score",
-                    "page": "1",
-                },
-            )
-            comments = comment_data.comments
-        except Exception:
-            logger.exception("获取帖子评论失败")
+        if pconfig.max_comments:
+            try:
+                comment_data = await self.fetch(
+                    commentDecoder,
+                    "https://bbs.mobileapi.hupu.com/1/7.5.51/threads/getsThreadPostList",
+                    {
+                        "fid": "",
+                        "tid": topic_id,
+                        "order": "score",
+                        "page": "1",
+                    },
+                )
+                comments = comment_data.comments
+            except Exception:
+                logger.exception("获取帖子评论失败")
+                comments = []
+        else:
             comments = []
         return self.result(
             author=bbs.author_obj,

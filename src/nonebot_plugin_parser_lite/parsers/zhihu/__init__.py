@@ -41,33 +41,34 @@ class ZhiHuParser(BaseParser):
         )
 
         statistics = article_data.reaction.statistics
-
-        try:
-            comment_data = await self.fetch(
-                f"https://www.zhihu.com/api/v4/comment_v5/articles/{article_id}/root_comment?order_by=score&limit=20",
-                rootCommentDecoder,
-            )
-            comments = [
-                self.create_comment(
-                    author=self.create_author(
-                        name=c.author.name,
-                        avatar_url=c.author.avatar_url,
-                        id=c.author.url_token,
-                        location=c.ip_info,
-                    ),
-                    content=c.content,
-                    timestamp=c.created_time,
-                    stats=self.create_stats(
-                        like_count=format_num(c.like_count),
-                        comment_count=format_num(c.child_comment_count),
-                    ),
+        if pconfig.max_comments:
+            try:
+                comment_data = await self.fetch(
+                    f"https://www.zhihu.com/api/v4/comment_v5/articles/{article_id}/root_comment?order_by=score&limit=20",
+                    rootCommentDecoder,
                 )
-                for c in comment_data.data
-            ]
-        except Exception as e:
-            logger.warning(f"知乎获取评论失败, {type(e)}:{e!r}")
+                comments = [
+                    self.create_comment(
+                        author=self.create_author(
+                            name=c.author.name,
+                            avatar_url=c.author.avatar_url,
+                            id=c.author.url_token,
+                            location=c.ip_info,
+                        ),
+                        content=c.content,
+                        timestamp=c.created_time,
+                        stats=self.create_stats(
+                            like_count=format_num(c.like_count),
+                            comment_count=format_num(c.child_comment_count),
+                        ),
+                    )
+                    for c in comment_data.data
+                ]
+            except Exception as e:
+                logger.warning(f"知乎获取评论失败, {type(e)}:{e!r}")
+                comments = []
+        else:
             comments = []
-
         return self.result(
             title=article_data.title,
             content=await article_data.get_content(),

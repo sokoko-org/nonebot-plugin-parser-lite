@@ -1,6 +1,6 @@
 from typing import ClassVar
 
-from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle
+from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle, pconfig
 from .topic import decoder as postDecoder
 
 
@@ -28,5 +28,5 @@ class FiveEPlayParser(BaseParser):
             timestamp=post.timestamp,
             title=post.title,
             stats=post.stats,
-            comments=post.comments,
+            comments=post.comments if pconfig.max_comments else [],
         )

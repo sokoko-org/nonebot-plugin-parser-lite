@@ -49,21 +49,24 @@ class TapTapParser(BaseParser):
                 )
             videos = videoDecoder.decode(resp.content).data
             content.extend(videos.content)
-        try:
-            resp = await self.httpx.get(
-                "/webapiv2/moment-comment/v1/by-moment",
-                params={
-                    "moment_id": moment_id,
-                    "X-UA": self.X_UA,
-                    "sort": "rank",
-                    "order": "desc",
-                    "limit": pconfig.max_comments,
-                },
-            )
+        if pconfig.max_comments:
+            try:
+                resp = await self.httpx.get(
+                    "/webapiv2/moment-comment/v1/by-moment",
+                    params={
+                        "moment_id": moment_id,
+                        "X-UA": self.X_UA,
+                        "sort": "rank",
+                        "order": "desc",
+                        "limit": pconfig.max_comments,
+                    },
+                )
 
-            comments = commentDecoder.decode(resp.content).comments
-        except Exception:
-            logger.exception("获取帖子评论失败")
+                comments = commentDecoder.decode(resp.content).comments
+            except Exception:
+                logger.exception("获取帖子评论失败")
+                comments = []
+        else:
             comments = []
         return self.result(
             author=moment.author,

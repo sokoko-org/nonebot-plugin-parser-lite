@@ -11,6 +11,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .model import AtlasData, BlogData, CommentData
 
@@ -34,7 +35,10 @@ class DuiTangParser(BaseParser):
             blog_data.msg,
             self.create_image(blog_data.photo.path),
         ]
-        comments = self._build_comments(comment_data)
+        if pconfig.max_comments:
+            comments = self._build_comments(comment_data)
+        else:
+            comments = []
 
         return self.result(
             content=content,

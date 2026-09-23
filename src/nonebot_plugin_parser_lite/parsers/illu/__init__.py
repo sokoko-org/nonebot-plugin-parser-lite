@@ -11,6 +11,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .articleByIdV2 import ArticleByIdV2
 from .articleByIdV2 import decoder as article_decoder
@@ -139,6 +140,8 @@ class IlluParser(BaseParser):
         :param type: BizType.Article 或 BizType.Drawing
         :return: Comment 实例列表
         """
+        if not pconfig.max_comments:
+            return []
         router = Detail.CommentList.value
         resp = await self.httpx.post(
             router,

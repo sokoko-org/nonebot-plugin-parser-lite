@@ -55,27 +55,27 @@ class DsParser(BaseParser):
         )
         sid = f"{feed.feed.uid}.{feed_id}"
         comment_results: list[CommentResult] = []
+        if pconfig.max_comments:
+            try:
+                handpicked = await self.fetch(
+                    "https://inf.ds.163.com/v1/web/comment/getCommentsByHandpicked"
+                    f"?sid={sid}&tier=1",
+                    CommentResult,
+                )
+                comment_results.append(handpicked)
+            except Exception:
+                logger.exception("获取大神精选评论失败")
 
-        try:
-            handpicked = await self.fetch(
-                "https://inf.ds.163.com/v1/web/comment/getCommentsByHandpicked"
-                f"?sid={sid}&tier=1",
-                CommentResult,
-            )
-            comment_results.append(handpicked)
-        except Exception:
-            logger.exception("获取大神精选评论失败")
-
-        try:
-            latest = await self.fetch(
-                "https://inf.ds.163.com/v1/web/comment/page"
-                f"?sid={sid}&tier=1&sortDirection=DESC"
-                f"&count={pconfig.max_comments}",
-                CommentResult,
-            )
-            comment_results.append(latest)
-        except Exception:
-            logger.exception("获取大神评论失败")
+            try:
+                latest = await self.fetch(
+                    "https://inf.ds.163.com/v1/web/comment/page"
+                    f"?sid={sid}&tier=1&sortDirection=DESC"
+                    f"&count={pconfig.max_comments}",
+                    CommentResult,
+                )
+                comment_results.append(latest)
+            except Exception:
+                logger.exception("获取大神评论失败")
 
         return self.result(
             author=feed.author,

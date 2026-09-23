@@ -12,6 +12,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .encrypt import build_url
 from .model import BaseResult
@@ -97,6 +98,8 @@ class HeyBoxParser(BaseParser):
         :return: Comment 列表
         """
         comments: list[Comment] = []
+        if not pconfig.max_comments:
+            return comments
 
         for wrapper in data.comments:
             comment_list = wrapper.comment

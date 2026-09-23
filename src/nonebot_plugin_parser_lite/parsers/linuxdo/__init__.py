@@ -47,7 +47,7 @@ class LinuxDoParser(BaseParser):
             url=f"https://linux.do/t/topic/{post.id}",
             title=post.title,
             content=post.detail.content,
-            comments=post.comment_list,
+            comments=post.comment_list if pconfig.max_comments else [],
             stats=self.create_stats(
                 like_count=format_num(post.like_count),
                 view_count=format_num(post.views),

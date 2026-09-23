@@ -12,6 +12,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .comments import CommentList
 from .post import Post
@@ -77,39 +78,43 @@ class LofterParser(BaseParser):
         author = post.blogInfo
         stats = post.postCount
 
-        comments = [
-            self.create_comment(
-                author=self.create_author(
-                    name=c.publisherBlogInfo.blogNickName,
-                    avatar_url=c.publisherBlogInfo.bigAvaImg,
-                    id=c.publisherBlogInfo.blogName,
-                    location=c.ipLocation,
-                ),
-                content=c.content,
-                timestamp=c.publishTime // 1000,
-                stats=self.create_stats(
-                    like_count=format_num(c.likeCount),
-                    comment_count=format_num(len(c.l2Comments)),
-                ),
-                replies=[
-                    self.create_comment(
-                        author=self.create_author(
-                            name=s.publisherBlogInfo.blogNickName,
-                            avatar_url=s.publisherBlogInfo.bigAvaImg,
-                            id=s.publisherBlogInfo.blogName,
-                            location=s.ipLocation,
-                        ),
-                        content=s.content,
-                        timestamp=s.publishTime // 1000,
-                        stats=self.create_stats(
-                            like_count=format_num(s.likeCount),
-                        ),
-                    )
-                    for s in c.l2Comments
-                ],
-            )
-            for c in comment_list.comments
-        ]
+        comments = (
+            [
+                self.create_comment(
+                    author=self.create_author(
+                        name=c.publisherBlogInfo.blogNickName,
+                        avatar_url=c.publisherBlogInfo.bigAvaImg,
+                        id=c.publisherBlogInfo.blogName,
+                        location=c.ipLocation,
+                    ),
+                    content=c.content,
+                    timestamp=c.publishTime // 1000,
+                    stats=self.create_stats(
+                        like_count=format_num(c.likeCount),
+                        comment_count=format_num(len(c.l2Comments)),
+                    ),
+                    replies=[
+                        self.create_comment(
+                            author=self.create_author(
+                                name=s.publisherBlogInfo.blogNickName,
+                                avatar_url=s.publisherBlogInfo.bigAvaImg,
+                                id=s.publisherBlogInfo.blogName,
+                                location=s.ipLocation,
+                            ),
+                            content=s.content,
+                            timestamp=s.publishTime // 1000,
+                            stats=self.create_stats(
+                                like_count=format_num(s.likeCount),
+                            ),
+                        )
+                        for s in c.l2Comments
+                    ],
+                )
+                for c in comment_list.comments
+            ]
+            if pconfig.max_comments
+            else []
+        )
 
         return self.result(
             title=post.title,

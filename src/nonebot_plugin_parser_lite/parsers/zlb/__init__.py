@@ -9,6 +9,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .topic import decoder as postDecoder
 
@@ -41,7 +42,7 @@ class ZLBParser(BaseParser):
             url=f"https://bb.zlb.ink/t/topic/{post.id}",
             title=post.title,
             content=post.detail.content,
-            comments=post.comment_list,
+            comments=post.comment_list if pconfig.max_comments else [],
             stats=self.create_stats(
                 like_count=format_num(post.like_count),
                 view_count=format_num(post.views),

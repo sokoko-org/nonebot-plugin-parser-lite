@@ -9,6 +9,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .discovery import decoder as discoveryDecoder
 
@@ -77,41 +78,42 @@ class RedNoteParser(BaseParser):
         )
         comment_list: list[Comment] = []
 
-        for c in comment_data.comments:
-            comment = self.create_comment(
-                author=self.create_author(
-                    name=c.user.nickname,
-                    avatar_url=c.user.image,
-                    location=c.ipLocation,
-                    avatar_cache_key=f"rednote:{c.user.userId}",
-                    id=c.user.userId,
-                ),
-                content=c.content,
-                timestamp=c.time // 1000,
-                stats=self.create_stats(
-                    like_count=c.likeViewCount,
-                    comment_count=str(len(c.subComments)),
-                ),
-            )
-
-            for sub in c.subComments:
-                comment.replies.append(
-                    self.create_comment(
-                        author=self.create_author(
-                            name=sub.user.nickname,
-                            avatar_url=sub.user.image,
-                            avatar_cache_key=f"rednote:{sub.user.userId}",
-                            id=sub.user.userId,
-                        ),
-                        content=sub.content,
-                        timestamp=sub.time // 1000,
-                        stats=self.create_stats(
-                            like_count=sub.likeViewCount,
-                        ),
-                    )
+        if pconfig.max_comments:
+            for c in comment_data.comments:
+                comment = self.create_comment(
+                    author=self.create_author(
+                        name=c.user.nickname,
+                        avatar_url=c.user.image,
+                        location=c.ipLocation,
+                        avatar_cache_key=f"rednote:{c.user.userId}",
+                        id=c.user.userId,
+                    ),
+                    content=c.content,
+                    timestamp=c.time // 1000,
+                    stats=self.create_stats(
+                        like_count=c.likeViewCount,
+                        comment_count=str(len(c.subComments)),
+                    ),
                 )
 
-            comment_list.append(comment)
+                for sub in c.subComments:
+                    comment.replies.append(
+                        self.create_comment(
+                            author=self.create_author(
+                                name=sub.user.nickname,
+                                avatar_url=sub.user.image,
+                                avatar_cache_key=f"rednote:{sub.user.userId}",
+                                id=sub.user.userId,
+                            ),
+                            content=sub.content,
+                            timestamp=sub.time // 1000,
+                            stats=self.create_stats(
+                                like_count=sub.likeViewCount,
+                            ),
+                        )
+                    )
+
+                comment_list.append(comment)
 
         return self.result(
             title=note_detail.title,

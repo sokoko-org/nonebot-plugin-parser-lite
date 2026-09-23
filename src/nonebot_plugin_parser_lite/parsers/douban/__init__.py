@@ -21,17 +21,20 @@ class DoubanParser(BaseParser):
         )
         res.raise_for_status()
         post = postDecoder.decode(res.content)
-        try:
-            res = await self.httpx.get(
-                f"https://m.douban.com/rexxar/api/v2/group/topic/{topic_id}/comments",
-                params={
-                    "count": pconfig.max_comments,
-                },
-            )
-            res.raise_for_status()
-            comments = commentDecoder.decode(res.content).comment_list
-        except Exception:
-            logger.exception("获取帖子评论失败")
+        if pconfig.max_comments:
+            try:
+                res = await self.httpx.get(
+                    f"https://m.douban.com/rexxar/api/v2/group/topic/{topic_id}/comments",
+                    params={
+                        "count": pconfig.max_comments,
+                    },
+                )
+                res.raise_for_status()
+                comments = commentDecoder.decode(res.content).comment_list
+            except Exception:
+                logger.exception("获取帖子评论失败")
+                comments = []
+        else:
             comments = []
         return self.result(
             author=post.author_obj,

@@ -33,19 +33,22 @@ class MiyousheParser(BaseParser):
         )
         res.raise_for_status()
         post = postDecoder.decode(res.content)
-        try:
-            res = await self.httpx.get(
-                "https://bbs-api.miyoushe.com/post/wapi/getPostReplies",
-                params={
-                    "post_id": post_id,
-                    "is_hot": True,
-                    "size": pconfig.max_comments,
-                },
-            )
-            res.raise_for_status()
-            comments = commentDecoder.decode(res.content).comments
-        except Exception:
-            logger.exception("获取帖子评论失败")
+        if pconfig.max_comments:
+            try:
+                res = await self.httpx.get(
+                    "https://bbs-api.miyoushe.com/post/wapi/getPostReplies",
+                    params={
+                        "post_id": post_id,
+                        "is_hot": True,
+                        "size": pconfig.max_comments,
+                    },
+                )
+                res.raise_for_status()
+                comments = commentDecoder.decode(res.content).comments
+            except Exception:
+                logger.exception("获取帖子评论失败")
+                comments = []
+        else:
             comments = []
         return self.result(
             author=self.create_author(

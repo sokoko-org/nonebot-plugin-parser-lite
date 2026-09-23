@@ -12,6 +12,7 @@ from ..base import (
     Platform,
     PlatformEnum,
     handle,
+    pconfig,
 )
 from .comments import Comment as RawComment
 from .comments import Comments
@@ -71,6 +72,8 @@ class BuffParser(BaseParser):
         )
 
     async def fetch_comments(self, comment_type: int, type_id: str) -> list[Comment]:
+        if not pconfig.max_comments:
+            return []
         try:
             resp = await self.httpx.get(
                 "https://buff.163.com/api/comment/share/detail",

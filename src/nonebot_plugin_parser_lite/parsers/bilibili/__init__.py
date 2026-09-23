@@ -765,6 +765,8 @@ class BilibiliParser(BaseParser):
         self, oid: int, type: CommentResourceType
     ) -> list[Comment]:
         """从 Bilibili API 获取评论数据，优先热评，失败时兜底普通评论"""
+        if not pconfig.max_comments:
+            return []
 
         try:
             try:

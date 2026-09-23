@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from ...utils.format import format_num
-from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle
+from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle, pconfig
 from .utils import build_comments, build_content, get_post
 
 
@@ -35,7 +35,7 @@ class TiebaParser(BaseParser):
 
         # 主楼正文内容
         contents = build_content(posts)
-        comments = build_comments(posts.objs[1:])
+        comments = build_comments(posts.objs[1:]) if pconfig.max_comments else []
         extra = {
             "forum": {
                 "name": forum.fname,

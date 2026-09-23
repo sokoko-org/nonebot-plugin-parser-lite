@@ -37,7 +37,10 @@ class KuaiShouParser(BaseParser):
     async def _parse_v_kuaishou(self, searched: MatchWithParams):
         url = f"https://{searched.url}"
         photo = await self._fetch_photo(url)
-        comments = await self._fetch_comments(photo.photoId)
+        if pconfig.max_comments:
+            comments = await self._fetch_comments(photo.photoId)
+        else:
+            comments = []
 
         return self.result(
             author=photo.author,
