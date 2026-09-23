@@ -552,7 +552,7 @@ class Renderer:
         html = await self._inject_fallback_icon_css(html)
 
         async with get_new_page(
-            1,
+            2,
             **{
                 "viewport": {"width": 620, "height": 1000},
                 "base_url": selected_template.base_url,

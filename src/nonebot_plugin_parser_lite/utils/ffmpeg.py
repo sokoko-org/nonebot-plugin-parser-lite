@@ -454,7 +454,7 @@ class FFmpeg:
             "-lossless",
             "0",
             "-quality",
-            "100",
+            "85",
             "pipe:1",
         ]
         return await cls.exec_ffmpeg(cmd, png_data)
