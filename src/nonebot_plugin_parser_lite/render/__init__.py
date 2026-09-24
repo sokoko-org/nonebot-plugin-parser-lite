@@ -214,7 +214,7 @@ class Renderer:
     async def send_content(
         self,
         result: ParseResult,
-        summary_node: ForwardNodeInner | None = None,
+        summary_node: UniMessage[Any] | None = None,
     ) -> AsyncGenerator[UniMessage[Any], None]:
         """发送媒体内容消息
 
@@ -261,6 +261,7 @@ class Renderer:
         ordered_segs = await self.__build_forward_segs(result, forward_video_segs)
         if summary_node is not None:
             ordered_segs.insert(0, summary_node)
+            ordered_segs.extend(deferred_messages)
         if ordered_segs:
             # 一次遍历：统计+长文本拆分
             processed_segs: list[ForwardNodeInner] = []
@@ -334,10 +335,6 @@ class Renderer:
                 last_msg = flush_chunk()
                 if last_msg is not None:
                     yield last_msg
-
-        # 总结卡片进入转发时，确保它先于无法进入转发的音视频发送。
-        for message in deferred_messages:
-            yield message
 
         # 汇总下载失败信息
         if failed_count > 0:

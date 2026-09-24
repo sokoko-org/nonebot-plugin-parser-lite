@@ -122,7 +122,7 @@ async def test_summary_is_first_forward_node(monkeypatch, fake_media_segments):
 
 
 @pytest.mark.asyncio
-async def test_summary_forces_forward_and_precedes_separate_video(
+async def test_summary_forces_forward_and_includes_deferred_video(
     monkeypatch, fake_media_segments
 ):
     result = make_result()
@@ -138,8 +138,10 @@ async def test_summary_forces_forward_and_precedes_separate_video(
         async for message in Renderer().send_content(result, summary_node=summary)
     ]
 
-    assert len(messages) == 2
+    assert len(messages) == 1
     assert len(captured) == 1
     assert captured[0][0] is summary
     assert isinstance(captured[0][1], Image)
-    assert any(isinstance(segment, Video) for segment in messages[1])
+    deferred_video = captured[0][2]
+    assert isinstance(deferred_video, UniMessage)
+    assert any(isinstance(segment, Video) for segment in deferred_video)
