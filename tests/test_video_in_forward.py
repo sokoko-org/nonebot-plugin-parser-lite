@@ -9,7 +9,10 @@ from nonebot_plugin_alconna.uniseg import (
 import pytest
 from render_test_support import (
     ForwardNodeInner,
+    ImageContent,
     Renderer,
+    ResolvedPathTask,
+    SyncPath,
     UniHelper,
     make_result,
     pconfig,
@@ -145,3 +148,30 @@ async def test_summary_forces_forward_and_includes_deferred_video(
     deferred_video = captured[0][2]
     assert isinstance(deferred_video, UniMessage)
     assert any(isinstance(segment, Video) for segment in deferred_video)
+
+
+@pytest.mark.asyncio
+async def test_summary_keeps_deferred_media_in_content_order(
+    monkeypatch, fake_media_segments
+):
+    result = make_result()
+    result.content.append(ImageContent(ResolvedPathTask(SyncPath("image.png"))))  # pyright: ignore[reportArgumentType]
+    captured = capture_forward_nodes(monkeypatch)
+    summary = UniMessage([Text("summary")])
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
+
+    messages = [
+        message
+        async for message in Renderer().send_content(result, summary_node=summary)
+    ]
+
+    assert len(messages) == 1
+    assert len(captured) == 1
+    assert captured[0][0] is summary
+    assert isinstance(captured[0][1], Image)
+    assert isinstance(captured[0][2], UniMessage)
+    assert any(isinstance(segment, Video) for segment in captured[0][2])
+    assert isinstance(captured[0][3], Image)

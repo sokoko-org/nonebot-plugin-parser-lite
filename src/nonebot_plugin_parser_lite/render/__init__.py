@@ -224,7 +224,7 @@ class Renderer:
         - 可合并转发的图文 / 图片（统一收集后一次发送）
         """
         failed_count = 0
-        deferred_messages: list[UniMessage[Any]] = []
+        deferred_media_segs: dict[int, list[UniMessage[Any]]] = {}
         forward_video_segs: dict[int, ForwardNodeInner] = {}
         repost_medias = result.repost.content if result.repost else []
         media_contents = (
@@ -242,7 +242,7 @@ class Renderer:
                     if summary_node is None:
                         yield msg
                     else:
-                        deferred_messages.append(msg)
+                        deferred_media_segs.setdefault(id(cont), []).append(msg)
             except SizeLimitException:
                 message = UniMessage(
                     f"媒体太大啦，还是去{result.platform.display_name}看看吧~"
@@ -250,7 +250,7 @@ class Renderer:
                 if summary_node is None:
                     yield message
                 else:
-                    deferred_messages.append(message)
+                    deferred_media_segs.setdefault(id(cont), []).append(message)
                 continue
             except DownloadException as e:
                 failed_count += 1
@@ -258,10 +258,13 @@ class Renderer:
                 continue
 
         # 2 构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
-        ordered_segs = await self.__build_forward_segs(result, forward_video_segs)
+        ordered_segs = await self.__build_forward_segs(
+            result,
+            forward_video_segs,
+            deferred_media_segs,
+        )
         if summary_node is not None:
             ordered_segs.insert(0, summary_node)
-            ordered_segs.extend(deferred_messages)
         if ordered_segs:
             # 一次遍历：统计+长文本拆分
             processed_segs: list[ForwardNodeInner] = []
@@ -378,6 +381,7 @@ class Renderer:
         self,
         result: ParseResult,
         forward_video_segs: dict[int, ForwardNodeInner],
+        deferred_media_segs: dict[int, list[UniMessage[Any]]],
     ) -> list[ForwardNodeInner | _ForwardText]:
         """根据当前内容和转发内容构造有序的转发段列表（文本 + 媒体，保持顺序）
 
@@ -441,6 +445,12 @@ class Renderer:
                     video_seg = forward_video_segs.get(id(cont))
                     if video_seg is not None:
                         nodes.append(video_seg)
+                    else:
+                        nodes.extend(deferred_media_segs.get(id(cont), ()))
+                    return
+
+                if deferred_segs := deferred_media_segs.get(id(cont)):
+                    nodes.extend(deferred_segs)
                     return
 
                 try:
@@ -655,11 +665,7 @@ class Renderer:
             logger.warning(f"读取内置 icon.css 失败: {error!r}")
             return html
 
-        style = (
-            '<style data-parser-fallback="icon-css">\n'
-            f"{icon_css}\n"
-            "</style>"
-        )
+        style = f'<style data-parser-fallback="icon-css">\n{icon_css}\n</style>'
         head_match = re.search(r"<head\b[^>]*>", html, flags=re.IGNORECASE)
         if head_match is None:
             return style + html
