@@ -158,7 +158,10 @@ async def parser_handler(
     result = await _get_or_parse_result(sr)
 
     summary_msg = await RENDERER.render_messages(result)
-    await summary_msg.send()
+    summary_in_forward = pconfig.summary_in_forward and not pconfig.lazy_download
+    if not summary_in_forward:
+        await summary_msg.send()
+
     if pconfig.lazy_download:
         if pconfig.lazy_download_tip:
             download_cmd = ", ".join(pconfig.download_command)
@@ -168,7 +171,10 @@ async def parser_handler(
             ).send()
         await LazyManager.add(LazyManager.session_key(session), result)
     else:
-        async for content_msg in RENDERER.send_content(result):
+        async for content_msg in RENDERER.send_content(
+            result,
+            summary_node=summary_msg if summary_in_forward else None,
+        ):
             await content_msg.send()
 
 

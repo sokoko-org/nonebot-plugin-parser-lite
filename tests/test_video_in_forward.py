@@ -1,4 +1,11 @@
-from nonebot_plugin_alconna.uniseg import File, Image, Reference, Video
+from nonebot_plugin_alconna.uniseg import (
+    File,
+    Image,
+    Reference,
+    Text,
+    UniMessage,
+    Video,
+)
 import pytest
 from render_test_support import (
     ForwardNodeInner,
@@ -90,3 +97,49 @@ async def test_uploaded_video_is_appended_as_file(monkeypatch, fake_media_segmen
     assert len(captured[0]) == 2
     assert isinstance(captured[0][0], Image)
     assert isinstance(captured[0][1], File)
+
+
+@pytest.mark.asyncio
+async def test_summary_is_first_forward_node(monkeypatch, fake_media_segments):
+    result = make_result()
+    captured = capture_forward_nodes(monkeypatch)
+    summary = UniMessage([Text("summary")])
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
+
+    messages = [
+        message
+        async for message in Renderer().send_content(result, summary_node=summary)
+    ]
+
+    assert len(messages) == 1
+    assert len(captured) == 1
+    assert captured[0][0] is summary
+    assert isinstance(captured[0][1], Image)
+    assert isinstance(captured[0][2], Video)
+
+
+@pytest.mark.asyncio
+async def test_summary_forces_forward_and_precedes_separate_video(
+    monkeypatch, fake_media_segments
+):
+    result = make_result()
+    captured = capture_forward_nodes(monkeypatch)
+    summary = UniMessage([Text("summary")])
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
+
+    messages = [
+        message
+        async for message in Renderer().send_content(result, summary_node=summary)
+    ]
+
+    assert len(messages) == 2
+    assert len(captured) == 1
+    assert captured[0][0] is summary
+    assert isinstance(captured[0][1], Image)
+    assert any(isinstance(segment, Video) for segment in messages[1])
