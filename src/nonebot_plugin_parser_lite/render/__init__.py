@@ -251,15 +251,19 @@ class Renderer:
         return msg
 
     async def send_content(
-        self, result: ParseResult
+        self,
+        result: ParseResult,
+        summary_node: ForwardNodeInner | None = None,
     ) -> AsyncGenerator[UniMessage[Any], None]:
         """发送媒体内容消息
 
         将解析结果中的媒体内容拆分为：
         - 需要立即发送的音视频（逐条 yield）或待合并转发的视频
+        - 可选的总结卡片（作为合并转发首节点）
         - 可合并转发的图文 / 图片（统一收集后一次发送）
         """
         failed_count = 0
+        deferred_messages: list[UniMessage[Any]] = []
         forward_video_segs: dict[int, ForwardNodeInner] = {}
         repost_medias = result.repost.content if result.repost else []
         media_contents = (
@@ -274,11 +278,18 @@ class Renderer:
                     forward_video_segs[id(cont)] = await self.__build_video_seg(cont)
                     continue
                 async for msg in self.__handle_immediate_media(cont):
-                    yield msg
+                    if summary_node is None:
+                        yield msg
+                    else:
+                        deferred_messages.append(msg)
             except SizeLimitException:
-                yield UniMessage(
+                message = UniMessage(
                     f"媒体太大啦，还是去{result.platform.display_name}看看吧~"
                 )
+                if summary_node is None:
+                    yield message
+                else:
+                    deferred_messages.append(message)
                 continue
             except DownloadException as e:
                 failed_count += 1
@@ -287,6 +298,8 @@ class Renderer:
 
         # 2 构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
         ordered_segs = await self.__build_forward_segs(result, forward_video_segs)
+        if summary_node is not None:
+            ordered_segs.insert(0, summary_node)
         if ordered_segs:
             # 一次遍历：统计+长文本拆分
             processed_segs: list[ForwardNodeInner] = []
@@ -315,11 +328,13 @@ class Renderer:
             # 2) 纯文字部分超过阈值
             # 3) 节点数较多
             # 4) 包含配置为合并转发的视频
+            # 5) 包含配置为合并转发的总结卡片
             need_forward = (
                 pconfig.need_forward_contents
                 or total_plain_len > SPLIT_THRESHOLD
                 or node_count > 4
                 or bool(forward_video_segs)
+                or summary_node is not None
             )
 
             if not need_forward:
@@ -358,6 +373,10 @@ class Renderer:
                 last_msg = flush_chunk()
                 if last_msg is not None:
                     yield last_msg
+
+        # 总结卡片进入转发时，确保它先于无法进入转发的音视频发送。
+        for message in deferred_messages:
+            yield message
 
         # 汇总下载失败信息
         if failed_count > 0:

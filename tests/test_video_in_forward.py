@@ -9,7 +9,7 @@ import nonebot
 nonebot.init()
 assert nonebot.load_plugin("nonebot_plugin_parser_lite") is not None
 
-from nonebot_plugin_alconna.uniseg import File, Image, Text, Video
+from nonebot_plugin_alconna.uniseg import File, Image, Text, UniMessage, Video
 
 from nonebot_plugin_parser_lite.config import pconfig
 from nonebot_plugin_parser_lite.constants import PlatformEnum
@@ -57,8 +57,13 @@ def capture_forward_nodes(monkeypatch) -> list[list[ForwardNodeInner]]:
     return captured
 
 
-async def collect_messages(result: ParseResult):
-    return [message async for message in Renderer().send_content(result)]
+async def collect_messages(
+    result: ParseResult, summary_node: ForwardNodeInner | None = None
+):
+    return [
+        message
+        async for message in Renderer().send_content(result, summary_node=summary_node)
+    ]
 
 
 def test_video_is_sent_separately_by_default(tmp_path, monkeypatch):
@@ -107,3 +112,37 @@ def test_uploaded_video_is_appended_as_file(tmp_path, monkeypatch):
     assert len(captured[0]) == 2
     assert isinstance(captured[0][0], Image)
     assert isinstance(captured[0][1], File)
+
+
+def test_summary_is_first_forward_node(tmp_path, monkeypatch):
+    result = make_result(tmp_path)
+    captured = capture_forward_nodes(monkeypatch)
+    summary = UniMessage([Text("summary")])
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
+
+    messages = asyncio.run(collect_messages(result, summary))
+
+    assert len(messages) == 1
+    assert len(captured) == 1
+    assert captured[0][0] is summary
+    assert isinstance(captured[0][1], Image)
+    assert isinstance(captured[0][2], Video)
+
+
+def test_summary_forces_forward_and_precedes_separate_video(tmp_path, monkeypatch):
+    result = make_result(tmp_path)
+    captured = capture_forward_nodes(monkeypatch)
+    summary = UniMessage([Text("summary")])
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
+
+    messages = asyncio.run(collect_messages(result, summary))
+
+    assert len(messages) == 2
+    assert len(captured) == 1
+    assert captured[0][0] is summary
+    assert isinstance(captured[0][1], Image)
+    assert any(isinstance(segment, Video) for segment in messages[1])

@@ -210,6 +210,10 @@ plite_append_qrcode=False
 # [可选] 是否需要转发媒体内容(超过 4 项时始终使用合并转发)
 plite_need_forward_contents=True
 
+# [可选] 是否将首张总结卡片作为第一个节点放入内容合并转发
+# 开启后会强制使用合并转发；懒下载模式下仍立即单独发送总结卡片
+plite_summary_in_forward=False
+
 # [可选] 是否将视频作为节点放入内容合并转发
 # 需要协议端支持在合并转发节点中发送 Video / File
 # 开启后仍保留视频封面，并在包含视频时强制使用合并转发
