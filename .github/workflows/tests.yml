@@ -32,6 +32,7 @@ jobs:
           python -m pip install --disable-pip-version-check --upgrade pip
           python -m pip install --disable-pip-version-check -e .
           python -m pip install --disable-pip-version-check "pytest>=8,<9" "pytest-asyncio>=0.24,<1"
+          python -m pip install --disable-pip-version-check nonebot2[fastapi]
 
       - name: Run tests
         run: python -m pytest tests -q
