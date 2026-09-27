@@ -97,6 +97,17 @@ class BiliAudioQuality(IntEnum):
     _192K = 30280
 
 
+# 音频流 ID 的数值顺序与选择优先级不同。
+AUDIO_QUALITY_ORDER = (
+    BiliAudioQuality._64K,
+    BiliAudioQuality._132K,
+    BiliAudioQuality._192K,
+    BiliAudioQuality.HI_RES,
+    BiliAudioQuality.DOLBY,
+)
+AUDIO_QUALITY_RANK = {quality: rank for rank, quality in enumerate(AUDIO_QUALITY_ORDER)}
+
+
 class Video:
     """
     视频类，各种对视频的操作均在里面
@@ -431,7 +442,11 @@ class VideoDownloadURLDataDetecter:
             quality = BiliAudioQuality(quality_id)
         except ValueError:
             return
-        if not (min_quality.value <= quality.value <= max_quality.value):
+        if not (
+            AUDIO_QUALITY_RANK[min_quality]
+            <= AUDIO_QUALITY_RANK[quality]
+            <= AUDIO_QUALITY_RANK[max_quality]
+        ):
             return
         if quality not in accepted_qualities:
             return
@@ -446,7 +461,7 @@ class VideoDownloadURLDataDetecter:
     def detect_best_streams(
         self,
         video_max_quality: BiliVideoQuality = BiliVideoQuality._8K,
-        audio_max_quality: BiliAudioQuality = BiliAudioQuality._192K,
+        audio_max_quality: BiliAudioQuality = BiliAudioQuality.DOLBY,
         video_min_quality: BiliVideoQuality = BiliVideoQuality._360P,
         audio_min_quality: BiliAudioQuality = BiliAudioQuality._64K,
         video_accepted_qualities: list[BiliVideoQuality] | None = None,
@@ -617,18 +632,9 @@ class VideoDownloadURLDataDetecter:
             return dolby_hdr_priority, quality_weight, codec_priority
 
         # 选择最优音频流：基于评分的 key 函数
-        def audio_score(s: AudioStreamDownloadURL) -> tuple[int, int]:
-            """
-            :return: (杜比/Hi-Res 优先级, 清晰度权重)
-            """
-            dolby_hires_priority = 0
-            if not no_dolby_audio and s.audio_quality == BiliAudioQuality.DOLBY:
-                dolby_hires_priority = 2
-            elif not no_hires and s.audio_quality == BiliAudioQuality.HI_RES:
-                dolby_hires_priority = 1
-
-            quality_weight = s.audio_quality.value
-            return dolby_hires_priority, quality_weight
+        def audio_score(s: AudioStreamDownloadURL) -> int:
+            """按音频档位的选择优先级排序。"""
+            return AUDIO_QUALITY_RANK[s.audio_quality]
 
         # 取最优（线性扫描）
         best_video: (

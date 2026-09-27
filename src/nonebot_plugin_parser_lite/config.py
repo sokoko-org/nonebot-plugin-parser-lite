@@ -6,7 +6,7 @@ from .constants import PlatformEnum
 from .path import cache_dir as _cache_dir
 from .path import config_dir as _config_dir
 from .path import data_dir as _data_dir
-from .utils.bilibili.video import BiliVideoCodecs, BiliVideoQuality
+from .utils.bilibili.video import BiliAudioQuality, BiliVideoCodecs, BiliVideoQuality
 
 
 def parse_hm_to_minutes(value: str) -> int:
@@ -61,6 +61,8 @@ class Config(BaseModel):
     """B站视频编码"""
     plite_bili_video_quality: BiliVideoQuality = BiliVideoQuality._1080P
     """B站视频清晰度"""
+    plite_bili_audio_quality: BiliAudioQuality = BiliAudioQuality.DOLBY
+    """B站音频流音质上限"""
     plite_need_forward_contents: bool = True
     """是否需要合并转发内容(大于四项时始终转发)"""
     plite_summary_in_forward: bool = False
@@ -156,6 +158,11 @@ class Config(BaseModel):
     def bili_video_quality(self) -> BiliVideoQuality:
         """B站视频清晰度"""
         return self.plite_bili_video_quality
+
+    @property
+    def bili_audio_quality(self) -> BiliAudioQuality:
+        """B站音频流音质上限"""
+        return self.plite_bili_audio_quality
 
     @property
     def zhihu_ck(self) -> str | None:

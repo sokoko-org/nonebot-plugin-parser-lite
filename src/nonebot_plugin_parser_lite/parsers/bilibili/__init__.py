@@ -321,6 +321,8 @@ class BilibiliParser(BaseParser):
             (audio_stream.url, *audio_stream.backup_url) if audio_stream else None
         )
         cache_key = f"bilibili:{bvid}:{page_index + 1}"
+        if audio_stream is not None:
+            cache_key += f":audio:{audio_stream.audio_quality.value}"
         retryable_http_statuses = self.BILI_RETRYABLE_HTTP_STATUSES
 
         class BiliVideoDownloader:
@@ -679,6 +681,7 @@ class BilibiliParser(BaseParser):
         detecter = VideoDownloadURLDataDetecter(download_url_data)
         streams = detecter.detect_best_streams(
             video_max_quality=pconfig.bili_video_quality,
+            audio_max_quality=pconfig.bili_audio_quality,
             codecs=pconfig.bili_video_codes,
             no_dolby_video=True,
             no_hdr=True,
