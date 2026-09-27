@@ -20,6 +20,7 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
+from ..delivery import send_with_media_fallback
 from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
@@ -175,7 +176,7 @@ async def parser_handler(
             result,
             summary_node=summary_msg if summary_in_forward else None,
         ):
-            await content_msg.send()
+            await send_with_media_fallback(content_msg, result)
 
 
 @driver.on_startup
@@ -264,7 +265,7 @@ if pconfig.lazy_download:
 
         try:
             async for message in RENDERER.send_content(result):
-                await message.send()
+                await send_with_media_fallback(message, result)
         finally:
             await LazyManager.release(session_key)
 

@@ -219,6 +219,14 @@ plite_summary_in_forward=False
 # 开启后仍保留视频封面，并在包含视频时强制使用合并转发
 plite_video_in_forward=False
 
+# 合并转发遇到明确的媒体上传错误时，会将失败分包中的媒体替换为文字说明，
+# 补充标题、作者及原链接，并仅尝试一次纯文字合并转发；已发送的分包不会重发。
+# 图片、视频、音频和文件均适用，正常解析与懒下载共用此行为。
+# 首版识别 NoneBot ActionFailed 中透传的 HTTP Upload failed with code、
+# rich media transfer failed、Highway request timeout；适用于透传这些错误的适配器。
+# 普通超时、权限错误、单独的错误码不会触发降级；降级失败后记录错误并结束。
+# 即使 plite_append_url=False，降级消息仍附上原链接，方便查看未能发送的媒体。
+
 # [可选] 是否开启懒下载模式，仅在用户请求时才下载视频
 plite_lazy_download=False
 
