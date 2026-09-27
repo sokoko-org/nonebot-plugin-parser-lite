@@ -121,7 +121,7 @@
 {% set MAX_VISIBLE_IMAGES = 9 %}
 {% macro build_images(img_list, full_bleed=False) %}
     {% set count = img_list|length %}
-    {% set layout = grid %}
+    {% set layout = img_list[0].layout|default('grid') %}
     {% set visible_imgs = img_list[:MAX_VISIBLE_IMAGES] %}
     {% set hidden_count = (count - MAX_VISIBLE_IMAGES) if count > MAX_VISIBLE_IMAGES else 0 %}
     {% if count == 1 %}
@@ -169,7 +169,7 @@
             </div>
         </div>
     {% elif count <= 4 %}
-        {% set grid_cols = "grid-cols-2" %}
+        {% set grid_cols = "grid-cols-3" if count == 3 else "grid-cols-2" %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
             <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} overflow-hidden grid {{ grid_cols }} gap-[2px]">
