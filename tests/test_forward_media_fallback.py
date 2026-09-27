@@ -58,7 +58,7 @@ def text_of(message):
     for node in message[0].children:
         assert isinstance(node, CustomNode)
         assert all(isinstance(segment, Text) for segment in node.content)
-        texts.append(node.content.extract_plain_text())
+        texts.append(node.content.extract_plain_text()) # pyright: ignore[reportAttributeAccessIssue]
     return "\n".join(texts)
 
 
@@ -92,7 +92,7 @@ def test_media_replaced_without_losing_text_or_source(media, label, monkeypatch)
     assert result.url in text
     assert result.repost.url in text
     assert message == original
-    assert result.content[0].need_send
+    assert result.content[0].need_send # pyright: ignore[reportAttributeAccessIssue]
     assert all(node.uid == "42" for node in fallback[0][0].children)
 
 
@@ -347,7 +347,7 @@ def test_video_file_role_preserves_unrelated_files():
     segments = [s for n in fallback[0][0].children for s in n.content]
     assert [s.raw for s in segments if isinstance(s, File)] == [b"document"]
     assert any(isinstance(s, Image) for s in segments)
-    assert video in message[0].children[0].content
+    assert video in message[0].children[0].content # pyright: ignore[reportAttributeAccessIssue, reportOperatorIssue]
 
 
 @pytest.mark.asyncio
@@ -378,7 +378,7 @@ async def test_split_video_fallback_does_not_resend_successful_packet(monkeypatc
 
     async def send(outgoing, **kwargs):
         calls.append(deepcopy(outgoing))
-        if len(calls) in (1, 3):
+        if len(calls) in {1, 3}:
             raise UploadFailed()
 
     monkeypatch.setattr(UniMessage, "send", send)
