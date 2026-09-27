@@ -381,6 +381,112 @@ class Renderer:
             file=video_path, thumbnail=await cont.get_cover_path()
         )
 
+    @staticmethod
+    def __format_quote(item: QuoteContent) -> str:
+        parts = [part for part in (item.title, item.text) if part]
+        if item.url:
+            parts.append(item.url)
+        return "\n".join(parts)
+
+    @staticmethod
+    def __format_poll(item: PollContent) -> str:
+        option_vote_total = item.option_vote_total
+        parts = [f"【投票】{item.title or '投票'}"]
+        parts.extend(
+            f"- {option.text}: {option.votes} 票 "
+            f"({item.option_percentage(option, option_vote_total):.1f}%)"
+            for option in item.options
+        )
+        status = ["已结束" if item.closed else "进行中"]
+        if item.multiple:
+            status.append("多选")
+        if item.total_voters is not None:
+            status.append(f"{item.total_voters} 人参与")
+        parts.append(" · ".join(status))
+        return "\n".join(parts)
+
+    async def __append_forward_video(
+        self,
+        cont: VideoContent,
+        nodes: list[ForwardNodeInner | _ForwardText],
+        forward_video_segs: dict[int, ForwardNodeInner],
+        deferred_media_segs: dict[int, list[UniMessage[Any]]],
+    ) -> None:
+        cover_in_forward = False
+        try:
+            path = await cont.get_cover_path()
+            if path:
+                nodes.append(await UniHelper.img_seg(file=path))
+                cover_in_forward = True
+        except Exception as e:
+            logger.warning(f"构建转发媒体片段失败: {type(cont).__name__}: {e}")
+            nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
+
+        video_seg = forward_video_segs.get(id(cont))
+        if video_seg is not None:
+            if cover_in_forward and getattr(video_seg, "thumbnail", None):
+                setattr(video_seg, "_parser_lite_cover_in_forward", True)
+            nodes.append(video_seg)
+            return
+
+        deferred_segs = deferred_media_segs.get(id(cont), ())
+        if cover_in_forward:
+            for deferred_seg in deferred_segs:
+                for segment in deferred_seg:
+                    if getattr(segment, "thumbnail", None):
+                        setattr(segment, "_parser_lite_cover_in_forward", True)
+        nodes.extend(deferred_segs)
+
+    async def __append_forward_media(
+        self,
+        cont: MediaContent,
+        nodes: list[ForwardNodeInner | _ForwardText],
+        forward_video_segs: dict[int, ForwardNodeInner],
+        deferred_media_segs: dict[int, list[UniMessage[Any]]],
+    ) -> None:
+        if isinstance(cont, VideoContent):
+            await self.__append_forward_video(
+                cont, nodes, forward_video_segs, deferred_media_segs
+            )
+            return
+
+        if deferred_segs := deferred_media_segs.get(id(cont)):
+            nodes.extend(deferred_segs)
+            return
+
+        try:
+            if isinstance(cont, ImageContent):
+                nodes.append(await UniHelper.img_seg(await cont.get_path()))
+                return
+
+            if isinstance(cont, GraphicContent):
+                seg: ForwardNodeInner = await UniHelper.img_seg(await cont.get_path())
+                if cont.alt:
+                    seg = seg + cont.alt
+                nodes.append(seg)
+                return
+
+            if isinstance(cont, LivePhotoContent):
+                if pconfig.live_photo:
+                    nodes.append(
+                        await UniHelper.video_seg(
+                            file=await cont.get_live(), thumbnail=await cont.get_base()
+                        )
+                    )
+                    return
+
+                base_path = await cont.get_base()
+                nodes.append(await UniHelper.img_seg(base_path))
+                video_seg = await UniHelper.video_seg(
+                    file=await cont.get_path(), thumbnail=base_path
+                )
+                if getattr(video_seg, "thumbnail", None):
+                    setattr(video_seg, "_parser_lite_cover_in_forward", True)
+                nodes.append(video_seg)
+        except Exception as e:
+            logger.warning(f"构建转发媒体片段失败: {type(cont).__name__}: {e}")
+            nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
+
     async def __build_forward_segs(
         self,
         result: ParseResult,
@@ -421,128 +527,42 @@ class Renderer:
                     author_prefix_pending = False
                     text_buffer = []
 
-            def append_text(text: str) -> None:
-                text_buffer.append(_ForwardTextPart(text))
-
             def append_text_block(text: str) -> None:
                 """将块级文本加入当前文本段，并与相邻内容换行分隔"""
                 if not text:
                     return
                 if text_buffer and not text_buffer[-1].text.endswith("\n"):
-                    append_text("\n")
+                    text_buffer.append(_ForwardTextPart("\n"))
                 text_buffer.append(_ForwardTextPart(f"{text}\n", protected=True))
-
-            async def append_media(cont: MediaContent) -> None:
-                """将单个媒体内容转换为若干 ForwardNodeInner，并追加到 nodes"""
-                # 视频：始终保留封面，并按配置追加视频本体。两者分别处理，
-                # 避免封面构建失败时丢失已经准备好的视频节点。
-                if isinstance(cont, VideoContent):
-                    cover_in_forward = False
-                    try:
-                        path = await cont.get_cover_path()
-                        if path:
-                            nodes.append(await UniHelper.img_seg(file=path))
-                            cover_in_forward = True
-                    except Exception as e:
-                        logger.warning(
-                            f"构建转发媒体片段失败: {type(cont).__name__}: {e}"
-                        )
-                        nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
-                    video_seg = forward_video_segs.get(id(cont))
-                    if video_seg is not None:
-                        if cover_in_forward and getattr(video_seg, "thumbnail", None):
-                            setattr(video_seg, "_parser_lite_cover_in_forward", True)
-                        nodes.append(video_seg)
-                    else:
-                        nodes.extend(deferred_media_segs.get(id(cont), ()))
-                    return
-
-                if deferred_segs := deferred_media_segs.get(id(cont)):
-                    nodes.extend(deferred_segs)
-                    return
-
-                try:
-                    # 图片
-                    if isinstance(cont, ImageContent):
-                        path = await cont.get_path()
-                        nodes.append(await UniHelper.img_seg(path))
-                        return
-
-                    # 图文：图片 + 可选文字说明
-                    if isinstance(cont, GraphicContent):
-                        path = await cont.get_path()
-                        seg: ForwardNodeInner = await UniHelper.img_seg(path)
-                        if cont.alt:
-                            seg = seg + cont.alt
-                        nodes.append(seg)
-                        return
-
-                    # Live Photo
-                    if isinstance(cont, LivePhotoContent):
-                        if pconfig.live_photo:
-                            live_path = await cont.get_live()
-                            nodes.append(
-                                await UniHelper.video_seg(
-                                    file=live_path, thumbnail=await cont.get_base()
-                                )
-                            )
-                        else:
-                            base_path = await cont.get_base()
-                            live_path = await cont.get_path()
-                            nodes.append(await UniHelper.img_seg(base_path))
-                            video_seg = await UniHelper.video_seg(
-                                file=live_path, thumbnail=base_path
-                            )
-                            if getattr(video_seg, "thumbnail", None):
-                                setattr(
-                                    video_seg, "_parser_lite_cover_in_forward", True
-                                )
-                            nodes.append(video_seg)
-                        return
-                except Exception as e:
-                    # 统一当作媒体构建失败处理
-                    logger.warning(f"构建转发媒体片段失败: {type(cont).__name__}: {e}")
-                    nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
 
             # 按 content 顺序遍历
             for item in pr.content:
                 if isinstance(item, str):
                     # 文本：保留接口返回的空白和换行，段落边界由原始文本控制
-                    append_text(item)
-                elif isinstance(item, StickerContent):
-                    append_text(item.desc or "[表情]")
-                elif isinstance(item, MediaContent) and item.need_send:
-                    # 媒体：先输出之前的文本，再输出媒体段
+                    text_buffer.append(_ForwardTextPart(item))
+                    continue
+                if isinstance(item, StickerContent):
+                    text_buffer.append(_ForwardTextPart(item.desc or "[表情]"))
+                    continue
+                if isinstance(item, MediaContent):
+                    if not item.need_send:
+                        continue
                     await flush_text()
-                    await append_media(item)
-                elif isinstance(item, LinkContent):
+                    await self.__append_forward_media(
+                        item, nodes, forward_video_segs, deferred_media_segs
+                    )
+                    continue
+                if isinstance(item, LinkContent):
                     await flush_text()
                     if preview := await item.get_preview_path():
                         nodes.append(await UniHelper.img_seg(file=preview))
-                    append_text(item.url)
-                elif isinstance(item, QuoteContent):
-                    quote_parts = [part for part in (item.title, item.text) if part]
-                    if item.url:
-                        quote_parts.append(item.url)
-                    append_text_block("\n".join(quote_parts))
-                elif isinstance(item, PollContent):
-                    option_vote_total = item.option_vote_total
-                    poll_parts = [f"【投票】{item.title or '投票'}"]
-                    poll_parts.extend(
-                        f"- {option.text}: {option.votes} 票 "
-                        f"({item.option_percentage(option, option_vote_total):.1f}%)"
-                        for option in item.options
-                    )
-                    status = ["已结束" if item.closed else "进行中"]
-                    if item.multiple:
-                        status.append("多选")
-                    if item.total_voters is not None:
-                        status.append(f"{item.total_voters} 人参与")
-                    poll_parts.append(" · ".join(status))
-                    append_text_block("\n".join(poll_parts))
-                else:
-                    # 其他类型暂不处理
+                    text_buffer.append(_ForwardTextPart(item.url))
                     continue
+                if isinstance(item, QuoteContent):
+                    append_text_block(self.__format_quote(item))
+                    continue
+                if isinstance(item, PollContent):
+                    append_text_block(self.__format_poll(item))
 
             # 收尾文本
             await flush_text()

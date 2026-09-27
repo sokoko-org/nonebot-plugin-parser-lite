@@ -1,12 +1,20 @@
-"""合并转发媒体上传失败时，保留失败分包的文字与来源。"""
+"""合并转发媒体上传失败时，保留失败分包的文字与来源"""
 
 from copy import deepcopy
-from dataclasses import replace
+from dataclasses import dataclass, replace
 import re
+from typing import cast
 
 from nonebot import logger
 from nonebot.exception import ActionFailed
-from nonebot_plugin_alconna.uniseg import CustomNode, Image, Reference, Text, UniMessage
+from nonebot_plugin_alconna.uniseg import (
+    CustomNode,
+    Image,
+    Reference,
+    Segment,
+    Text,
+    UniMessage,
+)
 from nonebot_plugin_alconna.uniseg.segment import Media
 
 from .data import ParseResult
@@ -18,7 +26,7 @@ from .render import (
     split_text_by_length_with_punct,
 )
 
-# 仅匹配协议端明确透传的媒体上传错误，不能仅凭 retcode 或普通超时降级。
+# 仅匹配协议端明确透传的媒体上传错误，不能仅凭 retcode 或普通超时降级
 _UPLOAD_ERROR = re.compile(
     r"\bHTTP Upload failed with code \d+\b"
     r"|\brich media transfer failed\b"
@@ -36,7 +44,6 @@ _MEDIA_LABELS = {
 
 
 def is_media_upload_error(error: ActionFailed) -> bool:
-    """兼容直接错误字段及 OneBot 的 info 字段，不搜索请求内容或异常 repr。"""
     values = [getattr(error, key, None) for key in _ERROR_FIELDS]
     info = getattr(error, "info", None)
     if isinstance(info, dict):
@@ -55,7 +62,7 @@ def _copy_node(node: CustomNode, content: UniMessage) -> CustomNode:
 
 
 def _pack_nodes(nodes: list[CustomNode]) -> list[UniMessage]:
-    """新增的说明也计入长度，并保留混合图文节点的顺序。"""
+    """新增的说明也计入长度，并保留混合图文节点的顺序"""
     split_limit = min(MAX_FORWARD_TEXT_LEN, max(1, SPLIT_THRESHOLD))
     split_nodes: list[CustomNode] = []
     for node in nodes:
@@ -103,64 +110,82 @@ def _pack_nodes(nodes: list[CustomNode]) -> list[UniMessage]:
     return messages
 
 
-def _build_fallback(
-    message: UniMessage, result: ParseResult, *, video_only: bool
-) -> list[UniMessage]:
-    """按失败分包生成独立副本，未知节点保持原有异常处理。"""
-    if len(message) != 1 or not isinstance(message[0], Reference):
-        return []
-    reference = message[0]
-    if reference.id or not reference.children:
-        return []
+@dataclass(slots=True)
+class _FallbackState:
+    nodes: list[CustomNode]
+    replaced_media: bool = False
+    has_summary: bool = False
 
-    nodes: list[CustomNode] = []
+
+def _fallback_media(
+    segment: Media, *, video_only: bool
+) -> tuple[list[Segment], bool, bool]:
+    role = media_role(segment)
+    is_video = segment.type == "video" or role == "video"
+    if video_only and not is_video:
+        return [deepcopy(segment)], False, role == "summary"
+
+    content: list[Segment] = []
+    if video_only and not getattr(segment, "_parser_lite_cover_in_forward", False):
+        thumbnail = getattr(segment, "thumbnail", None)
+        if isinstance(thumbnail, Image):
+            content.append(deepcopy(thumbnail))
+    if role != "summary":
+        label = "视频" if is_video else _MEDIA_LABELS.get(segment.type, "媒体")
+        content.append(Text(f"\n[{label}已省略，请通过原链接查看]\n"))
+    return content, True, False
+
+
+def _fallback_node(
+    node: CustomNode, *, video_only: bool
+) -> tuple[CustomNode, bool, bool] | None:
+    content = UniMessage()
     replaced_media = False
     has_summary = False
+    for segment in UniMessage(node.content):
+        if isinstance(segment, Text):
+            content.append(deepcopy(segment))
+            continue
+        if not isinstance(segment, Media):
+            return None
+        parts, replaced, summary = _fallback_media(segment, video_only=video_only)
+        content.extend(parts)
+        replaced_media |= replaced
+        has_summary |= summary
+    return replace(node, content=content), replaced_media, has_summary
+
+
+def _fallback_nodes(reference: Reference, *, video_only: bool) -> _FallbackState | None:
+    state = _FallbackState(nodes=[])
     for node in reference.children:
         if not isinstance(node, CustomNode):
-            return []
-        # 二级降级重新生成说明，避免叠加上一层提示。
+            return None
+        # 二级降级重新生成说明，避免叠加上一层提示
         if getattr(node, "_parser_lite_fallback_notice", False):
             continue
-        content = UniMessage()
-        for segment in UniMessage(node.content):
-            if isinstance(segment, Text):
-                content.append(deepcopy(segment))
-            elif isinstance(segment, Media):
-                role = media_role(segment)
-                is_video = segment.type == "video" or role == "video"
-                if video_only and not is_video:
-                    content.append(deepcopy(segment))
-                    has_summary |= role == "summary"
-                    continue
-                replaced_media = True
-                if (
-                    video_only
-                    and is_video
-                    and not getattr(segment, "_parser_lite_cover_in_forward", False)
-                ):
-                    thumbnail = getattr(segment, "thumbnail", None)
-                    if isinstance(thumbnail, Image):
-                        content.append(deepcopy(thumbnail))
-                if role != "summary":
-                    label = (
-                        "视频" if is_video else _MEDIA_LABELS.get(segment.type, "媒体")
-                    )
-                    content.append(Text(f"\n[{label}已省略，请通过原链接查看]\n"))
-            else:
-                return []
-        if content:
-            nodes.append(replace(node, content=content))
-    if not replaced_media:
-        return []
+        converted = _fallback_node(node, video_only=video_only)
+        if converted is None:
+            return None
+        fallback_node, replaced, has_summary = converted
+        state.replaced_media |= replaced
+        state.has_summary |= has_summary
+        if fallback_node.content:
+            state.nodes.append(fallback_node)
+    return state
 
+
+def _fallback_context(
+    nodes: list[CustomNode],
+    result: ParseResult,
+    *,
+    video_only: bool,
+    has_summary: bool,
+) -> list[str]:
     existing = "\n".join(
         UniMessage(node.content).extract_plain_text() for node in nodes
     )
     context = [
-        "媒体上传失败，已省略视频，保留其他内容。"
-        if video_only
-        else "媒体上传失败，已改为纯文字内容，请通过原链接查看。"
+        "媒体上传失败，已省略视频" if video_only else "媒体上传失败，已改为纯文字内容"
     ]
     for source in (result, result.repost):
         if source is None:
@@ -173,10 +198,32 @@ def _build_fallback(
         if source.url not in existing:
             context.append(source.display_url)
         existing += "\n" + "\n".join(context)
+    return context
+
+
+def _build_fallback(
+    message: UniMessage, result: ParseResult, *, video_only: bool
+) -> list[UniMessage]:
+    """按失败分包生成独立副本，未知节点保持原有异常处理"""
+    if len(message) != 1 or not isinstance(message[0], Reference):
+        return []
+    reference = cast(Reference, message[0])
+    if reference.id or not reference.children:
+        return []
+    state = _fallback_nodes(reference, video_only=video_only)
+    if state is None or not state.replaced_media:
+        return []
+
+    context = _fallback_context(
+        state.nodes,
+        result,
+        video_only=video_only,
+        has_summary=state.has_summary,
+    )
     notice = replace(reference.children[0], content=UniMessage.text("\n".join(context)))
     setattr(notice, "_parser_lite_fallback_notice", True)
-    nodes.insert(0, notice)
-    return _pack_nodes(nodes)
+    state.nodes.insert(0, notice)  # pyright: ignore[reportArgumentType]
+    return _pack_nodes(state.nodes)
 
 
 def build_text_fallback(message: UniMessage, result: ParseResult) -> list[UniMessage]:
@@ -187,38 +234,46 @@ def build_video_fallback(message: UniMessage, result: ParseResult) -> list[UniMe
     return _build_fallback(message, result, video_only=True)
 
 
-async def _send_text_fallback(messages: list[UniMessage]) -> None:
-    try:
-        for message in messages:
-            await message.send(fallback=False)
-    except Exception:
-        logger.exception("合并转发文字降级发送失败，停止重试")
-        raise
-    logger.warning("合并转发已降级为纯文字")
-
-
-async def send_with_media_fallback(message: UniMessage, result: ParseResult) -> None:
-    # send/export 可能修改消息；预先准备两级副本，不复用发送过的对象。
-    video_fallback = build_video_fallback(message, result)
-    text_fallback = build_text_fallback(message, result)
-    video_packets = [
-        (packet, build_text_fallback(packet, result)) for packet in video_fallback
-    ]
+async def send_with_media_fallback(message: UniMessage, result: ParseResult):
+    # exporter 可能修改消息，失败后只能从发送前的快照构造降级内容
+    snapshot = (
+        deepcopy(message)
+        if len(message) == 1 and isinstance(message[0], Reference)
+        else None
+    )
     try:
         await message.send()
     except ActionFailed as error:
-        if not text_fallback or not is_media_upload_error(error):
+        if snapshot is None or not is_media_upload_error(error):
             raise
         logger.exception("合并转发媒体上传失败，开始降级失败分包")
-        if not video_packets:
-            await _send_text_fallback(text_fallback)
-            return
-        for packet, plain_packets in video_packets:
+        video_fallback = build_video_fallback(snapshot, result)
+        if not video_fallback:
+            text_fallback = build_text_fallback(snapshot, result)
+            if not text_fallback:
+                raise
             try:
-                await packet.send(fallback=False)
+                for packet in text_fallback:
+                    await packet.send(fallback=False)
+            except Exception:
+                logger.exception("合并转发文字降级发送失败，停止重试")
+                raise
+            logger.warning("合并转发已降级为纯文字")
+            return
+        for packet in video_fallback:
+            try:
+                await deepcopy(packet).send(fallback=False)
             except ActionFailed as video_error:
-                if not plain_packets or not is_media_upload_error(video_error):
+                if not is_media_upload_error(video_error):
+                    raise
+                plain_packets = build_text_fallback(packet, result)
+                if not plain_packets:
                     raise
                 logger.exception("省略视频后仍发生媒体上传错误，降级该分包为纯文字")
-                await _send_text_fallback(plain_packets)
+                try:
+                    for plain_packet in plain_packets:
+                        await plain_packet.send(fallback=False)
+                except Exception:
+                    logger.exception("合并转发文字降级发送失败，停止重试")
+                    raise
         logger.warning("合并转发降级发送完成")

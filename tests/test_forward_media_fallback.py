@@ -217,13 +217,16 @@ def test_large_configured_split_threshold_cannot_exceed_forward_limit(monkeypatc
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("as_file", [False, True])
+@pytest.mark.parametrize(
+    ("as_file", "video_in_forward"),
+    [(False, True), (True, True), (False, False)],
+)
 async def test_summary_and_video_from_renderer_fall_back_inside_forward(
-    monkeypatch, as_file
+    monkeypatch, as_file, video_in_forward
 ):
     result = make_result()
     result.title = "实际渲染路径"
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", video_in_forward)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", as_file)
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
 
@@ -231,7 +234,10 @@ async def test_summary_and_video_from_renderer_fall_back_inside_forward(
         return Image(raw=b"image")
 
     async def video_segment(file, thumbnail=None):
-        return Video(raw=b"video")
+        return Video(
+            raw=b"video",
+            thumbnail=Image(raw=b"thumbnail") if thumbnail is not None else None,
+        )
 
     async def file_segment(file, display_name=None):
         return File(raw=b"video", name="video.mp4")
@@ -260,7 +266,8 @@ async def test_summary_and_video_from_renderer_fall_back_inside_forward(
         await send_with_media_fallback(message, result)
     assert len(calls) == 2
     segments = [segment for node in calls[1][0].children for segment in node.content]
-    assert sum(isinstance(segment, Image) for segment in segments) == 2
+    images = [segment for segment in segments if isinstance(segment, Image)]
+    assert [image.raw for image in images] == [b"summary", b"image"]
     assert not any(isinstance(segment, Video) for segment in segments)
     assert not any(isinstance(segment, File) for segment in segments)
     text = "".join(segment.text for segment in segments if isinstance(segment, Text))
