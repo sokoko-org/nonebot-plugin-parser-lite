@@ -494,7 +494,9 @@ class Renderer:
                                 file=live_path, thumbnail=base_path
                             )
                             if getattr(video_seg, "thumbnail", None):
-                                setattr(video_seg, "_parser_lite_cover_in_forward", True)
+                                setattr(
+                                    video_seg, "_parser_lite_cover_in_forward", True
+                                )
                             nodes.append(video_seg)
                         return
                 except Exception as e:

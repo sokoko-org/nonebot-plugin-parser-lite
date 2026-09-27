@@ -134,8 +134,10 @@ def _build_fallback(
                     has_summary |= role == "summary"
                     continue
                 replaced_media = True
-                if video_only and is_video and not getattr(
-                    segment, "_parser_lite_cover_in_forward", False
+                if (
+                    video_only
+                    and is_video
+                    and not getattr(segment, "_parser_lite_cover_in_forward", False)
                 ):
                     thumbnail = getattr(segment, "thumbnail", None)
                     if isinstance(thumbnail, Image):
