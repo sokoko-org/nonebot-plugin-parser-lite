@@ -214,8 +214,11 @@ async def register_bili_matcher():
                 url=audio_stream.url,
                 fallback_urls=audio_stream.backup_url,
                 retry_http_statuses=bilip.BILI_RETRYABLE_HTTP_STATUSES,
-                cache_key=f"bilibili:{bvid}:{page_idx + 1}",
-                cache_variant=f"source:{audio_stream.audio_quality.value}",
+                cache_key=(
+                    f"bilibili:{bvid}:{page_idx + 1}:"
+                    f"audio:{audio_stream.audio_quality.value}"
+                ),
+                cache_variant="source",
                 ext_headers=bilip.headers,
                 convert_to_mp3=True,
             )
