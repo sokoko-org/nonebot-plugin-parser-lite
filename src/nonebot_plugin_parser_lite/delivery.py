@@ -6,7 +6,7 @@ import re
 
 from nonebot import logger
 from nonebot.exception import ActionFailed
-from nonebot_plugin_alconna.uniseg import CustomNode, Reference, Text, UniMessage
+from nonebot_plugin_alconna.uniseg import CustomNode, Image, Reference, Text, UniMessage
 from nonebot_plugin_alconna.uniseg.segment import Media
 
 from .data import ParseResult
@@ -134,6 +134,12 @@ def _build_fallback(
                     has_summary |= role == "summary"
                     continue
                 replaced_media = True
+                if video_only and is_video and not getattr(
+                    segment, "_parser_lite_cover_in_forward", False
+                ):
+                    thumbnail = getattr(segment, "thumbnail", None)
+                    if isinstance(thumbnail, Image):
+                        content.append(deepcopy(thumbnail))
                 if role != "summary":
                     label = (
                         "视频" if is_video else _MEDIA_LABELS.get(segment.type, "媒体")

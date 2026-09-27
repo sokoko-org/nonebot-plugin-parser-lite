@@ -437,10 +437,12 @@ class Renderer:
                 # 视频：始终保留封面，并按配置追加视频本体。两者分别处理，
                 # 避免封面构建失败时丢失已经准备好的视频节点。
                 if isinstance(cont, VideoContent):
+                    cover_in_forward = False
                     try:
                         path = await cont.get_cover_path()
                         if path:
                             nodes.append(await UniHelper.img_seg(file=path))
+                            cover_in_forward = True
                     except Exception as e:
                         logger.warning(
                             f"构建转发媒体片段失败: {type(cont).__name__}: {e}"
@@ -448,6 +450,8 @@ class Renderer:
                         nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
                     video_seg = forward_video_segs.get(id(cont))
                     if video_seg is not None:
+                        if cover_in_forward and getattr(video_seg, "thumbnail", None):
+                            setattr(video_seg, "_parser_lite_cover_in_forward", True)
                         nodes.append(video_seg)
                     else:
                         nodes.extend(deferred_media_segs.get(id(cont), ()))
@@ -486,11 +490,12 @@ class Renderer:
                             base_path = await cont.get_base()
                             live_path = await cont.get_path()
                             nodes.append(await UniHelper.img_seg(base_path))
-                            nodes.append(
-                                await UniHelper.video_seg(
-                                    file=live_path, thumbnail=base_path
-                                )
+                            video_seg = await UniHelper.video_seg(
+                                file=live_path, thumbnail=base_path
                             )
+                            if getattr(video_seg, "thumbnail", None):
+                                setattr(video_seg, "_parser_lite_cover_in_forward", True)
+                            nodes.append(video_seg)
                         return
                 except Exception as e:
                     # 统一当作媒体构建失败处理
