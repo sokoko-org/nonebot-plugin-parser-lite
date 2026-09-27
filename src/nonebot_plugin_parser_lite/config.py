@@ -61,7 +61,7 @@ class Config(BaseModel):
     """B站视频编码"""
     plite_bili_video_quality: BiliVideoQuality = BiliVideoQuality._1080P
     """B站视频清晰度"""
-    plite_bili_audio_quality: BiliAudioQuality = BiliAudioQuality.DOLBY
+    plite_bili_audio_quality: BiliAudioQuality = BiliAudioQuality._192K
     """B站音频流音质上限"""
     plite_need_forward_contents: bool = True
     """是否需要合并转发内容(大于四项时始终转发)"""
