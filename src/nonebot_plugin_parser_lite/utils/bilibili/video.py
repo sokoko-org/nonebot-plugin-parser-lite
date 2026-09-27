@@ -53,6 +53,11 @@ class BiliVideoQuality(IntEnum):
     DOLBY = 126
     _8K = 127
 
+    @property
+    def selection_rank(self) -> int:
+        """视频清晰度的选择权重"""
+        return self.value
+
 
 class BiliVideoCodecs(StrEnum):
     """
@@ -92,20 +97,14 @@ class BiliAudioQuality(IntEnum):
 
     _64K = 30216
     _132K = 30232
-    DOLBY = 30250
-    HI_RES = 30251
     _192K = 30280
+    HI_RES = 30251
+    DOLBY = 30250
 
-
-# 音频流 ID 的数值顺序与选择优先级不同。
-AUDIO_QUALITY_ORDER = (
-    BiliAudioQuality._64K,
-    BiliAudioQuality._132K,
-    BiliAudioQuality._192K,
-    BiliAudioQuality.HI_RES,
-    BiliAudioQuality.DOLBY,
-)
-AUDIO_QUALITY_RANK = {quality: rank for rank, quality in enumerate(AUDIO_QUALITY_ORDER)}
+    @property
+    def selection_rank(self) -> int:
+        """音频档位的选择权重，声明顺序即优先级"""
+        return tuple(type(self)).index(self)
 
 
 class Video:
@@ -443,9 +442,9 @@ class VideoDownloadURLDataDetecter:
         except ValueError:
             return
         if not (
-            AUDIO_QUALITY_RANK[min_quality]
-            <= AUDIO_QUALITY_RANK[quality]
-            <= AUDIO_QUALITY_RANK[max_quality]
+            min_quality.selection_rank
+            <= quality.selection_rank
+            <= max_quality.selection_rank
         ):
             return
         if quality not in accepted_qualities:
@@ -553,7 +552,11 @@ class VideoDownloadURLDataDetecter:
 
             # 非 HDR / 杜比的视频质量范围过滤
             if vq not in (BiliVideoQuality.DOLBY, BiliVideoQuality.HDR):
-                if not (video_min_quality.value <= vq.value <= video_max_quality.value):
+                if not (
+                    video_min_quality.selection_rank
+                    <= vq.selection_rank
+                    <= video_max_quality.selection_rank
+                ):
                     continue
                 if vq not in video_accepted_qualities:
                     continue
@@ -621,7 +624,7 @@ class VideoDownloadURLDataDetecter:
                 dolby_hdr_priority = 1
 
             # 清晰度（越高越好）
-            quality_weight = s.video_quality.value
+            quality_weight = s.video_quality.selection_rank
 
             # 编码优先级（codecs 列表越靠前越优先）
             try:
@@ -634,7 +637,7 @@ class VideoDownloadURLDataDetecter:
         # 选择最优音频流：基于评分的 key 函数
         def audio_score(s: AudioStreamDownloadURL) -> int:
             """按音频档位的选择优先级排序。"""
-            return AUDIO_QUALITY_RANK[s.audio_quality]
+            return s.audio_quality.selection_rank
 
         # 取最优（线性扫描）
         best_video: (
