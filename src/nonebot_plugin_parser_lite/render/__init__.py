@@ -32,7 +32,7 @@ from ..exception import (
     DownloadException,
     SizeLimitException,
 )
-from ..helper import ForwardNodeInner, UniHelper, UniMessage
+from ..helper import ForwardNodeInner, UniHelper, UniMessage, mark_media_role
 from ..utils.cache import CacheManager
 from ..utils.ffmpeg import FFmpeg
 from .context import PLACEHOLDER_IMAGE, ThemeData, build_theme_data, safe_src
@@ -202,6 +202,8 @@ class Renderer:
             image_seg = None
 
         # 尝试直接发送图片
+        if image_seg is not None:
+            mark_media_role(image_seg, "summary")
         msg = UniMessage(image_seg or "图片渲染失败")
         if pconfig.append_url:
             urls = (result.display_url, result.repost_display_url)
@@ -372,7 +374,9 @@ class Renderer:
         """构建视频或视频文件消息段"""
         video_path = path or await cont.get_path()
         if pconfig.need_upload_video:
-            return await UniHelper.file_seg(video_path)
+            segment = await UniHelper.file_seg(video_path)
+            mark_media_role(segment, "video")
+            return segment
         return await UniHelper.video_seg(
             file=video_path, thumbnail=await cont.get_cover_path()
         )

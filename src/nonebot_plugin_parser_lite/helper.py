@@ -27,6 +27,15 @@ ForwardNodeInner = str | Segment | UniMessage
 """转发消息节点内部允许的类型"""
 
 
+def mark_media_role(segment: Segment, role: Literal["video", "summary"]) -> None:
+    """保留插件内的媒体来源；不写入适配器序列化的消息字段。"""
+    setattr(segment, "_parser_lite_media_role", role)
+
+
+def media_role(segment: Segment) -> str | None:
+    return getattr(segment, "_parser_lite_media_role", None)
+
+
 class UniHelper:
     @staticmethod
     def construct_forward_message(
@@ -102,7 +111,9 @@ class UniHelper:
 
         # 超过 100MB，转为文件 Seg
         if file_size_byte_count > 100 * 1024 * 1024:
-            return await cls.file_seg(file, display_name=file.name)
+            segment = await cls.file_seg(file, display_name=file.name)
+            mark_media_role(segment, "video")
+            return segment
 
         # 构造 Video，对 base64 与路径模式统一一个逻辑分支
         if pconfig.use_base64:

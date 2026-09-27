@@ -1,5 +1,7 @@
 from copy import deepcopy
+from types import SimpleNamespace
 
+from anyio import Path
 from nonebot.exception import ActionFailed, NetworkError
 from nonebot_plugin_alconna.uniseg import (
     Audio,
@@ -19,8 +21,10 @@ from render_test_support import Renderer, UniHelper, make_result, pconfig
 from nonebot_plugin_parser_lite import delivery
 from nonebot_plugin_parser_lite.delivery import (
     build_text_fallback,
+    build_video_fallback,
     send_with_media_fallback,
 )
+from nonebot_plugin_parser_lite.helper import mark_media_role, media_role
 
 
 class UploadFailed(ActionFailed):
@@ -81,7 +85,7 @@ def test_media_replaced_without_losing_text_or_source(media, label, monkeypatch)
 
     assert len(fallback) == 1
     text = text_of(fallback[0])
-    assert f"{label}未能发送" in text
+    assert f"{label}已省略" in text
     assert text.index("前文") < text.index("说明文字") < text.index("后文")
     assert "作品标题" in text
     assert "作者：tester" in text
@@ -121,7 +125,7 @@ async def test_explicit_upload_failure_retries_only_failed_chunk(monkeypatch, er
 
     assert len(calls) == 4
     assert text_of(calls[0]) == "已发送"
-    assert "图片未能发送" in text_of(calls[2])
+    assert "图片已省略" in text_of(calls[2])
     assert text_of(calls[3]) == "后续"
 
 
@@ -213,11 +217,14 @@ def test_large_configured_split_threshold_cannot_exceed_forward_limit(monkeypatc
 
 
 @pytest.mark.asyncio
-async def test_summary_and_video_from_renderer_fall_back_inside_forward(monkeypatch):
+@pytest.mark.parametrize("as_file", [False, True])
+async def test_summary_and_video_from_renderer_fall_back_inside_forward(
+    monkeypatch, as_file
+):
     result = make_result()
     result.title = "实际渲染路径"
     monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
-    monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload_video", as_file)
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
 
     async def image_segment(file):
@@ -226,8 +233,17 @@ async def test_summary_and_video_from_renderer_fall_back_inside_forward(monkeypa
     async def video_segment(file, thumbnail=None):
         return Video(raw=b"video")
 
+    async def file_segment(file, display_name=None):
+        return File(raw=b"video", name="video.mp4")
+
+    async def cached_summary(self, result):
+        return Image(raw=b"summary")
+
     monkeypatch.setattr(UniHelper, "img_seg", image_segment)
     monkeypatch.setattr(UniHelper, "video_seg", video_segment)
+    monkeypatch.setattr(UniHelper, "file_seg", file_segment)
+    monkeypatch.setattr(Renderer, "cache_or_render_image", cached_summary)
+    monkeypatch.setattr(pconfig, "plite_append_url", True)
     monkeypatch.setattr(
         UniHelper, "construct_forward_message", lambda segments: forward(*segments)[0]
     )
@@ -239,15 +255,19 @@ async def test_summary_and_video_from_renderer_fall_back_inside_forward(monkeypa
             raise UploadFailed()
 
     monkeypatch.setattr(UniMessage, "send", send)
-    summary = UniMessage(Image(raw=b"summary")) + result.display_url
+    summary = await Renderer().render_messages(result)
     async for message in Renderer().send_content(result, summary_node=summary):
         await send_with_media_fallback(message, result)
     assert len(calls) == 2
-    text = text_of(calls[1])
+    segments = [segment for node in calls[1][0].children for segment in node.content]
+    assert sum(isinstance(segment, Image) for segment in segments) == 2
+    assert not any(isinstance(segment, Video) for segment in segments)
+    assert not any(isinstance(segment, File) for segment in segments)
+    text = "".join(segment.text for segment in segments if isinstance(segment, Text))
     assert "实际渲染路径" in text
     assert result.url in text
-    assert "图片未能发送" in text
-    assert "视频未能发送" in text
+    assert "图片已省略" not in text
+    assert "视频已省略" in text
 
 
 @pytest.mark.asyncio
@@ -277,3 +297,125 @@ async def test_upload_words_in_request_data_do_not_trigger_fallback(monkeypatch)
     with pytest.raises(OneBotFailed):
         await send_with_media_fallback(forward(Image(raw=b"image")), make_result())
     assert len(calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_video_then_text_fallback_keeps_images_until_second_failure(monkeypatch):
+    result = make_result()
+    result.title = "作品标题"
+    summary = Image(raw=b"summary", name="secret-cache.webp")
+    mark_media_role(summary, "summary")
+    message = forward(
+        UniMessage(summary) + result.display_url,
+        result.title,
+        Image(raw=b"cover", name="secret-cover.jfif"),
+        Video(raw=b"video", name="secret-video.mp4"),
+        "tester：正文",
+    )
+    original = deepcopy(message)
+    calls = []
+
+    async def send(outgoing, **kwargs):
+        calls.append(deepcopy(outgoing))
+        if len(calls) <= 2:
+            outgoing[0].children.clear()
+            raise UploadFailed()
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    await send_with_media_fallback(message, result)
+    assert len(calls) == 3
+    assert calls[0] == original
+    stage_one = [s for n in calls[1][0].children for s in n.content]
+    assert sum(isinstance(s, Image) for s in stage_one) == 2
+    assert not any(isinstance(s, Video) for s in stage_one)
+    text = text_of(calls[2])
+    assert text.count(result.title) == 1
+    assert text.count(result.url) == 1
+    assert text.count("媒体上传失败") == 1
+    assert "图片已省略" in text
+    assert "视频已省略" in text
+    assert "secret-" not in text
+    assert "保留其他内容" not in text
+
+
+def test_video_file_role_preserves_unrelated_files():
+    video = File(raw=b"video", name="video.mp4")
+    mark_media_role(video, "video")
+    attachment = File(raw=b"document", name="ordinary.mp4")
+    message = forward(video, attachment, Image(raw=b"image"))
+    fallback = build_video_fallback(message, make_result())
+    segments = [s for n in fallback[0][0].children for s in n.content]
+    assert [s.raw for s in segments if isinstance(s, File)] == [b"document"]
+    assert any(isinstance(s, Image) for s in segments)
+    assert video in message[0].children[0].content
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "error", [UploadFailed("permission denied"), NetworkError("test")]
+)
+async def test_non_media_error_in_video_fallback_stops(monkeypatch, error):
+    calls = []
+
+    async def send(message, **kwargs):
+        calls.append(message)
+        raise UploadFailed() if len(calls) == 1 else error
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    with pytest.raises(type(error)) as caught:
+        await send_with_media_fallback(
+            forward(Image(raw=b"cover"), Video(raw=b"video")), make_result()
+        )
+    assert caught.value is error
+    assert len(calls) == 2
+
+
+@pytest.mark.asyncio
+async def test_split_video_fallback_does_not_resend_successful_packet(monkeypatch):
+    monkeypatch.setattr(delivery, "MAX_FORWARD_NODES", 2)
+    message = forward(Video(raw=b"video"), Image(raw=b"cover"), "末尾正文")
+    calls = []
+
+    async def send(outgoing, **kwargs):
+        calls.append(deepcopy(outgoing))
+        if len(calls) in (1, 3):
+            raise UploadFailed()
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    await send_with_media_fallback(message, make_result())
+    # 第一份省略视频的分包成功；第二份才需要变成文字。
+    assert "视频已省略" in text_of(calls[1])
+    for packet in calls[3:]:
+        assert "视频已省略" not in text_of(packet)
+    assert any("末尾正文" in text_of(packet) for packet in calls[3:])
+
+
+@pytest.mark.asyncio
+async def test_large_video_file_keeps_origin_without_exporting_metadata(monkeypatch):
+    async def stat(path):
+        return SimpleNamespace(st_size=101 * 1024 * 1024)
+
+    monkeypatch.setattr(Path, "stat", stat)
+    monkeypatch.setattr(pconfig, "plite_use_base64", False)
+    segment = await UniHelper.video_seg(Path("large-live-photo.mp4"))
+    assert isinstance(segment, File)
+    assert media_role(deepcopy(segment)) == "video"
+    assert "_parser_lite_media_role" not in segment.data
+    assert "_parser_lite_media_role" not in segment.dump()
+
+
+@pytest.mark.asyncio
+async def test_third_media_error_is_terminal(monkeypatch):
+    calls = []
+
+    async def send(message, **kwargs):
+        calls.append(deepcopy(message))
+        raise UploadFailed()
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    with pytest.raises(UploadFailed):
+        await send_with_media_fallback(
+            forward(Image(raw=b"cover"), Video(raw=b"video")), make_result()
+        )
+    assert len(calls) == 3
+    text_of(calls[-1])
