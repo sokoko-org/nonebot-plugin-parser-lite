@@ -8,10 +8,18 @@ from ...creator import Creator
 from ...data import ContentItem
 
 
+class GrokTranslationAssociatedData(Struct):
+    poll_translations: list[str] = field(default_factory=list)
+    """投票选项译文，与选项顺序一致"""
+
+
 class GrokTranslatedPostWithAvailabilityData(Struct):
     destination_language: str
     source_language: str
     translation: str
+    associated_data: GrokTranslationAssociatedData = field(
+        default_factory=GrokTranslationAssociatedData
+    )
 
 
 class GrokTranslatedPostWithAvailability(Struct):
@@ -31,6 +39,7 @@ class CardImage(Struct):
 class CardValue(Struct):
     string_value: str | None = None
     image_value: CardImage | None = None
+    boolean_value: bool | None = None
 
 
 class CardBindingValue(Struct):
@@ -535,6 +544,10 @@ class Tweet(Struct):
 
         content.extend(self.legacy.medias)
         return content
+
+    @property
+    def is_article(self) -> bool:
+        return self._get_article_result() is not None
 
     @property
     def title(self) -> str | None:

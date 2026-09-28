@@ -582,6 +582,38 @@ class Creator:
         return QuoteContent(text=text, title=title, url=url, icon=icon)
 
     @staticmethod
+    def poll_option(
+        text: str,
+        votes: int = 0,
+        image_url: str | None = None,
+        ext_headers: dict[str, str] | None = None,
+        use_curl_cffi: bool = False,
+        cache_key: str | None = None,
+    ):
+        """
+        创建投票选项
+
+        :param text: 选项文本
+        :param votes: 选项票数
+        :param image_url: 选项图片 URL
+        :param ext_headers: 额外请求头
+        :param use_curl_cffi: 是否使用 curl_cffi 下载
+        :param cache_key: 选项图片的稳定缓存标识，为空时根据 URL 生成
+        """
+        image = (
+            DOWNLOADER.download_img(
+                url=image_url,
+                cache_key=cache_key,
+                cache_variant="poll-option" if cache_key is not None else None,
+                ext_headers=ext_headers,
+                use_curl_cffi=use_curl_cffi,
+            )
+            if image_url
+            else None
+        )
+        return PollOption(text=text, votes=votes, image=image)
+
+    @staticmethod
     def poll(
         options: list[PollOption],
         title: str | None = None,

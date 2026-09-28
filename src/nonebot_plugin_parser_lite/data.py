@@ -327,6 +327,11 @@ class PollOption:
     """选项文本"""
     votes: int = 0
     """选项票数"""
+    image: DownloadTaskWrapper[Path] | None = None
+    """选项图片"""
+
+    async def get_image_path(self) -> Path | None:
+        return None if self.image is None else await self.image
 
 
 @dataclass(slots=True)

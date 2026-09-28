@@ -20,7 +20,10 @@ from ..base import (
     pconfig,
 )
 from .model import Tweet, TweetCard, TweetEntry
-from .util import parse_link_card
+from .util import PollCardData, parse_link_card, parse_poll_card
+
+TARGET_LANG: Final[str] = "zh"
+NON_LINGUISTIC_LANGS: Final[frozenset[str]] = frozenset({"qme", "qst", "zxx"})
 
 V2_BEARER = (
     "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8x"
@@ -118,19 +121,130 @@ class XParser(BaseParser):
             )
         return None
 
-    def _build_content(self, tweet: Tweet) -> list[ContentItem]:
+    def _build_poll(self, poll: PollCardData) -> ContentItem:
+        return self.create_poll(
+            options=[
+                self.create_poll_option(
+                    text=choice.label,
+                    votes=choice.votes,
+                    image_url=choice.image_url,
+                    cache_key=f"x:poll:{choice.image_url}"
+                    if choice.image_url
+                    else None,
+                )
+                for choice in poll.choices
+            ],
+            total_votes=sum(choice.votes for choice in poll.choices),
+            closed=poll.closed,
+            close_at=poll.close_at,
+        )
+
+    def _build_content(
+        self, tweet: Tweet, poll: PollCardData | None
+    ) -> list[ContentItem]:
         content = tweet.content
-        if link_card := self._get_link_card(tweet.card):
+        if poll:
+            content.append(self._build_poll(poll))
+        elif link_card := self._get_link_card(tweet.card):
             content.append(link_card)
         return content
+
+    @staticmethod
+    def _should_translate(tweet: Tweet, poll: PollCardData | None) -> bool:
+        """有可翻译文字、不是 Article 且语言不是目标语言时翻译"""
+        lang = tweet.legacy.lang.lower()
+        if (
+            tweet.is_article
+            or not lang
+            or lang in NON_LINGUISTIC_LANGS
+            or lang.split("-", 1)[0] == TARGET_LANG
+        ):
+            return False
+        return bool(tweet._text().strip() or (poll and poll.choices))
+
+    @staticmethod
+    def _format_translation(
+        text: str, poll: PollCardData | None, poll_translations: list[str]
+    ) -> str:
+        parts = [text.strip()] if text.strip() else []
+        if poll and poll_translations:
+            options = "\n".join(
+                f"{index}. {translated or choice.label}"
+                for index, (choice, translated) in enumerate(
+                    zip(poll.choices, poll_translations), start=1
+                )
+            )
+            parts.append(f"投票选项：\n{options}")
+        return "\n\n".join(parts)
+
+    async def _fetch_translation(self, tweet: Tweet) -> tuple[str, list[str]] | None:
+        response = await self.httpx.post(
+            "https://api.x.com/2/grok/translation.json",
+            headers=await self.getAuthHeaders(),
+            json={
+                "content_type": "POST",
+                "id": tweet.rest_id,
+                "dst_lang": TARGET_LANG,
+            },
+        )
+        response.raise_for_status()
+        try:
+            result = response.json()["result"]
+            translated_text = result.get("text") or ""
+            associated = result.get("associated_data") or {}
+            poll_translations = associated.get("poll_translations") or []
+            if not isinstance(translated_text, str) or not isinstance(
+                poll_translations, list
+            ):
+                raise ValueError("translation format invalid")
+            poll_translations = [
+                item if isinstance(item, str) else "" for item in poll_translations
+            ]
+            if not translated_text and not any(poll_translations):
+                raise ValueError("translation text missing")
+            return translated_text, poll_translations
+        except Exception:
+            logger.exception(f"翻译解析失败: {response.text}")
+            return None
+
+    async def _get_translation(
+        self, tweet: Tweet, poll: PollCardData | None
+    ) -> ContentItem | None:
+        if not self._should_translate(tweet, poll):
+            return None
+        translation = tweet.grok_translated_post_with_availability
+        if translation.is_available and translation.data:
+            translated = (
+                translation.data.translation,
+                translation.data.associated_data.poll_translations,
+            )
+        elif self.cookies:
+            try:
+                translated = await self._fetch_translation(tweet)
+            except Exception:
+                logger.exception("获取翻译失败")
+                return None
+        else:
+            return None
+        if not translated:
+            return None
+        if text := self._format_translation(
+            poll=poll, text=translated[0], poll_translations=translated[1]
+        ):
+            return self.create_quote(
+                text=text,
+                title=f"由 Grok 翻译自 {tweet.legacy.lang}",
+            )
+        return None
 
     async def collect_data(
         self, raw: TweetEntry, is_repost: bool = False
     ) -> ParseResult:
         tweet = raw.result.as_tweet
         legacy = tweet.legacy
+        poll = parse_poll_card(tweet.card)
 
-        content = self._build_content(tweet)
+        content = self._build_content(tweet, poll)
 
         user = tweet.core.user_results.result
 
@@ -138,41 +252,8 @@ class XParser(BaseParser):
         repost_status = tweet.quoted_status_result or tweet.retweeted_status_result
         if not is_repost and repost_status:
             repost = await self.collect_data(repost_status, True)
-        if tweet.legacy.lang and tweet.legacy.lang != "zh":
-            translation = tweet.grok_translated_post_with_availability
-            if translation.is_available and translation.data:
-                content.append(
-                    self.create_quote(
-                        text=translation.data.translation,
-                        title=f"由 Grok 翻译自 {tweet.legacy.lang}",
-                    )
-                )
-            elif tweet.is_translatable and self.cookies:
-                try:
-                    response = await self.httpx.post(
-                        "https://api.x.com/2/grok/translation.json",
-                        headers=await self.getAuthHeaders(),
-                        json={
-                            "content_type": "POST",
-                            "id": tweet.rest_id,
-                            "dst_lang": "zh",
-                        },
-                    )
-                    response.raise_for_status()
-                    try:
-                        translated_text = response.json()["result"]["text"]
-                        if not isinstance(translated_text, str) or not translated_text:
-                            raise ValueError("translation text missing")
-                        content.append(
-                            self.create_quote(
-                                text=translated_text,
-                                title=f"由 Grok 翻译自 {tweet.legacy.lang}",
-                            )
-                        )
-                    except Exception:
-                        logger.exception(f"翻译解析失败: {response.text}")
-                except Exception:
-                    logger.exception("获取翻译失败")
+        if translation := await self._get_translation(tweet, poll):
+            content.append(translation)
 
         return self.result(
             content=content,

@@ -39,7 +39,7 @@ async def test_theme_manager_discovers_external_theme(tmp_path):
     (partial_root / "netease.html.jinja").write_text("netease", encoding="utf-8")
 
     manager = ThemeManager(
-        ROOT / "src/nonebot_plugin_parser_lite/render/templates", # pyright: ignore[reportArgumentType]
+        ROOT / "src/nonebot_plugin_parser_lite/render/templates",  # pyright: ignore[reportArgumentType]
         [tmp_path],
     )
     theme = await manager.resolve("custom")
@@ -112,9 +112,7 @@ async def test_builtin_icon_css_is_injected_before_theme_styles():
 
     assert '<style data-parser-fallback="icon-css">' in rendered
     assert "--icon-color-view" in rendered
-    assert rendered.index("data-parser-fallback") < rendered.index(
-        'href="icon.css"'
-    )
+    assert rendered.index("data-parser-fallback") < rendered.index('href="icon.css"')
 
 
 @pytest.mark.asyncio
@@ -179,9 +177,7 @@ async def test_builtin_template_consumes_theme_data(monkeypatch):
         append_qrcode=False,
     )
     placeholder = "data:image/gif;base64,placeholder"
-    data["post"]["stats"]["extra"] = [
-        {"key": "coin", "label": "投币", "value": "2"}
-    ]
+    data["post"]["stats"]["extra"] = [{"key": "coin", "label": "投币", "value": "2"}]
     data["post"]["content"].extend(
         [
             {
@@ -222,7 +218,15 @@ async def test_builtin_template_consumes_theme_data(monkeypatch):
             {
                 "type": "poll",
                 "title": "投票",
-                "options": [{"text": "A", "votes": 1, "percentage": 100.0}],
+                "options": [
+                    {
+                        "text": "A",
+                        "votes": 1,
+                        "percentage": 100.0,
+                        "image": placeholder,
+                    }
+                ],
+                "has_images": True,
                 "total_votes": 1,
                 "total_voters": 1,
                 "multiple": False,
@@ -241,4 +245,6 @@ async def test_builtin_template_consumes_theme_data(monkeypatch):
 
     assert "hello" in html
     assert "投票" in html
+    assert "grid grid-cols-2 gap-3" in html
+    assert 'alt="A"' in html
     assert "[00:01.00]hello" in html

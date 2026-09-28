@@ -1,0 +1,709 @@
+{
+  "data": {
+    "tweetResult": {
+      "result": {
+        "__typename": "Tweet",
+        "card": {
+          "legacy": {
+            "binding_values": [
+              {
+                "key": "choice1_label",
+                "value": {
+                  "string_value": "試着室",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice2_image",
+                "value": {
+                  "image_value": {
+                    "height": 280,
+                    "url": "https://pbs.twimg.com/card_img/2103902109473398784/TDfSGzhS?format=jpg&name=280x280_2",
+                    "width": 280
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice3_image_color",
+                "value": {
+                  "image_color_value": {
+                    "palette": [
+                      {
+                        "percentage": 67.46,
+                        "rgb": {
+                          "blue": 185,
+                          "green": 183,
+                          "red": 212
+                        }
+                      },
+                      {
+                        "percentage": 28.11,
+                        "rgb": {
+                          "blue": 115,
+                          "green": 100,
+                          "red": 130
+                        }
+                      },
+                      {
+                        "percentage": 1.51,
+                        "rgb": {
+                          "blue": 136,
+                          "green": 125,
+                          "red": 210
+                        }
+                      },
+                      {
+                        "percentage": 1.44,
+                        "rgb": {
+                          "blue": 240,
+                          "green": 244,
+                          "red": 238
+                        }
+                      },
+                      {
+                        "percentage": 1.26,
+                        "rgb": {
+                          "blue": 133,
+                          "green": 141,
+                          "red": 155
+                        }
+                      }
+                    ]
+                  },
+                  "type": "IMAGE_COLOR"
+                }
+              },
+              {
+                "key": "choice_count",
+                "value": {
+                  "string_value": "4",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice2_label",
+                "value": {
+                  "string_value": "服の中にいる。",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice2_image_original",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902109473398784/TDfSGzhS?format=jpg&name=orig",
+                    "width": 1050
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice3_image_x_large",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902144713920513/tqjjFDNr?format=png&name=2048x2048_2_exp",
+                    "width": 975
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice4_image_color",
+                "value": {
+                  "image_color_value": {
+                    "palette": [
+                      {
+                        "percentage": 68.05,
+                        "rgb": {
+                          "blue": 194,
+                          "green": 187,
+                          "red": 208
+                        }
+                      },
+                      {
+                        "percentage": 30.98,
+                        "rgb": {
+                          "blue": 136,
+                          "green": 124,
+                          "red": 138
+                        }
+                      },
+                      {
+                        "percentage": 0.59,
+                        "rgb": {
+                          "blue": 75,
+                          "green": 52,
+                          "red": 52
+                        }
+                      },
+                      {
+                        "percentage": 0.32,
+                        "rgb": {
+                          "blue": 127,
+                          "green": 154,
+                          "red": 180
+                        }
+                      }
+                    ]
+                  },
+                  "type": "IMAGE_COLOR"
+                }
+              },
+              {
+                "key": "end_datetime_utc",
+                "value": {
+                  "string_value": "2026-09-27T17:40:52Z",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice4_image_original",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902403758292992/2jj82xsR?format=jpg&name=orig",
+                    "width": 1275
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "counts_are_final",
+                "value": {
+                  "boolean_value": true,
+                  "type": "BOOLEAN"
+                }
+              },
+              {
+                "key": "choice1_image_large",
+                "value": {
+                  "image_value": {
+                    "height": 420,
+                    "url": "https://pbs.twimg.com/card_img/2103902071619821568/Vsnhhjrq?format=jpg&name=420x420_2",
+                    "width": 420
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice3_image_large",
+                "value": {
+                  "image_value": {
+                    "height": 420,
+                    "url": "https://pbs.twimg.com/card_img/2103902144713920513/tqjjFDNr?format=jpg&name=420x420_2",
+                    "width": 420
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice3_image_small",
+                "value": {
+                  "image_value": {
+                    "height": 100,
+                    "url": "https://pbs.twimg.com/card_img/2103902144713920513/tqjjFDNr?format=jpg&name=100x100_2",
+                    "width": 100
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice2_count",
+                "value": {
+                  "string_value": "613",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice2_image_small",
+                "value": {
+                  "image_value": {
+                    "height": 100,
+                    "url": "https://pbs.twimg.com/card_img/2103902109473398784/TDfSGzhS?format=jpg&name=100x100_2",
+                    "width": 100
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice1_count",
+                "value": {
+                  "string_value": "654",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice1_image",
+                "value": {
+                  "image_value": {
+                    "height": 280,
+                    "url": "https://pbs.twimg.com/card_img/2103902071619821568/Vsnhhjrq?format=jpg&name=280x280_2",
+                    "width": 280
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice4_image_small",
+                "value": {
+                  "image_value": {
+                    "height": 100,
+                    "url": "https://pbs.twimg.com/card_img/2103902403758292992/2jj82xsR?format=jpg&name=100x100_2",
+                    "width": 100
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice4_label",
+                "value": {
+                  "string_value": "着替え中",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice3_image",
+                "value": {
+                  "image_value": {
+                    "height": 280,
+                    "url": "https://pbs.twimg.com/card_img/2103902144713920513/tqjjFDNr?format=jpg&name=280x280_2",
+                    "width": 280
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "last_updated_datetime_utc",
+                "value": {
+                  "string_value": "2026-09-27T17:40:54Z",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "duration_minutes",
+                "value": {
+                  "string_value": "1440",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice3_image_original",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902144713920513/tqjjFDNr?format=jpg&name=orig",
+                    "width": 975
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice3_count",
+                "value": {
+                  "string_value": "568",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice4_count",
+                "value": {
+                  "string_value": "914",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice1_image_x_large",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902071619821568/Vsnhhjrq?format=png&name=2048x2048_2_exp",
+                    "width": 1050
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice4_image_x_large",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902403758292992/2jj82xsR?format=png&name=2048x2048_2_exp",
+                    "width": 1275
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice3_label",
+                "value": {
+                  "string_value": "ずぼらな子",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "api",
+                "value": {
+                  "string_value": "capi://passthrough/1",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice2_image_x_large",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902109473398784/TDfSGzhS?format=png&name=2048x2048_2_exp",
+                    "width": 1050
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice1_image_original",
+                "value": {
+                  "image_value": {
+                    "height": 1950,
+                    "url": "https://pbs.twimg.com/card_img/2103902071619821568/Vsnhhjrq?format=jpg&name=orig",
+                    "width": 1050
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice1_image_color",
+                "value": {
+                  "image_color_value": {
+                    "palette": [
+                      {
+                        "percentage": 74.47,
+                        "rgb": {
+                          "blue": 153,
+                          "green": 156,
+                          "red": 188
+                        }
+                      },
+                      {
+                        "percentage": 17.95,
+                        "rgb": {
+                          "blue": 136,
+                          "green": 109,
+                          "red": 101
+                        }
+                      },
+                      {
+                        "percentage": 6.34,
+                        "rgb": {
+                          "blue": 100,
+                          "green": 102,
+                          "red": 113
+                        }
+                      },
+                      {
+                        "percentage": 0.51,
+                        "rgb": {
+                          "blue": 155,
+                          "green": 154,
+                          "red": 214
+                        }
+                      }
+                    ]
+                  },
+                  "type": "IMAGE_COLOR"
+                }
+              },
+              {
+                "key": "choice2_image_color",
+                "value": {
+                  "image_color_value": {
+                    "palette": [
+                      {
+                        "percentage": 62.53,
+                        "rgb": {
+                          "blue": 148,
+                          "green": 152,
+                          "red": 194
+                        }
+                      },
+                      {
+                        "percentage": 34.68,
+                        "rgb": {
+                          "blue": 111,
+                          "green": 92,
+                          "red": 99
+                        }
+                      },
+                      {
+                        "percentage": 1.82,
+                        "rgb": {
+                          "blue": 111,
+                          "green": 115,
+                          "red": 173
+                        }
+                      },
+                      {
+                        "percentage": 0.37,
+                        "rgb": {
+                          "blue": 101,
+                          "green": 111,
+                          "red": 142
+                        }
+                      },
+                      {
+                        "percentage": 0.12,
+                        "rgb": {
+                          "blue": 68,
+                          "green": 99,
+                          "red": 188
+                        }
+                      }
+                    ]
+                  },
+                  "type": "IMAGE_COLOR"
+                }
+              },
+              {
+                "key": "choice4_image_large",
+                "value": {
+                  "image_value": {
+                    "height": 420,
+                    "url": "https://pbs.twimg.com/card_img/2103902403758292992/2jj82xsR?format=jpg&name=420x420_2",
+                    "width": 420
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice2_image_large",
+                "value": {
+                  "image_value": {
+                    "height": 420,
+                    "url": "https://pbs.twimg.com/card_img/2103902109473398784/TDfSGzhS?format=jpg&name=420x420_2",
+                    "width": 420
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "card_url",
+                "value": {
+                  "scribe_key": "card_url",
+                  "string_value": "https://twitter.com",
+                  "type": "STRING"
+                }
+              },
+              {
+                "key": "choice1_image_small",
+                "value": {
+                  "image_value": {
+                    "height": 100,
+                    "url": "https://pbs.twimg.com/card_img/2103902071619821568/Vsnhhjrq?format=jpg&name=100x100_2",
+                    "width": 100
+                  },
+                  "type": "IMAGE"
+                }
+              },
+              {
+                "key": "choice4_image",
+                "value": {
+                  "image_value": {
+                    "height": 280,
+                    "url": "https://pbs.twimg.com/card_img/2103902403758292992/2jj82xsR?format=jpg&name=280x280_2",
+                    "width": 280
+                  },
+                  "type": "IMAGE"
+                }
+              }
+            ],
+            "card_platform": {
+              "platform": {
+                "audience": {
+                  "name": "production"
+                },
+                "device": {
+                  "name": "Swift",
+                  "version": "12"
+                }
+              }
+            },
+            "name": "1906814671912599552:poll_choice_images",
+            "url": "card://2103902638639370240",
+            "user_refs_results": []
+          },
+          "rest_id": "card://2103902638639370240"
+        },
+        "cashtag_attachments": [],
+        "core": {
+          "user_results": {
+            "result": {
+              "__typename": "User",
+              "action_counts": {
+                "favorites_count": 3175
+              },
+              "affiliates_highlighted_label": {},
+              "avatar": {
+                "image_url": "https://pbs.twimg.com/profile_images/1227956530302996480/NvngMBw2_normal.jpg"
+              },
+              "banner": {
+                "image_url": ""
+              },
+              "core": {
+                "created_at": "Tue Jan 30 18:07:41 +0000 2018",
+                "name": "ヒロき",
+                "screen_name": "yyqw7151"
+              },
+              "follow_request_sent": false,
+              "has_graduated_access": true,
+              "id": "VXNlcjo5NTg0MDEzNDU0MDg1ODE2MzI=",
+              "is_blue_verified": true,
+              "location": {
+                "location": "富山県"
+              },
+              "media_permissions": {
+                "can_media_tag": true
+              },
+              "notifications_settings": {
+                "notifications_enabled": false
+              },
+              "parody_commentary_fan_label": "None",
+              "pinned_items": {
+                "tweet_ids_str": ["2002026054601601531"]
+              },
+              "possibly_sensitive": false,
+              "privacy": {
+                "protected": false
+              },
+              "profile_bio": {
+                "description": "１日１枚何か描く\n\nmail→ yyqw7151★https://t.co/57pA4zT1o1\nfanbox→https://t.co/WDoIHGCaBH",
+                "entities": {
+                  "description": {
+                    "urls": [
+                      {
+                        "display_url": "gmail.com",
+                        "expanded_url": "http://gmail.com",
+                        "indices": [25, 48],
+                        "url": "https://t.co/57pA4zT1o1"
+                      },
+                      {
+                        "display_url": "yyqw7151.fanbox.cc",
+                        "expanded_url": "http://yyqw7151.fanbox.cc",
+                        "indices": [56, 79],
+                        "url": "https://t.co/WDoIHGCaBH"
+                      }
+                    ]
+                  },
+                  "url": {
+                    "urls": [
+                      {
+                        "display_url": "pixiv.net/member.php?id=…",
+                        "expanded_url": "https://www.pixiv.net/member.php?id=27631291",
+                        "indices": [0, 23],
+                        "url": "https://t.co/MhKztKFTA0"
+                      }
+                    ]
+                  }
+                }
+              },
+              "profile_description_language": "ja",
+              "profile_image_shape": "Circle",
+              "profile_metadata": {
+                "profile_interstitial_type": ""
+              },
+              "profile_translation": {
+                "translator_type": "none"
+              },
+              "relationship_counts": {
+                "followers": 422076,
+                "following": 5
+              },
+              "relationship_perspectives": {
+                "blocked_by": false,
+                "blocking": false,
+                "followed_by": false,
+                "following": false,
+                "live_following": false,
+                "muting": false
+              },
+              "rest_id": "958401345408581632",
+              "super_follow_eligible": false,
+              "super_followed_by": false,
+              "super_following": false,
+              "tweet_counts": {
+                "media_tweets": 2686,
+                "tweets": 2780
+              },
+              "verification": {
+                "verified": false
+              },
+              "website": {
+                "url": "https://t.co/MhKztKFTA0"
+              }
+            }
+          }
+        },
+        "edit_control": {
+          "edit_tweet_ids": ["2103902639411134497"],
+          "editable_until_msecs": "1790448052000",
+          "edits_remaining": "5",
+          "is_edit_eligible": true
+        },
+        "grok_analysis_button": true,
+        "grok_annotations": {
+          "is_image_editable_by_grok": true
+        },
+        "grok_translated_post_with_availability": {
+          "data": {
+            "associated_data": {
+              "poll_translations": [
+                "试衣间",
+                "在衣服里面。",
+                "邋遢的孩子",
+                "换衣服中"
+              ]
+            },
+            "destination_language": "zh",
+            "entities": {
+              "hashtags": [],
+              "symbols": [],
+              "urls": [],
+              "user_mentions": []
+            },
+            "source_language": "ja",
+            "translation": "如果要系列化的话？（我会参考的）"
+          },
+          "is_available": true
+        },
+        "has_birdwatch_notes": false,
+        "is_translatable": true,
+        "legacy": {
+          "bookmark_count": 167,
+          "bookmarked": false,
+          "conversation_id_str": "2103902639411134497",
+          "created_at": "Sat Sep 26 17:40:52 +0000 2026",
+          "display_text_range": [0, 18],
+          "entities": {},
+          "favorite_count": 583,
+          "favorited": false,
+          "full_text": "シリーズ化するなら？（参考にします）",
+          "id_str": "2103902639411134497",
+          "is_quote_status": false,
+          "lang": "ja",
+          "quote_count": 2,
+          "reply_count": 5,
+          "retweet_count": 23,
+          "retweeted": false,
+          "user_id_str": "958401345408581632"
+        },
+        "rest_id": "2103902639411134497",
+        "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+        "unmention_data": {},
+        "views": {
+          "count": "35683",
+          "state": "EnabledWithCount"
+        }
+      }
+    }
+  }
+}

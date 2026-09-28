@@ -232,9 +232,16 @@
                 {{ '已结束' if poll.closed else '进行中' }}
             </div>
         </div>
-        <div class="mt-2.5 space-y-2.5">
+        <div class="mt-2.5 {{ 'grid grid-cols-2 gap-3' if poll.has_images else 'space-y-2.5' }}">
             {% for option in poll.options %}
-                <div>
+                <div class="min-w-0">
+                    {% if poll.has_images %}
+                        <div class="mb-1.5 aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+                            {% if option.image %}
+                                <img src="{{ option.image }}" alt="{{ option.text }}" class="block h-full w-full object-cover" />
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     <div class="mb-1 flex items-baseline justify-between gap-3 text-xs">
                         <span class="min-w-0 text-slate-700 dark:text-slate-200">{{ option.text }}</span><span class="shrink-0 font-medium text-slate-500 dark:text-slate-400">{{ option.votes }} 票 · {{ '%.1f' | format(option.percentage) }}%</span>
                     </div>

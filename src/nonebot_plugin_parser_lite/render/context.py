@@ -283,6 +283,9 @@ async def _serialize_content(
                     "text": option.text,
                     "votes": option.votes,
                     "percentage": item.option_percentage(option, total),
+                    "image": await safe_src(
+                        option, "get_image_path", return_none_on_fail=True
+                    ),
                 }
                 for option in item.options
             ],
@@ -292,6 +295,7 @@ async def _serialize_content(
             "multiple": item.multiple,
             "closed": item.closed,
             "close_at": item.close_at,
+            "has_images": any(option.image is not None for option in item.options),
         }
     return {"type": "unknown", "text": str(item)}
 

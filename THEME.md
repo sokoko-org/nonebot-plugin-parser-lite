@@ -594,7 +594,8 @@ post.extra.info;
     {
       "text": "选项 A",
       "votes": 10,
-      "percentage": 62.5
+      "percentage": 62.5,
+      "image": "选项图片 URI 或 None"
     }
   ],
   "option_vote_total": 16,
@@ -602,7 +603,8 @@ post.extra.info;
   "total_voters": 16,
   "multiple": false,
   "closed": false,
-  "close_at": "原始结束时间或 None"
+  "close_at": "原始结束时间或 None",
+  "has_images": false
 }
 ```
 
@@ -613,6 +615,8 @@ post.extra.info;
   <i style="width: {{ '%.2f'|format(option.percentage) }}%"></i>
 </div>
 ```
+
+`has_images` 表示是否有任一选项带图片，可用于切换为图片投票布局
 
 没有有效票数时，`percentage` 为 `0.0`，`total_votes`、`total_voters` 和 `close_at` 可能为 `None`
 

@@ -562,6 +562,14 @@ class Renderer:
                     append_text_block(self.__format_quote(item))
                     continue
                 if isinstance(item, PollContent):
+                    if any(option.image is not None for option in item.options):
+                        await flush_text()
+                        for option in item.options:
+                            try:
+                                if path := await option.get_image_path():
+                                    nodes.append(await UniHelper.img_seg(file=path))
+                            except Exception as e:
+                                logger.warning(f"投票选项图片获取失败: {e!r}")
                     append_text_block(self.__format_poll(item))
 
             # 收尾文本
