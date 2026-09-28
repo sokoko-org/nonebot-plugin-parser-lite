@@ -169,10 +169,8 @@ class XParser(BaseParser):
         parts = [text.strip()] if text.strip() else []
         if poll and poll_translations:
             options = "\n".join(
-                f"{index}. {translated or choice.label}"
-                for index, (choice, translated) in enumerate(
-                    zip(poll.choices, poll_translations), start=1
-                )
+                f"{index}. {poll_translations[index - 1] or choice.label}"
+                for index, choice in enumerate(poll.choices, start=1)
             )
             parts.append(f"投票选项：\n{options}")
         return "\n\n".join(parts)
