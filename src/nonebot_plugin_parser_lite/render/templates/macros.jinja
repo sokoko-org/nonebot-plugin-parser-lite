@@ -232,26 +232,40 @@
                 {{ '已结束' if poll.closed else '进行中' }}
             </div>
         </div>
-        <div class="mt-2.5 {{ 'grid grid-cols-2 gap-3' if poll.has_images else 'space-y-2.5' }}">
-            {% for option in poll.options %}
-                <div class="min-w-0">
-                    {% if poll.has_images %}
-                        <div class="mb-1.5 aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+        {% if poll.has_images %}
+            <div class="mt-2.5 space-y-2">
+                {% for option in poll.options %}
+                    <div class="relative flex min-h-16 items-center gap-3 overflow-hidden rounded-lg bg-slate-100 p-2 dark:bg-slate-800">
+                        <div class="absolute inset-y-0 left-0 bg-cyan-600/20 dark:bg-cyan-500/25"
+                             style="width: {{ '%.2f' | format(option.percentage) }}%"></div>
+                        <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-slate-200 dark:bg-slate-700">
                             {% if option.image %}
                                 <img src="{{ option.image }}" alt="{{ option.text }}" class="block h-full w-full object-cover" />
                             {% endif %}
                         </div>
-                    {% endif %}
-                    <div class="mb-1 flex items-baseline justify-between gap-3 text-xs">
-                        <span class="min-w-0 text-slate-700 dark:text-slate-200">{{ option.text }}</span><span class="shrink-0 font-medium text-slate-500 dark:text-slate-400">{{ option.votes }} 票 · {{ '%.1f' | format(option.percentage) }}%</span>
+                        <span class="relative min-w-0 flex-1 text-sm text-slate-700 dark:text-slate-200">{{ option.text }}</span>
+                        <span class="relative shrink-0 text-right text-xs font-medium text-slate-600 dark:text-slate-300">
+                            <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">{{ '%.1f' | format(option.percentage) }}%</span>
+                            {{ option.votes }} 票
+                        </span>
                     </div>
-                    <div class="h-1.5 overflow-hidden rounded-sm bg-slate-200 dark:bg-slate-700">
-                        <div class="h-full rounded-sm bg-cyan-600 dark:bg-cyan-500"
-                             style="width: {{ '%.2f' | format(option.percentage) }}%"></div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="mt-2.5 space-y-2.5">
+                {% for option in poll.options %}
+                    <div>
+                        <div class="mb-1 flex items-baseline justify-between gap-3 text-xs">
+                            <span class="min-w-0 text-slate-700 dark:text-slate-200">{{ option.text }}</span><span class="shrink-0 font-medium text-slate-500 dark:text-slate-400">{{ option.votes }} 票 · {{ '%.1f' | format(option.percentage) }}%</span>
+                        </div>
+                        <div class="h-1.5 overflow-hidden rounded-sm bg-slate-200 dark:bg-slate-700">
+                            <div class="h-full rounded-sm bg-cyan-600 dark:bg-cyan-500"
+                                 style="width: {{ '%.2f' | format(option.percentage) }}%"></div>
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
+                {% endfor %}
+            </div>
+        {% endif %}
         <div class="mt-2.5 flex gap-2 text-xs text-slate-500 dark:text-slate-400">
             {% if poll.total_voters is not none %}<span>{{ poll.total_voters }} 人参与</span>{% endif %}
             {% if poll.multiple %}<span>多选</span>{% endif %}

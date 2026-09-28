@@ -245,6 +245,6 @@ async def test_builtin_template_consumes_theme_data(monkeypatch):
 
     assert "hello" in html
     assert "投票" in html
-    assert "grid grid-cols-2 gap-3" in html
+    assert "h-16 w-16 shrink-0" in html
     assert 'alt="A"' in html
     assert "[00:01.00]hello" in html
