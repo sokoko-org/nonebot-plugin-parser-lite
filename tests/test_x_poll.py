@@ -46,3 +46,13 @@ def test_translation_ignores_is_translatable_and_article():
     article = _entry("article.json").result.as_tweet
     article.legacy.lang = "en"
     assert not parser._should_translate(article, None)
+
+
+def test_poll_translation_tolerates_missing_options():
+    tweet = _entry("poll_image.json").result.as_tweet
+    from nonebot_plugin_parser_lite.parsers.x.util import parse_poll_card
+
+    poll = parse_poll_card(tweet.card)
+    text = XParser._format_translation("t", poll, ["a"])
+    assert "1. a" in text
+    assert "4. " in text

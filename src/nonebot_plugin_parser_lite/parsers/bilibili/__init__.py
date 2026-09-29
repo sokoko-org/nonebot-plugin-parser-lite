@@ -77,8 +77,11 @@ class BilibiliParser(BaseParser):
         self.headers = HEADERS.copy()
         self._credential: Credential | None = None
         self._credential_file = pconfig.config_dir / "bilibili_credential.json"
-        self.black_mids: list[int] | None = None
+        self._credential_lock = asyncio.Lock()
+        """串行化凭证初始化与刷新，避免并发请求重复使用同一 refresh_token"""
+        self.black_mids: set[int] | None = None
         """黑名单作者列表"""
+        self._black_list_lock = asyncio.Lock()
         self._black_list_job_added: bool = False
 
     async def load_black_list(self) -> None:
@@ -86,7 +89,7 @@ class BilibiliParser(BaseParser):
         credential = await self.credential
         if not credential:
             logger.info("B站未登录，跳过黑名单加载")
-            self.black_mids = []
+            self.black_mids = set()
             return
         black_mids: list[int] = []
         page_size = 50
@@ -96,7 +99,7 @@ class BilibiliParser(BaseParser):
                 data = await get_black_list(page_size=page_size, credential=credential)
             except BiliHelperException as e:
                 logger.error(f"获取B站黑名单列表失败: {e.msg}")
-                self.black_mids = []
+                self.black_mids = set()
                 return
 
             first_list = data["list"]
@@ -125,7 +128,7 @@ class BilibiliParser(BaseParser):
                     logger.warning(f"请求B站黑名单第 {page_index} 页异常: {e}")
                     continue
 
-            self.black_mids = black_mids
+            self.black_mids = set(black_mids)
             logger.debug(f"B站黑名单列表: {black_mids}")
             logger.info(
                 f"已加载 {len(self.black_mids)} 个 B 站黑名单用户 (pages={pages})"
@@ -151,7 +154,7 @@ class BilibiliParser(BaseParser):
         except Exception as e:
             logger.exception(f"请求 B 站黑名单接口异常: {e}")
             if self.black_mids is None:
-                self.black_mids = []
+                self.black_mids = set()
 
     async def raise_if_in_black_list(self, mid: int):
         """
@@ -160,7 +163,10 @@ class BilibiliParser(BaseParser):
         :raise TipException: 用户在黑名单中
         """
         if self.black_mids is None:
-            await self.load_black_list()
+            # 首次并发请求只加载一次黑名单
+            async with self._black_list_lock:
+                if self.black_mids is None:
+                    await self.load_black_list()
             assert self.black_mids is not None
         if mid in self.black_mids:
             raise TipException("该up属于黑名单")
@@ -226,7 +232,7 @@ class BilibiliParser(BaseParser):
     async def _parse_av(self, searched: MatchWithParams):
         """解析视频信息"""
         avid = int(searched["avid"])
-        page_num = int(searched["p"])
+        page_num = int(searched.get("p", 1))
 
         return await self.parse_video(avid=avid, page_num=page_num)
 
@@ -937,7 +943,14 @@ class BilibiliParser(BaseParser):
     @property
     async def credential(self) -> Credential | None:
         """哔哩哔哩登录凭证"""
+        if self._credential is not None and not self._credential.check_refresh():
+            return self._credential
 
+        async with self._credential_lock:
+            # 等锁期间可能已被其他请求初始化或刷新，重新检查
+            return await self._ensure_credential()
+
+    async def _ensure_credential(self) -> Credential | None:
         if self._credential is None:
             await self._init_credential()
             return self._credential

@@ -11,6 +11,7 @@ from ...utils.format import (
     anchor_text,
     append_html_text,
     clean_blank,
+    is_inside,
 )
 
 
@@ -39,7 +40,7 @@ def _iter_media_and_text(soup: BeautifulSoup):
     skip_parent: Tag | None = None
     for element in soup.descendants:
         if skip_parent:
-            if element in skip_parent.descendants:
+            if is_inside(element, skip_parent):
                 continue
             else:
                 skip_parent = None

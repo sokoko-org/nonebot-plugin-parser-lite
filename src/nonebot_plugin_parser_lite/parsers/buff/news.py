@@ -8,6 +8,7 @@ from ...utils.format import (
     HTML_NEWLINE_TAGS,
     append_html_text,
     clean_blank,
+    is_inside,
     replace_anchor_hrefs,
 )
 from .share import ShareData
@@ -39,7 +40,13 @@ class News(Struct):
             append_html_text(data, text_buffer)
             text_buffer.clear()
 
+        skip_parent: Tag | None = None
         for element in soup.descendants:
+            # 遍历中 decompose 会切断 descendants 链，改为跳过已处理子树
+            if skip_parent is not None:
+                if is_inside(element, skip_parent):
+                    continue
+                skip_parent = None
             # 标签节点
             if isinstance(element, Tag):
                 if element.name in HTML_NEWLINE_TAGS:
@@ -64,8 +71,8 @@ class News(Struct):
                             cover_url=thumb,
                         )
                     )
-                    # 处理完后从 DOM 树移除该节点，避免内部 img 再被当作普通图处理
-                    element.decompose()
+                    # 跳过该节点子树，避免内部 img 再被当作普通图处理
+                    skip_parent = element
                     continue
 
                 # 普通图片

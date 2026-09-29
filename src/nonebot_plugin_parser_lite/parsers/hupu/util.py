@@ -10,6 +10,7 @@ from ...utils.format import (
     anchor_text,
     append_html_text,
     clean_blank,
+    is_inside,
 )
 
 
@@ -36,7 +37,13 @@ def parse_rich_content(html: str) -> list[ContentItem]:
 
 def _iter_media_and_text(soup: BeautifulSoup):
     seen_anchors: set[int] = set()
+    skip_parent: Tag | None = None
     for element in soup.descendants:
+        # 遍历中 decompose 会切断 descendants 链，改为跳过已处理子树
+        if skip_parent is not None:
+            if is_inside(element, skip_parent):
+                continue
+            skip_parent = None
         if isinstance(element, Tag):
             if element.name in HTML_NEWLINE_TAGS:
                 yield "\n"
@@ -52,7 +59,7 @@ def _iter_media_and_text(soup: BeautifulSoup):
                     cover_url=str(element.get("poster")),
                     cache_key=f"hupu:{stable_url}",
                 )
-                element.decompose()
+                skip_parent = element
                 continue
 
             if element.name == "img":

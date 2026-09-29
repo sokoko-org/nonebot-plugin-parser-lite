@@ -33,7 +33,7 @@ class KuaiShouParser(BaseParser):
     @handle("v.kuaishou", r"v\.kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("kuaishou", r"(?:www\.)?kuaishou\.com/[A-Za-z\d._?%&+\-=/#]+")
     @handle("chenzhongtech", r"(?:v\.m\.)?chenzhongtech\.com/fw/[A-Za-z\d._?%&+\-=/#]+")
-    @handle("m.gifshow.com", r"fw/photo/\d+")
+    @handle("m.gifshow.com", r"m\.gifshow\.com/fw/photo/[A-Za-z\d]+")
     async def _parse_v_kuaishou(self, searched: MatchWithParams):
         url = f"https://{searched.url}"
         photo = await self._fetch_photo(url)

@@ -168,8 +168,10 @@ class XParser(BaseParser):
     ) -> str:
         parts = [text.strip()] if text.strip() else []
         if poll and poll_translations:
+            # 译文数量可能少于选项，缺失时回退原文
+            translations = [*poll_translations, *[""] * len(poll.choices)]
             options = "\n".join(
-                f"{index}. {poll_translations[index - 1] or choice.label}"
+                f"{index}. {translations[index - 1] or choice.label}"
                 for index, choice in enumerate(poll.choices, start=1)
             )
             parts.append(f"投票选项：\n{options}")

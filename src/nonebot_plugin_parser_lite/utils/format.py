@@ -66,6 +66,19 @@ def replace_placeholder_to_sticker(
     return result
 
 
+def is_inside(element: object, ancestor: Tag) -> bool:
+    """按对象身份判断节点是否位于 ancestor 子树内
+
+    bs4 的 ``in`` / ``==`` 按内容比较，会把子树外内容相同的节点误判为子孙
+    """
+    parent = getattr(element, "parent", None)
+    while parent is not None:
+        if parent is ancestor:
+            return True
+        parent = parent.parent
+    return False
+
+
 def format_num(num: int | None) -> str | None:
     """将数字格式化为 1.2万 的形式"""
     if num is None:

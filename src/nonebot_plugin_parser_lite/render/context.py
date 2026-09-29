@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import asyncio
 import base64
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Iterable, Mapping
 import contextlib
+from contextvars import ContextVar
 from datetime import datetime
 from html import escape
 import inspect
 from io import BytesIO
-from typing import Any, TypedDict, cast
+from typing import Any, TypedDict, TypeVar, cast
 
 from anyio import Path
 from nonebot import logger
@@ -35,6 +37,20 @@ from .theme import MUSIC_PLATFORMS, THEME_SCHEMA_VERSION
 PLACEHOLDER_IMAGE = (
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 )
+MAX_CONCURRENT_RESOURCES = 8
+"""渲染时同时获取的资源上限，避免图片很多的帖子一次打出大量请求"""
+# 每次渲染创建独立信号量，避免模块级对象绑定到旧事件循环
+_resource_limit: ContextVar[asyncio.Semaphore | None] = ContextVar(
+    "parser_lite_resource_limit", default=None
+)
+
+
+_T = TypeVar("_T")
+
+
+async def _gather_ordered(awaitables: Iterable[Awaitable[_T]]) -> list[_T]:
+    """并发执行并按输入顺序返回结果"""
+    return list(await asyncio.gather(*awaitables))
 
 
 class ThemeData(TypedDict):
@@ -65,8 +81,10 @@ async def safe_src(
         attr = getattr(obj, method)
         if not callable(attr):
             return fallback
-        result = cast(Any, attr)()
-        value = await result if inspect.isawaitable(result) else result
+        # 只在叶子资源获取处限流；外层 gather 不持有信号量，嵌套也不会死锁
+        async with _resource_limit.get() or contextlib.nullcontext():
+            result = cast(Any, attr)()
+            value = await result if inspect.isawaitable(result) else result
         return fallback if value is None else await _path_to_uri(value)
     except Exception as error:
         logger.warning(
@@ -89,7 +107,11 @@ async def build_theme_data(
     返回值只包含 JSON-like 数据：字典、列表、字符串、数字、布尔值和
     ``None``。主题因此不需要知道解析器内部的数据类或资源获取方法
     """
-    post = await _serialize_result(result, max_comments=max_comments)
+    token = _resource_limit.set(asyncio.Semaphore(MAX_CONCURRENT_RESOURCES))
+    try:
+        post = await _serialize_result(result, max_comments=max_comments)
+    finally:
+        _resource_limit.reset(token)
     if append_qrcode:
         post["qrcode"] = _build_qrcode(result.url)
 
@@ -112,16 +134,31 @@ async def _serialize_result(
 ) -> dict[str, Any]:
     is_music = str(result.platform.name) in MUSIC_PLATFORMS
 
-    content: list[dict[str, Any]] = []
-    cover_found = False
-    for item in result.content:
-        is_cover = (
-            is_music
-            and not cover_found
-            and isinstance(item, ImageContent | GraphicContent)
-        )
-        content.append(await _serialize_content(item, is_cover=is_cover))
-        cover_found = cover_found or is_cover
+    # 封面标记依赖顺序，先确定再并发序列化
+    cover_index = next(
+        (
+            index
+            for index, item in enumerate(result.content)
+            if isinstance(item, ImageContent | GraphicContent)
+        ),
+        None,
+    )
+    content, logo, author, comments, repost = await asyncio.gather(
+        _gather_ordered(
+            _serialize_content(item, is_cover=is_music and index == cover_index)
+            for index, item in enumerate(result.content)
+        ),
+        safe_src(result.platform, "get_logo_path"),
+        _serialize_author(result.author),
+        _gather_ordered(
+            _serialize_comment(comment) for comment in result.comments[:max_comments]
+        ),
+        (
+            _serialize_result(result.repost, max_comments=max_comments)
+            if result.repost
+            else asyncio.sleep(0, None)
+        ),
+    )
 
     return {
         "title": result.title,
@@ -132,23 +169,16 @@ async def _serialize_result(
         "platform": {
             "id": str(result.platform.name),
             "name": result.platform.display_name,
-            "logo": await safe_src(result.platform, "get_logo_path"),
+            "logo": logo,
         },
-        "author": await _serialize_author(result.author),
+        "author": author,
         "content": content,
         "stats": _serialize_stats(result.stats),
-        "comments": [
-            await _serialize_comment(comment)
-            for comment in result.comments[:max_comments]
-        ],
+        "comments": comments,
         "qrcode": None,
         "ai_summary": result.ai_summary,
         "embed_url": result.embed_url,
-        "repost": (
-            await _serialize_result(result.repost, max_comments=max_comments)
-            if result.repost
-            else None
-        ),
+        "repost": repost,
     }
 
 
@@ -163,18 +193,24 @@ async def _serialize_author(author: Author) -> dict[str, Any]:
 
 
 async def _serialize_comment(comment: Comment) -> dict[str, Any]:
+    author, content, replies, parent_author = await asyncio.gather(
+        _serialize_author(comment.author),
+        _gather_ordered(_serialize_content(item) for item in comment.content),
+        _gather_ordered(_serialize_comment(reply) for reply in comment.replies),
+        (
+            _serialize_author(comment.parent_author)
+            if comment.parent_author
+            else asyncio.sleep(0, None)
+        ),
+    )
     return {
-        "author": await _serialize_author(comment.author),
-        "content": [await _serialize_content(item) for item in comment.content],
+        "author": author,
+        "content": content,
         "timestamp": comment.timestamp,
         "formatted_datetime": comment.formatted_datetime,
         "stats": _serialize_stats(comment.stats),
-        "replies": [await _serialize_comment(reply) for reply in comment.replies],
-        "parent_author": (
-            await _serialize_author(comment.parent_author)
-            if comment.parent_author
-            else None
-        ),
+        "replies": replies,
+        "parent_author": parent_author,
     }
 
 
@@ -302,7 +338,8 @@ async def _serialize_content(
 
 async def _display_size(item: MediaContent) -> str:
     try:
-        return await item.get_display_size()
+        async with _resource_limit.get() or contextlib.nullcontext():
+            return await item.get_display_size()
     except Exception:
         return "未知大小"
 

@@ -9,6 +9,7 @@ from ...utils.format import (
     anchor_text,
     append_html_text,
     clean_blank,
+    is_inside,
 )
 
 VIDEO_HEADER = {**DOWNLOADER.headers, "x-app-za": "OS=webplayer", "x-referer": ""}
@@ -121,7 +122,7 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
 
     for element in soup.descendants:
         if skip_parent:
-            if element in skip_parent.descendants:
+            if is_inside(element, skip_parent):
                 continue
             else:
                 skip_parent = None
