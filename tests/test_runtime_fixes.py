@@ -36,7 +36,7 @@ def test_is_inside_uses_identity():
 
 def test_linuxdo_keeps_text_equal_to_quote_content():
     html = (
-        '<aside class="quote"><blockquote><p>same</p></blockquote></aside>'
+        '<aside class="quote"><blockquote><p>quoted</p></blockquote></aside>'
         "<p>same</p>"
     )
     assert "same" in _texts(parse_linuxdo(html))
