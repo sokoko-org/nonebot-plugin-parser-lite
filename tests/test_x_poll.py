@@ -29,6 +29,8 @@ def test_image_poll_and_translation():
     assert [option.votes for option in polls[0].options] == [654, 613, 568, 914]
     assert polls[0].options[0].text == "試着室"
     assert polls[0].closed
+    assert polls[0].close_at is not None
+    assert len(polls[0].close_at) == len("2026-09-28 01:40")
     assert len(quotes) == 1
     assert "如果要系列化的话" in quotes[0].text
     assert "1. 试衣间" in quotes[0].text

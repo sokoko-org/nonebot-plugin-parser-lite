@@ -272,6 +272,7 @@
             {% if poll.total_votes is not none and poll.total_votes != poll.total_voters %}
                 <span>{{ poll.total_votes }} 票</span>
             {% endif %}
+            {% if poll.close_at %}<span class="ml-auto">截止 {{ poll.close_at }}</span>{% endif %}
         </div>
     </div>
 {% endmacro %}

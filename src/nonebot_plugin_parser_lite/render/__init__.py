@@ -402,6 +402,8 @@ class Renderer:
             status.append("多选")
         if item.total_voters is not None:
             status.append(f"{item.total_voters} 人参与")
+        if item.close_at:
+            status.append(f"截止 {item.close_at}")
         parts.append(" · ".join(status))
         return "\n".join(parts)
 

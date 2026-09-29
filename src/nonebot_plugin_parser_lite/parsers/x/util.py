@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 from msgspec import DecodeError
 from msgspec.json import decode
@@ -142,6 +143,17 @@ def _to_int(value: str | None) -> int:
         return 0
 
 
+def _local_time(value: str | None) -> str | None:
+    """将 X 的 UTC ISO 时间转换为本地时间字符串"""
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return value
+    return dt.astimezone().strftime("%Y-%m-%d %H:%M")
+
+
 def parse_poll_card(card: TweetCard | None) -> PollCardData | None:
     """解析 X 投票卡片，兼容纯文字投票和图片投票"""
     if card is None or card.legacy is None:
@@ -186,7 +198,7 @@ def parse_poll_card(card: TweetCard | None) -> PollCardData | None:
     return PollCardData(
         choices=choices,
         closed=bool(final and final.boolean_value),
-        close_at=string_value("end_datetime_utc"),
+        close_at=_local_time(string_value("end_datetime_utc")),
     )
 
 

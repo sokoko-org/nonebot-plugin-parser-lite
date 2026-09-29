@@ -231,6 +231,7 @@ async def test_builtin_template_consumes_theme_data(monkeypatch):
                 "total_voters": 1,
                 "multiple": False,
                 "closed": False,
+                "close_at": "2026-09-28 01:40",
             },
         ]
     )
@@ -247,4 +248,5 @@ async def test_builtin_template_consumes_theme_data(monkeypatch):
     assert "投票" in html
     assert "h-16 w-16 shrink-0" in html
     assert 'alt="A"' in html
+    assert "截止 2026-09-28 01:40" in html
     assert "[00:01.00]hello" in html
