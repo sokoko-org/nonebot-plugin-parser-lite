@@ -168,6 +168,19 @@ def extract_from_html(html: str) -> list[ContentItem]:
     for noscript in soup.find_all("noscript"):
         noscript.decompose()
 
+    # 图片描述在 .img-desc, 不是 img.alt
+    for description in soup.select(".img-desc"):
+        previous = description.previous_sibling
+        while isinstance(previous, NavigableString) and not str(previous).strip():
+            previous = previous.previous_sibling
+        if not isinstance(previous, Tag):
+            continue
+        if not (image := previous.find("img")):
+            continue
+        if caption := description.get_text(" ", strip=True):
+            image["alt"] = image.get("alt") or caption
+            description.decompose()
+
     result: list[ContentItem] = []
     text_buffer: list[str] = []
 
@@ -184,9 +197,11 @@ def extract_from_html(html: str) -> list[ContentItem]:
                 or element.get("data-default-watermark-src")
             ):
                 flush_text()
+                alt = element.get("alt")
                 result.append(
-                    Creator.image(
+                    Creator.graphic(
                         url=str(src),
+                        alt=str(alt) if alt else None,
                     )
                 )
         elif isinstance(element, Tag) and element.name in HTML_NEWLINE_TAGS:
