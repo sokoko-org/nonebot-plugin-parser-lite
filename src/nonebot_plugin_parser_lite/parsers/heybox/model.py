@@ -175,7 +175,7 @@ def extract_from_html(html: str) -> list[ContentItem]:
             previous = previous.previous_sibling
         if not isinstance(previous, Tag):
             continue
-        if not (image := previous.find("img")):
+        if not (image := previous if previous.name == "img" else previous.find("img")): 
             continue
         if caption := description.get_text(" ", strip=True):
             image["alt"] = image.get("alt") or caption
