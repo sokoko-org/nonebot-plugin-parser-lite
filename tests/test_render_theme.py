@@ -68,18 +68,22 @@ async def test_theme_manager_discovers_external_theme(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_music_theme_data_uses_content_for_cover_and_plain_text(monkeypatch):
+async def test_music_theme_data_uses_content_for_cover_and_plain_text(
+    monkeypatch, tmp_path
+):
     async def logo_path(self):
         return SyncPath("logo.webp")
 
     monkeypatch.setattr(Platform, "get_logo_path", logo_path)
+    cover_path = tmp_path / "cover.jpg"
+    cover_path.write_bytes(b"cover")
     result = ParseResult(
         platform=Platform(PlatformEnum.NETEASE, "网易云音乐"),
         author=Author("singer"),
         url="https://music.example.com/song/1",
         content=[
             ImageContent(
-                path_task=ResolvedPathTask(SyncPath("cover.jpg")),  # type: ignore[arg-type]
+                path_task=ResolvedPathTask(cover_path),  # type: ignore[arg-type]
             ),
             "[00:01.00]hello",
         ],
@@ -100,6 +104,7 @@ async def test_music_theme_data_uses_content_for_cover_and_plain_text(monkeypatc
         "text",
     ]
     assert data["post"]["content"][0]["alt"] == "专辑封面"
+    assert data["post"]["content"][0]["src"] == cover_path.as_uri()
     assert data["post"]["content"][1]["text"] == "[00:01.00]hello"
     assert "lyric" not in data["post"]["extra"]
     assert data["post"]["extra"]["album"] == "album"
@@ -116,11 +121,13 @@ async def test_builtin_icon_css_is_injected_before_theme_styles():
 
 
 @pytest.mark.asyncio
-async def test_theme_data_is_json_like(monkeypatch):
+async def test_theme_data_is_json_like(monkeypatch, tmp_path):
     async def logo_path(self):
         return SyncPath("logo.webp")
 
     monkeypatch.setattr(Platform, "get_logo_path", logo_path)
+    image_path = tmp_path / "image.png"
+    image_path.write_bytes(b"image")
     result = ParseResult(
         platform=Platform(PlatformEnum.BILIBILI, "哔哩哔哩"),
         author=Author("tester"),
@@ -128,7 +135,7 @@ async def test_theme_data_is_json_like(monkeypatch):
         content=[
             "hello",
             ImageContent(
-                path_task=ResolvedPathTask(SyncPath("image.png")),  # type: ignore[arg-type]
+                path_task=ResolvedPathTask(image_path),  # type: ignore[arg-type]
             ),
         ],
     )
@@ -154,6 +161,7 @@ async def test_theme_data_is_json_like(monkeypatch):
         "text",
         "image",
     ]
+    assert data["post"]["content"][1]["src"] == image_path.as_uri()
 
 
 @pytest.mark.asyncio

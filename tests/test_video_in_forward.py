@@ -12,7 +12,6 @@ from render_test_support import (
     ImageContent,
     Renderer,
     ResolvedPathTask,
-    SyncPath,
     UniHelper,
     make_result,
     pconfig,
@@ -152,10 +151,12 @@ async def test_summary_forces_forward_and_includes_deferred_video(
 
 @pytest.mark.asyncio
 async def test_summary_keeps_deferred_media_in_content_order(
-    monkeypatch, fake_media_segments
+    monkeypatch, fake_media_segments, tmp_path
 ):
     result = make_result()
-    result.content.append(ImageContent(ResolvedPathTask(SyncPath("image.png"))))  # pyright: ignore[reportArgumentType]
+    image_path = tmp_path / "image.png"
+    image_path.write_bytes(b"image")
+    result.content.append(ImageContent(ResolvedPathTask(image_path)))  # pyright: ignore[reportArgumentType]
     captured = capture_forward_nodes(monkeypatch)
     summary = UniMessage([Text("summary")])
     monkeypatch.setattr(pconfig, "plite_video_in_forward", False)

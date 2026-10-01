@@ -5,6 +5,7 @@ import tempfile
 from types import ModuleType
 from typing import Any
 
+from anyio import Path
 import nonebot
 
 ROOT = SyncPath(__file__).parents[1]
@@ -77,23 +78,28 @@ __all__ = [
 
 
 class ResolvedPathTask:
-    def __init__(self, path: SyncPath):
-        self.path = path
+    def __init__(self, path: SyncPath | Path):
+        self.path = Path(path)
         self.url = str(path)
         self.ext_headers = {}
         self.use_curl_cffi = False
 
     def __await__(self) -> Iterator[Any]:
-        async def resolve() -> SyncPath:
+        async def resolve() -> Path:
             return self.path
 
         return resolve().__await__()
 
 
 def make_result() -> ParseResult:
+    media_dir = SyncPath(tempfile.mkdtemp(prefix="media-", dir=store_root))
+    video_path = media_dir / "video.mp4"
+    cover_path = media_dir / "cover.png"
+    video_path.write_bytes(b"video")
+    cover_path.write_bytes(b"cover")
     video = VideoContent(
-        path_task=ResolvedPathTask(SyncPath("video.mp4")),  # type: ignore[arg-type]
-        cover=ResolvedPathTask(SyncPath("cover.png")),  # type: ignore[arg-type]
+        path_task=ResolvedPathTask(video_path),  # type: ignore[arg-type]
+        cover=ResolvedPathTask(cover_path),  # type: ignore[arg-type]
     )
     return ParseResult(
         platform=Platform(PlatformEnum.BILIBILI, "哔哩哔哩"),
