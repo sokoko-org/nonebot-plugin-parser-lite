@@ -323,7 +323,7 @@ class Renderer:
 
                 for seg in processed_segs:
                     if isinstance(seg, str):
-                        seg = seg.strip("\n")
+                        seg = seg.rstrip("\n")
                     seg_text_len = len(seg) if isinstance(seg, str) else 0
 
                     # 如果加上当前节点会超出单个 forward 限制，则先 flush 当前 chunk
