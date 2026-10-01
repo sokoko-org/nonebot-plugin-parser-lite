@@ -28,6 +28,7 @@ from ..utils.common import (
 )
 from ..utils.ffmpeg import FFmpeg
 from .client import RetryableDownloadError, UniHttpClient, UniResponse
+from .size import DownloadSizeBudget
 from .task import auto_task
 
 _RE_RANGE_PATTERN = re.compile(r"bytes\s+(\d+)-\d+/(\d+|\*)")
@@ -144,6 +145,7 @@ class StreamDownloader:
         ext_headers: dict[str, str] | None = None,
         cache_type: str = CacheManager.MEDIA,
         use_curl_cffi: bool = False,
+        on_size: Callable[[int], None] | None = None,
     ) -> Path:
         """
         :param url: 下载文件的链接地址
@@ -154,6 +156,7 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :param cache_type: 缓存类型
         :param use_curl_cffi: 是否使用 curl_cffi 下载
+        :param on_size: 当前文件实际大小回调，包含缓存及断点续传；可抛出大小限制异常
 
         :return: 下载完成后的本地文件路径
         :raise ZeroSizeException: 资源大小为 0 时抛出
@@ -174,10 +177,20 @@ class StreamDownloader:
         download_key = str(base_path)
         active_download = self._active_downloads.get(download_key)
         if active_download is not None:
-            return await active_download
+            if on_size is None:
+                return await active_download
+            # 复用其他任务时也监测已有文件，但取消本次等待不影响共享下载。
+            while not active_download.done():
+                on_size(await self.__get_partial_size(partial_path))
+                await asyncio.wait((active_download,), timeout=0.1)
+            result = await asyncio.shield(active_download)
+            on_size((await result.stat()).st_size)
+            return result
 
         async def __download_task() -> Path:
             if cached_path := await CacheManager.get_cached_file(base_path):
+                if on_size is not None:
+                    on_size((await cached_path.stat()).st_size)
                 return cached_path
             result = await self.__download_with_retry(
                 download_urls=download_urls,
@@ -188,7 +201,10 @@ class StreamDownloader:
                 desc=f"{cache_name}{default_suffix}",
                 retry_http_statuses=frozenset(retry_http_statuses),
                 use_curl_cffi=use_curl_cffi,
+                on_size=on_size,
             )
+            if on_size is not None:
+                on_size((await result.stat()).st_size)
             await CacheManager.set_cached_file(base_path, result)
             return result
 
@@ -197,7 +213,7 @@ class StreamDownloader:
 
         try:
             return await download_task
-        except (SizeLimitException, ZeroSizeException):
+        except (SizeLimitException, ZeroSizeException, asyncio.CancelledError):
             await safe_unlink(partial_path)
             raise
         finally:
@@ -214,6 +230,7 @@ class StreamDownloader:
         desc: str,
         retry_http_statuses: frozenset[int],
         use_curl_cffi: bool = False,
+        on_size: Callable[[int], None] | None = None,
     ) -> Path:
         last_error: Exception | None = None
 
@@ -227,6 +244,7 @@ class StreamDownloader:
                     desc=desc,
                     retry_http_statuses=retry_http_statuses,
                     use_curl_cffi=use_curl_cffi,
+                    on_size=on_size,
                 )
                 suffix = await _detect_file_suffix(
                     partial_path,
@@ -237,6 +255,8 @@ class StreamDownloader:
                 file_path = base_path.with_suffix(suffix)
                 if await file_path.exists():
                     await safe_unlink(partial_path)
+                    if on_size is not None:
+                        on_size((await file_path.stat()).st_size)
                     return file_path
                 await partial_path.rename(file_path)
                 return file_path
@@ -247,6 +267,8 @@ class StreamDownloader:
                 last_error = e
                 if not last_error.keep_part:
                     await safe_unlink(partial_path)
+                    if on_size is not None:
+                        on_size(0)
                 if retry >= self.MAX_RETRIES:
                     break
 
@@ -348,6 +370,7 @@ class StreamDownloader:
         downloaded: int,
         total_size: int | None,
         url: str,
+        on_size: Callable[[int], None] | None = None,
     ) -> None:
         mode = "ab" if downloaded > 0 else "wb"
         current_size = downloaded
@@ -357,6 +380,8 @@ class StreamDownloader:
                 update(advance=current_size)
             async with aiofiles.open(file_path, mode) as file:
                 async for chunk in response.aiter_bytes(1024 * 1024):
+                    if on_size is not None:
+                        on_size(current_size + len(chunk))
                     await file.write(chunk)
                     current_size += len(chunk)
                     update(advance=len(chunk))
@@ -394,7 +419,11 @@ class StreamDownloader:
 
     @staticmethod
     async def __get_partial_size(file_path: Path) -> int:
-        return (await file_path.stat()).st_size if await file_path.exists() else 0
+        try:
+            return (await file_path.stat()).st_size
+        except FileNotFoundError:
+            # 下载完成或重试清理时，临时文件可能已被移动或删除。
+            return 0
 
     def __prepare_response(
         self,
@@ -417,6 +446,7 @@ class StreamDownloader:
         downloaded: int,
         retry_http_statuses: Collection[int],
         use_curl_cffi: bool,
+        on_size: Callable[[int], None] | None = None,
     ) -> None:
         request_headers = self.__make_range_headers(headers, downloaded)
         async with self.client.stream(
@@ -426,7 +456,7 @@ class StreamDownloader:
                 response, downloaded, url, retry_http_statuses
             )
             await self.__write_response(
-                response, file_path, desc, downloaded, total_size, url
+                response, file_path, desc, downloaded, total_size, url, on_size
             )
             await self.__validate_downloaded_size(file_path, total_size)
 
@@ -438,8 +468,11 @@ class StreamDownloader:
         desc: str,
         retry_http_statuses: Collection[int],
         use_curl_cffi: bool,
+        on_size: Callable[[int], None] | None = None,
     ):
         downloaded = await self.__get_partial_size(file_path)
+        if on_size is not None:
+            on_size(downloaded)
         await self.__download_response(
             url,
             file_path,
@@ -448,6 +481,7 @@ class StreamDownloader:
             downloaded,
             retry_http_statuses,
             use_curl_cffi,
+            on_size,
         )
 
     @auto_task
@@ -462,6 +496,7 @@ class StreamDownloader:
         ext_headers: dict[str, str] | None = None,
         cache_type: str = CacheManager.MEDIA,
         use_curl_cffi: bool = False,
+        on_size: Callable[[int], None] | None = None,
     ) -> Path:
         """
         下载普通视频
@@ -474,6 +509,7 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :param cache_type: 缓存类型
         :param use_curl_cffi: 是否使用 curl_cffi 下载
+        :param on_size: 当前源文件实际大小回调
 
         :return: 下载完成后的视频文件路径
         :raise ZeroSizeException: 资源大小为 0 时抛出
@@ -489,6 +525,7 @@ class StreamDownloader:
             ext_headers=ext_headers,
             cache_type=cache_type,
             use_curl_cffi=use_curl_cffi,
+            on_size=on_size,
         )
 
     @auto_task
@@ -625,6 +662,7 @@ class StreamDownloader:
         cache_type: str = CacheManager.MEDIA,
         use_curl_cffi: bool = False,
         convert_to_mp3: bool = False,
+        on_size: Callable[[int], None] | None = None,
     ) -> Path:
         """
         下载音频
@@ -638,6 +676,7 @@ class StreamDownloader:
         :param cache_type: 缓存类型
         :param use_curl_cffi: 是否使用 curl_cffi 下载
         :param convert_to_mp3: 下载完成后是否使用 ffmpeg 转换为 mp3
+        :param on_size: 当前源文件实际大小回调（转码前）
 
         :return: 下载完成后的音频文件路径
         :raise DownloadException: 下载过程中发生错误时抛出
@@ -651,6 +690,7 @@ class StreamDownloader:
             ext_headers=ext_headers,
             cache_type=cache_type,
             use_curl_cffi=use_curl_cffi,
+            on_size=on_size,
         )
         if convert_to_mp3:
             return await FFmpeg.convert_to_mp3(audio_path)
@@ -712,6 +752,7 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :param use_curl_cffi: 是否使用 curl_cffi 下载
         :return: 合并后的视频文件本地路径(mp4)
+        :raise SizeLimitException: 两路源流总大小或最终 MP4 超过配置上限
         :raise DownloadException: 下载或合并过程中发生错误时抛出
         """
         merge_cache_key = compose_cache_key("video", cache_key, "merged")
@@ -720,10 +761,13 @@ class StreamDownloader:
         merge_name = generate_file_name(url=video_url, cache_key=merge_cache_key)
         cache_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
         output_path = cache_dir / f"{merge_name}.mp4"
+        budget = DownloadSizeBudget(pconfig.max_size)
         if await output_path.exists():
+            budget.check((await output_path.stat()).st_size)
             return output_path
-        v_path, a_path = await asyncio.gather(
-            self.download_video(
+
+        async def download_video_source() -> Path:
+            return await self.download_video(
                 url=video_url,
                 fallback_urls=video_fallback_urls,
                 retry_http_statuses=retry_http_statuses,
@@ -731,8 +775,11 @@ class StreamDownloader:
                 cache_variant="source" if cache_key is not None else None,
                 ext_headers=ext_headers,
                 use_curl_cffi=use_curl_cffi,
-            ),
-            self.download_audio(
+                on_size=partial(budget.update, "video"),
+            )
+
+        async def download_audio_source() -> Path:
+            return await self.download_audio(
                 url=audio_url,
                 fallback_urls=audio_fallback_urls,
                 retry_http_statuses=retry_http_statuses,
@@ -740,9 +787,30 @@ class StreamDownloader:
                 cache_variant="source" if cache_key is not None else None,
                 ext_headers=ext_headers,
                 use_curl_cffi=use_curl_cffi,
-            ),
+                on_size=partial(budget.update, "audio"),
+            )
+
+        tasks = [
+            asyncio.create_task(download_video_source()),
+            asyncio.create_task(download_audio_source()),
+        ]
+        try:
+            v_path, a_path = await asyncio.gather(*tasks)
+        finally:
+            for task in tasks:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+        result = await FFmpeg.merge_av(
+            v_path=v_path, a_path=a_path, file_name=merge_name
         )
-        return await FFmpeg.merge_av(v_path=v_path, a_path=a_path, file_name=merge_name)
+        try:
+            budget.check((await result.stat()).st_size)
+        except SizeLimitException:
+            await safe_unlink(result)
+            raise
+        return result
 
     @staticmethod
     @contextlib.contextmanager
