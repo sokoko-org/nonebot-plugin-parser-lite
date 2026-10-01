@@ -3,7 +3,12 @@ import re
 from bs4 import BeautifulSoup, Comment, Tag
 from bs4.element import NavigableString, PageElement
 
-from ...utils.format import HTML_NEWLINE_TAGS, clean_blank
+from ...utils.format import (
+    HTML_NEWLINE_TAGS,
+    clean_blank,
+    html_boundary,
+    normalize_html_text,
+)
 
 _CARD_ICON_RE = re.compile(r"timeline_card_small_([a-z0-9]+)", re.I)
 
@@ -44,7 +49,7 @@ def weibo_long_html_to_raw(html: str) -> str:
             return
 
         if node.name in HTML_NEWLINE_TAGS:
-            parts.append("\n")
+            parts.append(html_boundary(node))
             if node.name == "br":
                 return
 
@@ -76,6 +81,8 @@ def weibo_long_html_to_raw(html: str) -> str:
 
         for child in node.children:
             walk(child)
+        if node.name in HTML_NEWLINE_TAGS:
+            parts.append(html_boundary(node))
 
     walk(soup)
-    return "".join(parts)
+    return normalize_html_text(parts)

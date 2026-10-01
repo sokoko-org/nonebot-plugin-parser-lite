@@ -1,7 +1,6 @@
 from nonebot_plugin_alconna.uniseg import (
     File,
     Image,
-    Reference,
     Text,
     UniMessage,
     Video,
@@ -37,10 +36,11 @@ def fake_media_segments(monkeypatch):
 
 def capture_forward_nodes(monkeypatch) -> list[list[ForwardNodeInner]]:
     captured: list[list[ForwardNodeInner]] = []
+    original = UniHelper.construct_forward_message
 
     def construct(segments: list[ForwardNodeInner], user_id=None):
         captured.append(list(segments))
-        return Reference(nodes=[])
+        return original(segments, user_id="123")
 
     monkeypatch.setattr(UniHelper, "construct_forward_message", construct)
     return captured

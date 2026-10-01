@@ -1,55 +1,9 @@
 from datetime import datetime
-from importlib.util import module_from_spec, spec_from_file_location
-from pathlib import Path
-import sys
-from types import ModuleType
 
 import pytest
+from render_test_support import ROOT  # noqa: F401 初始化公共插件测试环境
 
-ROOT = Path(__file__).parents[1]
-SOURCE = ROOT / "src/nonebot_plugin_parser_lite/parsers/douban/util.py"
-TEST_PACKAGE = "_parser_lite_douban_date_test"
-
-
-def _package(name: str) -> ModuleType:
-    package = ModuleType(name)
-    package.__path__ = []
-    sys.modules[name] = package
-    return package
-
-
-def _load_parse_date():
-    _package(TEST_PACKAGE)
-    _package(f"{TEST_PACKAGE}.parsers")
-    _package(f"{TEST_PACKAGE}.parsers.douban")
-    _package(f"{TEST_PACKAGE}.utils")
-
-    creator = ModuleType(f"{TEST_PACKAGE}.creator")
-    creator.Creator = object  # pyright: ignore[reportAttributeAccessIssue]
-    sys.modules[creator.__name__] = creator
-
-    data = ModuleType(f"{TEST_PACKAGE}.data")
-    data.ContentItem = object  # pyright: ignore[reportAttributeAccessIssue]
-    sys.modules[data.__name__] = data
-
-    formatting = ModuleType(f"{TEST_PACKAGE}.utils.format")
-    formatting.HTML_NEWLINE_TAGS = frozenset()  # pyright: ignore[reportAttributeAccessIssue]
-    formatting.anchor_text = lambda *_args: None  # pyright: ignore[reportAttributeAccessIssue]
-    formatting.append_html_text = lambda *_args: None  # pyright: ignore[reportAttributeAccessIssue]
-    formatting.clean_blank = lambda *_args: None  # pyright: ignore[reportAttributeAccessIssue]
-    sys.modules[formatting.__name__] = formatting
-
-    module_name = f"{TEST_PACKAGE}.parsers.douban.util"
-    spec = spec_from_file_location(module_name, SOURCE)
-    assert spec is not None
-    assert spec.loader is not None
-    module = module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module.parse_date
-
-
-parse_date = _load_parse_date()
+from nonebot_plugin_parser_lite.parsers.douban.util import parse_date
 
 
 @pytest.mark.parametrize(

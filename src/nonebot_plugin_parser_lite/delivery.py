@@ -17,14 +17,19 @@ from nonebot_plugin_alconna.uniseg import (
 )
 from nonebot_plugin_alconna.uniseg.segment import Media
 
+from .config import pconfig
 from .data import ParseResult
 from .helper import media_role
-from .render import (
+from .utils.message import (
     MAX_FORWARD_NODES,
     MAX_FORWARD_TEXT_LEN,
-    SPLIT_THRESHOLD,
-    split_text_by_length_with_punct,
+    append_message_part,
+    message_segments,
+    pack_forward_nodes,
 )
+
+SPLIT_THRESHOLD = pconfig.forward_text_threshold
+
 
 # 仅匹配协议端明确透传的媒体上传错误，不能仅凭 retcode 或普通超时降级
 _UPLOAD_ERROR = re.compile(
@@ -62,52 +67,16 @@ def _copy_node(node: CustomNode, content: UniMessage) -> CustomNode:
 
 
 def _pack_nodes(nodes: list[CustomNode]) -> list[UniMessage]:
-    """新增的说明也计入长度，并保留混合图文节点的顺序"""
-    split_limit = min(MAX_FORWARD_TEXT_LEN, max(1, SPLIT_THRESHOLD))
-    split_nodes: list[CustomNode] = []
-    for node in nodes:
-        content = UniMessage(node.content)
-        fragment = UniMessage()
-        length = 0
-        for segment in content:
-            parts = (
-                [
-                    Text(text)
-                    for text in split_text_by_length_with_punct(
-                        segment.text, split_limit
-                    )
-                ]
-                if isinstance(segment, Text)
-                else [segment]
-            )
-            for part in parts:
-                part_length = len(part.text) if isinstance(part, Text) else 0
-                if fragment and length + part_length > split_limit:
-                    split_nodes.append(_copy_node(node, fragment))
-                    fragment = UniMessage()
-                    length = 0
-                fragment.append(part)
-                length += part_length
-        if fragment:
-            split_nodes.append(_copy_node(node, fragment))
-
-    messages: list[UniMessage] = []
-    chunk: list[CustomNode] = []
-    length = 0
-    for node in split_nodes:
-        node_length = len(UniMessage(node.content).extract_plain_text())
-        if chunk and (
-            len(chunk) >= MAX_FORWARD_NODES
-            or length + node_length > MAX_FORWARD_TEXT_LEN
-        ):
-            messages.append(UniMessage(Reference(nodes=list(chunk))))
-            chunk.clear()
-            length = 0
-        chunk.append(node)
-        length += node_length
-    if chunk:
-        messages.append(UniMessage(Reference(nodes=chunk)))
-    return messages
+    return [
+        UniMessage(Reference(nodes=packet))
+        for packet in pack_forward_nodes(
+            nodes,
+            SPLIT_THRESHOLD,
+            hard_limit=MAX_FORWARD_TEXT_LEN,
+            max_nodes=MAX_FORWARD_NODES,
+            copy_node=_copy_node,
+        )
+    ]
 
 
 @dataclass(slots=True)
@@ -132,7 +101,7 @@ def _fallback_media(
             content.append(deepcopy(thumbnail))
     if role != "summary":
         label = "视频" if is_video else _MEDIA_LABELS.get(segment.type, "媒体")
-        content.append(Text(f"\n[{label}已省略，请通过原链接查看]\n"))
+        content.append(Text(f"[{label}已省略，请通过原链接查看]"))
     return content, True, False
 
 
@@ -142,14 +111,19 @@ def _fallback_node(
     content = UniMessage()
     replaced_media = False
     has_summary = False
-    for segment in UniMessage(node.content):
+    previous_notice = False
+    for segment in message_segments(node.content):
         if isinstance(segment, Text):
-            content.append(deepcopy(segment))
+            append_message_part(content, deepcopy(segment), separate=previous_notice)
+            previous_notice = False
             continue
         if not isinstance(segment, Media):
             return None
         parts, replaced, summary = _fallback_media(segment, video_only=video_only)
-        content.extend(parts)
+        for part in parts:
+            notice = replaced and isinstance(part, Text)
+            append_message_part(content, part, separate=previous_notice or notice)
+            previous_notice = notice
         replaced_media |= replaced
         has_summary |= summary
     return replace(node, content=content), replaced_media, has_summary

@@ -11,8 +11,11 @@ from ...creator import Creator
 from ...data import ContentItem
 from ...utils.format import (
     HTML_NEWLINE_TAGS,
+    HtmlBreak,
     append_html_text,
     clean_blank,
+    html_boundary,
+    iter_html_content,
     replace_anchor_hrefs,
     replace_placeholder_to_sticker,
 )
@@ -188,7 +191,10 @@ def extract_from_html(html: str) -> list[ContentItem]:
         append_html_text(result, text_buffer)
         text_buffer.clear()
 
-    for element in soup.descendants:
+    for element in iter_html_content(soup):
+        if isinstance(element, HtmlBreak):
+            text_buffer.append(element)
+            continue
         # 处理图片标签
         if isinstance(element, Tag) and element.name == "img":
             if src := (
@@ -205,7 +211,7 @@ def extract_from_html(html: str) -> list[ContentItem]:
                     )
                 )
         elif isinstance(element, Tag) and element.name in HTML_NEWLINE_TAGS:
-            text_buffer.append("\n")
+            text_buffer.append(html_boundary(element))
         # 处理纯文本节点
         elif isinstance(element, NavigableString):
             if text := clean_blank(str(element)):

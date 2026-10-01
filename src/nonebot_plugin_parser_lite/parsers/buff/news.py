@@ -6,9 +6,12 @@ from ...creator import Creator
 from ...data import ContentItem
 from ...utils.format import (
     HTML_NEWLINE_TAGS,
+    HtmlBreak,
     append_html_text,
     clean_blank,
+    html_boundary,
     is_inside,
+    iter_html_content,
     replace_anchor_hrefs,
 )
 from .share import ShareData
@@ -41,16 +44,19 @@ class News(Struct):
             text_buffer.clear()
 
         skip_parent: Tag | None = None
-        for element in soup.descendants:
+        for element in iter_html_content(soup):
             # 遍历中 decompose 会切断 descendants 链，改为跳过已处理子树
             if skip_parent is not None:
                 if is_inside(element, skip_parent):
                     continue
                 skip_parent = None
             # 标签节点
+            if isinstance(element, HtmlBreak):
+                text_buffer.append(element)
+                continue
             if isinstance(element, Tag):
                 if element.name in HTML_NEWLINE_TAGS:
-                    text_buffer.append("\n")
+                    text_buffer.append(html_boundary(element))
                     continue
                 if element.name == "div" and "video-content" in (
                     element.get("class") or []

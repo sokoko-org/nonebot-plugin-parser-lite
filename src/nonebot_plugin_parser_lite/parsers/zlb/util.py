@@ -8,10 +8,13 @@ from ...creator import Creator
 from ...data import ContentItem, LinkContent, PollContent
 from ...utils.format import (
     HTML_NEWLINE_TAGS,
+    HtmlBreak,
     anchor_text,
     append_html_text,
     clean_blank,
+    html_boundary,
     is_inside,
+    iter_html_content,
 )
 
 
@@ -52,12 +55,15 @@ def _iter_media_and_text(
     polls: dict[str, PollContent],
 ):
     skip_parent: Tag | None = None
-    for element in soup.descendants:
+    for element in iter_html_content(soup):
         if skip_parent:
             if is_inside(element, skip_parent):
                 continue
             else:
                 skip_parent = None
+        if isinstance(element, HtmlBreak):
+            yield element
+            continue
         if isinstance(element, Tag):
             if element.name == "aside" and "quote" in (element.get("class") or []):
                 if quote := _parse_quote(element):
@@ -100,7 +106,7 @@ def _iter_media_and_text(
                 continue
 
             if element.name in HTML_NEWLINE_TAGS:
-                yield "\n"
+                yield html_boundary(element)
                 continue
 
             if element.name == "img":

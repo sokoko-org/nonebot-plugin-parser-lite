@@ -1,10 +1,10 @@
-from collections.abc import Callable, MutableSequence, Sequence
+from collections.abc import Callable, Iterator, MutableSequence, Sequence
 import re
 from typing import Final, Literal
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
-from bs4.element import NavigableString, Tag
+from bs4.element import NavigableString, PageElement, Tag
 
 from ..constants import STICKER_CDN
 from ..creator import Creator
@@ -92,13 +92,67 @@ def clean_blank(value: str) -> str | None:
     return text or None
 
 
+class HtmlBreak(str):
+    """区分 HTML 块边界与用户显式写出的 br。"""
+
+    explicit: bool
+    parent: Tag | None
+
+    def __new__(cls, *, explicit: bool = False, parent: Tag | None = None):
+        value = super().__new__(cls, "\n")
+        value.explicit = explicit
+        value.parent = parent
+        return value
+
+
+def html_boundary(tag: Tag) -> HtmlBreak:
+    return HtmlBreak(explicit=tag.name == "br")
+
+
+def iter_html_content(root: Tag) -> Iterator[PageElement | HtmlBreak]:
+    """按文档顺序遍历，补出块的结束边界；保留父级供解析器跳过子树。"""
+    stack = [(iter(root.children), root)]
+    while stack:
+        children, parent = stack[-1]
+        try:
+            element = next(children)
+        except StopIteration:
+            stack.pop()
+            if parent is not root and parent.name in HTML_NEWLINE_TAGS:
+                if parent.name not in {"br", "hr"}:
+                    yield HtmlBreak(parent=parent)
+            continue
+        yield element
+        if isinstance(element, Tag):
+            stack.append((iter(element.children), element))
+
+
+def normalize_html_text(parts: Sequence[str]) -> str:
+    output: list[str] = []
+    generated_boundary = False
+    for part in parts:
+        if isinstance(part, HtmlBreak):
+            if part.explicit:
+                if generated_boundary:
+                    output.pop()
+                output.append("\n")
+                generated_boundary = False
+            elif output and not output[-1].endswith("\n"):
+                output.append("\n")
+                generated_boundary = True
+        elif part:
+            output.append(part)
+            generated_boundary = False
+    if generated_boundary:
+        output.pop()
+    return "".join(output)
+
+
 def append_html_text(
     result: MutableSequence[ContentItem], buffer: Sequence[str]
 ) -> None:
-    """合并连续 HTML 文本，并保留标签产生的换行"""
-    if not buffer:
-        return
-    if normalized := "".join(buffer).strip():
+    """合并 HTML 文本：块边界去重，显式 br 保留。"""
+    if normalized := normalize_html_text(buffer):
         result.append(normalized)
 
 
@@ -106,15 +160,17 @@ def html_to_text(root: BeautifulSoup | Tag | str) -> str:
     """按 HTML 标签语义提取文本"""
     parts: list[str] = []
     if isinstance(root, str):
-        root = BeautifulSoup(root)
-    for element in root.descendants:
-        if isinstance(element, Tag):
+        root = BeautifulSoup(root, "html.parser")
+    for element in iter_html_content(root):
+        if isinstance(element, HtmlBreak):
+            parts.append(element)
+        elif isinstance(element, Tag):
             if element.name in HTML_NEWLINE_TAGS:
-                parts.append("\n")
+                parts.append(html_boundary(element))
         elif isinstance(element, NavigableString):
             if text := clean_blank(str(element)):
                 parts.append(text)
-    return "".join(parts).strip()
+    return normalize_html_text(parts)
 
 
 def anchor_text(element: Tag, base_url: str) -> str | None:

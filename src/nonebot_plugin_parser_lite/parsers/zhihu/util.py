@@ -6,10 +6,13 @@ from ...data import ContentItem
 from ...download import DOWNLOADER
 from ...utils.format import (
     HTML_NEWLINE_TAGS,
+    HtmlBreak,
     anchor_text,
     append_html_text,
     clean_blank,
+    html_boundary,
     is_inside,
+    iter_html_content,
 )
 
 VIDEO_HEADER = {**DOWNLOADER.headers, "x-app-za": "OS=webplayer", "x-referer": ""}
@@ -120,15 +123,18 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
     """
     skip_parent: Tag | None = None
 
-    for element in soup.descendants:
+    for element in iter_html_content(soup):
         if skip_parent:
             if is_inside(element, skip_parent):
                 continue
             else:
                 skip_parent = None
+        if isinstance(element, HtmlBreak):
+            yield element
+            continue
         if isinstance(element, Tag):
             if element.name in HTML_NEWLINE_TAGS:
-                yield "\n"
+                yield html_boundary(element)
                 continue
 
             if _is_video_box(element):
