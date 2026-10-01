@@ -371,7 +371,7 @@ class Renderer:
             nodes: list[ForwardNodeInner | MessageText] = []
             text_buffer: list[TextPart] = []
             author_prefix_pending = True
-            if title := pr.title:
+            if (title := pr.title) and title.strip():
                 nodes.append(
                     MessageText(author_name, [TextPart(title)], False, separate=True)
                 )
