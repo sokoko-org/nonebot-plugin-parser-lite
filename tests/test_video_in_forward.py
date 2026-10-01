@@ -175,3 +175,40 @@ async def test_summary_keeps_deferred_media_in_content_order(
     assert isinstance(captured[0][2], UniMessage)
     assert any(isinstance(segment, Video) for segment in captured[0][2])
     assert isinstance(captured[0][3], Image)
+
+@pytest.mark.asyncio
+async def test_title_node_has_no_trailing_newline_in_forward(
+    monkeypatch, fake_media_segments
+):
+    result = make_result()
+    result.title = "标题"
+    result.content.append("正文\n   第二段\ngg")
+    captured = capture_forward_nodes(monkeypatch)
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload", False)
+    monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
+
+    _ = [message async for message in Renderer().send_content(result)]
+
+    assert len(captured) == 1
+    assert captured[0][0] == "标题"
+    assert isinstance(captured[0][1], Image)
+    assert isinstance(captured[0][2], Video)
+    assert captured[0][3] == "tester：正文\n   第二段\ngg"
+
+
+@pytest.mark.asyncio
+async def test_title_is_separated_from_text_in_single_message(
+    monkeypatch, fake_media_segments
+):
+    result = make_result()
+    result.title = "标题"
+    result.content = ["正文\n   第二段\ngg"]
+    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+
+    messages = [message async for message in Renderer().send_content(result)]
+
+    assert len(messages) == 1
+    assert messages[0].extract_plain_text() == "标题\ntester：正文\n   第二段\ngg"
