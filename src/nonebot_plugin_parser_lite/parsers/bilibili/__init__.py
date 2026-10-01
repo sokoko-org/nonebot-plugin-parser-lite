@@ -8,7 +8,6 @@ from google.protobuf.json_format import MessageToJson
 from msgspec import convert
 from nonebot import logger
 
-from ...download.size import DownloadSizeBudget
 from ...exception import DownloadException, TipException
 from ...utils.bilibili.a2v import bv2av
 from ...utils.bilibili.bangumi import Bangumi
@@ -332,27 +331,6 @@ class BilibiliParser(BaseParser):
             cache_key += f":audio:{audio_stream.audio_quality.value}"
         retryable_http_statuses = self.BILI_RETRYABLE_HTTP_STATUSES
 
-        async def probe_head_size(url: str) -> int | None:
-            return await DOWNLOADER.head_size(
-                url=url,
-                ext_headers=self.headers,
-            )
-
-        source_sizes = await asyncio.gather(
-            *(
-                probe_source_size(urls, probe_head_size)
-                for urls in (video_urls, audio_urls)
-                if urls
-            ),
-        )
-        known_size = sum(size for size in source_sizes if size is not None and size > 0)
-        # 部分已知大小可用于提前拦截，但只有完整总大小才能用于展示。
-        total_size = (
-            known_size
-            if all(size is not None and size > 0 for size in source_sizes)
-            else None
-        )
-
         class BiliVideoDownloader:
             def __init__(
                 self,
@@ -366,8 +344,6 @@ class BilibiliParser(BaseParser):
                 self.ext_headers = ext_headers
 
             async def __call__(self) -> Path:
-                budget = DownloadSizeBudget(pconfig.max_size)
-                budget.check(known_size)
                 # 有单独音频流时，走 av 合并
                 if self.audio_urls:
                     return await DOWNLOADER.download_av_and_merge(
@@ -387,7 +363,6 @@ class BilibiliParser(BaseParser):
                     cache_key=cache_key,
                     cache_variant="source",
                     ext_headers=self.ext_headers,
-                    on_size=budget.check,
                 )
 
         downloader = BiliVideoDownloader(video_urls, audio_urls, self.headers)
@@ -400,7 +375,20 @@ class BilibiliParser(BaseParser):
             cache_key=cache_key,
         )
 
-        if total_size is not None:
+        async def probe_head_size(url: str) -> int | None:
+            return await DOWNLOADER.head_size(
+                url=url,
+                ext_headers=self.headers,
+            )
+
+        source_sizes = await asyncio.gather(
+            *(
+                probe_source_size(urls, probe_head_size)
+                for urls in (video_urls, audio_urls)
+            ),
+        )
+        total_size = sum(filter(None, source_sizes))
+        if total_size:
             video_content._size_bytes = total_size
 
         # 提取统计数据

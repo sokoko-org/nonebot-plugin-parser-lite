@@ -6,9 +6,11 @@ from typing import Any, Literal, TypedDict
 
 from anyio import Path
 
+from .config import pconfig
 from .constants import STICKER_CDN, PlatformEnum
 from .download import DOWNLOADER
 from .download.task import DownloadTaskWrapper
+from .exception import SizeLimitException
 from .utils.cache import CacheManager
 from .utils.ffmpeg import FFmpeg
 
@@ -37,7 +39,15 @@ class MediaContent:
         :raise ZeroSizeException:  文件大小为零
         :raise SizeLimitException: 文件大小超过限制
         """
-        return await self.path_task
+        max_size_bytes = pconfig.max_size * 1024 * 1024
+        if self._size_bytes is not None and self._size_bytes > max_size_bytes:
+            raise SizeLimitException(self._size_bytes / 1024 / 1024)
+
+        path = await self.path_task
+        self._size_bytes = (await path.stat()).st_size
+        if self._size_bytes > max_size_bytes:
+            raise SizeLimitException(self._size_bytes / 1024 / 1024)
+        return path
 
     @staticmethod
     def _format_size(size_bytes: int | None) -> str:
