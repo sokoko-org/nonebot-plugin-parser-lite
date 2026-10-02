@@ -30,6 +30,7 @@ class LofterParser(BaseParser):
             " (KHTML, like Gecko) Version/4.0 Chrome/121.0.6167.71 Safari/537.36 Mobile"
             " Safari/537.36 V1_AND_SQ_9.3.70_16410_YYB_D QQ/9.3.70.41925 AppId/537395443"  # noqa: E501
         )
+        self.httpx.headers["User-Agent"] = self.headers["User-Agent"]
 
     @handle(
         "s.lofter.com",
