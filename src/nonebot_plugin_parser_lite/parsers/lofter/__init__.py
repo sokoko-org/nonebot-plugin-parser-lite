@@ -23,6 +23,14 @@ class LofterParser(BaseParser):
         name=PlatformEnum.LOFTER, display_name="LOFTER"
     )
 
+    def __init__(self):
+        super().__init__()
+        self.headers["User-Agent"] = (
+            "Mozilla/5.0 (Linux; Android 16; 2201123C Build/1450000) AppleWebKit/537.36"
+            " (KHTML, like Gecko) Version/4.0 Chrome/121.0.6167.71 Safari/537.36 Mobile"
+            " Safari/537.36 V1_AND_SQ_9.3.70_16410_YYB_D QQ/9.3.70.41925 AppId/537395443"  # noqa: E501
+        )
+
     @handle(
         "s.lofter.com",
         r"s\.lofter\.com/-s/[0-9A-Za-z]+",
