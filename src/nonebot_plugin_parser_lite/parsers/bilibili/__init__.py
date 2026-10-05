@@ -4,6 +4,7 @@ from typing import ClassVar
 
 import aiofiles
 from anyio import Path
+from bs4 import BeautifulSoup
 from google.protobuf.json_format import MessageToJson
 from msgspec import convert
 from nonebot import logger
@@ -35,7 +36,7 @@ from ...utils.bilibili.video import (
     VideoDownloadURLDataDetecter,
     VideoStreamDownloadURL,
 )
-from ...utils.format import format_num
+from ...utils.format import format_num, html_to_text, replace_anchor_hrefs
 from ..base import (
     DOWNLOADER,
     Author,
@@ -572,6 +573,13 @@ class BilibiliParser(BaseParser):
         logger.debug(f"B站直播解析原始：{room}")
         room_data = await room.get_room_info()
 
+        description = BeautifulSoup(room_data.description, "html.parser")
+        if description.find() is None:
+            description_text = room_data.description
+        else:
+            replace_anchor_hrefs(description, "https://live.bilibili.com/")
+            description_text = html_to_text(description)
+
         await self.raise_if_in_black_list(room_data.uid)
         content: list[ContentItem] = []
         match room_data.live_status:
@@ -584,7 +592,7 @@ class BilibiliParser(BaseParser):
         content.extend(
             [
                 f"分区: {room_data.area_name} | {room_data.parent_area_name}\n",
-                room_data.description,
+                description_text,
             ]
         )
         if cover := room_data.user_cover:

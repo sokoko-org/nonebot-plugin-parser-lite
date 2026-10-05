@@ -18,7 +18,11 @@ from nonebot_plugin_parser_lite.parsers.linuxdo.util import (
     parse_rich_content as parse_linuxdo,
 )
 from nonebot_plugin_parser_lite.render import context
-from nonebot_plugin_parser_lite.utils.format import is_inside
+from nonebot_plugin_parser_lite.utils.format import (
+    html_to_text,
+    is_inside,
+    replace_anchor_hrefs,
+)
 
 
 def _texts(items) -> str:
@@ -52,6 +56,23 @@ def test_hupu_keeps_content_after_video():
     assert "after" in _texts(items)
     assert any(isinstance(item, VideoContent) for item in items)
     assert any(isinstance(item, GraphicContent) for item in items)
+
+
+def test_bilibili_live_description_strips_html_and_keeps_links():
+    soup = BeautifulSoup(
+        '<p><strong>支持：</strong><a href="https://example.com">这里</a></p>'
+        '<div id="gtx-trans"> </div>',
+        "html.parser",
+    )
+    replace_anchor_hrefs(soup, "https://live.bilibili.com/")
+    assert html_to_text(soup) == "支持：这里 (https://example.com)"
+
+
+def test_bilibili_live_plain_description_keeps_whitespace():
+    description = "  第一行\n\n第二行  "
+    soup = BeautifulSoup(description, "html.parser")
+    assert soup.find() is None
+    assert description == "  第一行\n\n第二行  "
 
 
 class _SlowIcon:
