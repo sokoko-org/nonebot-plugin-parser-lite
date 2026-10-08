@@ -49,7 +49,7 @@ class VideoInfo(Struct, kw_only=True):
 
     @property
     def text(self) -> str:
-        return f"简介: {html_to_text(self.description)}" if self.description else ""
+        return html_to_text(self.description) if self.description else ""
 
     @property
     def timestamp(self) -> int:

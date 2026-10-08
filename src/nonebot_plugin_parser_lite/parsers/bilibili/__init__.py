@@ -282,7 +282,7 @@ class BilibiliParser(BaseParser):
 
         await self.raise_if_in_black_list(arc.author.mid)
 
-        text = f"简介: {arc.desc}" if arc.desc else ""
+        text = arc.desc or ""
         author = self.create_author(
             name=arc.author.name,
             avatar_url=arc.author.face,
