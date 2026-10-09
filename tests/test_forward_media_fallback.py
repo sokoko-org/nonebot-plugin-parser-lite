@@ -18,7 +18,7 @@ from nonebot_plugin_alconna.uniseg import (
 import pytest
 from render_test_support import Renderer, UniHelper, make_result, pconfig
 
-from nonebot_plugin_parser_lite import delivery
+from nonebot_plugin_parser_lite import delivery, render
 from nonebot_plugin_parser_lite.delivery import (
     build_text_fallback,
     build_video_fallback,
@@ -379,7 +379,7 @@ async def test_non_media_error_in_video_fallback_stops(monkeypatch, error):
 
 @pytest.mark.asyncio
 async def test_split_video_fallback_does_not_resend_successful_packet(monkeypatch):
-    monkeypatch.setattr(delivery, "MAX_FORWARD_NODES", 2)
+    monkeypatch.setattr(render, "MAX_FORWARD_NODES", 2)
     message = forward(Video(raw=b"video"), Image(raw=b"cover"), "末尾正文")
     calls = []
 
@@ -426,3 +426,141 @@ async def test_third_media_error_is_terminal(monkeypatch):
         )
     assert len(calls) == 3
     text_of(calls[-1])
+
+
+@pytest.mark.parametrize("build", [build_video_fallback, build_text_fallback])
+def test_video_placeholder_has_no_surrounding_newlines(build):
+    packets = build(forward(Video(raw=b"video")), make_result())
+    assert packets[0][0].children[-1].content.extract_plain_text() == (
+        "[视频已省略，请通过原链接查看]"
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "text",
+    ["正文\n\n", "第一段。\n第二段内容", "第一段文字\n第二段文字", "字" * 100],
+)
+async def test_fallback_text_uses_normal_split_and_pack_rules(monkeypatch, text):
+    monkeypatch.setattr(render, "SPLIT_THRESHOLD", 10)
+    monkeypatch.setattr(delivery, "SPLIT_THRESHOLD", 10)
+    monkeypatch.setattr(render, "MAX_FORWARD_NODES", 2)
+    monkeypatch.setattr(pconfig, "plite_need_forward_contents", True)
+    monkeypatch.setattr(
+        UniHelper, "construct_forward_message", lambda contents: forward(*contents)[0]
+    )
+    result = make_result()
+    result.content = [text]
+    normal = [packet async for packet in Renderer().send_content(result)]
+    normal_nodes = [node for packet in normal for node in packet[0].children]
+    # 输入与普通渲染相同的作者前缀，检查 fallback 新增说明之外的正文。
+    fallback = build_text_fallback(forward(f"tester：{text}", Video(raw=b"v")), result)
+    fallback_nodes = [node for packet in fallback for node in packet[0].children]
+    body = [
+        node.content.extract_plain_text()
+        for node in fallback_nodes
+        if not getattr(node, "_parser_lite_fallback_notice", False)
+    ]
+    assert body[:len(normal_nodes)] == [
+        node.content.extract_plain_text() for node in normal_nodes
+    ]
+    assert "".join(body[len(normal_nodes):]) == "[视频已省略，请通过原链接查看]"
+    assert all(len(packet[0].children) <= 2 for packet in normal + fallback)
+
+
+@pytest.mark.parametrize("build", [build_video_fallback, build_text_fallback])
+@pytest.mark.parametrize(
+    ("before", "after", "expected"),
+    [
+        ("前文", "后文", "前文\n[视频已省略，请通过原链接查看]\n后文"),
+        ("前文\n", "\n后文", "前文\n\n[视频已省略，请通过原链接查看]\n\n后文"),
+        (
+            "前文\n\n",
+            "\n\n  后文",
+            "前文\n\n\n[视频已省略，请通过原链接查看]\n\n\n  后文",
+        ),
+        ("", "后文", "[视频已省略，请通过原链接查看]\n后文"),
+        ("前文", "", "前文\n[视频已省略，请通过原链接查看]"),
+    ],
+)
+def test_placeholder_separators_preserve_internal_newlines(
+    build, before, after, expected
+):
+    message = forward(UniMessage.text(before) + Video(raw=b"video") + after)
+    packets = build(message, make_result())
+    assert packets[0][0].children[-1].content.extract_plain_text() == expected
+
+
+def test_adjacent_media_placeholders_preserve_internal_separator():
+    packets = build_text_fallback(
+        forward(UniMessage(Video(raw=b"v")) + Image(raw=b"i")), make_result()
+    )
+    assert packets[0][0].children[-1].content.extract_plain_text() == (
+        "[视频已省略，请通过原链接查看]\n\n[图片已省略，请通过原链接查看]"
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("split_limit", [1000, 20000])
+async def test_normal_and_video_fallback_respect_mixed_text_limits(
+    monkeypatch, split_limit
+):
+    monkeypatch.setattr(render, "SPLIT_THRESHOLD", split_limit)
+    monkeypatch.setattr(delivery, "SPLIT_THRESHOLD", split_limit)
+    monkeypatch.setattr(
+        UniHelper, "construct_forward_message", lambda contents: forward(*contents)[0]
+    )
+    mixed = UniMessage(Image(raw=b"image")) + "字" * 16000
+    result = make_result()
+    result.content = []
+    normal = [
+        packet
+        async for packet in Renderer().send_content(result, summary_node=mixed + mixed)
+    ]
+    fallback = build_video_fallback(forward(mixed, mixed, Video(raw=b"v")), result)
+    for packets in (normal, fallback):
+        assert len(packets) >= 2
+        body = [
+            node
+            for packet in packets
+            for node in packet[0].children
+            if not getattr(node, "_parser_lite_fallback_notice", False)
+        ]
+        assert (
+            sum(isinstance(segment, Image) for node in body for segment in node.content)
+            == 2
+        )
+        assert (
+            "".join(node.content.extract_plain_text() for node in body).count("字")
+            == 32000
+        )
+        assert all(
+            len(node.content.extract_plain_text()) <= split_limit for node in body
+        )
+        assert all(
+            sum(len(node.content.extract_plain_text()) for node in packet[0].children)
+            <= 30000
+            for packet in packets
+        )
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "\n\n  正文\n\n第二段\n\n",
+        UniMessage.text("\n\n  正文\n\n") + Image(raw=b"image") + "\n尾段\n\n",
+    ],
+)
+def test_shared_packing_strips_only_node_boundary_newlines(content):
+    original = deepcopy(content)
+    chunks = list(
+        render.pack_forward_items(
+            [content],
+            content_of=lambda item: item,
+            with_content=lambda _original, cleaned: cleaned,
+        )
+    )
+    text = UniMessage(chunks[0][0]).extract_plain_text()
+    assert text.startswith("  正文\n\n")
+    assert not text.endswith("\n")
+    assert content == original
