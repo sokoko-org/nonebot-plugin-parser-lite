@@ -20,10 +20,10 @@ from nonebot_plugin_alconna.uniseg.segment import Media
 from .data import ParseResult
 from .helper import media_role
 from .render import (
-    MAX_FORWARD_NODES,
     MAX_FORWARD_TEXT_LEN,
     SPLIT_THRESHOLD,
-    split_text_by_length_with_punct,
+    pack_forward_items,
+    split_forward_content,
 )
 
 # 仅匹配协议端明确透传的媒体上传错误，不能仅凭 retcode 或普通超时降级
@@ -61,53 +61,29 @@ def _copy_node(node: CustomNode, content: UniMessage) -> CustomNode:
     return copied
 
 
-def _pack_nodes(nodes: list[CustomNode]) -> list[UniMessage]:
-    """新增的说明也计入长度，并保留混合图文节点的顺序"""
-    split_limit = min(MAX_FORWARD_TEXT_LEN, max(1, SPLIT_THRESHOLD))
-    split_nodes: list[CustomNode] = []
-    for node in nodes:
-        content = UniMessage(node.content)
-        fragment = UniMessage()
-        length = 0
-        for segment in content:
-            parts = (
-                [
-                    Text(text)
-                    for text in split_text_by_length_with_punct(
-                        segment.text, split_limit
-                    )
-                ]
-                if isinstance(segment, Text)
-                else [segment]
-            )
-            for part in parts:
-                part_length = len(part.text) if isinstance(part, Text) else 0
-                if fragment and length + part_length > split_limit:
-                    split_nodes.append(_copy_node(node, fragment))
-                    fragment = UniMessage()
-                    length = 0
-                fragment.append(part)
-                length += part_length
-        if fragment:
-            split_nodes.append(_copy_node(node, fragment))
+def _node_content(node: CustomNode) -> str | UniMessage:
+    """纯文字恢复为普通发送的字符串输入，混合图文保留消息段。"""
+    content = UniMessage(node.content)
+    if all(isinstance(segment, Text) for segment in content):
+        return content.extract_plain_text()
+    return content
 
-    messages: list[UniMessage] = []
-    chunk: list[CustomNode] = []
-    length = 0
-    for node in split_nodes:
-        node_length = len(UniMessage(node.content).extract_plain_text())
-        if chunk and (
-            len(chunk) >= MAX_FORWARD_NODES
-            or length + node_length > MAX_FORWARD_TEXT_LEN
-        ):
-            messages.append(UniMessage(Reference(nodes=list(chunk))))
-            chunk.clear()
-            length = 0
-        chunk.append(node)
-        length += node_length
-    if chunk:
-        messages.append(UniMessage(Reference(nodes=chunk)))
-    return messages
+
+def _pack_nodes(nodes: list[CustomNode]) -> list[UniMessage]:
+    split_limit = min(MAX_FORWARD_TEXT_LEN, max(1, SPLIT_THRESHOLD))
+    split_nodes = [
+        _copy_node(node, UniMessage(content))
+        for node in nodes
+        for content in split_forward_content(_node_content(node), split_limit)
+    ]
+    return [
+        UniMessage(Reference(nodes=chunk))
+        for chunk in pack_forward_items(
+            split_nodes,
+            content_of=_node_content,
+            with_content=lambda node, content: _copy_node(node, UniMessage(content)),
+        )
+    ]
 
 
 @dataclass(slots=True)

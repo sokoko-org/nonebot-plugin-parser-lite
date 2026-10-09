@@ -1,16 +1,17 @@
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable, Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
 from io import BytesIO
 from itertools import chain
 import re
-from typing import Any, ClassVar, Literal
+from typing import Any, ClassVar, Literal, TypeVar
 import uuid
 
 from anyio import Path
 from jinja2 import Environment, FileSystemLoader
 from nonebot import logger
+from nonebot_plugin_alconna.uniseg import Text
 from nonebot_plugin_htmlrender import get_new_page
 from PIL import Image
 
@@ -183,6 +184,77 @@ class _ForwardText:
         return chunks
 
 
+ForwardItem = TypeVar("ForwardItem")
+
+
+def split_forward_content(
+    content: ForwardNodeInner | _ForwardText, max_len: int
+) -> list[ForwardNodeInner]:
+    """按文字阈值拆分，混合消息保留各消息段的顺序。"""
+    if isinstance(content, _ForwardText):
+        return content.split(max_len)
+    if isinstance(content, str):
+        return split_text_by_length_with_punct(content, max_len)
+    message = UniMessage(content)
+    if max_len <= 0 or len(message.extract_plain_text()) <= max_len:
+        return [content]
+
+    fragments: list[ForwardNodeInner] = []
+    fragment = UniMessage()
+    text_length = 0
+    for segment in message:
+        parts = (
+            [
+                Text(text)
+                for text in split_text_by_length_with_punct(segment.text, max_len)
+            ]
+            if isinstance(segment, Text)
+            else [segment]
+        )
+        for part in parts:
+            length = len(part.text) if isinstance(part, Text) else 0
+            if fragment and text_length + length > max_len:
+                fragments.append(fragment)
+                fragment = UniMessage()
+                text_length = 0
+            fragment.append(part)
+            text_length += length
+    if fragment:
+        fragments.append(fragment)
+    return fragments
+
+
+def pack_forward_items(
+    items: list[ForwardItem],
+    content_of: Callable[[ForwardItem], ForwardNodeInner],
+    with_content: Callable[[ForwardItem, ForwardNodeInner], ForwardItem],
+) -> Iterator[list[ForwardItem]]:
+    """统一清理节点首尾换行，并按文本长度和节点数分包。"""
+    chunk: list[ForwardItem] = []
+    text_length = 0
+    for item in items:
+        content = content_of(item)
+        if isinstance(content, str | UniMessage):
+            cleaned = content.strip("\n")
+            if not cleaned:
+                continue
+            if cleaned != content:
+                item = with_content(item, cleaned)
+            content = cleaned
+        length = len(UniMessage(content).extract_plain_text())
+        if chunk and (
+            text_length + length > MAX_FORWARD_TEXT_LEN
+            or len(chunk) >= MAX_FORWARD_NODES
+        ):
+            yield chunk
+            chunk = []
+            text_length = 0
+        chunk.append(item)
+        text_length += length
+    if chunk:
+        yield chunk
+
+
 class Renderer:
     """统一的渲染器，将解析结果转换为消息"""
 
@@ -277,18 +349,9 @@ class Renderer:
                 node_count += 1
                 if isinstance(seg, _ForwardText):
                     total_plain_len += seg.text_length
-                    processed_segs.extend(seg.split(SPLIT_THRESHOLD))
                 elif isinstance(seg, str):
-                    seg_len = len(seg)
-                    total_plain_len += seg_len
-                    if seg_len > SPLIT_THRESHOLD:
-                        processed_segs.extend(
-                            split_text_by_length_with_punct(seg, SPLIT_THRESHOLD)
-                        )
-                    else:
-                        processed_segs.append(seg)
-                else:
-                    processed_segs.append(seg)
+                    total_plain_len += len(seg)
+                processed_segs.extend(split_forward_content(seg, SPLIT_THRESHOLD))
 
             # 是否需要合并转发：
             # 1) 配置项 need_forward_contents
@@ -309,39 +372,12 @@ class Renderer:
                 yield UniMessage(processed_segs)
             else:
                 # 需要合并转发：根据平台限制按文本长度 / 节点数分批构造 forward
-                current_chunk: list[ForwardNodeInner] = []
-                current_text_len = 0
-
-                def flush_chunk() -> UniMessage[Any] | None:
-                    nonlocal current_text_len
-                    if not current_chunk:
-                        return None
-                    msg = UniMessage(UniHelper.construct_forward_message(current_chunk))
-                    current_chunk.clear()
-                    current_text_len = 0
-                    return msg
-
-                for seg in processed_segs:
-                    if isinstance(seg, str):
-                        seg = seg.rstrip("\n")
-                    seg_text_len = len(seg) if isinstance(seg, str) else 0
-
-                    # 如果加上当前节点会超出单个 forward 限制，则先 flush 当前 chunk
-                    if current_chunk and (
-                        current_text_len + seg_text_len > MAX_FORWARD_TEXT_LEN
-                        or len(current_chunk) >= MAX_FORWARD_NODES
-                    ):
-                        msg = flush_chunk()
-                        if msg is not None:
-                            yield msg
-
-                    current_chunk.append(seg)
-                    current_text_len += seg_text_len
-
-                # 收尾：还有未发送的 chunk
-                last_msg = flush_chunk()
-                if last_msg is not None:
-                    yield last_msg
+                for chunk in pack_forward_items(
+                    processed_segs,
+                    content_of=lambda content: content,
+                    with_content=lambda _original, content: content,
+                ):
+                    yield UniMessage(UniHelper.construct_forward_message(chunk))
 
         # 汇总下载失败信息
         if failed_count > 0:
