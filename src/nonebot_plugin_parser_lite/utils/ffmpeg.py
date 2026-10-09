@@ -437,6 +437,24 @@ class FFmpeg:
         return cls._available
 
     @classmethod
+    async def png_to_jpeg(cls, png_data: bytes) -> bytes:
+        cmd = [
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            "pipe:0",
+            "-f",
+            "image2pipe",
+            "-c:v",
+            "mjpeg",
+            "-q:v",
+            "85",
+            "pipe:1",
+        ]
+        return await cls.exec_ffmpeg(cmd, png_data)
+
+    @classmethod
     async def png_to_webp(cls, png_data: bytes) -> bytes:
         """PNG to WebP"""
         cmd = [

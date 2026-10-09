@@ -778,16 +778,24 @@ class Renderer:
         """
         theme = get_theme()
         selected_theme = await self._resolve_theme()
+        render_format = pconfig.render_format
         cache_key = (
             f"{RENDER_TEMPLATE_VERSION}:{selected_theme.id}:"
             f"{selected_theme.version}:{theme}:{result.url}"
         )
-        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.webp"
+        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.{render_format}"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
         logger.info(f"渲染主题: {selected_theme.name}")
         if not await image_path.exists():
-            image_raw = await FFmpeg.png_to_webp(
+            match render_format:
+                case "webp":
+                    compress_func = FFmpeg.png_to_webp
+                case "jpeg":
+                    compress_func = FFmpeg.png_to_jpeg
+                case _:
+                    raise ValueError
+            image_raw = await compress_func(
                 await self.render_image(
                     result,
                     theme=theme,

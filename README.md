@@ -266,6 +266,9 @@ plite_linuxdo_ck="xxxx"
 
 # [可选] X cookie, R18帖子和帖子翻译需要登录才可以查看
 plite_x_ck="auth_token=xxx"
+
+# [可选] 渲染图片格式，jpeg会丢失透明度但可能兼容性更好，仅建议在默认格式无法发送时更改
+plite_render_format="webp"
 ```
 
 </details>
