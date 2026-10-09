@@ -1,5 +1,5 @@
 import asyncio
-from collections.abc import AsyncGenerator, Callable, Iterator
+from collections.abc import AsyncGenerator, Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from io import BytesIO
@@ -189,7 +189,7 @@ ForwardItem = TypeVar("ForwardItem")
 
 def split_forward_content(
     content: ForwardNodeInner | _ForwardText, max_len: int
-) -> list[ForwardNodeInner]:
+) -> Sequence[ForwardNodeInner]:
     """按文字阈值拆分，混合消息保留各消息段的顺序。"""
     if isinstance(content, _ForwardText):
         return content.split(max_len)
@@ -359,18 +359,14 @@ class Renderer:
             # 3) 节点数较多
             # 4) 包含配置为合并转发的视频
             # 5) 包含配置为合并转发的总结卡片
-            need_forward = (
+
+            if (
                 pconfig.need_forward_contents
                 or total_plain_len > SPLIT_THRESHOLD
                 or node_count > 4
                 or bool(forward_video_segs)
                 or summary_node is not None
-            )
-
-            if not need_forward:
-                # 不走合并转发：直接按节点顺序发出
-                yield UniMessage(processed_segs)
-            else:
+            ):
                 # 需要合并转发：根据平台限制按文本长度 / 节点数分批构造 forward
                 for chunk in pack_forward_items(
                     processed_segs,
@@ -378,6 +374,8 @@ class Renderer:
                     with_content=lambda _original, content: content,
                 ):
                     yield UniMessage(UniHelper.construct_forward_message(chunk))
+            else:
+                yield UniMessage(processed_segs)
 
         # 汇总下载失败信息
         if failed_count > 0:
