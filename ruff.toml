@@ -1,8 +1,8 @@
-line-length = 88
-target-version = "py311"
 exclude = [
   "src/nonebot_plugin_parser_lite/utils/bilibili/bilibili",
 ]
+line-length = 88
+target-version = "py311"
 
 [format]
 line-ending = "lf"
@@ -11,10 +11,26 @@ line-ending = "lf"
 ignore = [
   "E402", # module-import-not-at-top-of-file
   "UP037", # quoted-annotation
-  "RUF001", # ambiguous-unicode-character-string
-  "RUF002", # ambiguous-unicode-character-docstring
-  "RUF003", # ambiguous-unicode-character-comment
   "TID252", # relative-imports
+  "BLE001", # except Exception as e
+  "PGH003", # 要求 `# type: ignore` 提供理由，但 pyright 和 mypy 等都不是统一标准
+  "PLC0414", # 用 import-as 表示 re-export
+  "N818", # 要求所有自定义错误以 Error 作后缀，但我们不这么做
+  "RET502", # return = return None
+  "RET503", # 就要 implicit return none
+  "PLR0913", # 参数就那么多的，你用 builder 什么的不是更逆天？
+  "PLR0917", # Preserve positional arguments in the existing public API.
+  "SIM108", # 迫真 simplicy
+  "RUF001", # String contains ambiguous `，` (FULLWIDTH COMMA). Did you mean `,` (COMMA)?
+  "RUF002", # Docstring contains ambiguous `，` (FULLWIDTH COMMA). Did you mean `,` (COMMA)?
+  "RUF009", # 我不想要额外的全局变量。  # "UP038",  # instance(..., X | Y) 还是太超前了
+  "RUF003", # 中文注释里用全角符号怎么你了
+  "PYI019", # 用 `Self` 替代 `self: T` 的 T
+  "PYI041", # int 和 float 在运行时的类型没有交集（互不成立 issubclass）
+  "S101", # assert 怎么你了，非要 RuntimeError 吗
+  "PLR2004", # magic number 怎么你了
+  "TRY004", # 我要抛啥错误我清楚
+  "E501", # 过长的行由 ruff format 处理, 剩余的都是字符串
 ]
 select = [
   "F", # Pyflakes

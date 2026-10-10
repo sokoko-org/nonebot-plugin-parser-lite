@@ -108,7 +108,7 @@ def handle(
             * 先用 pattern 过滤
             * 若 pattern 没有匹配到末尾或追加 `$`，则自动在末尾补 `[^\\s]*`，以便 MatchWithParams 能看到查询参数部分
             * 再用 params 解析 URL 后进一步判断
-    """  # noqa: E501
+    """
 
     if pattern is None and not params:
         raise ValueError("handle: pattern 和 params 至少要指定一个")

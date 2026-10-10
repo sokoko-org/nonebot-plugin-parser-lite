@@ -100,7 +100,7 @@ class StreamDownloader:
         if 200 <= resp.status_code < 300:
             return resp
         logger.debug(
-            f"[StreamDownloader] HEAD {url} returned {resp.status_code}, fallback to streamed GET"  # noqa: E501
+            f"[StreamDownloader] HEAD {url} returned {resp.status_code}, fallback to streamed GET"
         )
         async with self.client.stream(
             "GET",
