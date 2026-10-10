@@ -26,7 +26,7 @@ __plugin_meta__ = PluginMetadata(
     extra={
         "author": "sokoko-org",
         "homepage": "https://github.com/sokoko-org/nonebot-plugin-parser-lite",
-        "version": "1.3.9rc4",
+        "version": "1.3.9",
         "plugin_type": "NORMAL",
     },
 )
