@@ -32,6 +32,7 @@ from .client import RetryableDownloadError, UniHttpClient, UniResponse
 from .task import auto_task
 
 _RE_RANGE_PATTERN = re.compile(r"bytes\s+(\d+)-\d+/(\d+|\*)")
+_CACHE_SUFFIXES = frozenset({".part", ".meta", ".meta.part"})
 
 
 def _with_identity_encoding(headers: dict[str, str]) -> dict[str, str]:
@@ -229,15 +230,10 @@ class StreamDownloader:
                     retry_http_statuses=retry_http_statuses,
                     use_curl_cffi=use_curl_cffi,
                 )
-                suffix = await _detect_file_suffix(
-                    partial_path,
-                    Path(urlsplit(current_url).path).suffix.lower()
-                    or (
-                        default_suffix
-                        if default_suffix.startswith(".")
-                        else f".{default_suffix}"
-                    ),
-                )
+                fallback_suffix = Path(urlsplit(current_url).path).suffix.lower()
+                if not fallback_suffix or fallback_suffix in _CACHE_SUFFIXES:
+                    fallback_suffix = f".{default_suffix.lstrip('.')}"
+                suffix = await _detect_file_suffix(partial_path, fallback_suffix)
                 file_path = base_path.with_suffix(suffix)
                 if await file_path.exists():
                     await safe_unlink(partial_path)

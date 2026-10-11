@@ -421,6 +421,59 @@ async def test_unidentified_audio_preserves_source_suffix(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("url", "default_suffix", "expected_suffix"),
+    [
+        ("https://cdn.example/file.part", ".ogg", ".ogg"),
+        ("https://cdn.example/file.meta", ".dat", ".dat"),
+        ("https://cdn.example/file.META", ".dat", ".dat"),
+        ("https://cdn.example/file.meta.part", ".dat", ".dat"),
+    ],
+)
+async def test_reserved_suffix_does_not_destroy_download(
+    downloader_modules, monkeypatch, url, default_suffix, expected_suffix
+):
+    download, _, cache_manager = downloader_modules
+    real_cache = _load_module(
+        f"{TEST_PACKAGE}.utils.real_cache", SOURCE / "utils/cache.py"
+    )
+    monkeypatch.setattr(
+        cache_manager, "set_cached_file", real_cache.CacheManager.set_cached_file
+    )
+    client = FakeClient(
+        [FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
+    )
+    downloader = _new_downloader(download, client)
+
+    path = await downloader.streamd(url=url, default_suffix=default_suffix)
+
+    assert path.suffix == expected_suffix
+    assert await path.read_bytes() == b"\x00\x01\x02"
+    assert await path.with_suffix(".meta").read_bytes() == expected_suffix.encode()
+    assert not await path.with_suffix(".part").exists()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("detected_suffix", [".part", ".META", ".meta.part"])
+async def test_reserved_detected_suffix_uses_safe_fallback(
+    downloader_modules, monkeypatch, detected_suffix
+):
+    download, _, _ = downloader_modules
+    monkeypatch.setattr(download.puremagic, "from_file", lambda _: detected_suffix)
+    client = FakeClient(
+        [FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
+    )
+    downloader = _new_downloader(download, client)
+
+    path = await downloader.streamd(
+        url="https://cdn.example/file.meta", default_suffix=".ogg"
+    )
+
+    assert path.suffix == ".ogg"
+    assert await path.read_bytes() == b"\x00\x01\x02"
+
+
+@pytest.mark.asyncio
 async def test_stream_suffix_comes_from_successful_fallback_url(
     downloader_modules, monkeypatch
 ):
