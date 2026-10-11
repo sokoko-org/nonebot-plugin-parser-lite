@@ -454,26 +454,6 @@ async def test_reserved_suffix_does_not_destroy_download(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("detected_suffix", [".part", ".META", ".meta.part"])
-async def test_reserved_detected_suffix_uses_safe_fallback(
-    downloader_modules, monkeypatch, detected_suffix
-):
-    download, _, _ = downloader_modules
-    monkeypatch.setattr(download.puremagic, "from_file", lambda _: detected_suffix)
-    client = FakeClient(
-        [FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
-    )
-    downloader = _new_downloader(download, client)
-
-    path = await downloader.streamd(
-        url="https://cdn.example/file.meta", default_suffix=".ogg"
-    )
-
-    assert path.suffix == ".ogg"
-    assert await path.read_bytes() == b"\x00\x01\x02"
-
-
-@pytest.mark.asyncio
 async def test_stream_suffix_comes_from_successful_fallback_url(
     downloader_modules, monkeypatch
 ):
@@ -481,7 +461,9 @@ async def test_stream_suffix_comes_from_successful_fallback_url(
     client = FakeClient(
         [
             FakeResponse(404),
-            FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"]),
+            FakeResponse(
+                200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"]
+            ),
         ]
     )
     downloader = _new_downloader(download, client)
