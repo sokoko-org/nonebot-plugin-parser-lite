@@ -373,6 +373,7 @@ class BilibiliParser(BaseParser):
             cover_url=cover,
             duration=duration,
             ext_headers=self.headers,
+            cache_key=cache_key,
         )
 
         async def probe_head_size(url: str) -> int | None:
