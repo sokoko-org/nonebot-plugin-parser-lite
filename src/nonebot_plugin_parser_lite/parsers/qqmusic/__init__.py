@@ -82,7 +82,7 @@ class QQMusicParser(BaseParser):
             author=self.create_author(
                 name=music_data["artist"], avatar_url=music_data["artist_pic"]
             ),
-            url=f"https://www.kuwo.cn/play_detail/{mid}",
+            url=f"https://y.qq.com/n/ryqq_v2/songDetail/{mid}",
             content=contents,
             extra=extra,
         )
