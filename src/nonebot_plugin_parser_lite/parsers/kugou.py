@@ -155,7 +155,7 @@ class KuGouParser(BaseParser):
             raise ParseException("未找到音频资源")
 
         audio_content = self.create_audio(
-            url=audio_url,
+            url_or_task=audio_url,
             duration=playinfo.timeLength,
             cache_key=f"kugou:{playinfo.hash}",
         )

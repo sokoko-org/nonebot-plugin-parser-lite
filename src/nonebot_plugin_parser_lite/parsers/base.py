@@ -383,7 +383,7 @@ class BaseParser:
         """
         创建视频内容,
         传入 `DownloadFunc` 时,
-        会使用 `DownloadFunc` 的 `ext_headers` 而不是传入的.
+        优先使用对象的 `ext_headers` 属性，未定义时使用传入的请求头.
 
         :param url_or_task: 视频 URL 或下载任务
         :param cover_url: 封面 URL
@@ -484,7 +484,7 @@ class BaseParser:
 
     def create_audio(
         self,
-        url: str,
+        url_or_task: str | DownloadTaskWrapper[Path] | DownloadFunc,
         duration: float = 0.0,
         need_send: bool = True,
         ext_headers: dict[str, str] | None = None,
@@ -494,7 +494,7 @@ class BaseParser:
         """
         创建音频内容,
         传入 `DownloadFunc` 时,
-        会使用 `DownloadFunc` 的 `ext_headers` 而不是传入的.
+        优先使用对象的 `ext_headers` 属性，未定义时使用传入的请求头.
 
         :param url_or_task: 音频 URL 或下载任务
         :param duration: 音频时长
@@ -505,7 +505,7 @@ class BaseParser:
         """
 
         return Creator.audio(
-            url_or_task=url,
+            url_or_task=url_or_task,
             duration=duration,
             need_send=need_send,
             ext_headers=ext_headers,

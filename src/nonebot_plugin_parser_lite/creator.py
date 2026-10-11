@@ -32,10 +32,9 @@ T = TypeVar("T", bound=MediaContent)
 
 @runtime_checkable
 class DownloadFunc(Protocol):
-    """自定义下载函数协议：必须暴露 URL"""
+    """自定义下载函数协议：必须暴露 URL，ext_headers 属性可省略"""
 
     url: str
-    ext_headers: dict[str, str] | None = None
 
     def __call__(self) -> Coroutine[Any, Any, Path]:
         raise NotImplementedError
@@ -105,7 +104,7 @@ class Creator:
         """
         创建视频内容,
         传入 `DownloadFunc` 时,
-        会使用 `DownloadFunc` 的 `ext_headers` 而不是传入的.
+        优先使用对象的 `ext_headers` 属性，未定义时使用传入的请求头.
 
         :param url_or_task: 视频 URL 或下载任务
         :param cover_url: 封面 URL
@@ -148,7 +147,7 @@ class Creator:
                 args=(),
                 kwargs={},
                 url=download_func.url,
-                ext_headers=download_func.ext_headers,
+                ext_headers=getattr(download_func, "ext_headers", ext_headers),
                 use_curl_cffi=use_curl_cffi,
             )
         else:
@@ -264,7 +263,7 @@ class Creator:
         """
         创建音频内容,
         传入 `DownloadFunc` 时,
-        会使用 `DownloadFunc` 的 `ext_headers` 而不是传入的.
+        优先使用对象的 `ext_headers` 属性，未定义时使用传入的请求头.
 
         :param url_or_task: 音频 URL 或下载任务
         :param duration: 音频时长
@@ -299,7 +298,7 @@ class Creator:
                 args=(),
                 kwargs={},
                 url=download_func.url,
-                ext_headers=download_func.ext_headers,
+                ext_headers=getattr(download_func, "ext_headers", ext_headers),
                 use_curl_cffi=use_curl_cffi,
             )
         else:
