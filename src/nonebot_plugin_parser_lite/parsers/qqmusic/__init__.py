@@ -37,10 +37,10 @@ class QQMusicParser(BaseParser):
 
     # https://y.qq.com/n/ryqq_v2/songDetail/0039MnYb0qxYhV
     # https://i2.y.qq.com/n3/other/pages/playsong/index.html?ADTAG=ryqq.songDetail&songmid=0039MnYb0qxYhV&songid=0&songtype=0
-    @handle("y.qq.com", r"songDetail/(?P<mid>[0-9a-zA-Z]+)")
+    @handle("y.qq.com", r"songDetail/(?P<songmid>[0-9a-zA-Z]+)")
     @handle("y.qq.com", params={"songmid": {}, "ADTAG": {"equals": "ryqq.songDetail"}})
     async def _parse_qqmusic_share(self, searched: MatchWithParams):
-        mid = searched["mid"]
+        mid = searched["songmid"]
 
         resp = await self.httpx.get(
             "http://127.0.0.1:8000/api/qq/song",
