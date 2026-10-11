@@ -43,7 +43,7 @@ class QQMusicParser(BaseParser):
         mid = searched["songmid"]
 
         resp = await self.httpx.get(
-            "http://127.0.0.1:8000/api/qq/song",
+            "https://parse-api.sokoko.org/api/qq/song",
             params={"music_id": mid, "quality": "high"},
         )
         resp.raise_for_status()
