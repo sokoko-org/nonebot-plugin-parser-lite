@@ -20,7 +20,7 @@ from pydantic import ValidationError
 import pytest
 from render_test_support import Renderer, UniHelper, make_result, pconfig
 
-from nonebot_plugin_parser_lite import delivery, render
+from nonebot_plugin_parser_lite import delivery, matchers, render
 from nonebot_plugin_parser_lite.config import Config
 from nonebot_plugin_parser_lite.delivery import (
     build_text_fallback,
@@ -82,6 +82,48 @@ async def test_file_upload_uses_its_configured_timeout(
     assert calls == (
         [{}] if upload_timeout is None else [{"_timeout": upload_timeout}]
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("summary_segment", "expected_options"),
+    [
+        (File(path="large-summary.webp"), {"_timeout": 900}),
+        (Image(path="summary.webp"), {}),
+    ],
+)
+async def test_parser_summary_uses_file_timeout_when_rendered_as_file(
+    monkeypatch, onebot_context, summary_segment, expected_options
+):
+    result = make_result()
+    calls = []
+
+    async def parse_result(sr):
+        return result
+
+    async def cached_summary(parsed):
+        return summary_segment
+
+    async def no_content(parsed, summary_node=None):
+        for packet in ():
+            yield packet
+
+    async def send(message, **kwargs):
+        calls.append((message, kwargs))
+
+    monkeypatch.setattr(matchers, "_get_or_parse_result", parse_result)
+    monkeypatch.setattr(matchers.RENDERER, "cache_or_render_image", cached_summary)
+    monkeypatch.setattr(matchers.RENDERER, "send_content", no_content)
+    monkeypatch.setattr(UniMessage, "send", send)
+    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
+    monkeypatch.setattr(pconfig, "plite_summary_in_forward", False)
+    monkeypatch.setattr(pconfig, "plite_lazy_download", False)
+    monkeypatch.setattr(pconfig, "plite_append_url", False)
+    monkeypatch.setattr(pconfig, "plite_embed_url", False)
+    await matchers.parser_handler.__wrapped__(session=None, sr=None)
+    assert len(calls) == 1
+    assert calls[0][0][0] is summary_segment
+    assert calls[0][1] == expected_options
 
 
 @pytest.mark.asyncio
