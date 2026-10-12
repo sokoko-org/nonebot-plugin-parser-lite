@@ -36,7 +36,7 @@ class QQMusicParser(BaseParser):
     )
 
     # https://c6.y.qq.com/base/fcgi-bin/u?__=R8HMYy74qYwf
-    @handle("c6.y.qq.com", r"fcgi-bin/u", params={"__": {}})
+    @handle("c6.y.qq.com/base/fcgi-bin/u", params={"__": {}})
     async def _parse_short(self, searched: MatchWithParams):
         return await self.parse_with_redirect(
             f"https://c6.y.qq.com/base/fcgi-bin/u?__={searched['__']}"
