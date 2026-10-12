@@ -76,12 +76,13 @@ class QQMusicParser(BaseParser):
         if data["code"] != 200:
             raise ParseException(f"接口返回错误: {data}")
         music_data = data["data"]
+        mid = music_data["id"]
         audio_url = music_data["download_url"]
         if not audio_url.startswith("http"):
             raise ParseException("无效音乐URL")
         duration = music_data["duration_seconds"]
         audio_content = self.create_audio(
-            url_or_task=QQMusicDecrypter(audio_url, music_id, music_data["ekey"]),
+            url_or_task=QQMusicDecrypter(audio_url, mid, music_data["ekey"]),
             duration=duration,
         )
         dis_dura = audio_content.display_duration
@@ -107,7 +108,7 @@ class QQMusicParser(BaseParser):
             author=self.create_author(
                 name=music_data["artist"], avatar_url=music_data["artist_pic"]
             ),
-            url=f"https://y.qq.com/n/yqq/song/{music_data['id']}",
+            url=f"https://y.qq.com/n/yqq/song/{mid}",
             content=contents,
             extra=extra,
         )
