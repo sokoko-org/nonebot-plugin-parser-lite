@@ -114,9 +114,19 @@ def build_parser_mapping(root: Path) -> str:
         if path.is_dir():
             source = path / "__init__.py"
             if source.is_file():
-                modules.append((f".{path.name}", source))
+                module_part = path.name
+                if not module_part.isidentifier():
+                    raise RuntimeError(
+                        f"invalid parser module name {module_part!r}: {path}"
+                    )
+                modules.append((f".{module_part}", source))
         elif path.suffix == ".py" and path.stem not in {"__init__", "base"}:
-            modules.append((f".{path.stem}", path))
+            module_part = path.stem
+            if not module_part.isidentifier():
+                raise RuntimeError(
+                    f"invalid parser module name {module_part!r}: {path}"
+                )
+            modules.append((f".{module_part}", path))
 
     parsers: dict[str, str] = {}
     for module, path in modules:
@@ -138,7 +148,7 @@ def build_parser_mapping(root: Path) -> str:
         raise RuntimeError(f"no parser classes found in {parser_root}")
 
     return "\n".join(
-        f'    "{name}": "{module}",' for name, module in sorted(parsers.items())
+        f"    {name!r}: {module!r}," for name, module in sorted(parsers.items())
     )
 
 
