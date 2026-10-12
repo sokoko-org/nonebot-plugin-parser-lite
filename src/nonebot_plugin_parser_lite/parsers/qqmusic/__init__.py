@@ -66,10 +66,10 @@ class QQMusicParser(BaseParser):
     async def _parse_qqmusic_songid(self, searched: MatchWithParams):
         return await self._parse_qqmusic(searched["songid"])
 
-    async def _parse_qqmusic(self, mid: str):
+    async def _parse_qqmusic(self, music_id: str):
         resp = await self.httpx.get(
             "https://parse-api.sokoko.org/api/qq/song",
-            params={"music_id": mid, "quality": "high"},
+            params={"music_id": music_id, "quality": "high"},
         )
         resp.raise_for_status()
         data = resp.json()
@@ -81,7 +81,7 @@ class QQMusicParser(BaseParser):
             raise ParseException("无效音乐URL")
         duration = music_data["duration_seconds"]
         audio_content = self.create_audio(
-            url_or_task=QQMusicDecrypter(audio_url, mid, music_data["ekey"]),
+            url_or_task=QQMusicDecrypter(audio_url, music_id, music_data["ekey"]),
             duration=duration,
         )
         dis_dura = audio_content.display_duration
@@ -107,7 +107,7 @@ class QQMusicParser(BaseParser):
             author=self.create_author(
                 name=music_data["artist"], avatar_url=music_data["artist_pic"]
             ),
-            url=f"https://y.qq.com/n/ryqq_v2/songDetail/{mid}",
+            url=f"https://y.qq.com/n/yqq/song/{music_data['id']}",
             content=contents,
             extra=extra,
         )
