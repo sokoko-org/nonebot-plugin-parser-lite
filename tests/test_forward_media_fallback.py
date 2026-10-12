@@ -16,18 +16,18 @@ from nonebot_plugin_alconna.uniseg import (
     Video,
     Voice,
 )
-import pytest
 from pydantic import ValidationError
+import pytest
 from render_test_support import Renderer, UniHelper, make_result, pconfig
 
 from nonebot_plugin_parser_lite import delivery, render
+from nonebot_plugin_parser_lite.config import Config
 from nonebot_plugin_parser_lite.delivery import (
     build_text_fallback,
     build_video_fallback,
     send_with_media_fallback,
 )
 from nonebot_plugin_parser_lite.helper import mark_media_role, media_role
-from nonebot_plugin_parser_lite.config import Config
 
 
 class UploadFailed(ActionFailed):
@@ -66,9 +66,9 @@ def test_file_upload_timeout_configuration_is_opt_in():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("timeout", [None, 450.0, 900.0])
+@pytest.mark.parametrize("upload_timeout", [None, 450.0, 900.0])
 async def test_file_upload_uses_its_configured_timeout(
-    monkeypatch, onebot_context, timeout
+    monkeypatch, onebot_context, upload_timeout
 ):
     calls = []
 
@@ -76,10 +76,12 @@ async def test_file_upload_uses_its_configured_timeout(
         calls.append(kwargs)
 
     monkeypatch.setattr(UniMessage, "send", send)
-    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", timeout)
+    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", upload_timeout)
     # /bm 的纯文件发送不需要构造解析结果，普通和懒下载共用同一边界。
     await send_with_media_fallback(UniMessage(File(path="audio.mp3")))
-    assert calls == ([{}] if timeout is None else [{"_timeout": timeout}])
+    assert calls == (
+        [{}] if upload_timeout is None else [{"_timeout": upload_timeout}]
+    )
 
 
 @pytest.mark.asyncio
