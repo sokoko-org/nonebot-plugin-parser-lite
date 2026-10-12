@@ -6,6 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
+        <!-- nonebot-plugin-parser-lite:issue-template=feature-request -->
+
         ## 先说明问题，再提出方案
 
         功能建议应回答：**谁在什么场景遇到了什么限制、现有方案为什么不够、期望最终得到什么结果**。单纯填写“支持一下”“加个开关”“能不能做……”通常不足以进入需求评审。

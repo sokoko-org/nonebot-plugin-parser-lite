@@ -6,6 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
+        <!-- nonebot-plugin-parser-lite:issue-template=bug-report -->
+
         ## 提交前请先花一分钟确认
 
         Issue 用于跟踪**可复现、可定位的插件缺陷**。安装咨询、配置求助、平台偶发风控、失效链接等问题，请先查阅[现有issue](https://github.com/sokoko-org/nonebot-plugin-parser-lite/issues?q=is%3Aissue)并前往 [Discussions](https://github.com/sokoko-org/nonebot-plugin-parser-lite/discussions) 交流。

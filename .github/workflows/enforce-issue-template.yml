@@ -1,0 +1,89 @@
+name: Enforce issue templates
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  enforce-template:
+    name: Close issues without a template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce issue template
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            if (!issue || issue.pull_request) {
+              return;
+            }
+
+            const templateMarker = /<!--\s*nonebot-plugin-parser-lite:issue-template=[^>]+\s*-->/;
+            if (templateMarker.test(issue.body ?? "")) {
+              core.info(`Issue #${issue.number} used an issue template.`);
+              return;
+            }
+
+            const author = issue.user?.login;
+            if (!author) {
+              core.warning(`Issue #${issue.number} has no author; leaving it open.`);
+              return;
+            }
+
+            const bypassPermissions = new Set(["admin", "maintain", "push", "triage"]);
+            let permission = "pull";
+            if (issue.author_association === "OWNER") {
+              permission = "admin";
+            } else {
+              try {
+                const response = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  username: author,
+                });
+                permission = response.data.permission;
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+            }
+
+            if (bypassPermissions.has(permission)) {
+              core.info(`Issue #${issue.number} is exempt with ${permission} permission.`);
+              return;
+            }
+
+            const commentMarker = "<!-- nonebot-plugin-parser-lite:template-required -->";
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              per_page: 100,
+            });
+            if (!comments.some((comment) => comment.body?.includes(commentMarker))) {
+              const templatesUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/new/choose`;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `${commentMarker}
+
+            这个 Issue 没有使用项目提供的 Issue 模板，已自动关闭。
+
+            请打开 [Issue 模板选择页](${templatesUrl})，选择合适的模板并完整填写后重新提交。`,
+              });
+            }
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              state: "closed",
+              state_reason: "not planned",
+            });
