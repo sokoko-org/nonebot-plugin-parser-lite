@@ -3,6 +3,7 @@ from collections.abc import Callable, Collection, Generator, Sequence
 import contextlib
 from functools import partial
 import re
+from urllib.parse import urlsplit
 
 import aiofiles
 from anyio import Path
@@ -31,6 +32,7 @@ from .client import RetryableDownloadError, UniHttpClient, UniResponse
 from .task import auto_task
 
 _RE_RANGE_PATTERN = re.compile(r"bytes\s+(\d+)-\d+/(\d+|\*)")
+_CACHE_SUFFIXES = frozenset({".part", ".meta", ".meta.part"})
 
 
 def _with_identity_encoding(headers: dict[str, str]) -> dict[str, str]:
@@ -100,7 +102,7 @@ class StreamDownloader:
         if 200 <= resp.status_code < 300:
             return resp
         logger.debug(
-            f"[StreamDownloader] HEAD {url} returned {resp.status_code}, fallback to streamed GET"  # noqa: E501
+            f"[StreamDownloader] HEAD {url} returned {resp.status_code}, fallback to streamed GET"
         )
         async with self.client.stream(
             "GET",
@@ -150,7 +152,7 @@ class StreamDownloader:
         :param fallback_urls: 主链接失败时轮换使用的同资源备用链接
         :param retry_http_statuses: 可通过重试或切换线路恢复的 HTTP 状态码
         :param cache_key: 稳定缓存标识，为空时根据 URL 生成
-        :param default_suffix: puremagic 无法识别文件类型时使用的后缀名
+        :param default_suffix: 文件内容与 URL 路径均无法确定后缀时使用的后缀名
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :param cache_type: 缓存类型
         :param use_curl_cffi: 是否使用 curl_cffi 下载
@@ -228,12 +230,10 @@ class StreamDownloader:
                     retry_http_statuses=retry_http_statuses,
                     use_curl_cffi=use_curl_cffi,
                 )
-                suffix = await _detect_file_suffix(
-                    partial_path,
-                    default_suffix
-                    if default_suffix.startswith(".")
-                    else f".{default_suffix}",
-                )
+                fallback_suffix = Path(urlsplit(current_url).path).suffix.lower()
+                if not fallback_suffix or fallback_suffix in _CACHE_SUFFIXES:
+                    fallback_suffix = f".{default_suffix.lstrip('.')}"
+                suffix = await _detect_file_suffix(partial_path, fallback_suffix)
                 file_path = base_path.with_suffix(suffix)
                 if await file_path.exists():
                     await safe_unlink(partial_path)

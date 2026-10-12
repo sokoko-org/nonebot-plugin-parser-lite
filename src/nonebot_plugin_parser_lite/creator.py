@@ -32,10 +32,9 @@ T = TypeVar("T", bound=MediaContent)
 
 @runtime_checkable
 class DownloadFunc(Protocol):
-    """自定义下载函数协议：必须暴露 URL"""
+    """自定义下载函数协议：必须暴露 URL，ext_headers 属性可省略"""
 
     url: str
-    ext_headers: dict[str, str] | None = None
 
     def __call__(self) -> Coroutine[Any, Any, Path]:
         raise NotImplementedError
@@ -105,7 +104,7 @@ class Creator:
         """
         创建视频内容,
         传入 `DownloadFunc` 时,
-        会使用 `DownloadFunc` 的 `ext_headers` 而不是传入的.
+        优先使用对象的 `ext_headers` 属性，未定义时使用传入的请求头.
 
         :param url_or_task: 视频 URL 或下载任务
         :param cover_url: 封面 URL
@@ -148,7 +147,7 @@ class Creator:
                 args=(),
                 kwargs={},
                 url=download_func.url,
-                ext_headers=download_func.ext_headers,
+                ext_headers=getattr(download_func, "ext_headers", ext_headers),
                 use_curl_cffi=use_curl_cffi,
             )
         else:
@@ -264,7 +263,7 @@ class Creator:
         """
         创建音频内容,
         传入 `DownloadFunc` 时,
-        会使用 `DownloadFunc` 的 `ext_headers` 而不是传入的.
+        优先使用对象的 `ext_headers` 属性，未定义时使用传入的请求头.
 
         :param url_or_task: 音频 URL 或下载任务
         :param duration: 音频时长
@@ -299,7 +298,7 @@ class Creator:
                 args=(),
                 kwargs={},
                 url=download_func.url,
-                ext_headers=download_func.ext_headers,
+                ext_headers=getattr(download_func, "ext_headers", ext_headers),
                 use_curl_cffi=use_curl_cffi,
             )
         else:
@@ -374,7 +373,7 @@ class Creator:
 
     @staticmethod
     def live_photo(
-        video_url: str,
+        video_url: str | DownloadTaskWrapper[Path] | DownloadFunc,
         image_url: str,
         bgm_url: str | None = None,
         loop: int = 1,
@@ -386,7 +385,8 @@ class Creator:
         """
         创建  iPhone Live Photo 内容
 
-        :param video_url: iPhone Live Photo 变化过程视频
+        :param video_url: iPhone Live Photo 变化过程视频；
+        传入 `DownloadFunc` 时，优先使用对象的 `ext_headers` 属性，未定义时使用传入的请求头.
         :param image_url: iPhone Live Photo 底图
         :param cache_key: 稳定缓存标识，为空时根据各自 URL 生成
         :param bgm_url: iPhone Live Photo 背景音乐
@@ -396,13 +396,36 @@ class Creator:
         :param use_curl_cffi: 是否使用 curl_cffi 下载
         """
 
-        video_task = DOWNLOADER.download_video(
-            url=video_url,
-            cache_key=cache_key,
-            cache_variant="motion" if cache_key is not None else None,
-            ext_headers=ext_headers,
-            use_curl_cffi=use_curl_cffi,
-        )
+        if isinstance(video_url, str):
+            video_task = DOWNLOADER.download_video(
+                url=video_url,
+                cache_key=cache_key,
+                cache_variant="motion" if cache_key is not None else None,
+                ext_headers=ext_headers,
+                use_curl_cffi=use_curl_cffi,
+            )
+        elif isinstance(video_url, DownloadTaskWrapper):
+            video_task = video_url
+        elif isinstance(video_url, DownloadFunc):
+            download_func = video_url
+
+            async def _runner() -> Path:
+                return await download_func()
+
+            # 与 Creator.video 一致：自定义下载函数自带 ext_headers
+            video_task = DownloadTaskWrapper(
+                func=_runner,
+                args=(),
+                kwargs={},
+                url=download_func.url,
+                ext_headers=getattr(download_func, "ext_headers", ext_headers),
+                use_curl_cffi=use_curl_cffi,
+            )
+        else:
+            raise TypeError(
+                "Creator.live_photo 收到了不受支持的 video_url 类型: "
+                f"{type(video_url)}，期望 str / DownloadTaskWrapper / DownloadFunc 协议对象"
+            )
         image_task = DOWNLOADER.download_img(
             url=image_url,
             cache_key=cache_key,

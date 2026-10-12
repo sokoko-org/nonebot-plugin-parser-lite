@@ -103,7 +103,7 @@ def auto_task(
             )
         if ext_headers is not None and not isinstance(ext_headers, dict):
             raise TypeError(
-                f"@auto_task 要求 {func.__qualname__} 的 ext_headers 类型为 dict[str, str] | None, "  # noqa: E501
+                f"@auto_task 要求 {func.__qualname__} 的 ext_headers 类型为 dict[str, str] | None, "
                 f"但实际是 {type(ext_headers)!r}"
             )
         if not isinstance(use_curl_cffi, bool):

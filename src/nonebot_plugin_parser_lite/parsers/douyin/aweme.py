@@ -1,9 +1,11 @@
+from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from msgspec import Struct, field
 import ujson
 
 from ...creator import ContentItem, Creator
+from ...download import DOWNLOADER
 
 
 class Addr(Struct):
@@ -23,6 +25,34 @@ class Addr(Struct):
         if file_id := self.file_id:
             return f"https://aweme.snssdk.com/aweme/v1/play/?video_id={self.uri}&file_id={file_id}"
         return f"https://aweme.snssdk.com/aweme/v1/play/?video_id={self.uri}"
+
+
+DOUYIN_RETRYABLE_HTTP_STATUSES = frozenset({460})
+"""抖音 CDN 会按出口位置拒绝访问（HTTP 460，Overseas traffic refused），可换线路重试"""
+
+
+class DouyinVideoDownloader:
+    """按 play_addr.url_list 的全部线路下载视频，主线路失败时自动轮换。
+
+    满足 Creator.video 的 DownloadFunc 协议（url / ext_headers / __call__）。
+    """
+
+    def __init__(self, url_list: list[str], ext_headers: dict[str, str] | None, cache_key: str|None, cache_variant: str | None = None):
+        self.url_list = [url for url in url_list if url]
+        self.url = self.url_list[0] if self.url_list else ""
+        self.ext_headers = ext_headers
+        self.cache_key = cache_key
+        self.cache_variant = cache_variant
+
+    async def __call__(self) -> Any:
+        return await DOWNLOADER.download_video(
+            url=self.url,
+            fallback_urls=self.url_list[1:],
+            retry_http_statuses=DOUYIN_RETRYABLE_HTTP_STATUSES,
+            ext_headers=self.ext_headers,
+            cache_key=self.cache_key,
+            cache_variant=self.cache_variant,
+        )
 
 
 class Statistics(Struct):
@@ -140,7 +170,12 @@ class Aweme(Struct):
                 elif image_video := image.video:
                     content.append(
                         Creator.live_photo(
-                            video_url=image_video.play_addr.url,
+                            video_url=DouyinVideoDownloader(
+                                image_video.play_addr.url_list,
+                                ext_headers={"Referer": "https://www.douyin.com/"},
+                                cache_key=image_cache_key,
+                                cache_variant="motion",
+                            ),
                             image_url=image_video.cover.url_list[-1],
                             bgm_url=music_url,
                             cache_key=image_cache_key,
@@ -151,7 +186,11 @@ class Aweme(Struct):
         elif video := self.video:
             content.append(
                 Creator.video(
-                    url_or_task=video.play_addr.url,
+                    url_or_task=DouyinVideoDownloader(
+                        video.play_addr.url_list,
+                        ext_headers={"Referer": "https://www.douyin.com/"},
+                        cache_key=aweme_cache_key,
+                    ),
                     cover_url=video.cover_original_scale.url_list[-1]
                     if video.cover_original_scale
                     else video.cover.url_list[-1],

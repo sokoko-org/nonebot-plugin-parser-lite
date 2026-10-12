@@ -11,7 +11,6 @@ from .base import (
 )
 
 
-# ref https://kw-api.cenguigui.cn/
 class KuWoParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.KUWO, display_name="酷我音乐"
@@ -23,7 +22,7 @@ class KuWoParser(BaseParser):
         rid = searched[1]
 
         resp = await self.httpx.get(
-            "https://parse-api.sokoko.org/api/kuwo/song/",
+            "https://parse-api.sokoko.org/api/kuwo/song",
             params={"music_id": rid, "quality": "320k"},
         )
         resp.raise_for_status()
@@ -36,7 +35,7 @@ class KuWoParser(BaseParser):
             raise ParseException("无效音乐URL")
         duration = music_data["duration_seconds"]
         audio_content = self.create_audio(
-            url=audio_url,
+            url_or_task=audio_url,
             duration=duration,
             cache_key=f"kuwo:{rid}",
         )

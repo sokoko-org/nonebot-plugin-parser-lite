@@ -355,7 +355,7 @@ async def test_generic_binary_content_type_uses_puremagic_and_updates_cache_meta
     )
     downloader = _new_downloader(download, client)
     path = await downloader.streamd(
-        url="https://cdn.example/media",
+        url="https://cdn.example/media.bin",
         cache_key="video",
         default_suffix=".dat",
         cache_type=cache_manager.MEDIA,
@@ -391,6 +391,93 @@ async def test_unidentified_binary_uses_default_suffix(downloader_modules):
 
     assert path.name == "unknown.dat"
     assert cache_manager.cached_files[-1][1] is path
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("url", "expected_suffix"),
+    [
+        ("https://cdn.example/song.mgg?guid=test&vkey=test", ".mgg"),
+        ("https://cdn.example/song.MFLAC?token=test", ".mflac"),
+        ("https://cdn.example/song.mmp4", ".mmp4"),
+        ("https://cdn.example/audio?filename=song.mgg", ".mp3"),
+        ("https://cdn.example/song.bin", ".bin"),
+    ],
+)
+async def test_unidentified_audio_preserves_source_suffix(
+    downloader_modules, url, expected_suffix
+):
+    download, _, cache_manager = downloader_modules
+    client = FakeClient(
+        [FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
+    )
+    downloader = _new_downloader(download, client)
+
+    path = await downloader.download_audio(url=url)
+
+    assert path.suffix == expected_suffix
+    assert await path.read_bytes() == b"\x00\x01\x02"
+    assert cache_manager.cached_files[-1][1] is path
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("url", "default_suffix", "expected_suffix"),
+    [
+        ("https://cdn.example/file.part", ".ogg", ".ogg"),
+        ("https://cdn.example/file.meta", ".dat", ".dat"),
+        ("https://cdn.example/file.META", ".dat", ".dat"),
+        ("https://cdn.example/file.meta.part", ".dat", ".dat"),
+    ],
+)
+async def test_reserved_suffix_does_not_destroy_download(
+    downloader_modules, monkeypatch, url, default_suffix, expected_suffix
+):
+    download, _, cache_manager = downloader_modules
+    real_cache = _load_module(
+        f"{TEST_PACKAGE}.utils.real_cache", SOURCE / "utils/cache.py"
+    )
+    monkeypatch.setattr(
+        cache_manager, "set_cached_file", real_cache.CacheManager.set_cached_file
+    )
+    client = FakeClient(
+        [FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
+    )
+    downloader = _new_downloader(download, client)
+
+    path = await downloader.streamd(url=url, default_suffix=default_suffix)
+
+    assert path.suffix == expected_suffix
+    assert await path.read_bytes() == b"\x00\x01\x02"
+    assert await path.with_suffix(".meta").read_bytes() == expected_suffix.encode()
+    assert not await path.with_suffix(".part").exists()
+
+
+@pytest.mark.asyncio
+async def test_stream_suffix_comes_from_successful_fallback_url(
+    downloader_modules, monkeypatch
+):
+    download, _, _ = downloader_modules
+    client = FakeClient(
+        [
+            FakeResponse(404),
+            FakeResponse(
+                200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"]
+            ),
+        ]
+    )
+    downloader = _new_downloader(download, client)
+    monkeypatch.setattr(download.asyncio, "sleep", _no_sleep)
+
+    path = await downloader.streamd(
+        url="https://primary.example/song.mp3",
+        fallback_urls=("https://backup.example/song.mgg?token=test",),
+        retry_http_statuses={404},
+        default_suffix=".dat",
+    )
+
+    assert path.suffix == ".mgg"
+    assert await path.read_bytes() == b"\x00\x01\x02"
 
 
 @pytest.mark.asyncio

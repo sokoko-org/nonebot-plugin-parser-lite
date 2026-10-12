@@ -497,7 +497,7 @@ class VideoDownloadURLDataDetecter:
         :param cdn_domain: 自定义 CDN 域名，设置后优先于地区配置
 
         :return: (最佳视频流, 最佳音频流)，若不存在则对应位置为 `None`
-        """  # noqa: E501
+        """
         if video_accepted_qualities is None:
             video_accepted_qualities = DEFAULT_VIDEO_QUALITIES
         if audio_accepted_qualities is None:
