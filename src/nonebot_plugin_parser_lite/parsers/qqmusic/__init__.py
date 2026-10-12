@@ -45,7 +45,7 @@ class QQMusicParser(BaseParser):
     # https://y.qq.com/n/ryqq_v2/songDetail/0039MnYb0qxYhV
     # https://y.qq.com/n/yqq/song/000Vk1cS3DV3FI.html
     # https://i2.y.qq.com/n3/other/pages/playsong/index.html?ADTAG=ryqq.songDetail&songmid=0039MnYb0qxYhV&songid=0&songtype=0
-    @handle("y.qq.com", r"ryqq_v2/songDetail/(?P<songmid>[A-Za-z0-9]{14})")
+    @handle("y.qq.com", r"songDetail/(?P<songmid>[A-Za-z0-9]{14})")
     @handle("y.qq.com", r"n/yqq/song/(?P<songmid>[A-Za-z0-9]{14})(?:\.html)?")
     @handle(
         "i2.y.qq.com/n3/other/pages/playsong/index.html",
@@ -57,7 +57,7 @@ class QQMusicParser(BaseParser):
     # https://y.qq.com/n/ryqq_v2/songDetail/584161671
     # https://y.qq.com/n/yqq/song/584161671.html
     # https://i2.y.qq.com/n3/other/pages/playsong/index.html?ADTAG=ryqq.songDetail&songmid=&songid=584161671&songtype=0
-    @handle("y.qq.com", r"ryqq_v2/songDetail/(?P<songid>[1-9][0-9]*)")
+    @handle("y.qq.com", r"songDetail/(?P<songid>[1-9][0-9]*)")
     @handle("y.qq.com", r"n/yqq/song/(?P<songid>[1-9][0-9]*)(?:\.html)?")
     @handle(
         "i2.y.qq.com/n3/other/pages/playsong/index.html",
