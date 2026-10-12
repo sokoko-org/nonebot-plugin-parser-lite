@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 from anyio import Path
 from nonebot.exception import ActionFailed, NetworkError
+from nonebot.matcher import current_bot
 from nonebot_plugin_alconna.uniseg import (
     Audio,
     CustomNode,
@@ -16,6 +17,7 @@ from nonebot_plugin_alconna.uniseg import (
     Voice,
 )
 import pytest
+from pydantic import ValidationError
 from render_test_support import Renderer, UniHelper, make_result, pconfig
 
 from nonebot_plugin_parser_lite import delivery, render
@@ -25,6 +27,7 @@ from nonebot_plugin_parser_lite.delivery import (
     send_with_media_fallback,
 )
 from nonebot_plugin_parser_lite.helper import mark_media_role, media_role
+from nonebot_plugin_parser_lite.config import Config
 
 
 class UploadFailed(ActionFailed):
@@ -38,6 +41,108 @@ class OneBotFailed(ActionFailed):
     def __init__(self, wording):
         super().__init__("test")
         self.info = {"retcode": 1200, "wording": wording}
+
+
+@pytest.fixture
+def onebot_context():
+    token = current_bot.set(
+        SimpleNamespace(adapter=SimpleNamespace(get_name=lambda: "OneBot V11"))
+    )
+    try:
+        yield
+    finally:
+        current_bot.reset(token)
+
+
+@pytest.mark.parametrize("value", [0, -1, float("inf"), float("nan")])
+def test_file_upload_timeout_rejects_invalid_values(value):
+    with pytest.raises(ValidationError):
+        Config(plite_file_upload_timeout=value)
+
+
+def test_file_upload_timeout_configuration_is_opt_in():
+    assert Config().file_upload_timeout is None
+    assert Config(plite_file_upload_timeout="900").file_upload_timeout == 900
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("timeout", [None, 450.0, 900.0])
+async def test_file_upload_uses_its_configured_timeout(
+    monkeypatch, onebot_context, timeout
+):
+    calls = []
+
+    async def send(message, **kwargs):
+        calls.append(kwargs)
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", timeout)
+    # /bm 的纯文件发送不需要构造解析结果，普通和懒下载共用同一边界。
+    await send_with_media_fallback(UniMessage(File(path="audio.mp3")))
+    assert calls == ([{}] if timeout is None else [{"_timeout": timeout}])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "message",
+    [
+        UniMessage.text("text"),
+        UniMessage(Image(raw=b"image")),
+        UniMessage(Video(raw=b"video")),
+        UniMessage(Reference(id="forward")),
+        UniMessage([File(path="file.mp4"), Reference(id="forward")]),
+    ],
+)
+async def test_non_file_apis_keep_the_normal_timeout(
+    monkeypatch, onebot_context, message
+):
+    calls = []
+
+    async def send(message, **kwargs):
+        calls.append(kwargs)
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
+    await send_with_media_fallback(message, make_result())
+    assert calls == [{}]
+
+
+@pytest.mark.asyncio
+async def test_other_adapters_do_not_receive_onebot_timeout(monkeypatch):
+    calls = []
+
+    async def send(message, **kwargs):
+        calls.append(kwargs)
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
+    token = current_bot.set(
+        SimpleNamespace(adapter=SimpleNamespace(get_name=lambda: "Telegram"))
+    )
+    try:
+        await send_with_media_fallback(UniMessage(File(path="file.mp4")))
+    finally:
+        current_bot.reset(token)
+    assert calls == [{}]
+
+
+@pytest.mark.asyncio
+async def test_file_timeout_does_not_repeat_an_uncertain_upload(
+    monkeypatch, onebot_context
+):
+    calls = []
+    error = NetworkError("WebSocket call api upload_group_file timeout")
+
+    async def send(message, **kwargs):
+        calls.append(kwargs)
+        raise error
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
+    with pytest.raises(NetworkError) as caught:
+        await send_with_media_fallback(UniMessage(File(path="file.mp4")), make_result())
+    assert caught.value is error
+    assert calls == [{"_timeout": 900}]
 
 
 def forward(*contents):

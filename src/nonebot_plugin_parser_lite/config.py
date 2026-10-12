@@ -2,7 +2,7 @@ from typing import Literal
 
 from anyio import Path
 from nonebot import get_driver, get_plugin_config
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .constants import PlatformEnum
 from .path import cache_dir as _cache_dir
@@ -40,6 +40,10 @@ class Config(BaseModel):
     """是否需要上传音频文件"""
     plite_need_upload_video: bool = False
     """是否需要上传视频文件"""
+    plite_file_upload_timeout: float | None = Field(
+        default=None, gt=0, allow_inf_nan=False
+    )
+    """OneBot v11 文件上传回执等待秒数；未设置时沿用 NoneBot API_TIMEOUT"""
     plite_use_base64: bool = False
     """是否使用 base64 编码发送图片，音频，视频"""
     plite_max_size: int = 90
@@ -147,6 +151,10 @@ class Config(BaseModel):
     def max_size(self) -> int:
         """资源最大大小(mb)"""
         return self.plite_max_size
+
+    @property
+    def file_upload_timeout(self) -> float | None:
+        return self.plite_file_upload_timeout
 
     @property
     def disabled_platforms(self) -> list[PlatformEnum]:

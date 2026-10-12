@@ -224,7 +224,9 @@ async def register_bili_matcher():
                 convert_to_mp3=True,
             )
             if pconfig.need_upload_audio:
-                await UniMessage(await UniHelper.file_seg(audio_path)).send()
+                await send_with_media_fallback(
+                    UniMessage(await UniHelper.file_seg(audio_path))
+                )
             else:
                 await UniMessage(await UniHelper.record_seg(audio_path)).send()
 
