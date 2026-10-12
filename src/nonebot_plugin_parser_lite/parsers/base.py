@@ -52,6 +52,7 @@ T = TypeVar("T", bound="BaseParser")
 
 HandlerFunc = Callable[[T, MatchWithParams], Coroutine[Any, Any, ParseResult]]
 KeyPatterns = list[tuple[str, Pattern[str], ParamRules]]
+HandlerEntry = tuple[Pattern[str], HandlerFunc[T], ParamRules]
 
 _KEY_PATTERNS = "_key_patterns"
 
@@ -164,7 +165,7 @@ class BaseParser:
 
     if TYPE_CHECKING:
         _key_patterns: ClassVar[KeyPatterns]
-        _handlers: ClassVar[dict[str, list[tuple[Pattern[str], HandlerFunc]]]]
+        _handlers: ClassVar[dict[str, list[HandlerEntry]]]
 
     def __init__(self):
         self.headers = COMMON_HEADER.copy()
@@ -185,7 +186,7 @@ class BaseParser:
         if ABC not in cls.__bases__:  # 跳过抽象类
             BaseParser._registry.append(cls)
 
-        cls._handlers: dict[str, list[tuple[Pattern[str], HandlerFunc]]] = {}
+        cls._handlers: dict[str, list[HandlerEntry]] = {}
         cls._key_patterns = []
 
         # 获取所有被 handle 装饰的方法
@@ -195,8 +196,10 @@ class BaseParser:
                 key_patterns: KeyPatterns = getattr(attr, _KEY_PATTERNS)
                 handler = cast(HandlerFunc, attr)
                 for keyword, pattern, param_rules in key_patterns:
-                    # 记录 keyword -> (pattern, handler) 列表（解析时只关心 pattern）
-                    cls._handlers.setdefault(keyword, []).append((pattern, handler))
+                    # 记录 keyword -> (pattern, handler, param_rules) 列表
+                    cls._handlers.setdefault(keyword, []).append(
+                        (pattern, handler, param_rules)
+                    )
                     # _key_patterns 用于 matcher 注册，保留 param_rules
                     cls._key_patterns.append((keyword, pattern, param_rules))
 
@@ -222,10 +225,12 @@ class BaseParser:
             raise ParseException(f"未找到关键字 {keyword!r} 对应的 handler")
 
         text = searched.url
-        for pattern, handler in handlers:
-            # pattern 是当初 handle 时 compile 出来的正则
-            # 这里用 search/fullmatch 都可以，search 更宽松
-            if pattern.search(text):
+        for pattern, handler, param_rules in handlers:
+            # pattern 是当初 handle 时 compile 出来的正则；参数规则也必须复核，
+            # 因为同一 keyword 下可能有多个只靠 query 区分的 handler。
+            if pattern.search(text) and self._match_param_rules(
+                searched, param_rules
+            ):
                 return await handler(self, searched)
 
         # 理论上不该走到这里，防御性错误
