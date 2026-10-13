@@ -107,6 +107,51 @@ def copy_template(
     migration_log(f"写入独立实现: {destination.as_posix()}")
 
 
+def build_parser_mapping(root: Path) -> str:
+    parser_root = root / PACKAGE / "parsers"
+    modules: list[tuple[str, Path]] = []
+    for path in sorted(parser_root.iterdir(), key=lambda item: item.name):
+        if path.is_dir():
+            source = path / "__init__.py"
+            if source.is_file():
+                module_part = path.name
+                if not module_part.isidentifier():
+                    raise RuntimeError(
+                        f"invalid parser module name {module_part!r}: {path}"
+                    )
+                modules.append((f".{module_part}", source))
+        elif path.suffix == ".py" and path.stem not in {"__init__", "base"}:
+            module_part = path.stem
+            if not module_part.isidentifier():
+                raise RuntimeError(
+                    f"invalid parser module name {module_part!r}: {path}"
+                )
+            modules.append((f".{module_part}", path))
+
+    parsers: dict[str, str] = {}
+    for module, path in modules:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        class_names = [
+            node.name
+            for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name.endswith("Parser")
+        ]
+        for name in class_names:
+            previous_module = parsers.get(name)
+            if previous_module is not None:
+                raise RuntimeError(
+                    f"duplicate parser class {name}: {previous_module} and {module}"
+                )
+            parsers[name] = module
+
+    if not parsers:
+        raise RuntimeError(f"no parser classes found in {parser_root}")
+
+    return "\n".join(
+        f"    {name!r}: {module!r}," for name, module in sorted(parsers.items())
+    )
+
+
 def rewrite_config(root: Path) -> None:
     path = root / PACKAGE / "config.py"
     text = path.read_text(encoding="utf-8")
@@ -362,6 +407,7 @@ def generate(root: Path) -> None:
     rewrite_logging(root)
     rewrite_bilibili_scheduler(root)
     remove_nonebot_runtime(root)
+    parser_mapping = build_parser_mapping(root)
 
     replacements = {
         "package_init.py.tmpl": PACKAGE / "__init__.py",
@@ -377,13 +423,16 @@ def generate(root: Path) -> None:
         "README.md.tmpl": Path("README.md"),
     }
     for template, destination in replacements.items():
-        replacements = (
-            {"{{VERSION}}": version}
-            if "{{VERSION}}"
-            in (root / TEMPLATES / template).read_text(encoding="utf-8")
-            else None
-        )
-        copy_template(root, template, destination, replacements)
+        template_text = (root / TEMPLATES / template).read_text(encoding="utf-8")
+        template_replacements = {
+            marker: value
+            for marker, value in {
+                "{{VERSION}}": version,
+                "{{PARSERS}}": parser_mapping,
+            }.items()
+            if marker in template_text
+        }
+        copy_template(root, template, destination, template_replacements or None)
 
     requirements = rewrite_requirements(root)
     write_pyproject(root, requirements, version)

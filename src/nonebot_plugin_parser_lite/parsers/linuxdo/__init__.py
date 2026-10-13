@@ -1,17 +1,18 @@
 from typing import ClassVar
 
-from ...utils.cookie import ck2dict
+from nonebot import logger
+
 from ...utils.format import format_num
 from ..base import (
     DOWNLOADER,
     BaseParser,
     MatchWithParams,
-    ParseException,
     Platform,
     PlatformEnum,
     handle,
     pconfig,
 )
+from .auth import LinuxDoAuth, format_response_diagnostics
 from .topic import decoder as postDecoder
 
 
@@ -19,23 +20,28 @@ class LinuxDoParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.LINUXDO, display_name="LINUX DO"
     )
-    linuxdo_ck = ck2dict(pconfig.linuxdo_ck) if pconfig.linuxdo_ck else {}
+
+    def __init__(self):
+        super().__init__()
+        self.auth = LinuxDoAuth(DOWNLOADER.client, self.headers)
 
     @handle("linux.do", r"topic/(?P<topic_id>\d+)")
     async def parse_topic(self, searched: MatchWithParams):
         topic_id = searched["topic_id"]
+        auth = self.auth
+        cookies = await auth.cookies()
         res = await DOWNLOADER.client.get(
             f"https://linux.do/t/topic/{topic_id}.json",
             use_curl_cffi=True,
-            headers=self.headers,
-            cookies=self.linuxdo_ck,
+            headers=auth.headers,
+            cookies=cookies,
         )
+        await auth.update_from_response(res)
+        response_diagnostics = format_response_diagnostics(res)
         if not res.is_success:
-            try:
-                summary = res.json()
-            except Exception:
-                summary = res.text[:100]
-            raise ParseException(f"获取帖子失败: {summary}")
+            logger.warning(f"Linux.do 帖子响应异常: {response_diagnostics}")
+            raise await auth.tip_for_status(res.status_code)
+        logger.info(f"Linux.do 帖子响应成功: {response_diagnostics}")
         post = postDecoder.decode(res.content)
         return self.result(
             author=self.create_author(
