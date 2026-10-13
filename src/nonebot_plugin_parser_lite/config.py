@@ -43,7 +43,7 @@ class Config(BaseModel):
     plite_file_upload_timeout: float | None = Field(
         default=None, gt=0, allow_inf_nan=False
     )
-    """OneBot v11 文件上传回执等待秒数；未设置时沿用 NoneBot API_TIMEOUT"""
+    """文件发送的 _timeout 秒数，由适配器支持；未设置时沿用默认等待时间"""
     plite_use_base64: bool = False
     """是否使用 base64 编码发送图片，音频，视频"""
     plite_max_size: int = 90

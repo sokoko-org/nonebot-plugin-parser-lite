@@ -134,7 +134,9 @@ async def test_parser_summary_uses_file_timeout_when_rendered_as_file(
         UniMessage(Image(raw=b"image")),
         UniMessage(Video(raw=b"video")),
         UniMessage(Reference(id="forward")),
-        UniMessage([File(path="file.mp4"), Reference(id="forward")]),
+        UniMessage(
+            Reference(nodes=[CustomNode("42", "bot", content=UniMessage(File(path="file.mp4")))])
+        ),
     ],
 )
 async def test_non_file_apis_keep_the_normal_timeout(
@@ -152,7 +154,7 @@ async def test_non_file_apis_keep_the_normal_timeout(
 
 
 @pytest.mark.asyncio
-async def test_other_adapters_do_not_receive_onebot_timeout(monkeypatch):
+async def test_file_timeout_is_passed_without_adapter_specific_dispatch(monkeypatch):
     calls = []
 
     async def send(message, **kwargs):
@@ -167,7 +169,22 @@ async def test_other_adapters_do_not_receive_onebot_timeout(monkeypatch):
         await send_with_media_fallback(UniMessage(File(path="file.mp4")))
     finally:
         current_bot.reset(token)
-    assert calls == [{}]
+    assert calls == [{"_timeout": 900}]
+
+
+@pytest.mark.asyncio
+async def test_top_level_file_keeps_timeout_alongside_a_forward_id(monkeypatch):
+    calls = []
+
+    async def send(message, **kwargs):
+        calls.append(kwargs)
+
+    monkeypatch.setattr(UniMessage, "send", send)
+    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
+    await send_with_media_fallback(
+        UniMessage([File(path="file.mp4"), Reference(id="forward")])
+    )
+    assert calls == [{"_timeout": 900}]
 
 
 @pytest.mark.asyncio

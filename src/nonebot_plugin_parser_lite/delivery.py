@@ -7,7 +7,6 @@ from typing import cast
 
 from nonebot import logger
 from nonebot.exception import ActionFailed
-from nonebot.matcher import current_bot
 from nonebot_plugin_alconna.uniseg import (
     CustomNode,
     File,
@@ -223,18 +222,13 @@ async def send_with_media_fallback(
         else None
     )
     try:
-        bot = current_bot.get(None)
-        if (
-            pconfig.file_upload_timeout is not None
-            and bot is not None
-            and bot.adapter.get_name() == "OneBot V11"
-            and message.has(File)
-            and not message.has(Reference)
-        ):
-            # 文件上传单独等待；转发节点优先于 File 导出，不能误用此预算。
-            await message.send(_timeout=pconfig.file_upload_timeout)
-        else:
-            await message.send()
+        upload_timeout = pconfig.file_upload_timeout
+        send_kwargs = (
+            {"_timeout": upload_timeout}
+            if upload_timeout is not None and message.has(File)
+            else {}
+        )
+        await message.send(**send_kwargs)
     except ActionFailed as error:
         if snapshot is None or result is None or not is_media_upload_error(error):
             raise
