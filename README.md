@@ -149,6 +149,9 @@ uv add --requirements ./xxx/requirements.txt
 # [可选] nonebot2 内置配置，若服务器上传带宽太低或报错发送消息超时，建议调高，防止超时
 API_TIMEOUT=100
 
+# [可选] 文件发送的 _timeout 秒数，由适配器(Onebot)支持；未设置时沿用默认等待时间
+plite_file_upload_timeout=None
+
 # [可选] 允许的 B 站视频编码，越靠前的编码优先级越高
 # 可选 "avc"(H.264，体积较大), "hev"(HEVC), "av01"(AV1), "unknown"(未知)
 # 后两项在不同设备可能有兼容性问题，如需完全避免，可只填一项，如 '["avc"]'
