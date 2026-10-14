@@ -10,7 +10,7 @@ from .util import format_sticker
 class ReplyData(Struct):
     username: str
     dateline: int
-    rusername: str
+    rusername: str | None
     """回复谁的这个评论"""
     message: str
     """需要解析表情 [强]"""

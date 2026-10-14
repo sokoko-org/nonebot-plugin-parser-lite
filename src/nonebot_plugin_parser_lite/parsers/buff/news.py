@@ -7,7 +7,6 @@ from ...data import ContentItem
 from ...utils.format import (
     HTML_NEWLINE_TAGS,
     append_html_text,
-    clean_blank,
     is_inside,
     replace_anchor_hrefs,
 )
@@ -82,8 +81,7 @@ class News(Struct):
                         data.append(Creator.graphic(url=str(src_attr)))
 
             elif isinstance(element, NavigableString):
-                if text := clean_blank(str(element)):
-                    text_buffer.append(text)
+                text_buffer.append(str(element))
 
         flush_text()
 

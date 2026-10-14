@@ -9,7 +9,6 @@ from ...utils.format import (
     HTML_NEWLINE_TAGS,
     anchor_text,
     append_html_text,
-    clean_blank,
     is_inside,
 )
 
@@ -79,5 +78,4 @@ def _iter_media_and_text(soup: BeautifulSoup):
                 continue
             if anchor is not None:
                 continue
-            if text := clean_blank(str(element)):
-                yield text
+            yield str(element)

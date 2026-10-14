@@ -3,7 +3,7 @@ import re
 from bs4 import BeautifulSoup, Comment, Tag
 from bs4.element import NavigableString, PageElement
 
-from ...utils.format import HTML_NEWLINE_TAGS, clean_blank
+from ...utils.format import HTML_NEWLINE_TAGS
 
 _CARD_ICON_RE = re.compile(r"timeline_card_small_([a-z0-9]+)", re.I)
 
@@ -37,8 +37,7 @@ def weibo_long_html_to_raw(html: str) -> str:
         if isinstance(node, Comment):
             return
         if isinstance(node, NavigableString):
-            if text := clean_blank(str(node)):
-                parts.append(text)
+            parts.append(str(node))
             return
         if not isinstance(node, Tag):
             return
@@ -56,7 +55,7 @@ def weibo_long_html_to_raw(html: str) -> str:
         if node.name == "a":
             surl = node.find("span", class_="surl-text")
             if isinstance(surl, Tag):
-                title = clean_blank(surl.get_text(" ", strip=True)) or ""
+                title = surl.get_text(" ", strip=True)
                 if title and (label := _entity_label_from_card(node)):
                     parts.append(f"#{title}[{label}]#")
                     return
@@ -64,9 +63,9 @@ def weibo_long_html_to_raw(html: str) -> str:
                 if data_url.startswith(("http://t.cn/", "https://t.cn/")):
                     parts.append(data_url)
                     return
-                parts.append(title or clean_blank(node.get_text(" ", strip=True)) or "")
+                parts.append(title or node.get_text(" ", strip=True))
                 return
-            label = clean_blank(node.get_text(" ", strip=True)) or ""
+            label = node.get_text(" ", strip=True)
             href = _attr_str(node.get("href"))
             if href and label.strip() and label.strip() != href:
                 parts.append(f"{label} ({href})")

@@ -8,7 +8,6 @@ from ...utils.format import (
     HTML_NEWLINE_TAGS,
     anchor_text,
     append_html_text,
-    clean_blank,
     is_inside,
 )
 
@@ -148,8 +147,7 @@ async def _iter_media_and_text(soup: BeautifulSoup, content_type: str):
                     yield graphic
 
         elif isinstance(element, NavigableString):
-            if text := clean_blank(str(element)):
-                yield text
+            yield str(element)
 
 
 async def _parse_video_box(tag: Tag, content_type: str):

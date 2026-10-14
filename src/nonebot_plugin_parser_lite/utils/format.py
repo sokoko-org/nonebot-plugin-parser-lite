@@ -86,16 +86,10 @@ def format_num(num: int | None) -> str | None:
     return str(num) if num < 10000 else f"{num / 10000:.1f}万"
 
 
-def clean_blank(value: str) -> str | None:
-    """清理文本中的空白符号(包括换行)"""
-    text = re.sub(r"\s+", " ", value).strip()
-    return text or None
-
-
 def append_html_text(
     result: MutableSequence[ContentItem], buffer: Sequence[str]
 ) -> None:
-    """合并连续 HTML 文本，并保留标签产生的换行"""
+    """合并连续 HTML 文本，保留正文空白与标签产生的换行"""
     if not buffer:
         return
     if normalized := "".join(buffer).strip():
@@ -103,7 +97,7 @@ def append_html_text(
 
 
 def html_to_text(root: BeautifulSoup | Tag | str) -> str:
-    """按 HTML 标签语义提取文本"""
+    """按 HTML 标签语义提取文本，保留文本节点内的空白"""
     parts: list[str] = []
     if isinstance(root, str):
         root = BeautifulSoup(root)
@@ -112,8 +106,7 @@ def html_to_text(root: BeautifulSoup | Tag | str) -> str:
             if element.name in HTML_NEWLINE_TAGS:
                 parts.append("\n")
         elif isinstance(element, NavigableString):
-            if text := clean_blank(str(element)):
-                parts.append(text)
+            parts.append(str(element))
     return "".join(parts).strip()
 
 
