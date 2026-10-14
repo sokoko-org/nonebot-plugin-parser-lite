@@ -23,6 +23,10 @@ class LofterParser(BaseParser):
         name=PlatformEnum.LOFTER, display_name="LOFTER"
     )
 
+    def __init__(self):
+        super().__init__()
+        self.httpx.headers = self.qq_headers
+
     @handle(
         "s.lofter.com",
         r"s\.lofter\.com/-s/[0-9A-Za-z]+",
@@ -47,7 +51,6 @@ class LofterParser(BaseParser):
                 "postid": post_id,
                 "targetblogid": blog_id,
             },
-            headers=self.qq_headers,
         )
         post_data = post_resp.json()
 
@@ -56,7 +59,6 @@ class LofterParser(BaseParser):
             com_resp = await self.httpx.get(
                 "https://www.lofter.com/comment/l1/hotnew.json",
                 params={"postId": post_id, "blogId": blog_id},
-                headers=self.qq_headers,
             )
             com_data = com_resp.json()
 
