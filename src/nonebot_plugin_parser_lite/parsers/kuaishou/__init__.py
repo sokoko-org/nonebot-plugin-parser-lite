@@ -53,9 +53,9 @@ class KuaiShouParser(BaseParser):
 
     async def _fetch_photo(self, url: str) -> Photo:
         """获取页面并提取作品数据"""
-        real_url = await self.get_final_url(url, headers=self.ios_headers)
+        real_url = await self.get_final_url(url, headers=self.qq_headers)
         real_url = real_url.replace("/fw/long-video/", "/fw/photo/")
-        response = await self.httpx.get(real_url, headers=self.ios_headers)
+        response = await self.httpx.get(real_url, headers=self.qq_headers)
         response.raise_for_status()
 
         matched = INIT_PATTERN.search(response.text)

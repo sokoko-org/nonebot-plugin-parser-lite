@@ -13,19 +13,11 @@ COMMON_HEADER: Final[dict[str, str]] = {
     )
 }
 
-IOS_HEADER: Final[dict[str, str]] = {
+QQ_HEADER: Final[dict[str, str]] = {
     "User-Agent": (
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) "
-        "AppleWebKit/605.1.15 (KHTML, like Gecko) "
-        "Version/16.6 Mobile/15E148 Safari/604.1 Edg/132.0.0.0"
-    )
-}
-
-ANDROID_HEADER: Final[dict[str, str]] = {
-    "User-Agent": (
-        "Mozilla/5.0 (Linux; Android 15; SM-G998B) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/132.0.0.0 Mobile Safari/537.36 Edg/132.0.0.0"
+        "Mozilla/5.0 (Linux; Android 16; 2201123C Build/1450000) AppleWebKit/537.36"
+        " (KHTML, like Gecko) Version/4.0 Chrome/121.0.6167.71 Safari/537.36 Mobile"
+        " Safari/537.36 V1_AND_SQ_9.3.70_16410_YYB_D QQ/9.3.70.41925 AppId/537395443"
     )
 }
 

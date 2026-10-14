@@ -28,16 +28,14 @@ class QSMusicParser(BaseParser):
         """解析汽水音乐分享链接"""
         share_url = searched[0]
 
-        response = await self.httpx.get(share_url, headers=self.ios_headers)
+        response = await self.httpx.get(share_url, headers=self.qq_headers)
         response.raise_for_status()
         html = response.text
         if matched := ROUTER_DATA.search(html):
             raw = matched[1]
         else:
             raise ParseException("未找到结构化数据")
-        track = shareDecoder.decode(
-            raw
-        ).loaderData.track_page
+        track = shareDecoder.decode(raw).loaderData.track_page
         music_data = track.audioWithLyricsOption
         contents: list[ContentItem] = [
             self.create_audio(

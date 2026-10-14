@@ -24,23 +24,11 @@ class RedNoteParser(BaseParser):
         name=PlatformEnum.REDNOTE, display_name="小红书"
     )
 
-    def __init__(self):
-        super().__init__()
-        self.ios_headers.update(
-            {
-                "origin": "https://www.xiaohongshu.com",
-                "x-requested-with": "XMLHttpRequest",
-                "sec-fetch-site": "same-origin",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-dest": "empty",
-            }
-        )
-
     @handle("xhslink.cn", r"xhslink\.cn/[A-Za-z0-9._?%&+=/#@-]+")
     @handle("xhslink.com", r"xhslink\.com/[A-Za-z0-9._?%&+=/#@-]+")
     async def _parse_short_link(self, searched: MatchWithParams):
         url = f"https://{searched.url}"
-        return await self.parse_with_redirect(url, self.ios_headers)
+        return await self.parse_with_redirect(url, self.qq_headers)
 
     # https://www.xiaohongshu.com/explore/6a33df40000000001101fce5?xsec_token=ABoRHhYoIhXV24zUz64kWg8vu6u8D4zLUjIFRBf8fcf54=
     # https://www.xiaohongshu.com/explore/6a355d090000000021018c66?xsec_token=CBC_w7YSZbQP_uKutDlmX7iqXuEzWJJ8x8_nfNNfFWoHU=
@@ -58,7 +46,7 @@ class RedNoteParser(BaseParser):
 
         response = await self.httpx.get(
             url,
-            headers=self.ios_headers,
+            headers=self.qq_headers,
         )
         response.raise_for_status()
         html = response.text

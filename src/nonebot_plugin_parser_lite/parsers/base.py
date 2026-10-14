@@ -20,10 +20,9 @@ from httpx import AsyncClient
 
 from ..config import pconfig as pconfig
 from ..constants import (
-    ANDROID_HEADER,
     COMMON_HEADER,
     COMMON_TIMEOUT,
-    IOS_HEADER,
+    QQ_HEADER,
     MatchWithParams,
     ParamRules,
 )
@@ -169,8 +168,7 @@ class BaseParser:
 
     def __init__(self):
         self.headers = COMMON_HEADER.copy()
-        self.ios_headers = IOS_HEADER.copy()
-        self.android_headers = ANDROID_HEADER.copy()
+        self.qq_headers = QQ_HEADER.copy()
         self.timeout = COMMON_TIMEOUT
         self.httpx = AsyncClient(
             headers=self.headers, timeout=self.timeout, follow_redirects=True
@@ -228,9 +226,7 @@ class BaseParser:
         for pattern, handler, param_rules in handlers:
             # pattern 是当初 handle 时 compile 出来的正则；参数规则也必须复核，
             # 因为同一 keyword 下可能有多个只靠 query 区分的 handler。
-            if pattern.search(text) and self._match_param_rules(
-                searched, param_rules
-            ):
+            if pattern.search(text) and self._match_param_rules(searched, param_rules):
                 return await handler(self, searched)
 
         # 理论上不该走到这里，防御性错误
