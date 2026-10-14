@@ -9,16 +9,24 @@ exclude-labels:
 autolabeler:
   - label: "bug"
     title:
+      - '/^fix(\([^)]+\))?!?:\s+.+/i'
       - "/:bug:.+/"
       - "/🐛.+/"
   - label: "enhancement"
     title:
       - "/:sparkles:.+/"
       - "/✨.+/"
-      - "/feat/"
-  - label: "ci"
+      - '/^feat(\([^)]+\))?!?:\s+.+/i'
+  - label: "chore"
     files:
-      - .github/**/*
+      - ".github/**"
+    title:
+      - '/^chore(\([^)]+\))?!?:\s+.+/i'
+  - label: "tests"
+    files:
+      - "tests/**"
+    title:
+      - '/^tests?(\([^)]+\))?!?:\s+.+/i'
   - label: "breaking-change"
     title:
       - "/.+!:.+/"
@@ -38,29 +46,50 @@ autolabeler:
       - src/nonebot_plugin_parser_lite/render/templates/**/*
 categories:
   - title: 💥 破坏性变更
-    labels:
-      - breaking-change
+    when:
+      labels:
+        - breaking-change
   - title: 🚀 新功能
-    labels:
-      - enhancement
+    when:
+      - labels:
+          - enhancement
+      - conventional:
+          type: feat
   - title: 🐛 Bug 修复
-    labels:
-      - bug
+    when:
+      - labels:
+          - bug
+      - conventional:
+          type: fix
   - title: 📝 文档更新
-    labels:
-      - documentation
+    when:
+      labels:
+        - documentation
   - title: 👻 自动化程序
-    labels:
-      - chore
-      - internal
-      - maintenance
+    when:
+      - labels:
+          - chore
+          - internal
+          - maintenance
+      - conventional:
+          type: chore
+      - paths:
+          - ".github/**"
   - title: 🚦 测试
-    labels:
-      - test
-      - tests
+    when:
+      - labels:
+          - test
+          - tests
+      - conventional:
+          types:
+            - test
+            - tests
+      - paths:
+          - "tests/**"
   - title: 📦 依赖更新
-    labels:
-      - dependencies
+    when:
+      labels:
+        - dependencies
     collapse-after: 15
   - title: 💫 杂项
 change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
