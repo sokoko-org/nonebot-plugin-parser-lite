@@ -34,5 +34,5 @@ def test_parse_rich_content_uses_real_html_formatting():
         '<p>正文 <a href="/subject/1">链接</a></p>'
         '<p><img src="https://img.example/cover.jpg"></p>'
     )
-    assert result[0] == "正文链接 (https://m.douban.com/subject/1)"
+    assert result[0] == "正文 链接 (https://m.douban.com/subject/1)"
     assert result[1].path_task.url == "https://img.example/cover.jpg"
