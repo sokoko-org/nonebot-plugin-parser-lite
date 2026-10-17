@@ -1,0 +1,73 @@
+
+›
+
+CommonReq.proto"ÿ	
+	CommonReq 
+_client_type (R
+ClientType&
+_client_version (	RClientVersion
+
+_client_id (	RClientId
+_phone_imei (	R	PhoneImei
+_from (	RFrom
+cuid (	Rcuid
+
+_timestamp (R	Timestamp
+model	 (	Rmodel
+BDUSS
+ (	RBDUSS
+tbs (	Rtbs
+net_type (RnetType
+pversion (	Rpversion
+_os_version (	R	OsVersion
+brand (	Rbrand(
+lego_lib_version (	RlegoLibVersion
+applist (	Rapplist
+stoken (	Rstoken
+z_id (	RzId!
+cuid_galaxy2  (	RcuidGalaxy2
+cuid_gid! (	RcuidGid
+c3_aid# (	Rc3Aid
+	sample_id$ (	RsampleId
+scr_w% (RscrW
+scr_h& (RscrH
+scr_dip' (RscrDip
+q_type( (RqType
+is_teenager) (R
+isTeenager
+sdk_ver* (	RsdkVer#
+framework_ver+ (	RframeworkVer"
+naws_game_ver, (	RnawsGameVer)
+active_timestamp1 (RactiveTimestamp,
+first_install_time2 (RfirstInstallTime(
+last_update_time3 (RlastUpdateTime
+	event_day5 (	ReventDay
+
+android_id6 (	R	androidId
+cmode7 (Rcmode!
+start_scheme8 (	RstartScheme
+
+start_type9 (R	startType
+idfv< (	Ridfv
+extra= (	Rextra
+
+user_agent> (	R	userAgent6
+personalized_rec_switch? (RpersonalizedRecSwitch!
+device_scoreF (	RdeviceScorebproto3
+Û
+PbPageReqIdl.protoCommonReq.proto"«
+PbPageReqIdl)
+data (2.PbPageReqIdl.DataReqRdataï
+DataReq"
+common (2
+.CommonReqRcommon
+kz (Rkz
+lz (Rlz
+r (Rr
+pid (Rpid
+
+with_floor (R	withFloor
+floor_rn	 (RfloorRn
+rn (Rrn
+pn (Rpn&
+floor_sort_typeJ (RfloorSortTypebproto3
