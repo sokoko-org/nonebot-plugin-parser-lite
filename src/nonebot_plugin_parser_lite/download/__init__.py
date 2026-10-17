@@ -28,7 +28,7 @@ from ..utils.common import (
     safe_unlink,
 )
 from ..utils.ffmpeg import FFmpeg
-from .client import RetryableDownloadError, UniHttpClient, UniResponse
+from .client import HTTPStatusError, RetryableDownloadError, UniHttpClient, UniResponse
 from .task import auto_task
 
 _RE_RANGE_PATTERN = re.compile(r"bytes\s+(\d+)-\d+/(\d+|\*)")
@@ -160,7 +160,7 @@ class StreamDownloader:
         :return: 下载完成后的本地文件路径
         :raise ZeroSizeException: 资源大小为 0 时抛出
         :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raise DownloadException: 重试多次仍失败时抛出
+        :raise DownloadException: HTTP 状态异常或重试多次仍失败时抛出
         """
         cache_name = generate_file_name(url, cache_key)
         cache_dir = await CacheManager.ensure_dir(cache_type)
@@ -274,7 +274,10 @@ class StreamDownloader:
                 f"HTTP {response.status_code}，切换下载线路后重试",
                 keep_part=False,
             )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except HTTPStatusError as e:
+            raise DownloadException(str(e)) from e
         if downloaded > 0:
             self.__validate_header(response, downloaded)
 
@@ -478,7 +481,7 @@ class StreamDownloader:
         :return: 下载完成后的视频文件路径
         :raise ZeroSizeException: 资源大小为 0 时抛出
         :raise SizeLimitException: 资源大小超过配置的最大限制时抛出
-        :raise DownloadException: 重试多次仍失败时抛出
+        :raise DownloadException: HTTP 状态异常或重试多次仍失败时抛出
         """
         return await self.streamd(
             url=url,
