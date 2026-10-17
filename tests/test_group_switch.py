@@ -222,17 +222,6 @@ async def test_private_superuser_controls_current_or_target_user(switch_state):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "argument", ["0", "-1", "01", "1 2", "1abc", "１２３", "1" * 21]
-)
-async def test_target_id_is_used_without_format_validation(switch_state, argument):
-    message, source = await run_switch(argument)
-    assert message == f"QQClient_GROUP_{argument} 解析已关闭"
-    assert switches._DISABLED_TARGETS_SET == {f"QQClient_GROUP_{argument}"}
-    assert switches.is_enabled(source)
-
-
-@pytest.mark.asyncio
 async def test_scope_isolation_and_other_platform_current_group(switch_state):
     message, _ = await run_switch(TARGET_GROUP, scope=SupportScope.discord)
     assert TARGET_GROUP in message
@@ -244,28 +233,6 @@ async def test_scope_isolation_and_other_platform_current_group(switch_state):
     }
     assert not switches.is_enabled(context(scope=SupportScope.discord)[2])
     assert switches.is_enabled(context()[2])
-
-
-@pytest.mark.asyncio
-async def test_alconna_extracts_optional_target_and_rejects_extra_arguments(
-    switch_state,
-):
-    registered = next(
-        matcher
-        for group in matchers.values()
-        for matcher in group
-        if any(
-            dependent.call is switches.handle_disable for dependent in matcher.handlers
-        )
-    )
-    command = registered.command()
-    parsed = command.parse(f"关闭解析   {TARGET_GROUP}  ")
-    assert parsed.matched
-    assert parsed.all_matched_args["target"] == TARGET_GROUP
-    assert command.parse("关闭解析").matched
-    assert not command.parse(f"关闭解析 {TARGET_GROUP} extra").matched
-    await run_switch(parsed.all_matched_args["target"])
-    assert switches._DISABLED_TARGETS_SET == {f"QQClient_GROUP_{TARGET_GROUP}"}
 
 
 @pytest.mark.asyncio

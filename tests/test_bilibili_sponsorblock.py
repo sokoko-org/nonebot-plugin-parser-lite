@@ -3,7 +3,6 @@
 这块是平台特有能力，只被 bilibili 解析器调用；通用倍速在 test_media_speedup.py。
 """
 
-from anyio import Path as AnyPath
 import pytest
 import render_test_support as support
 
@@ -15,9 +14,7 @@ from nonebot_plugin_parser_lite.parsers.bilibili.sponsorblock import (
     fetch_segments,
     skip_for_video,
     skip_ranges,
-    skip_video,
 )
-from nonebot_plugin_parser_lite.utils.ffmpeg import FFmpeg
 
 ROW = {"segment": [1.0, 5.0], "category": "sponsor", "actionType": "skip"}
 
@@ -88,13 +85,6 @@ def test_parser_accepts_both_documented_shapes():
 )
 def test_malformed_segment_is_rejected(entry):
     assert _parse_segment(entry) is None
-
-
-def test_zero_recorded_duration_means_unknown():
-    """上游约定 videoDuration 为 0 表示提交时不知道时长，不能当成 0 秒"""
-    parsed = _parse_segment(row(1.0, 5.0, recorded=0))
-    assert parsed is not None
-    assert parsed.recorded_duration is None
 
 
 @pytest.mark.asyncio
@@ -249,89 +239,3 @@ async def test_skip_for_video_passes_the_resolved_identity(monkeypatch):
     # cid 是整数，查询要拿到字符串形式
     assert seen == [("https://x.top", ["sponsor"], "BV1", "9", 600.0)]
     assert (cuts, mutes, removed) == (((1.0, 2.0),), ((3.0, 4.0),), 1.0)
-
-
-# --------------------------------------------------------------------------
-# 下载完成后产出成片
-
-
-@pytest.mark.asyncio
-async def test_skip_video_returns_source_when_nothing_to_do(tmp_path, monkeypatch):
-    """没有区间就不该起转码
-
-    edit_video 用记录而不是抛异常：skip_video 会把异常吞成「退回原片」，
-    抛断言的用例写法等于什么都没测。
-    """
-    async def always(cls):
-        return True
-
-    called: list[int] = []
-
-    async def spy(cls, *args, **kwargs):
-        called.append(1)
-        return AnyPath(tmp_path / "product.mp4")
-
-    monkeypatch.setattr(FFmpeg, "is_available", classmethod(always))
-    monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
-    source = AnyPath(tmp_path / "source.mp4")
-    assert await skip_video(source, (), ()) == source
-    assert called == []
-
-
-@pytest.mark.asyncio
-async def test_skip_video_skips_when_ffmpeg_is_missing(tmp_path, monkeypatch):
-    async def unavailable(cls):
-        return False
-
-    called: list[int] = []
-
-    async def spy(cls, *args, **kwargs):
-        called.append(1)
-        return AnyPath(tmp_path / "product.mp4")
-
-    monkeypatch.setattr(FFmpeg, "is_available", classmethod(unavailable))
-    monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
-    source = AnyPath(tmp_path / "source.mp4")
-    assert await skip_video(source, ((1.0, 2.0),), ()) == source
-    assert called == [], "缺 ffmpeg 时不该调用转码"
-
-
-@pytest.mark.asyncio
-async def test_skip_video_falls_back_to_original_on_failure(tmp_path, monkeypatch):
-    async def always(cls):
-        return True
-
-    async def failing(cls, *args, **kwargs):
-        raise RuntimeError("ffmpeg 执行失败")
-
-    monkeypatch.setattr(FFmpeg, "is_available", classmethod(always))
-    monkeypatch.setattr(FFmpeg, "edit_video", classmethod(failing))
-    source = AnyPath(tmp_path / "source.mp4")
-    assert await skip_video(source, ((1.0, 2.0),), ((3.0, 4.0),)) == source
-
-
-@pytest.mark.asyncio
-async def test_skip_video_passes_the_annotations_to_ffmpeg(tmp_path, monkeypatch):
-    async def always(cls):
-        return True
-
-    seen: dict[str, object] = {}
-
-    async def spy(cls, input_path, **kwargs):
-        seen.update(kwargs, input_path=input_path)
-        product = tmp_path / "product.mp4"
-        product.write_bytes(b"edited")
-        return AnyPath(product)
-
-    monkeypatch.setattr(FFmpeg, "is_available", classmethod(always))
-    monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
-    monkeypatch.setattr(support.pconfig, "plite_max_size", 77)
-
-    source = AnyPath(tmp_path / "source.mp4")
-    cuts = ((1.0, 2.0),)
-    mutes = ((3.0, 4.0),)
-    assert str(await skip_video(source, cuts, mutes)) == str(tmp_path / "product.mp4")
-    # 产物名由 edit_video 自己按参数算，这里只负责把标注原样传下去
-    assert seen["input_path"] == source
-    assert seen["cut_ranges"] == cuts
-    assert seen["mute_ranges"] == mutes

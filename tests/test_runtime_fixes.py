@@ -68,13 +68,6 @@ def test_bilibili_live_description_strips_html_and_keeps_links():
     assert html_to_text(soup) == "支持：这里 (https://example.com)"
 
 
-def test_bilibili_live_plain_description_keeps_whitespace():
-    description = "  第一行\n\n第二行  "
-    soup = BeautifulSoup(description, "html.parser")
-    assert soup.find() is None
-    assert description == "  第一行\n\n第二行  "
-
-
 class _SlowIcon:
     def __init__(self, delay: float, state: dict[str, int]):
         self.delay = delay

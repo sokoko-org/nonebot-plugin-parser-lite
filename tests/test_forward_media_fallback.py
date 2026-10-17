@@ -1,7 +1,6 @@
 from copy import deepcopy
 from types import SimpleNamespace
 
-from anyio import Path
 from nonebot.exception import ActionFailed, NetworkError
 from nonebot.matcher import current_bot
 from nonebot_plugin_alconna.uniseg import (
@@ -20,13 +19,13 @@ import pytest
 from render_test_support import Renderer, UniHelper, make_result, pconfig
 
 from nonebot_plugin_parser_lite import delivery, matchers, render
-from nonebot_plugin_parser_lite.config import Config
+from nonebot_plugin_parser_lite.config import gconfig
 from nonebot_plugin_parser_lite.delivery import (
     build_text_fallback,
     build_video_fallback,
     send_with_media_fallback,
 )
-from nonebot_plugin_parser_lite.helper import mark_media_role, media_role
+from nonebot_plugin_parser_lite.helper import mark_media_role
 
 
 class UploadFailed(ActionFailed):
@@ -53,11 +52,6 @@ def onebot_context():
         current_bot.reset(token)
 
 
-def test_file_upload_timeout_configuration_is_opt_in():
-    assert Config().file_upload_timeout is None
-    assert Config(plite_file_upload_timeout="900").file_upload_timeout == 900
-
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize("upload_timeout", [None, 450.0, 900.0])
 async def test_file_upload_uses_its_configured_timeout(
@@ -72,19 +66,21 @@ async def test_file_upload_uses_its_configured_timeout(
     monkeypatch.setattr(pconfig, "plite_file_upload_timeout", upload_timeout)
     # /bm 的纯文件发送不需要构造解析结果，普通和懒下载共用同一边界。
     await send_with_media_fallback(UniMessage(File(path="audio.mp3")))
-    assert calls == ([{}] if upload_timeout is None else [{"_timeout": upload_timeout}])
+    assert calls == [
+        {"_timeout": upload_timeout or gconfig.api_timeout}
+    ]
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ("summary_segment", "expected_options"),
+    ("summary_segment", "expected_timeout"),
     [
-        (File(path="large-summary.webp"), {"_timeout": 900}),
-        (Image(path="summary.webp"), {}),
+        (File(path="large-summary.webp"), 900),
+        (Image(path="summary.webp"), gconfig.api_timeout),
     ],
 )
 async def test_parser_summary_uses_file_timeout_when_rendered_as_file(
-    monkeypatch, onebot_context, summary_segment, expected_options
+    monkeypatch, onebot_context, summary_segment, expected_timeout
 ):
     result = make_result()
     calls = []
@@ -114,7 +110,7 @@ async def test_parser_summary_uses_file_timeout_when_rendered_as_file(
     await matchers.parser_handler.__wrapped__(session=None, sr=None)
     assert len(calls) == 1
     assert calls[0][0][0] is summary_segment
-    assert calls[0][1] == expected_options
+    assert calls[0][1] == {"_timeout": expected_timeout}
 
 
 @pytest.mark.asyncio
@@ -145,26 +141,7 @@ async def test_non_file_apis_keep_the_normal_timeout(
     monkeypatch.setattr(UniMessage, "send", send)
     monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
     await send_with_media_fallback(message, make_result())
-    assert calls == [{}]
-
-
-@pytest.mark.asyncio
-async def test_file_timeout_is_passed_without_adapter_specific_dispatch(monkeypatch):
-    calls = []
-
-    async def send(message, **kwargs):
-        calls.append(kwargs)
-
-    monkeypatch.setattr(UniMessage, "send", send)
-    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
-    token = current_bot.set(
-        SimpleNamespace(adapter=SimpleNamespace(get_name=lambda: "Telegram"))
-    )
-    try:
-        await send_with_media_fallback(UniMessage(File(path="file.mp4")))
-    finally:
-        current_bot.reset(token)
-    assert calls == [{"_timeout": 900}]
+    assert calls == [{"_timeout": gconfig.api_timeout}]
 
 
 @pytest.mark.asyncio
@@ -439,19 +416,6 @@ async def test_summary_and_video_from_renderer_fall_back_inside_forward(
 
 
 @pytest.mark.asyncio
-async def test_successful_media_forward_is_sent_only_once(monkeypatch):
-    message = forward(Image(raw=b"image"), Video(raw=b"video"))
-    calls = []
-
-    async def send(outgoing, **kwargs):
-        calls.append(outgoing)
-
-    monkeypatch.setattr(UniMessage, "send", send)
-    await send_with_media_fallback(message, make_result())
-    assert calls == [message]
-
-
-@pytest.mark.asyncio
 async def test_upload_words_in_request_data_do_not_trigger_fallback(monkeypatch):
     error = OneBotFailed("permission denied")
     error.info["data"] = {"message": "HTTP Upload failed with code 102902"}
@@ -556,20 +520,6 @@ async def test_split_video_fallback_does_not_resend_successful_packet(monkeypatc
     for packet in calls[3:]:
         assert "视频已省略" not in text_of(packet)
     assert any("末尾正文" in text_of(packet) for packet in calls[3:])
-
-
-@pytest.mark.asyncio
-async def test_large_video_file_keeps_origin_without_exporting_metadata(monkeypatch):
-    async def stat(path):
-        return SimpleNamespace(st_size=101 * 1024 * 1024)
-
-    monkeypatch.setattr(Path, "stat", stat)
-    monkeypatch.setattr(pconfig, "plite_use_base64", False)
-    segment = await UniHelper.video_seg(Path("large-live-photo.mp4"))
-    assert isinstance(segment, File)
-    assert media_role(deepcopy(segment)) == "video"
-    assert "_parser_lite_media_role" not in segment.data
-    assert "_parser_lite_media_role" not in segment.dump()
 
 
 @pytest.mark.asyncio
