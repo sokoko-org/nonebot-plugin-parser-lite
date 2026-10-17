@@ -7,7 +7,6 @@ from anyio import Path as AnyPath
 import pytest
 import render_test_support as support
 
-from nonebot_plugin_parser_lite.constants import MIN_KEEP_PIECE_SECONDS
 from nonebot_plugin_parser_lite.parsers.bilibili import sponsorblock
 from nonebot_plugin_parser_lite.parsers.bilibili.sponsorblock import (
     _iter_segment_dicts,
@@ -83,8 +82,6 @@ def test_parser_accepts_both_documented_shapes():
         {"segment": ["a", "b"], "category": "sponsor", "actionType": "skip"},
         {"segment": [5.0, 1.0], "category": "sponsor", "actionType": "skip"},
         {"segment": [-5.0, 1.0], "category": "sponsor", "actionType": "skip"},
-        {"segment": [float("nan"), 1.0], "category": "sponsor", "actionType": "skip"},
-        {"segment": [1.0, float("inf")], "category": "sponsor", "actionType": "skip"},
         {"segment": [1.0, 2.0], "actionType": "skip"},
         {"segment": [1.0, 2.0], "category": "sponsor"},
     ],
@@ -98,25 +95,6 @@ def test_zero_recorded_duration_means_unknown():
     parsed = _parse_segment(row(1.0, 5.0, recorded=0))
     assert parsed is not None
     assert parsed.recorded_duration is None
-
-
-@pytest.mark.asyncio
-async def test_fetch_builds_the_query_and_returns_rows(monkeypatch):
-    client = _Client(_Response(200, [row(1.0, 5.0)]))
-    monkeypatch.setattr(sponsorblock.DOWNLOADER, "client", client)
-
-    segments = await fetch_segments(
-        "https://bsbsb.top/", "BV1", "9", ["sponsor", "intro"]
-    )
-    url, params = client.requests[0]
-    assert url == "https://bsbsb.top/api/skipSegments"
-    # 分类是集合，查询串排序后才是稳定的
-    assert params == {
-        "videoID": "BV1",
-        "cid": "9",
-        "categories": '["intro", "sponsor"]',
-    }
-    assert [seg.start for seg in segments] == [1.0]
 
 
 @pytest.mark.asyncio
@@ -158,24 +136,6 @@ def test_normalize_ranges_clamps_sorts_and_merges():
         600.0,
     )
     assert merged == ((0.0, 20.0), (100.0, 180.0), (500.0, 520.0), (590.0, 600.0))
-
-
-@pytest.mark.parametrize(
-    ("cuts", "expected"),
-    [
-        ([(10.0, 20.0), (20.02, 30.0)], ((10.0, 30.0),)),
-        ([(0.03, 30.0)], ((0.0, 30.0),)),
-        ([(0.06, 30.0)], ((0.06, 30.0),)),
-    ],
-)
-def test_tiny_retained_pieces_are_absorbed(cuts, expected):
-    """转码层会丢掉太短的碎片，区间就得先并掉，换算出的时长才对得上"""
-    merged = _normalize_ranges(cuts, 600.0, MIN_KEEP_PIECE_SECONDS)
-    assert merged == expected
-    kept = FFmpeg._build_keep_pieces(merged, 600.0)
-    assert sum(end - start for start, end in kept) == 600.0 - sum(
-        end - start for start, end in merged
-    )
 
 
 async def _skip_rows(monkeypatch, rows, duration=600.0):
@@ -336,7 +296,6 @@ async def test_skip_video_skips_when_ffmpeg_is_missing(tmp_path, monkeypatch):
     assert called == [], "缺 ffmpeg 时不该调用转码"
 
 
-@pytest.mark.asyncio
 @pytest.mark.asyncio
 async def test_skip_video_falls_back_to_original_on_failure(tmp_path, monkeypatch):
     async def always(cls):

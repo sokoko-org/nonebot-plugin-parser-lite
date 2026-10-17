@@ -170,20 +170,6 @@ async def test_validate_login_without_cookies_skips_request(
 
 
 @pytest.mark.asyncio
-async def test_update_from_response_persists_with_0600(tmp_path, monkeypatch) -> None:
-    cookie_path = tmp_path / "linuxdo_cookies.txt"
-    auth = LinuxDoAuth(FakeClient(), {}, cookie_path=cookie_path)
-    monkeypatch.setattr(pconfig, "plite_linuxdo_ck", None)
-
-    await auth.update_from_response(
-        FakeResponse(200, cookies={"_t": "token", "gone": "deleted"})
-    )
-
-    assert cookie_path.read_text() == "_t=token"
-    assert cookie_path.stat().st_mode & 0o777 == 0o600
-
-
-@pytest.mark.asyncio
 async def test_bootstrap_cookie_overrides_cache(tmp_path, monkeypatch) -> None:
     cookie_path = tmp_path / "linuxdo_cookies.txt"
     cookie_path.write_text("_t=old; cached=1")

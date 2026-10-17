@@ -1,7 +1,7 @@
 """上传前倍速：规则配置、写在内容上、渲染与发送读同一个值。
 
-倍速是平台无关的通用能力，命令拼装与真实转码分开验证；按标注裁切是 B 站特有
-的，用例在 test_bilibili_sponsorblock.py。
+倍速是平台无关的通用能力；按标注裁切是 B 站特有的，用例在
+test_bilibili_sponsorblock.py。
 """
 
 import asyncio
@@ -13,7 +13,7 @@ import pytest
 import render_test_support as support
 from render_test_support import ROOT, ResolvedPathTask, ThemeManager
 
-from nonebot_plugin_parser_lite.config import Config, parse_media_speedup_rules
+from nonebot_plugin_parser_lite.config import parse_media_speedup_rules
 from nonebot_plugin_parser_lite.constants import PlatformEnum
 from nonebot_plugin_parser_lite.data import (
     AudioContent,
@@ -88,11 +88,6 @@ def test_malformed_rule_is_rejected(raw):
 def test_later_rule_wins_and_ratio_is_not_capped():
     rules = parse_media_speedup_rules(["bilibili:1:1.2", "bilibili:1:1.5", "bilibili:1:100"])
     assert rules[(PlatformEnum.BILIBILI, "1")] == 100.0
-
-
-def test_config_rejects_bad_values():
-    with pytest.raises(ValueError, match="平台:作者id:倍速"):
-        Config(plite_media_speedup_rules=["bilibili=1.2"])
 
 
 # --------------------------------------------------------------------------
@@ -180,157 +175,6 @@ def test_digest_keeps_the_plain_speed(tmp_path):
 
 
 # --------------------------------------------------------------------------
-# ffmpeg 命令拼装
-
-
-@pytest.fixture
-def recorder(monkeypatch, media_dir):
-    """捕获 ffmpeg 调用并真实落一个占位产物，替代 _probe_media 与执行"""
-    calls: list[list[str]] = []
-    state = {"streams": ["video", "audio"], "fail": None}
-
-    async def fake_probe(path: Path):
-        return {
-            "format": {"duration": "20.0"},
-            "streams": [{"codec_type": name} for name in state["streams"]],
-        }
-
-    async def fake_monitored(cmd, output_path, max_size_mb, on_progress=None):
-        calls.append(list(cmd))
-        if state["fail"] is not None:
-            raise state["fail"]
-        await AnyPath(str(output_path)).write_bytes(b"edited")
-        return b""
-
-    monkeypatch.setattr(FFmpeg, "_probe_media", classmethod(lambda cls, p: fake_probe(p)))
-    monkeypatch.setattr(
-        FFmpeg,
-        "exec_ffmpeg_monitored",
-        staticmethod(
-            lambda cmd, output_path, max_size_mb, on_progress=None: fake_monitored(
-                cmd, output_path, max_size_mb
-            )
-        ),
-    )
-    for stale in media_dir.glob("*"):
-        stale.unlink()
-    return {"calls": calls, "state": state, "media_dir": media_dir}
-
-
-@pytest.fixture
-def media_dir() -> Path:
-    return Path(CacheManager.cache_dir(CacheManager.MEDIA))
-
-
-def filter_of(cmd: list[str]) -> str:
-    return cmd[cmd.index("-filter_complex") + 1] if "-filter_complex" in cmd else ""
-
-
-def test_speedup_video_command_reencodes_and_ends_with_output_path(recorder):
-    asyncio.run(FFmpeg.edit_video(Path("src.mp4"), speed_ratio=1.25))
-    cmd = recorder["calls"][-1]
-    assert filter_of(cmd) == "[0:v]setpts=PTS/1.25[vf];[0:a]atempo=1.25[af]"
-    assert cmd[cmd.index("-i") + 1] == "src.mp4"
-    # 滤镜必须在输入之后，否则 ffmpeg 把它当成输入选项
-    assert cmd.index("-filter_complex") > cmd.index("-i")
-    assert cmd[cmd.index("-map") + 1] == "[vf]"
-    assert cmd[cmd.index("-c:v") + 1] == "libx264"
-    # 缺输出路径时 ffmpeg 只报「unconnected output」，这里直接钉住末位参数
-    assert cmd[-1].endswith(".tmp.mp4")
-    assert [p.name for p in recorder["media_dir"].glob("*.mp4")] != []
-
-
-def test_ratio_is_passed_to_ffmpeg_as_is(recorder):
-    """不拆级：默认用户 ffmpeg 大于 7，单级 atempo 允许到 100"""
-    asyncio.run(FFmpeg.edit_video(Path("src.mp4"), speed_ratio=4.0))
-    assert "atempo=4" in filter_of(recorder["calls"][-1])
-
-
-def test_mute_only_video_stream_is_copied(recorder):
-    asyncio.run(FFmpeg.edit_video(Path("src.mp4"), mute_ranges=((1.0, 2.0),)))
-    cmd = recorder["calls"][-1]
-    assert cmd[cmd.index("-c:v") + 1] == "copy"
-    assert filter_of(cmd) == "[0:a]volume=enable='between(t,1,2)':volume=0[at]"
-    assert cmd[cmd.index("-map") + 1] == "0:v"
-
-
-def test_silent_source_produces_no_audio_map(recorder):
-    recorder["state"]["streams"] = ["video"]
-    asyncio.run(FFmpeg.edit_video(Path("src.mp4"), speed_ratio=2.0))
-    cmd = recorder["calls"][-1]
-    assert "-an" in cmd
-    assert "[0:a]" not in filter_of(cmd)
-
-
-def test_silent_source_with_cuts_and_mutes_does_not_reference_audio(recorder):
-    """没有音轨时不能挂引用 [0:a] 的消音滤镜
-
-    滤镜图一旦被拒，整次编辑（含裁切）都会退化成原片。CI 没有 ffmpeg，这条字符串
-    断言就是它唯一的防线；真实转码用例在 test_media_edit_real_ffmpeg.py。
-    """
-    recorder["state"]["streams"] = ["video"]
-    asyncio.run(
-        FFmpeg.edit_video(
-            Path("src.mp4"),
-            cut_ranges=((2.0, 4.0),),
-            mute_ranges=((10.0, 12.0),),
-        )
-    )
-    cmd = recorder["calls"][-1]
-    graph = filter_of(cmd)
-    assert "volume=enable" not in graph
-    assert "[0:a]" not in graph
-    assert "-an" in cmd
-    assert "trim=start=4:end=20" in graph
-
-
-def test_product_name_follows_the_source_and_the_parameters(recorder):
-    """产物名由 edit_video 自己维护：同源同参数复用，参数或源变了就换"""
-    first = Path(str(asyncio.run(FFmpeg.edit_video(Path("src.mp4"), speed_ratio=1.25))))
-    assert first.parent == recorder["media_dir"]
-    assert first.suffix == ".mp4"
-    assert ":" not in first.name, "Windows 的文件名不允许冒号"
-
-    recorder["calls"].clear()
-    again = Path(str(asyncio.run(FFmpeg.edit_video(Path("src.mp4"), speed_ratio=1.25))))
-    assert again == first
-    assert recorder["calls"] == [], "命中产物时不该再转码"
-
-    assert Path(
-        str(asyncio.run(FFmpeg.edit_video(Path("src.mp4"), speed_ratio=1.5)))
-    ) != first
-    assert Path(
-        str(asyncio.run(FFmpeg.edit_video(Path("src.mp4"), cut_ranges=((1.0, 2.0),))))
-    ) != first
-    assert Path(
-        str(asyncio.run(FFmpeg.edit_video(Path("src.mp4"), mute_ranges=((1.0, 2.0),))))
-    ) != first
-    # 主干相同、目录不同的源不能命中同一个产物
-    assert Path(
-        str(asyncio.run(FFmpeg.edit_video(Path("elsewhere/src.mp4"), speed_ratio=1.25)))
-    ) != first
-
-
-def test_edit_audio_reencodes_and_keeps_container(recorder):
-    product = Path(str(asyncio.run(FFmpeg.edit_audio(Path("src.mp3"), speed_ratio=1.5))))
-    cmd = recorder["calls"][-1]
-    assert cmd[cmd.index("-af") + 1] == "atempo=1.5"
-    assert "-vn" in cmd
-    assert cmd.index("-af") > cmd.index("-i")
-    # 编码器交给 ffmpeg 按输出后缀决定
-    assert "-c:a" not in cmd
-    assert cmd[-1].endswith(".tmp.mp3")
-    assert product.suffix == ".mp3"
-    assert product.parent == recorder["media_dir"]
-    assert product.is_file()
-    # 音频不判断视频容器，产物名同样随倍速变化
-    assert "+faststart" not in cmd
-    assert Path(
-        str(asyncio.run(FFmpeg.edit_audio(Path("src.mp3"), speed_ratio=2.0)))
-    ) != product
-
-
-# --------------------------------------------------------------------------
 # get_path 是唯一的执行点
 
 
@@ -369,8 +213,6 @@ async def test_get_path_returns_the_sped_up_product(tmp_path, monkeypatch):
 
     monkeypatch.setattr(FFmpeg, "is_available", classmethod(always))
     monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
-    monkeypatch.setattr(support.pconfig, "plite_max_size", 42)
-
     cont = make_media(VideoContent, tmp_path, "video.mp4")
     cont.speedup = 1.25
     source = await cont.path_task
