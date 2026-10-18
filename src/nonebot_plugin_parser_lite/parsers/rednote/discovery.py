@@ -7,9 +7,11 @@ from msgspec.json import Decoder
 
 from ...creator import Creator
 from ...data import ContentItem
+from ...download import DOWNLOADER
 from ...utils.format import replace_placeholder_to_sticker
 
 REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
+REDNOTE_RETRYABLE_HTTP_STATUSES = frozenset({422, 424})
 
 
 class StreamUrl(Struct):
@@ -69,9 +71,12 @@ class Video(Struct):
     consumer: Consumer
 
     @property
-    def url(self) -> str:
+    def url_list(self) -> list[str]:
         """主视频直链"""
-        return f"https://sns-video-bd.xhscdn.com/{self.consumer.originVideoKey}"
+        return [
+            f"https://sns-video-hw.xhscdn.com/{self.consumer.originVideoKey}",
+            f"https://sns-video-bd.xhscdn.com/{self.consumer.originVideoKey}",
+        ]
 
 
 class Image(Struct):
@@ -153,7 +158,12 @@ class NoteDetail(Struct):
         if self.video:
             items.append(
                 Creator.video(
-                    url_or_task=self.video.url,
+                    url_or_task=DOWNLOADER.download_video(
+                        url=self.video.url_list[0],
+                        fallback_urls=self.video.url_list[1:],
+                        retry_http_statuses=REDNOTE_RETRYABLE_HTTP_STATUSES,
+                        cache_key=f"rednote:{self.video.consumer.originVideoKey}",
+                    ),
                     cover_url=f"https://ci.xiaohongshu.com/{self.cover.fileId}?imageView2/2/w/1080/format/jpg",
                     duration=self.video.capa.duration,
                     cache_key=f"rednote:{self.video.consumer.originVideoKey}",
