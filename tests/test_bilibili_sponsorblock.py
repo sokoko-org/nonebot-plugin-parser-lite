@@ -33,7 +33,7 @@ async def query_rows(monkeypatch, rows, duration=600):
         transport=httpx.MockTransport(lambda _: httpx.Response(200, json=rows))
     ) as client:
         monkeypatch.setattr(sponsorblock.DOWNLOADER, "client", client)
-        return await SponsorBlock.query(9, duration)
+        return await SponsorBlock.query("a", 9, duration)
 
 
 @pytest.mark.asyncio
@@ -61,7 +61,7 @@ async def test_query_encodes_parameters_and_filters_by_cid_and_category(monkeypa
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         monkeypatch.setattr(sponsorblock.DOWNLOADER, "client", client)
-        result = await SponsorBlock.query(9, 600)
+        result = await SponsorBlock.query("a", 9, 600)
 
     params = seen[0].url.params
     assert params["cid"] == "9"
@@ -83,7 +83,7 @@ async def test_query_failure_leaves_the_original_timeline(monkeypatch, failure):
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
         monkeypatch.setattr(sponsorblock.DOWNLOADER, "client", client)
-        result = await SponsorBlock.query(9, 600)
+        result = await SponsorBlock.query("a", 9, 600)
     assert result.segments == ()
     assert result.output_duration == 600
 
@@ -96,7 +96,7 @@ async def test_disabled_configuration_does_not_query(monkeypatch, api_base):
     monkeypatch.setattr(support.pconfig, "plite_bsb_api_base", api_base)
     if api_base:
         monkeypatch.setattr(support.pconfig, "plite_bsb_categories", [])
-    assert (await SponsorBlock.query(9, 600)).segments == ()
+    assert (await SponsorBlock.query("a", 9, 600)).segments == ()
     get.assert_not_awaited()
 
 
