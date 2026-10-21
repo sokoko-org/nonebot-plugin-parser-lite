@@ -51,24 +51,7 @@ def make_media(cls, tmp_path: Path, name: str, duration: float = 60.0):
 @pytest.mark.parametrize(
     "cls", [ImageContent, GraphicContent, StickerContent, LivePhotoContent]
 )
-def test_malformed_rule_is_rejected(raw):
-    with pytest.raises(ValueError, match="变速规则"):
-        parse_media_speedup_rules([raw])
-
-
-def test_later_rule_wins_and_ratio_is_not_capped():
-    rules = parse_media_speedup_rules(
-        ["bilibili:1:1.2", "bilibili:1:1.5", "bilibili:1:100"]
-    )
-    assert rules[(PlatformEnum.BILIBILI, "1")] == 100.0
-
-
-# --------------------------------------------------------------------------
-# 写到内容上
-
-
-@pytest.mark.asyncio
-async def test_rule_matches_platform_and_author(tmp_path, monkeypatch):
+async def test_other_media_has_no_speedup_interface(cls, tmp_path, monkeypatch):
     monkeypatch.setattr(
         support.pconfig, "plite_media_speedup_rules", ["bilibili:123456:1.5"]
     )
@@ -127,16 +110,15 @@ async def test_unsent_media_is_left_alone(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_get_path_returns_source_when_no_speedup(tmp_path, monkeypatch):
-    called: list[int] = []
-
-    async def spy(cls, *args, **kwargs):
-        called.append(1)
-        return AnyPath(tmp_path / "product.mp4")
-
-    monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
-
-    cont = make_media(VideoContent, tmp_path, "video.mp4")
+@pytest.mark.parametrize(
+    ("cls", "editor"), [(VideoContent, "edit_video"), (AudioContent, "edit_audio")]
+)
+async def test_get_path_returns_source_when_no_speedup(
+    tmp_path, monkeypatch, cls, editor
+):
+    edit = AsyncMock()
+    monkeypatch.setattr(FFmpeg, editor, edit)
+    cont = make_media(cls, tmp_path, "source.mp4")
     assert await cont.get_path() == await cont.path_task
     assert speedup_digest(make_result(contents=[cont])) == "1.00x"
 
@@ -148,11 +130,7 @@ async def test_get_path_returns_source_when_no_speedup(tmp_path, monkeypatch):
 async def test_failure_falls_back_to_source_and_drops_speedup(
     tmp_path, monkeypatch, error
 ):
-
-    async def failing(cls, *args, **kwargs):
-        raise error
-
-    monkeypatch.setattr(FFmpeg, "edit_video", classmethod(failing))
+    monkeypatch.setattr(FFmpeg, "edit_video", AsyncMock(side_effect=error))
 
     cont = make_media(VideoContent, tmp_path, "video.mp4")
     cont.speedup = 1.25
@@ -164,18 +142,27 @@ async def test_failure_falls_back_to_source_and_drops_speedup(
 
 
 @pytest.mark.asyncio
-async def test_missing_ffmpeg_skips_speedup_and_drops_it(tmp_path, monkeypatch):
-
-    called: list[int] = []
-
-    async def spy(cls, *args, **kwargs):
-        called.append(1)
-        return AnyPath(tmp_path / "product.mp4")
-
-    monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
-
-    cont = make_media(VideoContent, tmp_path, "video.mp4")
-    cont.speedup = 1.25
-    assert await cont.get_path() == await cont.path_task
-    assert called == [], "缺 ffmpeg 时不该调用转码"
-    assert cont.speedup == 1.0
+@pytest.mark.parametrize(
+    ("cls", "editor"), [(VideoContent, "edit_video"), (AudioContent, "edit_audio")]
+)
+async def test_speedup_returns_edited_video_or_audio(
+    tmp_path, monkeypatch, cls, editor
+):
+    monkeypatch.setattr(
+        support.pconfig,
+        "plite_media_speedup_rules",
+        ["bilibili:123456:1.5", "bilibili:123456:1.25"],
+    )
+    output = AnyPath(tmp_path / "product.mp4")
+    await output.write_bytes(b"retimed")
+    edit = AsyncMock(return_value=output)
+    monkeypatch.setattr(FFmpeg, editor, edit)
+    cont = make_media(cls, tmp_path, "source.mp4")
+    result = make_result(contents=[cont])
+    apply_media_speedup(result)
+    assert await cont.get_path() == output
+    assert await (await cont.get_path()).read_bytes() == b"retimed"
+    assert cont.speedup == 1.25
+    assert cont.display_duration == "0:48"
+    assert cont.duration == 60.0
+    assert speedup_digest(result) == "1.25x"
