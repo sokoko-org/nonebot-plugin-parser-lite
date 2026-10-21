@@ -81,7 +81,9 @@ def test_malformed_rule_is_rejected(raw):
 
 
 def test_later_rule_wins_and_ratio_is_not_capped():
-    rules = parse_media_speedup_rules(["bilibili:1:1.2", "bilibili:1:1.5", "bilibili:1:100"])
+    rules = parse_media_speedup_rules(
+        ["bilibili:1:1.2", "bilibili:1:1.5", "bilibili:1:100"]
+    )
     assert rules[(PlatformEnum.BILIBILI, "1")] == 100.0
 
 
@@ -166,17 +168,12 @@ def test_digest_keeps_the_plain_speed(tmp_path):
 
 @pytest.mark.asyncio
 async def test_get_path_returns_source_when_no_speedup(tmp_path, monkeypatch):
-    async def always(cls):
-        return True
-
     called: list[int] = []
 
     async def spy(cls, *args, **kwargs):
         called.append(1)
         return AnyPath(tmp_path / "product.mp4")
 
-    # 把 ffmpeg 说成可用，才能证明「不变速就直接发原片」是倍速判断挡住的
-    monkeypatch.setattr(FFmpeg, "is_available", classmethod(always))
     monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
 
     cont = make_media(VideoContent, tmp_path, "video.mp4")
@@ -191,13 +188,10 @@ async def test_get_path_returns_source_when_no_speedup(tmp_path, monkeypatch):
 async def test_failure_falls_back_to_source_and_drops_speedup(
     tmp_path, monkeypatch, error
 ):
-    async def always(cls):
-        return True
 
     async def failing(cls, *args, **kwargs):
         raise error
 
-    monkeypatch.setattr(FFmpeg, "is_available", classmethod(always))
     monkeypatch.setattr(FFmpeg, "edit_video", classmethod(failing))
 
     cont = make_media(VideoContent, tmp_path, "video.mp4")
@@ -211,8 +205,6 @@ async def test_failure_falls_back_to_source_and_drops_speedup(
 
 @pytest.mark.asyncio
 async def test_missing_ffmpeg_skips_speedup_and_drops_it(tmp_path, monkeypatch):
-    async def never(cls):
-        return False
 
     called: list[int] = []
 
@@ -220,7 +212,6 @@ async def test_missing_ffmpeg_skips_speedup_and_drops_it(tmp_path, monkeypatch):
         called.append(1)
         return AnyPath(tmp_path / "product.mp4")
 
-    monkeypatch.setattr(FFmpeg, "is_available", classmethod(never))
     monkeypatch.setattr(FFmpeg, "edit_video", classmethod(spy))
 
     cont = make_media(VideoContent, tmp_path, "video.mp4")
