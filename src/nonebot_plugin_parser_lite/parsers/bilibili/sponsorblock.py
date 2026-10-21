@@ -37,8 +37,8 @@ def _parse_segment(entry: Any) -> SponsorSegment | None:
         return SponsorSegment(
             start=pair[0],
             end=pair[1] if len(pair) > 1 else math.nan,
-            category=entry["category"],
-            action_type=entry["actionType"],
+            category=entry["category"].lower(),
+            action_type=entry["actionType"].lower(),
             cid=int(entry["cid"]),
         )
     except (KeyError, IndexError, TypeError, ValueError, OverflowError):
@@ -49,11 +49,9 @@ def _normalize_ranges(
     ranges: Iterable[tuple[float, float]],
     duration: float,
 ) -> tuple[tuple[float, float], ...]:
-    """按上游规则限制终点、排除无效区间，只合并重叠或相接的区间"""
+    """按规则限制终点、排除无效区间，只合并重叠或相接的区间"""
     clamped: list[SegmentRange] = []
     for start, end in ranges:
-        # 对应 runtime.snapshot 的终点限制及 eligibilityRules 的 invalid 规则。
-        # Number.isFinite 不会把字符串、布尔值起点当成数字。
         if not isinstance(start, int | float) or isinstance(start, bool):
             continue
         try:
@@ -132,20 +130,21 @@ class SponsorBlock:
         return ad_ranges == ((0.0, self.duration),)
 
     @staticmethod
-    async def fetch_segments(cid: int) -> list[SponsorSegment]:
+    async def fetch_segments(bvid: str, cid: int) -> list[SponsorSegment]:
         """查询"""
         api_base = pconfig.bsb_api_base
         categories = pconfig.bsb_categories
         if not api_base or not categories:
             return []
         params = {
+            "videoID": bvid,
             "cid": cid,
             "categories": json.dumps(categories, separators=(",", ":")),
             "actionTypes": json.dumps(["skip", "mute", "full"], separators=(",", ":")),
         }
         try:
             response = await DOWNLOADER.client.get(
-                urljoin(api_base, "/api/skipSegments"),
+                urljoin(api_base, "api/skipSegments"),
                 params=params,
                 headers=DOWNLOADER.headers,
             )
@@ -181,9 +180,9 @@ class SponsorBlock:
         ]
 
     @classmethod
-    async def query(cls, cid: int, duration: float) -> "SponsorBlock":
+    async def query(cls, bvid: str, cid: int, duration: float) -> "SponsorBlock":
         """查询空降信息"""
-        return cls(duration, tuple(await cls.fetch_segments(cid)))
+        return cls(duration, tuple(await cls.fetch_segments(bvid=bvid, cid=cid)))
 
     async def apply(self, path: Path) -> Path:
         """应用空降"""

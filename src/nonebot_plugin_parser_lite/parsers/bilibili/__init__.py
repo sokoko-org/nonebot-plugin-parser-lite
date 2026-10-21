@@ -369,7 +369,7 @@ class BilibiliParser(BaseParser):
             cache_key += f":audio:{audio_stream.audio_quality.value}"
         retryable_http_statuses = self.BILI_RETRYABLE_HTTP_STATUSES
 
-        sponsorblock = await SponsorBlock.query(cid, duration)
+        sponsorblock = await SponsorBlock.query(bvid=bvid, cid=cid, duration=duration)
         is_full_video_ad = sponsorblock.is_full_video_ad
         if is_full_video_ad:
             logger.info(f"空降助手标注整条视频为广告: {bvid} cid={cid}")
