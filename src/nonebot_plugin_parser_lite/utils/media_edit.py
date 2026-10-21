@@ -1,22 +1,18 @@
-"""上传前倍速：把配置里的「平台+作者」倍速写到即将发送的媒体上
-
-渲染层和 ``MediaContent.get_path`` 读同一个 ``speedup``，卡片显示的时长就是真正
-发出去的文件时长。按平台标注裁切片段是平台特有的能力，写在对应解析器里
-"""
+"""上传前倍速处理"""
 
 from collections.abc import Iterator
 
 from ..config import pconfig
-from ..data import MediaContent, ParseResult
+from ..data import AudioVideoContent, ParseResult
 
 
-def _iter_media(result: ParseResult) -> Iterator[MediaContent]:
+def _iter_media(result: ParseResult) -> Iterator[AudioVideoContent]:
     for content in result.content:
-        if isinstance(content, MediaContent):
+        if isinstance(content, AudioVideoContent):
             yield content
     if result.repost is not None:
         for content in result.repost.content:
-            if isinstance(content, MediaContent):
+            if isinstance(content, AudioVideoContent):
                 yield content
 
 

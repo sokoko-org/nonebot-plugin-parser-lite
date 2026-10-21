@@ -17,6 +17,7 @@ import qrcode
 
 from ..data import (
     AudioContent,
+    AudioVideoContent,
     Author,
     Comment,
     ContentItem,
@@ -336,7 +337,7 @@ async def _serialize_content(
     return {"type": "unknown", "text": str(item)}
 
 
-def _speedup_label(item: MediaContent) -> str | None:
+def _speedup_label(item: AudioVideoContent) -> str | None:
     """倍速标签，1 倍速时不占位"""
     return None if item.speedup == 1.0 else f"{item.speedup:g}x"
 
