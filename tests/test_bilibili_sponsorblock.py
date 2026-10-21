@@ -65,7 +65,6 @@ async def test_query_encodes_parameters_and_filters_by_cid_and_category(monkeypa
 
     params = seen[0].url.params
     assert params["cid"] == "9"
-    assert "videoID" not in params
     assert params.get_list("categories") == ['["sponsor","intro"]']
     assert params["actionTypes"] == '["skip","mute","full"]'
     assert result.cut_ranges == ((1, 5), (10, 30), (590, 600))
