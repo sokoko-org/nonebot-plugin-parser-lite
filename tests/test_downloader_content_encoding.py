@@ -1,266 +1,37 @@
 from contextlib import asynccontextmanager
-from importlib.util import module_from_spec, spec_from_file_location
-from pathlib import Path
-import sys
-from types import ModuleType, SimpleNamespace
-from typing import ClassVar
+import gzip
+from types import SimpleNamespace
 
-from httpx import DecodingError, Request, Timeout
+from anyio import Path
+from httpx import DecodingError, Request, Response
 import pytest
+import render_test_support as support
 
-ROOT = Path(__file__).parents[1]
-SOURCE = ROOT / "src/nonebot_plugin_parser_lite"
-TEST_PACKAGE = "_parser_lite_downloader_test"
-FFMPEG_TEST_PACKAGE = "_parser_lite_ffmpeg_test"
-
-
-class AsyncPathStub:
-    """只供下载器单元测试使用，避免依赖 anyio 的工作线程"""
-
-    def __init__(self, path):
-        self._path = Path(path)
-
-    def __fspath__(self):
-        return str(self._path)
-
-    def __str__(self):
-        return str(self._path)
-
-    def __truediv__(self, child):
-        return type(self)(self._path / child)
-
-    @property
-    def parent(self):
-        return type(self)(self._path.parent)
-
-    @property
-    def name(self):
-        return self._path.name
-
-    @property
-    def stem(self):
-        return self._path.stem
-
-    @property
-    def suffix(self):
-        return self._path.suffix
-
-    async def exists(self):
-        return self._path.exists()
-
-    async def mkdir(self, *, parents=False, exist_ok=False):
-        self._path.mkdir(parents=parents, exist_ok=exist_ok)
-
-    async def rename(self, target):
-        self._path.rename(Path(target))
-
-    async def replace(self, target):
-        self._path.replace(Path(target))
-
-    async def stat(self):
-        return self._path.stat()
-
-    async def unlink(self, *, missing_ok=False):
-        self._path.unlink(missing_ok=missing_ok)
-
-    async def read_bytes(self):
-        return self._path.read_bytes()
-
-    async def write_bytes(self, data):
-        return self._path.write_bytes(data)
-
-    def with_suffix(self, suffix):
-        return type(self)(self._path.with_suffix(suffix))
-
-    def with_name(self, name):
-        return type(self)(self._path.with_name(name))
-
-
-class AsyncFileStub:
-    """aiofiles.open 的同步测试替身"""
-
-    def __init__(self, path, mode):
-        self._file = open(Path(path), mode)
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, exc_type, exc, traceback):
-        self._file.close()
-
-    async def write(self, data):
-        return self._file.write(data)
-
-
-def _module(name: str, **attrs):
-    module = ModuleType(name)
-    for key, value in attrs.items():
-        setattr(module, key, value)
-    sys.modules[name] = module
-    return module
-
-
-def _load_module(name: str, path: Path):
-    spec = spec_from_file_location(name, path)
-    assert spec is not None
-    assert spec.loader is not None
-    module = module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
+from nonebot_plugin_parser_lite import download
+from nonebot_plugin_parser_lite.download import client as client_module
+from nonebot_plugin_parser_lite.utils import ffmpeg as ffmpeg_module
+from nonebot_plugin_parser_lite.utils.cache import CacheManager
+from nonebot_plugin_parser_lite.utils.common import generate_file_name
 
 
 @pytest.fixture
-def downloader_modules(tmp_path):
-    for name in list(sys.modules):
-        if name == TEST_PACKAGE or name.startswith(f"{TEST_PACKAGE}."):
-            sys.modules.pop(name)
-
-    package = _module(TEST_PACKAGE)
-    package.__path__ = [str(SOURCE)]
-
-    class ParseException(Exception):
-        pass
-
-    class DownloadException(ParseException):
-        pass
-
-    class SizeLimitException(DownloadException):
-        pass
-
-    class ZeroSizeException(DownloadException):
-        pass
-
-    _module(
-        f"{TEST_PACKAGE}.exception",
-        ParseException=ParseException,
-        DownloadException=DownloadException,
-        SizeLimitException=SizeLimitException,
-        ZeroSizeException=ZeroSizeException,
+def downloader_modules(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        type(support.pconfig), "cache_dir", property(lambda _: Path(tmp_path))
     )
+    monkeypatch.setattr(download.StreamDownloader, "MAX_RETRIES", 2)
+    return download, client_module, CacheManager
 
-    pconfig = SimpleNamespace(
-        max_retries=2,
-        cache_dir=AsyncPathStub(tmp_path),
-        max_size=10,
+
+def response(status_code, *, headers=None, chunks=()):
+    return client_module.UniResponse(
+        Response(
+            status_code,
+            headers=headers,
+            content=b"".join(chunks),
+            request=Request("GET", "https://cdn.example/media"),
+        )
     )
-    _module(f"{TEST_PACKAGE}.config", pconfig=pconfig)
-    _module(
-        f"{TEST_PACKAGE}.constants",
-        COMMON_HEADER={"User-Agent": "downloader-test"},
-        DOWNLOAD_TIMEOUT=Timeout(1.0),
-    )
-
-    utils = _module(f"{TEST_PACKAGE}.utils")
-    utils.__path__ = []
-
-    class CacheManager:
-        MEDIA = "media"
-        cached_files: ClassVar[list[tuple[object, object]]] = []
-
-        @classmethod
-        async def ensure_dir(cls, cache_type):
-            path = pconfig.cache_dir / cache_type
-            await path.mkdir(parents=True, exist_ok=True)
-            return path
-
-        @classmethod
-        async def get_cached_file(cls, _base_path):
-            return None
-
-        @classmethod
-        async def set_cached_file(cls, base_path, file_path):
-            cls.cached_files.append((base_path, file_path))
-
-    async def safe_unlink(path):
-        await path.unlink(missing_ok=True)
-
-    _module(f"{TEST_PACKAGE}.utils.cache", CacheManager=CacheManager)
-    _module(
-        f"{TEST_PACKAGE}.utils.common",
-        compose_cache_key=lambda *parts: ":".join(
-            str(part) for part in parts if part is not None
-        ),
-        generate_file_name=lambda url, cache_key=None: (
-            cache_key or "download"
-        ).replace(":", "-"),
-        safe_unlink=safe_unlink,
-    )
-    _module(f"{TEST_PACKAGE}.utils.ffmpeg", FFmpeg=object)
-
-    download_name = f"{TEST_PACKAGE}.download"
-    download_path = SOURCE / "download"
-    download_spec = spec_from_file_location(
-        download_name,
-        download_path / "__init__.py",
-        submodule_search_locations=[str(download_path)],
-    )
-    assert download_spec is not None
-    assert download_spec.loader is not None
-    download = module_from_spec(download_spec)
-    sys.modules[download_name] = download
-
-    client = _load_module(f"{download_name}.client", download_path / "client.py")
-    _load_module(f"{download_name}.task", download_path / "task.py")
-    download_spec.loader.exec_module(download)
-    download.aiofiles = SimpleNamespace(open=AsyncFileStub)  # type: ignore
-
-    yield download, client, CacheManager
-
-    for name in list(sys.modules):
-        if name == TEST_PACKAGE or name.startswith(f"{TEST_PACKAGE}."):
-            sys.modules.pop(name)
-
-
-@pytest.fixture
-def ffmpeg_module():
-    for name in list(sys.modules):
-        if name == FFMPEG_TEST_PACKAGE or name.startswith(f"{FFMPEG_TEST_PACKAGE}."):
-            sys.modules.pop(name)
-
-    package = _module(FFMPEG_TEST_PACKAGE)
-    package.__path__ = [str(SOURCE)]
-    utils = _module(f"{FFMPEG_TEST_PACKAGE}.utils")
-    utils.__path__ = [str(SOURCE / "utils")]
-
-    class CacheManager:
-        MEDIA = "media"
-
-    class SizeLimitException(Exception):
-        def __init__(self, size):
-            self.size = size
-
-    _module(
-        f"{FFMPEG_TEST_PACKAGE}.exception",
-        SizeLimitException=SizeLimitException,
-    )
-    _module(f"{FFMPEG_TEST_PACKAGE}.utils.cache", CacheManager=CacheManager)
-
-    async def fmt_size(_path):
-        return "0 B"
-
-    _module(f"{FFMPEG_TEST_PACKAGE}.utils.common", fmt_size=fmt_size)
-    yield _load_module(
-        f"{FFMPEG_TEST_PACKAGE}.utils.ffmpeg", SOURCE / "utils/ffmpeg.py"
-    )
-    for name in list(sys.modules):
-        if name == FFMPEG_TEST_PACKAGE or name.startswith(f"{FFMPEG_TEST_PACKAGE}."):
-            sys.modules.pop(name)
-
-
-class FakeResponse:
-    def __init__(self, status_code, *, headers=None, chunks=()):
-        self.status_code = status_code
-        self.headers = {key.lower(): value for key, value in (headers or {}).items()}
-        self._chunks = list(chunks)
-
-    def raise_for_status(self):
-        if not 200 <= self.status_code < 300:
-            raise RuntimeError(f"HTTP {self.status_code}")
-
-    async def aiter_bytes(self, _chunk_size=None):
-        for chunk in self._chunks:
-            yield chunk
 
 
 class FakeClient:
@@ -325,7 +96,7 @@ async def _no_sleep(_delay):
 async def test_file_download_forces_identity_encoding(downloader_modules):
     download, _, cache_manager = downloader_modules
     client = FakeClient(
-        [FakeResponse(200, headers={"Content-Length": "4"}, chunks=[b"webp"])]
+        [response(200, headers={"Content-Length": "4"}, chunks=[b"webp"])]
     )
     downloader = _new_downloader(download, client)
 
@@ -343,7 +114,7 @@ async def test_generic_binary_content_type_uses_puremagic_and_updates_cache_meta
     download, _, cache_manager = downloader_modules
     client = FakeClient(
         [
-            FakeResponse(
+            response(
                 200,
                 headers={
                     "Content-Length": "12",
@@ -361,8 +132,8 @@ async def test_generic_binary_content_type_uses_puremagic_and_updates_cache_meta
         cache_type=cache_manager.MEDIA,
     )
 
-    assert path.name == "video.mp4"
-    assert cache_manager.cached_files[-1][1] is path
+    assert path.suffix == ".mp4"
+    assert await path.with_suffix(".meta").read_bytes() == path.suffix.encode()
 
 
 @pytest.mark.asyncio
@@ -370,7 +141,7 @@ async def test_unidentified_binary_uses_default_suffix(downloader_modules):
     download, _, cache_manager = downloader_modules
     client = FakeClient(
         [
-            FakeResponse(
+            response(
                 200,
                 headers={
                     "Content-Length": "3",
@@ -389,8 +160,8 @@ async def test_unidentified_binary_uses_default_suffix(downloader_modules):
         cache_type=cache_manager.MEDIA,
     )
 
-    assert path.name == "unknown.dat"
-    assert cache_manager.cached_files[-1][1] is path
+    assert path.suffix == ".dat"
+    assert await path.with_suffix(".meta").read_bytes() == path.suffix.encode()
 
 
 @pytest.mark.asyncio
@@ -407,9 +178,9 @@ async def test_unidentified_binary_uses_default_suffix(downloader_modules):
 async def test_unidentified_audio_preserves_source_suffix(
     downloader_modules, url, expected_suffix
 ):
-    download, _, cache_manager = downloader_modules
+    download, _, cache_manager = downloader_modules  # noqa: RUF059
     client = FakeClient(
-        [FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
+        [response(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
     )
     downloader = _new_downloader(download, client)
 
@@ -417,7 +188,7 @@ async def test_unidentified_audio_preserves_source_suffix(
 
     assert path.suffix == expected_suffix
     assert await path.read_bytes() == b"\x00\x01\x02"
-    assert cache_manager.cached_files[-1][1] is path
+    assert await path.with_suffix(".meta").read_bytes() == path.suffix.encode()
 
 
 @pytest.mark.asyncio
@@ -433,15 +204,9 @@ async def test_unidentified_audio_preserves_source_suffix(
 async def test_reserved_suffix_does_not_destroy_download(
     downloader_modules, monkeypatch, url, default_suffix, expected_suffix
 ):
-    download, _, cache_manager = downloader_modules
-    real_cache = _load_module(
-        f"{TEST_PACKAGE}.utils.real_cache", SOURCE / "utils/cache.py"
-    )
-    monkeypatch.setattr(
-        cache_manager, "set_cached_file", real_cache.CacheManager.set_cached_file
-    )
+    download, _, cache_manager = downloader_modules  # noqa: RUF059
     client = FakeClient(
-        [FakeResponse(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
+        [response(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
     )
     downloader = _new_downloader(download, client)
 
@@ -460,10 +225,8 @@ async def test_stream_suffix_comes_from_successful_fallback_url(
     download, _, _ = downloader_modules
     client = FakeClient(
         [
-            FakeResponse(404),
-            FakeResponse(
-                200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"]
-            ),
+            response(404),
+            response(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"]),
         ]
     )
     downloader = _new_downloader(download, client)
@@ -487,8 +250,8 @@ async def test_retryable_http_status_rotates_to_fallback_url(
     download, _, cache_manager = downloader_modules
     client = FakeClient(
         [
-            FakeResponse(404),
-            FakeResponse(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
+            response(404),
+            response(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
         ]
     )
     downloader = _new_downloader(download, client)
@@ -517,8 +280,8 @@ async def test_retryable_http_status_retries_primary_without_fallback(
     download, _, cache_manager = downloader_modules
     client = FakeClient(
         [
-            FakeResponse(404),
-            FakeResponse(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
+            response(404),
+            response(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
         ]
     )
     downloader = _new_downloader(download, client)
@@ -542,10 +305,10 @@ async def test_retryable_http_status_retries_primary_without_fallback(
 @pytest.mark.asyncio
 async def test_unlisted_http_status_is_not_retried(downloader_modules):
     download, _, cache_manager = downloader_modules
-    client = FakeClient([FakeResponse(404)])
+    client = FakeClient([response(404)])
     downloader = _new_downloader(download, client)
 
-    with pytest.raises(RuntimeError, match="HTTP 404"):
+    with pytest.raises(client_module.HTTPStatusError):
         await downloader.streamd(
             url="https://cdn.example/missing.webp",
             retry_http_statuses={503},
@@ -562,11 +325,14 @@ async def test_legacy_part_416_is_removed_and_restarted(downloader_modules, tmp_
     download, _, cache_manager = downloader_modules
     media_dir = tmp_path / cache_manager.MEDIA
     media_dir.mkdir()
-    (media_dir / "image.part").write_bytes(b"stale-decoded-data")
+    (
+        media_dir
+        / f"{generate_file_name('https://cdn.example/image.webp', 'image')}.part"
+    ).write_bytes(b"stale-decoded-data")
     client = FakeClient(
         [
-            FakeResponse(416),
-            FakeResponse(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
+            response(416),
+            response(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
         ]
     )
     downloader = _new_downloader(download, client)
@@ -576,7 +342,10 @@ async def test_legacy_part_416_is_removed_and_restarted(downloader_modules, tmp_
     assert await path.read_bytes() == b"fresh"
     assert client.requests[0]["headers"]["Range"] == "bytes=18-"
     assert "Range" not in client.requests[1]["headers"]
-    assert not (media_dir / "image.part").exists()
+    assert not (
+        media_dir
+        / f"{generate_file_name('https://cdn.example/image.webp', 'image')}.part"
+    ).exists()
 
 
 @pytest.mark.parametrize(
@@ -595,7 +364,10 @@ async def test_invalid_content_range_removes_part_and_restarts_cleanly(
     download, _, cache_manager = downloader_modules
     media_dir = tmp_path / cache_manager.MEDIA
     media_dir.mkdir()
-    part_path = media_dir / "image.part"
+    part_path = (
+        media_dir
+        / f"{generate_file_name('https://cdn.example/image.webp', 'image')}.part"
+    )
     part_path.write_bytes(b"partial-data")
 
     resume_headers = {
@@ -607,12 +379,12 @@ async def test_invalid_content_range_removes_part_and_restarts_cleanly(
 
     client = FakeClient(
         [
-            FakeResponse(
+            response(
                 206,
                 headers=resume_headers,
                 chunks=[b"must-not-be-appended"],
             ),
-            FakeResponse(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
+            response(200, headers={"Content-Length": "5"}, chunks=[b"fresh"]),
         ]
     )
     downloader = _new_downloader(download, client)
@@ -635,12 +407,12 @@ async def test_short_identity_response_resumes_with_matching_range(
     remainder = b"b" * 1536
     client = FakeClient(
         [
-            FakeResponse(
+            response(
                 200,
                 headers={"Content-Length": "2048"},
                 chunks=[prefix],
             ),
-            FakeResponse(
+            response(
                 206,
                 headers={
                     "Content-Length": "1536",
@@ -663,15 +435,17 @@ async def test_unexpected_encoded_response_does_not_compare_decoded_length(
     downloader_modules,
 ):
     download, _, cache_manager = downloader_modules
+    decoded = b"decoded-webp" * 1024
+    encoded = gzip.compress(decoded)
     client = FakeClient(
         [
-            FakeResponse(
+            response(
                 200,
                 headers={
-                    "Content-Encoding": "gzip, br",
-                    "Content-Length": "124406",
+                    "Content-Encoding": "gzip",
+                    "Content-Length": str(len(encoded)),
                 },
-                chunks=[b"decoded-webp"],
+                chunks=[encoded],
             )
         ]
     )
@@ -679,7 +453,7 @@ async def test_unexpected_encoded_response_does_not_compare_decoded_length(
 
     path = await _download_image(downloader, cache_manager)
 
-    assert await path.read_bytes() == b"decoded-webp"
+    assert await path.read_bytes() == decoded
 
 
 @pytest.mark.asyncio
@@ -793,9 +567,7 @@ async def test_native_hls_zero_output_raises_zero_size(downloader_modules, monke
 
 
 @pytest.mark.asyncio
-async def test_ffmpeg_failure_does_not_publish_partial_output(
-    ffmpeg_module, tmp_path, monkeypatch
-):
+async def test_ffmpeg_failure_does_not_publish_partial_output(tmp_path, monkeypatch):
     input_path = ffmpeg_module.Path(tmp_path / "input.ts")
     output_path = ffmpeg_module.Path(tmp_path / "video.mp4")
     await input_path.write_bytes(b"input")

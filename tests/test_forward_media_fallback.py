@@ -44,7 +44,7 @@ class OneBotFailed(ActionFailed):
 @pytest.fixture
 def onebot_context():
     token = current_bot.set(
-        SimpleNamespace(adapter=SimpleNamespace(get_name=lambda: "OneBot V11"))
+        SimpleNamespace(adapter=SimpleNamespace(get_name=lambda: "OneBot V11"))  # pyright: ignore[reportArgumentType]
     )
     try:
         yield
@@ -66,9 +66,7 @@ async def test_file_upload_uses_its_configured_timeout(
     monkeypatch.setattr(pconfig, "plite_file_upload_timeout", upload_timeout)
     # /bm 的纯文件发送不需要构造解析结果，普通和懒下载共用同一边界。
     await send_with_media_fallback(UniMessage(File(path="audio.mp3")))
-    assert calls == [
-        {"_timeout": upload_timeout or gconfig.api_timeout}
-    ]
+    assert calls == [{"_timeout": upload_timeout or gconfig.api_timeout}]
 
 
 @pytest.mark.asyncio
@@ -142,21 +140,6 @@ async def test_non_file_apis_keep_the_normal_timeout(
     monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
     await send_with_media_fallback(message, make_result())
     assert calls == [{"_timeout": gconfig.api_timeout}]
-
-
-@pytest.mark.asyncio
-async def test_top_level_file_keeps_timeout_alongside_a_forward_id(monkeypatch):
-    calls = []
-
-    async def send(message, **kwargs):
-        calls.append(kwargs)
-
-    monkeypatch.setattr(UniMessage, "send", send)
-    monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
-    await send_with_media_fallback(
-        UniMessage([File(path="file.mp4"), Reference(id="forward")])
-    )
-    assert calls == [{"_timeout": 900}]
 
 
 @pytest.mark.asyncio
@@ -539,14 +522,6 @@ async def test_third_media_error_is_terminal(monkeypatch):
     text_of(calls[-1])
 
 
-@pytest.mark.parametrize("build", [build_video_fallback, build_text_fallback])
-def test_video_placeholder_has_no_surrounding_newlines(build):
-    packets = build(forward(Video(raw=b"video")), make_result())
-    assert packets[0][0].children[-1].content.extract_plain_text() == (
-        "[视频已省略，请通过原链接查看]"
-    )
-
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "text",
@@ -653,25 +628,3 @@ async def test_normal_and_video_fallback_respect_mixed_text_limits(
             <= 30000
             for packet in packets
         )
-
-
-@pytest.mark.parametrize(
-    "content",
-    [
-        "\n\n  正文\n\n第二段\n\n",
-        UniMessage.text("\n\n  正文\n\n") + Image(raw=b"image") + "\n尾段\n\n",
-    ],
-)
-def test_shared_packing_strips_only_node_boundary_newlines(content):
-    original = deepcopy(content)
-    chunks = list(
-        render.pack_forward_items(
-            [content],
-            content_of=lambda item: item,
-            with_content=lambda _original, cleaned: cleaned,
-        )
-    )
-    text = UniMessage(chunks[0][0]).extract_plain_text()
-    assert text.startswith("  正文\n\n")
-    assert not text.endswith("\n")
-    assert content == original

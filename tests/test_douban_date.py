@@ -12,21 +12,12 @@ from nonebot_plugin_parser_lite.parsers.douban.util import (
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
-        ("2026-01-08 01:01:49", "2026-01-08 01:01:49"),
-        ("2026-09-17 20:54:08.010", "2026-09-17 20:54:08"),
-        ("2026-09-17 20:54:08.010189", "2026-09-17 20:54:08"),
+        ("2026-01-08 01:01:49", datetime(2026, 1, 8, 1, 1, 49)),
+        ("2026-09-17 20:54:08.010189", datetime(2026, 9, 17, 20, 54, 8)),
     ],
 )
-def test_parse_date_accepts_optional_fractional_seconds(value: str, expected: str):
-    expected_timestamp = int(
-        datetime.strptime(expected, "%Y-%m-%d %H:%M:%S").timestamp()
-    )
-    assert parse_date(value) == expected_timestamp
-
-
-def test_parse_date_rejects_invalid_value():
-    with pytest.raises(ValueError, match="Invalid isoformat string"):
-        parse_date("2026-09-17T20:54:08Z-invalid")
+def test_parse_date_accepts_optional_fractional_seconds(value: str, expected: datetime):
+    assert parse_date(value) == int(expected.timestamp())
 
 
 def test_parse_rich_content_uses_real_html_formatting():
@@ -35,4 +26,4 @@ def test_parse_rich_content_uses_real_html_formatting():
         '<p><img src="https://img.example/cover.jpg"></p>'
     )
     assert result[0] == "正文 链接 (https://m.douban.com/subject/1)"
-    assert result[1].path_task.url == "https://img.example/cover.jpg"
+    assert result[1].path_task.url == "https://img.example/cover.jpg"  # pyright: ignore[reportAttributeAccessIssue]

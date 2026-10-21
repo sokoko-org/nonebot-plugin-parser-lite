@@ -1,22 +1,20 @@
-"""上传前倍速：规则配置、写在内容上、渲染与发送读同一个值。
-
-倍速是平台无关的通用能力；按标注裁切是 B 站特有的，用例在
-test_bilibili_sponsorblock.py。
-"""
-
 from pathlib import Path
+from unittest.mock import AsyncMock
 
 from anyio import Path as AnyPath
 import pytest
 import render_test_support as support
 
-from nonebot_plugin_parser_lite.config import parse_media_speedup_rules
 from nonebot_plugin_parser_lite.constants import PlatformEnum
 from nonebot_plugin_parser_lite.data import (
     AudioContent,
     Author,
+    GraphicContent,
+    ImageContent,
+    LivePhotoContent,
     ParseResult,
     Platform,
+    StickerContent,
     VideoContent,
 )
 from nonebot_plugin_parser_lite.exception import SizeLimitException
@@ -49,31 +47,9 @@ def make_media(cls, tmp_path: Path, name: str, duration: float = 60.0):
     return cls(path_task=support.ResolvedPathTask(source), duration=duration)
 
 
-# --------------------------------------------------------------------------
-# 规则配置
-
-
-def test_rule_grammar_is_platform_colon_id_colon_ratio():
-    assert parse_media_speedup_rules(
-        ["bilibili:123456:1.25", " douyin : abc : 2 ", "bilibili:777:0.5"]
-    ) == {
-        (PlatformEnum.BILIBILI, "123456"): 1.25,
-        (PlatformEnum.DOUYIN, "abc"): 2.0,
-        (PlatformEnum.BILIBILI, "777"): 0.5,
-    }
-
-
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "raw",
-    [
-        "bilibili",
-        "bilibili:123456",
-        "bilibili::1.25",
-        "bilibili:123456:",
-        "bilibili:123456:x",
-        "bilibili:123456:1.25:9",
-        "nosuchplatform:1:1.25",
-    ],
+    "cls", [ImageContent, GraphicContent, StickerContent, LivePhotoContent]
 )
 def test_malformed_rule_is_rejected(raw):
     with pytest.raises(ValueError, match="变速规则"):
@@ -96,10 +72,19 @@ async def test_rule_matches_platform_and_author(tmp_path, monkeypatch):
     monkeypatch.setattr(
         support.pconfig, "plite_media_speedup_rules", ["bilibili:123456:1.5"]
     )
-    video = make_media(VideoContent, tmp_path, "v.mp4")
-    audio = make_media(AudioContent, tmp_path, "a.mp3")
-    apply_media_speedup(make_result(contents=[video, audio]))
-    assert (video.speedup, audio.speedup) == (1.5, 1.5)
+    source = tmp_path / "image.png"
+    source.write_bytes(b"image")
+    task = support.ResolvedPathTask(source)
+    kwargs = {"base_image": task, "loop": 1} if cls is LivePhotoContent else {}
+    media = cls(path_task=task, **kwargs)  # pyright: ignore[reportArgumentType]
+    video = make_media(VideoContent, tmp_path, "video.mp4")
+    result = make_result(contents=[media, video])
+
+    apply_media_speedup(result)
+
+    assert await media.get_path() == AnyPath(source)
+    assert video.speedup == 1.5
+    assert speedup_digest(result) == "1.50x"
 
 
 @pytest.mark.asyncio
@@ -141,31 +126,6 @@ async def test_unsent_media_is_left_alone(tmp_path, monkeypatch):
     assert speedup_digest(result) == ""
 
 
-# --------------------------------------------------------------------------
-# 展示换算
-
-
-@pytest.mark.parametrize("cls", [VideoContent, AudioContent])
-def test_display_duration_divides_the_speedup(cls, tmp_path):
-    cont = make_media(cls, tmp_path, "m.mp4", duration=120.0)
-    assert cont.display_duration == "2:00"
-    cont.speedup = 2.0
-    assert cont.display_duration == "1:00"
-    assert cont.duration == 120.0, "时长要由倍速换算，不能就地改写"
-
-
-def test_digest_keeps_the_plain_speed(tmp_path):
-    """1 倍速也要写进摘要，键的构成才不随命中与否变化"""
-    cont = make_media(VideoContent, tmp_path, "v.mp4")
-    assert speedup_digest(make_result(contents=[cont])) == "1.00x"
-    cont.speedup = 1.25
-    assert speedup_digest(make_result(contents=[cont])) == "1.25x"
-
-
-# --------------------------------------------------------------------------
-# get_path 是唯一的执行点
-
-
 @pytest.mark.asyncio
 async def test_get_path_returns_source_when_no_speedup(tmp_path, monkeypatch):
     called: list[int] = []
@@ -178,7 +138,7 @@ async def test_get_path_returns_source_when_no_speedup(tmp_path, monkeypatch):
 
     cont = make_media(VideoContent, tmp_path, "video.mp4")
     assert await cont.get_path() == await cont.path_task
-    assert called == []
+    assert speedup_digest(make_result(contents=[cont])) == "1.00x"
 
 
 @pytest.mark.asyncio

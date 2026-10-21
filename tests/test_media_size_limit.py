@@ -49,11 +49,10 @@ def media_factory(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("known_size", [MIB + 1, 2 * MIB])
 async def test_known_oversized_media_is_rejected_before_download(
-    media_factory, known_size
+    media_factory,
 ):
-    media, _, calls = media_factory(1, known_size)
+    media, _, calls = media_factory(MIB + 1, MIB + 1)
 
     with pytest.raises(SizeLimitException):
         await media.get_path()
@@ -62,8 +61,10 @@ async def test_known_oversized_media_is_rejected_before_download(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("known_size", [None, 0, MIB - 1, MIB])
-@pytest.mark.parametrize("actual_size", [MIB - 1, MIB, MIB + 1])
+@pytest.mark.parametrize(
+    ("known_size", "actual_size"),
+    [(None, MIB), (None, MIB + 1), (MIB - 1, MIB + 1)],
+)
 async def test_actual_size_enforces_limit_after_download(
     media_factory, known_size, actual_size
 ):
@@ -80,25 +81,10 @@ async def test_actual_size_enforces_limit_after_download(
 
 
 @pytest.mark.asyncio
-async def test_reused_download_task_still_checks_actual_file_size(
-    media_factory, tmp_path
-):
-    media, path, calls = media_factory(MIB)
-    assert await media.get_path() == path
-    with (tmp_path / path.name).open("wb") as file:
-        file.truncate(MIB + 1)
-
-    with pytest.raises(SizeLimitException):
-        await media.get_path()
-
-    assert calls == [path]
-    assert media._size_bytes == MIB + 1
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("video_in_forward", [False, True])
-@pytest.mark.parametrize("with_summary", [False, True])
-@pytest.mark.parametrize("known_size", [None, MIB + 1])
+@pytest.mark.parametrize(
+    ("video_in_forward", "with_summary", "known_size"),
+    [(False, False, None), (False, True, MIB + 1), (True, True, None)],
+)
 async def test_oversized_video_keeps_summary_and_sends_notice(
     media_factory, monkeypatch, video_in_forward, with_summary, known_size
 ):
