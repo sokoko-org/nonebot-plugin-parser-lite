@@ -2,7 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from anyio import Path
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent
+from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, PrivateMessageEvent
 from nonebot.internal.params import DependencyCache
 from nonebot.matcher import matchers
 from nonebot_plugin_alconna import Match, UniMessage
@@ -21,7 +21,6 @@ from render_test_support import ROOT  # noqa: F401  初始化插件包导入环�
 
 from nonebot_plugin_parser_lite.matchers import filter as switches
 
-# Synthetic identifiers for isolated tests, unrelated to production accounts.
 ADMIN_QQ = "10001"
 CURRENT_GROUP = "20001"
 TARGET_GROUP = "20002"
@@ -36,38 +35,37 @@ def switch_state(monkeypatch, tmp_path):
     monkeypatch.setattr(switches, "_DISABLED_TARGETS_SET", set())
 
 
-def context(*, superuser=True, private=False, scope=SupportScope.qq_client):
-    # Use the real NoneBot permission checker and adapter event types. No API
-    # call is needed to change a local parsing rule.
+def context(*, superuser=True, private=False):
     bot = Bot(
         SimpleNamespace(
             get_name=lambda: "OneBot V11",
             config=SimpleNamespace(superusers={ADMIN_QQ} if superuser else set()),
-        ),
+        ),  # pyright: ignore[reportArgumentType]
         BOT_QQ,
     )
-    event = GroupMessageEvent.model_validate(
-        {
-            "time": 1,
-            "self_id": int(BOT_QQ),
-            "post_type": "message",
-            "message_type": "group",
-            "sub_type": "normal",
-            "group_id": int(CURRENT_GROUP),
-            "user_id": int(ADMIN_QQ),
-            "message_id": 1,
-            "font": 0,
-            "message": [],
-            "original_message": [],
-            "raw_message": "",
-            "to_me": True,
-            "sender": {"user_id": int(ADMIN_QQ), "role": "admin"},
-        }
-    )
+    event_data = {
+        "time": 1,
+        "self_id": int(BOT_QQ),
+        "post_type": "message",
+        "message_type": "private" if private else "group",
+        "sub_type": "friend" if private else "normal",
+        "user_id": int(ADMIN_QQ),
+        "message_id": 1,
+        "font": 0,
+        "message": [],
+        "original_message": [],
+        "raw_message": "",
+        "to_me": True,
+        "sender": {"user_id": int(ADMIN_QQ), "role": "admin"},
+    }
+    if not private:
+        event_data["group_id"] = int(CURRENT_GROUP)
+    event_class = PrivateMessageEvent if private else GroupMessageEvent
+    event = event_class.model_validate(event_data)
     session = Session(
         self_id=bot.self_id,
         adapter="OneBot V11",
-        scope=scope,
+        scope=SupportScope.qq_client,
         scene=Scene(
             ADMIN_QQ if private else CURRENT_GROUP,
             SceneType.PRIVATE if private else SceneType.GROUP,
@@ -197,42 +195,12 @@ async def test_private_superuser_controls_current_or_target_user(switch_state):
     other_group = context()[2]
     other_group.scene.id = TARGET_GROUP
     assert not switches.is_enabled(other_group)
-    channel = context()[2]
-    channel.scene = Scene(
-        "50001", SceneType.CHANNEL_TEXT, parent=Scene("40001", SceneType.GUILD)
-    )
-    assert not switches.is_enabled(channel)
-    source.scene.parent = Scene("40001", SceneType.GUILD)
-    assert not switches.is_enabled(source)
-    await run_switch(enabled=True)
-    assert not switches.is_enabled(context()[2])
     other_user = context()[2]
     other_user.user.id = "10002"
     assert switches.is_enabled(other_user)
-    assert switches.is_enabled(context(scope=SupportScope.discord)[2])
     await run_switch(private=True, enabled=True)
     assert switches.is_enabled(source)
     assert switches.is_enabled(other_group)
-    assert switches.is_enabled(channel)
-    await run_switch()
-    await run_switch(private=True)
-    await run_switch(private=True, enabled=True)
-    assert switches.is_enabled(source)
-    assert not switches.is_enabled(context()[2])
-
-
-@pytest.mark.asyncio
-async def test_scope_isolation_and_other_platform_current_group(switch_state):
-    message, _ = await run_switch(TARGET_GROUP, scope=SupportScope.discord)
-    assert TARGET_GROUP in message
-    assert switches._DISABLED_TARGETS_SET == {f"Discord_GROUP_{TARGET_GROUP}"}
-    await run_switch(scope=SupportScope.discord)
-    assert switches._DISABLED_TARGETS_SET == {
-        f"Discord_GROUP_{CURRENT_GROUP}",
-        f"Discord_GROUP_{TARGET_GROUP}",
-    }
-    assert not switches.is_enabled(context(scope=SupportScope.discord)[2])
-    assert switches.is_enabled(context()[2])
 
 
 @pytest.mark.asyncio

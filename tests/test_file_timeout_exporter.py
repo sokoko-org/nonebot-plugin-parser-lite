@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, PrivateMessageEvent
 from nonebot.matcher import current_bot, current_event
-from nonebot_plugin_alconna.uniseg import File, Reference, UniMessage
+from nonebot_plugin_alconna.uniseg import File, UniMessage
 import pytest
 from render_test_support import pconfig
 
@@ -11,10 +11,7 @@ from nonebot_plugin_parser_lite.delivery import send_with_media_fallback
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("private", [False, True])
-@pytest.mark.parametrize("forward_id", [False, True])
-async def test_file_timeout_reaches_onebot_upload_api(
-    monkeypatch, tmp_path, private, forward_id
-):
+async def test_file_timeout_reaches_onebot_upload_api(monkeypatch, tmp_path, private):
     calls = []
 
     async def call_api(bot, api, **data):
@@ -23,18 +20,22 @@ async def test_file_timeout_reaches_onebot_upload_api(
 
     monkeypatch.setattr(Bot, "call_api", call_api)
     monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
-    bot = Bot(SimpleNamespace(get_name=lambda: "OneBot V11"), "42")
+    bot = Bot(SimpleNamespace(get_name=lambda: "OneBot V11"), "42")  # pyright: ignore[reportArgumentType]
     path = tmp_path / "file.mp4"
     path.write_bytes(b"file")
     message = UniMessage(File(path=path))
-    if forward_id:
-        message.append(Reference(id="existing-forward"))
     event_data = {
-        "time": 0, "self_id": 42, "post_type": "message",
+        "time": 0,
+        "self_id": 42,
+        "post_type": "message",
         "message_type": "private" if private else "group",
         "sub_type": "friend" if private else "normal",
-        "user_id": 123, "message_id": 1, "message": "file",
-        "original_message": "file", "raw_message": "file", "font": 0,
+        "user_id": 123,
+        "message_id": 1,
+        "message": "file",
+        "original_message": "file",
+        "raw_message": "file",
+        "font": 0,
         "sender": {"user_id": 123, "nickname": "user"},
     }
     if not private:

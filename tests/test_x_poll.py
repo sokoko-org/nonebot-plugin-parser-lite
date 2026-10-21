@@ -24,7 +24,7 @@ def test_image_poll_and_translation():
     polls = [item for item in result.content if isinstance(item, PollContent)]
     quotes = [item for item in result.content if isinstance(item, QuoteContent)]
     assert all(option.image is not None for option in polls[0].options)
-    assert polls[0].options[0].image.url.endswith("name=orig")
+    assert polls[0].options[0].image.url.endswith("name=orig")  # pyright: ignore[reportOptionalMemberAccess]
     assert len(polls) == 1
     assert [option.votes for option in polls[0].options] == [654, 613, 568, 914]
     assert polls[0].options[0].text == "試着室"
