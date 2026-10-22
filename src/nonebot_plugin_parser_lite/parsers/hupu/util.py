@@ -1,5 +1,3 @@
-from urllib.parse import urlparse
-
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
@@ -49,17 +47,13 @@ def _iter_media_and_text(soup: BeautifulSoup):
                 continue
 
             if element.name == "video":
-                video_url = str(element.get("src"))
-                stable_url = (
-                    urlparse(video_url)._replace(query="", fragment="").geturl()
-                )
-                yield Creator.video(
-                    url_or_task=video_url,
-                    cover_url=str(element.get("poster")),
-                    cache_key=f"hupu:{stable_url}",
-                )
-                skip_parent = element
-                continue
+                if video_url := element.get("src"):
+                    yield Creator.video(
+                        url_or_task=str(video_url),
+                        cover_url=str(element.get("poster")),
+                    )
+                    skip_parent = element
+                    continue
 
             if element.name == "img":
                 if src := (
