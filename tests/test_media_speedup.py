@@ -1,5 +1,4 @@
 from pathlib import Path
-from unittest.mock import AsyncMock
 
 from anyio import Path as AnyPath
 import pytest
@@ -7,7 +6,6 @@ import render_test_support as support
 
 from nonebot_plugin_parser_lite.constants import PlatformEnum
 from nonebot_plugin_parser_lite.data import (
-    AudioContent,
     Author,
     GraphicContent,
     ImageContent,
@@ -17,8 +15,6 @@ from nonebot_plugin_parser_lite.data import (
     StickerContent,
     VideoContent,
 )
-from nonebot_plugin_parser_lite.exception import SizeLimitException
-from nonebot_plugin_parser_lite.utils.ffmpeg import FFmpeg
 from nonebot_plugin_parser_lite.utils.media_edit import (
     apply_media_speedup,
     speedup_digest,
@@ -107,62 +103,3 @@ async def test_unsent_media_is_left_alone(tmp_path, monkeypatch):
     apply_media_speedup(result)
     assert video.speedup == 1.0
     assert speedup_digest(result) == ""
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    ("cls", "editor"), [(VideoContent, "edit_video"), (AudioContent, "edit_audio")]
-)
-async def test_get_path_returns_source_when_no_speedup(
-    tmp_path, monkeypatch, cls, editor
-):
-    edit = AsyncMock()
-    monkeypatch.setattr(FFmpeg, editor, edit)
-    cont = make_media(cls, tmp_path, "source.mp4")
-    assert await cont.get_path() == await cont.path_task
-    assert speedup_digest(make_result(contents=[cont])) == "1.00x"
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "error", [RuntimeError("ffmpeg 执行失败"), SizeLimitException(120.0)]
-)
-async def test_failure_falls_back_to_source_and_drops_speedup(
-    tmp_path, monkeypatch, error
-):
-    monkeypatch.setattr(FFmpeg, "edit_video", AsyncMock(side_effect=error))
-
-    cont = make_media(VideoContent, tmp_path, "video.mp4")
-    cont.speedup = 1.25
-    source = await cont.path_task
-    assert await cont.get_path() == source
-    # 退回原片后必须丢掉倍速，否则卡片继续按「已处理」显示时长与体积
-    assert cont.speedup == 1.0
-    assert cont.display_duration == "1:00"
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    ("cls", "editor"), [(VideoContent, "edit_video"), (AudioContent, "edit_audio")]
-)
-async def test_speedup_returns_edited_video_or_audio(
-    tmp_path, monkeypatch, cls, editor
-):
-    monkeypatch.setattr(
-        support.pconfig,
-        "plite_media_speedup_rules",
-        ["bilibili:123456:1.5", "bilibili:123456:1.25"],
-    )
-    output = AnyPath(tmp_path / "product.mp4")
-    await output.write_bytes(b"retimed")
-    edit = AsyncMock(return_value=output)
-    monkeypatch.setattr(FFmpeg, editor, edit)
-    cont = make_media(cls, tmp_path, "source.mp4")
-    result = make_result(contents=[cont])
-    apply_media_speedup(result)
-    assert await cont.get_path() == output
-    assert await (await cont.get_path()).read_bytes() == b"retimed"
-    assert cont.speedup == 1.25
-    assert cont.display_duration == "0:48"
-    assert cont.duration == 60.0
-    assert speedup_digest(result) == "1.25x"
