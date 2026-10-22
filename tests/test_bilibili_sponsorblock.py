@@ -1,4 +1,4 @@
-"""空降查询、时间轴规则，以及推广视频不下载的渲染与发送回归"""
+"""空降查询、时间轴规则，以及整片标签与跳过区间的下载行为"""
 
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -180,12 +180,35 @@ async def test_parser_uses_the_selected_page_duration(
 
 
 @pytest.mark.asyncio
+async def test_full_ad_label_adds_notice_and_keeps_video_downloadable(
+    monkeypatch, tmp_path, video_parser
+):
+    parser, info = video_parser
+    source = support.Path(tmp_path / "source.mp4")
+    await source.write_bytes(b"video")
+    monkeypatch.setattr(
+        bilibili.DOWNLOADER, "download_video", AsyncMock(return_value=source)
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(200, json=[row(0, 0, action="full")])
+        )
+    ) as client:
+        monkeypatch.setattr(sponsorblock.DOWNLOADER, "client", client)
+        result = await parser.parse_video(bvid=info.bvid)
+
+    video = result.content[0]
+    assert video.need_send
+    assert video.duration == 120
+    assert result.content[1:] == ["视频简介", "\n\n[视频为推广内容]"]
+    assert await video.get_path() == source
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("video_in_forward", [False, True])
 @pytest.mark.parametrize(
     ("entry", "notice"),
     [
-        (row(0, 0, action="full"), "[视频为推广内容，未下载]"),
-        (row(0, 120), "[视频为推广内容，未下载]"),
         (row(0, 120, category="intro"), "[空降标注覆盖整条视频，未下载]"),
     ],
 )

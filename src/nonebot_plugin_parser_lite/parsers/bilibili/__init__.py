@@ -387,7 +387,7 @@ class BilibiliParser(BaseParser):
             url_or_task=downloader,
             cover_url=cover,
             duration=sponsorblock.output_duration,
-            need_send=not (is_full_video_ad or sponsorblock.covers_entire_video),
+            need_send=not sponsorblock.covers_entire_video,
             ext_headers=self.headers,
             cache_key=cache_key,
         )
@@ -444,7 +444,7 @@ class BilibiliParser(BaseParser):
 
         content: list[ContentItem] = [video_content, text]
         if is_full_video_ad:
-            content.append("\n\n[视频为推广内容，未下载]")
+            content.append("\n\n[视频为推广内容]")
         elif sponsorblock.covers_entire_video:
             content.append("\n\n[空降标注覆盖整条视频，未下载]")
 
