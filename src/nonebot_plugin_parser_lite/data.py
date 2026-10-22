@@ -147,7 +147,7 @@ class AudioContent(AudioVideoContent):
     """音频内容"""
 
     async def retime(self, path: Path, ratio: float) -> Path:
-        return await FFmpeg.edit_audio(path, speed_ratio=ratio)
+        return await FFmpeg.change_audio_speed(path, ratio)
 
 
 @dataclass(repr=False, slots=True)

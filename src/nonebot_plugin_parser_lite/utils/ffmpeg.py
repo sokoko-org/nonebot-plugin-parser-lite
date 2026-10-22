@@ -193,8 +193,8 @@ class FFmpeg:
                 "-v",
                 "error",
                 "-show_entries",
-                "format=duration:stream="
-                "codec_type,duration,avg_frame_rate,r_frame_rate",
+                "format=duration,bit_rate:stream="
+                "codec_type,duration,avg_frame_rate,r_frame_rate,bit_rate",
                 "-of",
                 "json",
                 str(media_path),
@@ -217,6 +217,30 @@ class FFmpeg:
         if not math.isfinite(duration) or duration <= 0:
             raise RuntimeError(f"无法获取有效的媒体时长: {media_path}")
         return duration
+
+    @staticmethod
+    def _get_stream_bitrate(probe: dict[str, Any], codec_type: str) -> int | None:
+        """获取编码码率"""
+        streams = probe.get("streams", [])
+        target = next(
+            (stream for stream in streams if stream.get("codec_type") == codec_type),
+            None,
+        )
+        if target is None:
+            return None
+        bitrate = int(target.get("bit_rate") or 0)
+        if bitrate > 0:
+            return bitrate
+
+        total = int(probe.get("format", {}).get("bit_rate") or 0)
+        other_rates = [
+            int(stream.get("bit_rate") or 0)
+            for stream in streams
+            if stream is not target
+        ]
+        if total > 0 and all(rate > 0 for rate in other_rates):
+            return max(0, total - sum(other_rates)) or None
+        return None
 
     @staticmethod
     def _get_video_frame_rate(probe: dict[str, Any], video_path: Path) -> str:
@@ -732,22 +756,25 @@ class FFmpeg:
     async def edit_video(
         cls,
         input_path: Path,
-        *,
         speed_ratio: float = 1.0,
         cut_ranges: tuple[tuple[float, float], ...] = (),
         mute_ranges: tuple[tuple[float, float], ...] = (),
     ) -> Path:
-        """重编码视频
+        """倍速或修剪视频
 
         :param input_path: 源视频路径
-        :param speed_ratio: 播放倍率
-        :param cut_ranges: 需要删除的时间轴区间，需已排序、裁剪且不重叠
-        :param mute_ranges: 需要消音的时间轴区间，按源时间轴表达
+        :param speed_ratio: 播放倍速
+        :param cut_ranges: 需要删除的时间轴区间
+        :param mute_ranges: 需要消音的时间轴区间
         :return: 产物路径
         """
-        timeline_version = ("timeline-v2",) if cut_ranges or mute_ranges else ()
         output_path = await cls._get_edit_output_path(
-            input_path, ".mp4", speed_ratio, cut_ranges, mute_ranges, *timeline_version
+            input_path,
+            ".mp4",
+            speed_ratio,
+            cut_ranges,
+            mute_ranges,
+            "source-bitrate-v1",
         )
         if await output_path.exists():
             return output_path
@@ -765,11 +792,9 @@ class FFmpeg:
         )
         if not pieces:
             raise RuntimeError("裁切后没有剩余片段")
-        # 裁掉开头或结尾时只剩一个片段，但仍然要裁，不能拿「片段数 > 1」当判据
         needs_trim = bool(cut_ranges)
 
         filter_parts: list[str] = []
-        # 滤镜图里引用输入流要带方括号，-map 直接引用输入流时不带
         video_source, video_target = "[0:v]", "0:v"
         audio_source = "[0:a]" if has_audio else None
         audio_target = "0:a" if has_audio else None
@@ -804,22 +829,30 @@ class FFmpeg:
                 "libx264",
                 "-preset",
                 "veryfast",
-                "-crf",
-                "23",
                 "-pix_fmt",
                 "yuv420p",
             ]
+            if bitrate := cls._get_stream_bitrate(probe, "video"):
+                cmd += [
+                    "-b:v",
+                    str(bitrate),
+                    "-maxrate",
+                    str(bitrate),
+                    "-bufsize",
+                    str(bitrate * 2),
+                ]
         else:
             cmd += ["-c:v", "copy"]
         if audio_target is None:
             cmd += ["-an"]
         else:
             cmd += ["-map", audio_target]
-            cmd += (
-                ["-c:a", "copy"]
-                if audio_target == "0:a"
-                else ["-c:a", "aac", "-b:a", "192k"]
-            )
+            if audio_target == "0:a":
+                cmd += ["-c:a", "copy"]
+            else:
+                cmd += ["-c:a", "aac"]
+                if bitrate := cls._get_stream_bitrate(probe, "audio"):
+                    cmd += ["-b:a", str(bitrate)]
         logger.info(f"Editing video '{input_path.name}' as '{output_path.name}'")
         temp_path = cls.temporary_output_path(output_path)
         cmd += ["-movflags", "+faststart", str(temp_path)]
@@ -836,23 +869,25 @@ class FFmpeg:
         return output_path
 
     @classmethod
-    async def edit_audio(
+    async def change_audio_speed(
         cls,
         input_path: Path,
-        *,
         speed_ratio: float,
     ) -> Path:
-        """重编码音频
+        """倍速处理音频
 
-        :param input_path: 源音频路径
-        :param speed_ratio: 播放倍率
+        :param input_path: 音频路径
+        :param speed_ratio: 播放倍速
         :return: 产物路径
         """
         suffix = input_path.suffix.lower() or ".m4a"
-        output_path = await cls._get_edit_output_path(input_path, suffix, speed_ratio)
+        output_path = await cls._get_edit_output_path(
+            input_path, suffix, speed_ratio, "source-bitrate-v1"
+        )
         if await output_path.exists():
             return output_path
 
+        probe = await cls._probe_media(input_path)
         cmd: list[str] = ["-y", "-hide_banner", "-loglevel", "error"]
         cmd += [
             "-i",
@@ -861,7 +896,9 @@ class FFmpeg:
             "-af",
             f"atempo={cls._format_filter_number(speed_ratio)}",
         ]
-        # 编码器与码率交给 ffmpeg 按输出后缀决定
+        # 编码器按输出后缀决定，码率沿用源音频。
+        if bitrate := cls._get_stream_bitrate(probe, "audio"):
+            cmd += ["-b:a", str(bitrate)]
         logger.info(f"Editing audio '{input_path.name}' as '{output_path.name}'")
         temp_path = cls.temporary_output_path(output_path)
         cmd += [str(temp_path)]
