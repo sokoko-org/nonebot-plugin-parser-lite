@@ -1,6 +1,7 @@
 exclude = [
-  "src/nonebot_plugin_parser_lite/utils/bilibili/bilibili",
+  "*_pb2.py",
 ]
+force-exclude = true
 line-length = 88
 target-version = "py311"
 
