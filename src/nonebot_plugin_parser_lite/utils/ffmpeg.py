@@ -397,30 +397,18 @@ class FFmpeg:
         )
 
     @classmethod
-    async def png_to_jpeg(cls, png_data: bytes) -> bytes:
+    async def rgba_to_webp(cls, rgba_data: bytes, width: int, height: int) -> bytes:
+        """将 RGBA 原始像素编码为 WebP"""
         cmd = [
             "-hide_banner",
             "-loglevel",
             "error",
-            "-i",
-            "pipe:0",
             "-f",
-            "image2pipe",
-            "-c:v",
-            "mjpeg",
-            "-q:v",
-            "85",
-            "pipe:1",
-        ]
-        return await cls.exec_ffmpeg(cmd, png_data)
-
-    @classmethod
-    async def png_to_webp(cls, png_data: bytes) -> bytes:
-        """PNG to WebP"""
-        cmd = [
-            "-hide_banner",
-            "-loglevel",
-            "error",
+            "rawvideo",
+            "-pixel_format",
+            "rgba",
+            "-video_size",
+            f"{width}x{height}",
             "-i",
             "pipe:0",
             "-frames:v",
@@ -435,7 +423,7 @@ class FFmpeg:
             "85",
             "pipe:1",
         ]
-        return await cls.exec_ffmpeg(cmd, png_data)
+        return await cls.exec_ffmpeg(cmd, rgba_data)
 
     @classmethod
     async def remux_to_mp4(cls, input_path: Path, output_path: Path) -> Path:

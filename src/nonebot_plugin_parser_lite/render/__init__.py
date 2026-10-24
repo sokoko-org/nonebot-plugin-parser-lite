@@ -49,7 +49,7 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20261016-1"
+RENDER_TEMPLATE_VERSION = "20261025-1"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -626,9 +626,10 @@ class Renderer:
         result: ParseResult,
         *,
         theme: Theme,
+        image_format: Literal["jpeg", "webp"],
         theme_definition: ThemeDefinition | None = None,
-    ) -> bytes:
-        """使用选定主题绘制卡片"""
+    ) -> tuple[Literal["jpeg", "webp"], bytes]:
+        """使用选定主题绘制卡片，返回实际格式与编码后的图片。"""
         selected_theme = theme_definition or await self._resolve_theme()
         template_data = await self.resolve_parse_result(
             result,
@@ -648,10 +649,12 @@ class Renderer:
         html = await template.render_async(data=template_data)
         html = await self._inject_fallback_icon_css(html)
 
+        scale = 2
+        viewport_width, viewport_height = 620, 1000
         async with get_new_page(
-            2,
+            scale,
             **{
-                "viewport": {"width": 620, "height": 1000},
+                "viewport": {"width": viewport_width, "height": viewport_height},
                 "base_url": selected_template.base_url,
             },
         ) as page:
@@ -661,57 +664,66 @@ class Renderer:
             height = await page.locator("main").evaluate(
                 "el => Math.ceil(el.getBoundingClientRect().height)"
             )
-            viewport_height = 1000
             # 分段滚动并截图。每段只包含当前视口，避免 full_page 的大位图限制
-            segments: list[tuple[int, bytes]] = []
+            canvas = await asyncio.to_thread(
+                Image.new,
+                "RGBA",
+                (viewport_width * scale, height * scale),
+                (255, 255, 255, 0),
+            )
+
+            def paste_segment(segment: bytes, offset: int, end_offset: int) -> None:
+                start = offset * scale
+                with Image.open(BytesIO(segment)) as image:
+                    with image.crop(
+                        (
+                            0,
+                            0,
+                            image.width,
+                            min(image.height, (end_offset - offset) * scale),
+                        )
+                    ) as part:
+                        canvas.paste(part, (0, start))
+
             offsets = list(range(0, max(height - viewport_height, 0), viewport_height))
             final_offset = max(height - viewport_height, 0)
             if not offsets or offsets[-1] != final_offset:
                 offsets.append(final_offset)
-            for offset in offsets:
+            for index, offset in enumerate(offsets):
                 await page.evaluate("y => window.scrollTo(0, y)", offset)
                 # 等待滚动位置生效，避免截到上一段内容
                 await page.evaluate("() => new Promise(requestAnimationFrame)")
-                segments.append(
-                    (
-                        offset,
-                        await page.screenshot(
-                            type="png", full_page=False, omit_background=True
-                        ),
-                    )
+                # 每段截图贴入画布后即释放，不累积 PNG 和解码后的分段位图。
+                await asyncio.to_thread(
+                    paste_segment,
+                    await page.screenshot(
+                        type="png", full_page=False, omit_background=True
+                    ),
+                    offset,
+                    offsets[index + 1] if index + 1 < len(offsets) else height,
                 )
 
-        def stitch() -> bytes:
-            images = [
-                (offset, Image.open(BytesIO(segment)).convert("RGBA"))
-                for offset, segment in segments
-            ]
-            try:
-                scale = images[0][1].height / viewport_height
-                output_height = round(height * scale)
-                canvas = Image.new(
-                    "RGBA", (images[0][1].width, output_height), (255, 255, 255, 0)
-                )
-                for index, (offset, image) in enumerate(images):
-                    start = round(offset * scale)
-                    end = (
-                        output_height
-                        if index + 1 == len(images)
-                        else round(images[index + 1][0] * scale)
-                    )
-                    remaining = max(end - start, 0)
-                    if remaining <= 0:
-                        continue
-                    part = image.crop((0, 0, image.width, min(image.height, remaining)))
-                    canvas.paste(part, (0, start))
-                output = BytesIO()
-                canvas.save(output, format="PNG")
+        if image_format == "webp" and max(canvas.size) > 16383:
+            logger.warning("渲染结果尺寸超过 WebP 编码上限，已改用 JPEG 输出")
+            image_format = "jpeg"
+
+        if image_format == "webp":
+            width, height = canvas.size
+
+            def raw_pixels() -> bytes:
+                with canvas:
+                    return canvas.tobytes()
+
+            # 提取像素后释放画布，再启动 FFmpeg，减少编码阶段的内存重叠。
+            rgba_data = await asyncio.to_thread(raw_pixels)
+            return image_format, await FFmpeg.rgba_to_webp(rgba_data, width, height)
+
+        def encode_jpeg() -> bytes:
+            with canvas, canvas.convert("RGB") as rgb, BytesIO() as output:
+                rgb.save(output, format="JPEG", quality=85, subsampling=0)
                 return output.getvalue()
-            finally:
-                for _, image in images:
-                    image.close()
 
-        return await asyncio.to_thread(stitch)
+        return image_format, await asyncio.to_thread(encode_jpeg)
 
     async def _resolve_theme(self) -> ThemeDefinition:
         return await ThemeManager(
@@ -792,28 +804,13 @@ class Renderer:
                 image_path = jpeg_path
         logger.info(f"渲染主题: {selected_theme.name}")
         if not await image_path.exists():
-            png_data = await self.render_image(
+            image_format, image_raw = await self.render_image(
                 result,
                 theme=theme,
+                image_format=render_format,
                 theme_definition=selected_theme,
             )
-            match render_format:
-                case "webp":
-                    # WebP 单边最多 16383 像素
-                    with Image.open(BytesIO(png_data)) as image:
-                        exceeds_webp_limit = max(image.size) > 16383
-                    if exceeds_webp_limit:
-                        logger.warning(
-                            "渲染结果高度超过 webp 编码上限，已降级为 jpeg 输出"
-                        )
-                        image_path = image_path.with_suffix(".jpeg")
-                        image_raw = await FFmpeg.png_to_jpeg(png_data)
-                    else:
-                        image_raw = await FFmpeg.png_to_webp(png_data)
-                case "jpeg":
-                    image_raw = await FFmpeg.png_to_jpeg(png_data)
-                case _:
-                    raise ValueError
+            image_path = image_path.with_suffix(f".{image_format}")
             temp_path = image_path.with_name(
                 f".{image_path.stem}.{uuid.uuid4().hex}.tmp{image_path.suffix}"
             )
