@@ -1,6 +1,6 @@
 exclude = [
   "*_pb2.py",
-  "*.pyi",
+  "*_pb2.pyi",
 ]
 force-exclude = true
 line-length = 88
