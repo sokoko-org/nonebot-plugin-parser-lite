@@ -20,7 +20,6 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
-from ..data import AudioVideoContent
 from ..delivery import send_with_media_fallback
 from ..download import DOWNLOADER
 from ..helper import UniHelper
@@ -135,16 +134,6 @@ async def _get_or_parse_result(sr: SearchResult) -> ParseResult:
         async def parse_and_cache() -> ParseResult:
             parser = get_parser(sr.keyword)
             parsed = await parser.parse(sr.keyword, sr.searched)
-            ratio = (
-                pconfig.media_speedup_rules.get(
-                    (parsed.platform.name, parsed.author.id), 1.0
-                )
-                if parsed.author.id
-                else 1.0
-            )
-            for content in parsed.iter_sendable_media():
-                if isinstance(content, AudioVideoContent):
-                    content.speedup = ratio
             logger.debug(f"解析结果: {parsed!r}")
             _RESULT_CACHE[cache_key] = parsed
             return parsed

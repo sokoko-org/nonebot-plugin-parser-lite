@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -6,7 +7,6 @@ from anyio import Path as AnyPath
 import pytest
 import render_test_support as support
 
-from nonebot_plugin_parser_lite import matchers
 from nonebot_plugin_parser_lite.constants import PlatformEnum
 from nonebot_plugin_parser_lite.data import (
     Author,
@@ -18,18 +18,21 @@ from nonebot_plugin_parser_lite.data import (
     StickerContent,
     VideoContent,
 )
+from nonebot_plugin_parser_lite.parsers.base import BaseParser
 
 
 @pytest.fixture
 def parse_result(monkeypatch):
-    monkeypatch.setattr(matchers, "_RESULT_CACHE", {})
-    monkeypatch.setattr(matchers, "_PARSE_TASKS", {})
+    parser = BaseParser.__new__(BaseParser)
 
     async def parse(result):
-        parser = SimpleNamespace(parse=AsyncMock(return_value=result))
-        monkeypatch.setattr(matchers, "get_parser", lambda keyword: parser)
-        search = SimpleNamespace(cache_key=result.url, keyword="test", searched=None)
-        return await matchers._get_or_parse_result(search)
+        monkeypatch.setattr(
+            parser,
+            "_handlers",
+            {"test": [(re.compile(".*"), AsyncMock(return_value=result), {})]},
+            raising=False,
+        )
+        return await parser.parse("test", SimpleNamespace(url=result.url))  # pyright: ignore[reportArgumentType]
 
     return parse
 

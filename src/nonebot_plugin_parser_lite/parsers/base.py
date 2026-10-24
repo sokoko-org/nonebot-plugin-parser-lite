@@ -29,6 +29,7 @@ from ..constants import (
 from ..constants import PlatformEnum as PlatformEnum
 from ..creator import Creator, DownloadFunc
 from ..data import (
+    AudioVideoContent,
     Author,
     Comment,
     ContentItem,
@@ -227,7 +228,18 @@ class BaseParser:
             # pattern 是当初 handle 时 compile 出来的正则；参数规则也必须复核，
             # 因为同一 keyword 下可能有多个只靠 query 区分的 handler。
             if pattern.search(text) and self._match_param_rules(searched, param_rules):
-                return await handler(self, searched)
+                result = await handler(self, searched)
+                ratio = (
+                    pconfig.media_speedup_rules.get(
+                        (result.platform.name, result.author.id), 1.0
+                    )
+                    if result.author.id
+                    else 1.0
+                )
+                for content in result.iter_sendable_media():
+                    if isinstance(content, AudioVideoContent):
+                        content.speedup = ratio
+                return result
 
         # 理论上不该走到这里，防御性错误
         raise ParseException(
