@@ -20,13 +20,13 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
+from ..data import AudioVideoContent
 from ..delivery import send_with_media_fallback
 from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
 from ..render import RENDERER
 from ..utils.common import LimitedSizeDict
-from ..utils.media_edit import apply_media_speedup
 from .rule import Searched, SearchResult, _extract_text, on_keyword_regex
 
 # 关键词 / 类型 -> Parser 映射
@@ -135,6 +135,16 @@ async def _get_or_parse_result(sr: SearchResult) -> ParseResult:
         async def parse_and_cache() -> ParseResult:
             parser = get_parser(sr.keyword)
             parsed = await parser.parse(sr.keyword, sr.searched)
+            ratio = (
+                pconfig.media_speedup_rules.get(
+                    (parsed.platform.name, parsed.author.id), 1.0
+                )
+                if parsed.author.id
+                else 1.0
+            )
+            for content in parsed.iter_sendable_media():
+                if isinstance(content, AudioVideoContent):
+                    content.speedup = ratio
             logger.debug(f"解析结果: {parsed!r}")
             _RESULT_CACHE[cache_key] = parsed
             return parsed
@@ -158,10 +168,6 @@ async def parser_handler(
 ):
     """统一的解析处理器"""
     result = await _get_or_parse_result(sr)
-
-    # 上传前倍速必须在渲染之前定稿，卡片上的时长才是最终文件的时长
-    apply_media_speedup(result)
-
     summary_msg = await RENDERER.render_messages(result)
     summary_in_forward = pconfig.summary_in_forward and not pconfig.lazy_download
     if not summary_in_forward:

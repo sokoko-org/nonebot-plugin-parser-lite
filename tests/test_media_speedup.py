@@ -1,9 +1,12 @@
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 from anyio import Path as AnyPath
 import pytest
 import render_test_support as support
 
+from nonebot_plugin_parser_lite import matchers
 from nonebot_plugin_parser_lite.constants import PlatformEnum
 from nonebot_plugin_parser_lite.data import (
     Author,
@@ -15,10 +18,20 @@ from nonebot_plugin_parser_lite.data import (
     StickerContent,
     VideoContent,
 )
-from nonebot_plugin_parser_lite.utils.media_edit import (
-    apply_media_speedup,
-    speedup_digest,
-)
+
+
+@pytest.fixture
+def parse_result(monkeypatch):
+    monkeypatch.setattr(matchers, "_RESULT_CACHE", {})
+    monkeypatch.setattr(matchers, "_PARSE_TASKS", {})
+
+    async def parse(result):
+        parser = SimpleNamespace(parse=AsyncMock(return_value=result))
+        monkeypatch.setattr(matchers, "get_parser", lambda keyword: parser)
+        search = SimpleNamespace(cache_key=result.url, keyword="test", searched=None)
+        return await matchers._get_or_parse_result(search)
+
+    return parse
 
 
 def make_result(
@@ -47,7 +60,9 @@ def make_media(cls, tmp_path: Path, name: str, duration: float = 60.0):
 @pytest.mark.parametrize(
     "cls", [ImageContent, GraphicContent, StickerContent, LivePhotoContent]
 )
-async def test_other_media_has_no_speedup_interface(cls, tmp_path, monkeypatch):
+async def test_other_media_has_no_speedup_interface(
+    cls, tmp_path, monkeypatch, parse_result
+):
     monkeypatch.setattr(
         support.pconfig, "plite_media_speedup_rules", ["bilibili:123456:1.5"]
     )
@@ -59,28 +74,30 @@ async def test_other_media_has_no_speedup_interface(cls, tmp_path, monkeypatch):
     video = make_media(VideoContent, tmp_path, "video.mp4")
     result = make_result(contents=[media, video])
 
-    apply_media_speedup(result)
+    await parse_result(result)
 
     assert await media.get_path() == AnyPath(source)
     assert video.speedup == 1.5
-    assert speedup_digest(result) == "1.50x"
 
 
 @pytest.mark.asyncio
-async def test_unmatched_author_clears_a_stale_speedup(tmp_path, monkeypatch):
+async def test_unmatched_author_clears_a_stale_speedup(
+    tmp_path, monkeypatch, parse_result
+):
     monkeypatch.setattr(
         support.pconfig, "plite_media_speedup_rules", ["bilibili:999:2.0"]
     )
     video = make_media(VideoContent, tmp_path, "v.mp4")
     video.speedup = 1.5
     result = make_result(author_id="123456", contents=[video])
-    apply_media_speedup(result)
-    # 结果对象跨消息缓存，重新解析没命中时必须清回 1.0
+    await parse_result(result)
     assert video.speedup == 1.0
 
 
 @pytest.mark.asyncio
-async def test_repost_media_follows_the_outer_author(tmp_path, monkeypatch):
+async def test_repost_media_follows_the_outer_author(
+    tmp_path, monkeypatch, parse_result
+):
     """转发内容按外层结果的平台与作者命中规则，与 send_content 的遍历一致"""
     monkeypatch.setattr(
         support.pconfig, "plite_media_speedup_rules", ["bilibili:123456:1.5"]
@@ -88,18 +105,17 @@ async def test_repost_media_follows_the_outer_author(tmp_path, monkeypatch):
     inner = make_media(VideoContent, tmp_path, "inner.mp4")
     outer = make_media(VideoContent, tmp_path, "outer.mp4")
     result = make_result(contents=[outer], repost=make_result("777", [inner]))
-    apply_media_speedup(result)
+    await parse_result(result)
     assert (outer.speedup, inner.speedup) == (1.5, 1.5)
 
 
 @pytest.mark.asyncio
-async def test_unsent_media_is_left_alone(tmp_path, monkeypatch):
+async def test_unsent_media_is_left_alone(tmp_path, monkeypatch, parse_result):
     monkeypatch.setattr(
         support.pconfig, "plite_media_speedup_rules", ["bilibili:123456:1.5"]
     )
     video = make_media(VideoContent, tmp_path, "v.mp4")
     video.need_send = False
     result = make_result(contents=[video])
-    apply_media_speedup(result)
+    await parse_result(result)
     assert video.speedup == 1.0
-    assert speedup_digest(result) == ""

@@ -3,7 +3,6 @@ from collections.abc import AsyncGenerator, Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from io import BytesIO
-from itertools import chain
 import re
 from typing import Any, ClassVar, Literal, TypeVar
 import uuid
@@ -18,6 +17,7 @@ from PIL import Image
 from ..config import _nickname, gconfig, pconfig
 from ..data import (
     AudioContent,
+    AudioVideoContent,
     GraphicContent,
     ImageContent,
     LinkContent,
@@ -36,7 +36,6 @@ from ..exception import (
 from ..helper import ForwardNodeInner, UniHelper, UniMessage, mark_media_role
 from ..utils.cache import CacheManager
 from ..utils.ffmpeg import FFmpeg
-from ..utils.media_edit import speedup_digest
 from .context import PLACEHOLDER_IMAGE, ThemeData, build_theme_data, safe_src
 from .theme import ThemeDefinition, ThemeManager
 
@@ -301,13 +300,7 @@ class Renderer:
         failed_count = 0
         deferred_media_segs: dict[int, list[UniMessage[Any]]] = {}
         forward_video_segs: dict[int, ForwardNodeInner] = {}
-        repost_medias = result.repost.content if result.repost else []
-        media_contents = (
-            cont
-            for cont in chain(result.content, repost_medias)
-            if isinstance(cont, MediaContent) and cont.need_send
-        )
-        for cont in media_contents:
+        for cont in result.iter_sendable_media():
             # 先处理需要立即发送的音视频，或准备待合并转发的视频节点
             try:
                 if isinstance(cont, VideoContent) and pconfig.video_in_forward:
@@ -780,10 +773,15 @@ class Renderer:
         selected_theme = await self._resolve_theme()
         render_format = pconfig.render_format
         # 卡片上的时长与体积按倍速换算，倍速变了就得重渲染
+        speedup_digest = ",".join(
+            f"{content.speedup:.2f}x"
+            for content in result.iter_sendable_media()
+            if isinstance(content, AudioVideoContent)
+        )
         cache_key = (
             f"{RENDER_TEMPLATE_VERSION}:{selected_theme.id}:"
             f"{selected_theme.version}:{theme}:{result.url}"
-            f":{speedup_digest(result)}"
+            f":{speedup_digest}"
         )
         file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.{render_format}"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)

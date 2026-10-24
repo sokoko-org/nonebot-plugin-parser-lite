@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
+from itertools import chain
 from typing import Any, Literal, TypedDict
 
 from anyio import Path
@@ -433,6 +435,13 @@ class ParseResult:
     """转发的内容"""
     render_image: Path | None = field(default=None)
     """渲染图片"""
+
+    def iter_sendable_media(self) -> Iterator[MediaContent]:
+        """依次遍历主帖和一层转发中需要发送的媒体，不包含评论。"""
+        repost_content = self.repost.content if self.repost else ()
+        for content in chain(self.content, repost_content):
+            if isinstance(content, MediaContent) and content.need_send:
+                yield content
 
     @property
     def display_url(self) -> str:
