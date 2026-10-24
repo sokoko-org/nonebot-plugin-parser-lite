@@ -229,7 +229,7 @@ def pack_forward_items(
     content_of: Callable[[ForwardItem], ForwardNodeInner],
     with_content: Callable[[ForwardItem, ForwardNodeInner], ForwardItem],
 ) -> Iterator[list[ForwardItem]]:
-    """统一清理节点首尾换行，并按文本长度和节点数分包。"""
+    """统一清理节点首尾换行，并按文本长度和节点数分包"""
     chunk: list[ForwardItem] = []
     text_length = 0
     for item in items:
@@ -629,7 +629,7 @@ class Renderer:
         image_format: Literal["jpeg", "webp"],
         theme_definition: ThemeDefinition | None = None,
     ) -> tuple[Literal["jpeg", "webp"], bytes]:
-        """使用选定主题绘制卡片，返回实际格式与编码后的图片。"""
+        """使用选定主题绘制卡片，返回实际格式与编码后的图片"""
         selected_theme = theme_definition or await self._resolve_theme()
         template_data = await self.resolve_parse_result(
             result,
@@ -693,7 +693,6 @@ class Renderer:
                 await page.evaluate("y => window.scrollTo(0, y)", offset)
                 # 等待滚动位置生效，避免截到上一段内容
                 await page.evaluate("() => new Promise(requestAnimationFrame)")
-                # 每段截图贴入画布后即释放，不累积 PNG 和解码后的分段位图。
                 await asyncio.to_thread(
                     paste_segment,
                     await page.screenshot(
@@ -714,7 +713,7 @@ class Renderer:
                 with canvas:
                     return canvas.tobytes()
 
-            # 提取像素后释放画布，再启动 FFmpeg，减少编码阶段的内存重叠。
+            # 提取像素后释放画布
             rgba_data = await asyncio.to_thread(raw_pixels)
             return image_format, await FFmpeg.rgba_to_webp(rgba_data, width, height)
 
