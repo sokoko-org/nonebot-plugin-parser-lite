@@ -29,7 +29,6 @@ nonebot_plugin_parser_lite = [
     "render/templates/*.jinja",
     "render/templates/*.css",
     "render/templates/*.json",
-    "parsers/tieba/*.desc",
     "parsers/miyoushe/sticker.json",
 ]
 

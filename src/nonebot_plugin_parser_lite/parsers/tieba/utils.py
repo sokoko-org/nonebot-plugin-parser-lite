@@ -1,13 +1,9 @@
-from functools import lru_cache
-from pathlib import Path
-
-from google.protobuf import descriptor_pb2, descriptor_pool
-from google.protobuf.message_factory import GetMessageClass
-
 from ...constants import STICKER_CDN
 from ...creator import Creator
 from ...data import Comment, ContentItem, PollOption
 from ...download import DOWNLOADER
+from .PbPageReqIdl_pb2 import PbPageReqIdl
+from .PbPageResIdl_pb2 import PbPageResIdl
 from .types import (
     Contents,
     FragAt,
@@ -21,30 +17,18 @@ from .types import (
 )
 
 
-@lru_cache(maxsize=2)
-def get_message(name: str):
-    fds = descriptor_pb2.FileDescriptorSet()
-    fds.ParseFromString((Path(__file__).parent / f"{name}.desc").read_bytes())
-    pool = descriptor_pool.DescriptorPool()
-    for fd in fds.file:
-        pool.Add(fd)
-
-    msg_descriptor = pool.FindMessageTypeByName(name)
-    return GetMessageClass(msg_descriptor)
-
-
 def make_req(tid: int) -> bytes:
-    req_proto = get_message("PbPageReqIdl")()
-    req_proto.data.common._client_type = 2  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.common._client_version = "12.64.1.1"  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.kz = tid  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.pn = 1  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.rn = 30  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.r = 0  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.lz = 0  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.with_floor = 1  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.floor_sort_type = 1  # pyright: ignore[reportAttributeAccessIssue]
-    req_proto.data.floor_rn = 4  # pyright: ignore[reportAttributeAccessIssue]
+    req_proto = PbPageReqIdl()
+    req_proto.data.common._client_type = 2
+    req_proto.data.common._client_version = "12.64.1.1"
+    req_proto.data.kz = tid
+    req_proto.data.pn = 1
+    req_proto.data.rn = 30
+    req_proto.data.r = 0
+    req_proto.data.lz = 0
+    req_proto.data.with_floor = 1
+    req_proto.data.floor_sort_type = 1
+    req_proto.data.floor_rn = 5
     return req_proto.SerializeToString()
 
 
@@ -85,12 +69,12 @@ async def pack_req(data: bytes) -> bytes:
 
 
 def parse_res(data: bytes) -> Posts:
-    res = get_message("PbPageResIdl")()
+    res = PbPageResIdl()
     res.ParseFromString(data)
-    if res.error.errorno:  # pyright: ignore[reportAttributeAccessIssue]
-        raise ValueError(res.error.errmsg)  # pyright: ignore[reportAttributeAccessIssue]
+    if res.error.errorno:
+        raise ValueError(res.error.errmsg)
 
-    data_proto = res.data  # pyright: ignore[reportAttributeAccessIssue]
+    data_proto = res.data
     return Posts.from_proto(data_proto)
 
 

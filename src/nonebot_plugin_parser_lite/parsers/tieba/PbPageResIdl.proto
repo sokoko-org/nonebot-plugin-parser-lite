@@ -1,0 +1,326 @@
+syntax = "proto3";
+
+// SOURCE FILE: Error.proto
+message Error {
+  int32 errorno = 1;
+  string errmsg = 2;
+}
+
+// SOURCE FILE: SimpleForum.proto
+message SimpleForum {
+  int64 id = 1;
+  string name = 2;
+  string first_class = 7;
+  string second_class = 8;
+  int32 member_num = 12;
+  int32 post_num = 13;
+}
+
+// SOURCE FILE: Page.proto
+message Page {
+  int32 page_size = 1;
+  int32 current_page = 3;
+  int32 total_count = 4;
+  int32 total_page = 5;
+  int32 has_more = 6;
+  int32 has_prev = 7;
+}
+
+// SOURCE FILE: PbContent.proto
+message PbContent {
+  message TiebaPlusInfo {
+    string title = 1;
+    string desc = 2;
+    string jump_url = 3;
+    string app_icon = 6;
+    int32 target_type = 12;
+    int32 h5_jump_type = 13;
+    string h5_jump_number = 14;
+    string h5_jump_param = 15;
+    int32 jump_type = 16;
+    string button_desc = 23;
+  }
+
+  message Item {
+    string item_name = 2;
+  }
+
+  uint32 type = 1;
+  string text = 2;
+  string link = 3;
+  string src = 4;
+  string bsize = 5;
+  string cdn_src = 8;
+  string big_cdn_src = 9;
+  string c = 11;
+  string voice_md5 = 12;
+  uint32 during_time = 13;
+  int64 uid = 15;
+  uint32 width = 18;
+  uint32 height = 19;
+  string origin_src = 25;
+  uint32 origin_size = 27;
+  int32 count = 28;
+  TiebaPlusInfo tiebaplus_info = 40;
+  Item item = 41;
+}
+
+// SOURCE FILE: User.proto
+message User {
+  message Icon {
+    string name = 1;
+  }
+
+  message PrivSets {
+    int32 location = 1;
+    int32 like = 2;
+    int32 group = 3;
+    int32 post = 4;
+    int32 friend = 5;
+    int32 live = 6;
+    int32 reply = 7;
+    int32 bazhu_show_inside = 8;
+    int32 bazhu_show_outside = 9;
+  }
+
+  message LikeForumInfo {
+    string forum_name = 1;
+    uint64 forum_id = 2;
+  }
+
+  message UserVipInfo {
+    uint32 v_status = 1;
+    uint32 v_level = 5;
+  }
+
+  message TshowInfo {
+    string name = 2;
+  }
+
+  message NewGodInfo {
+    int32 status = 1;
+    uint32 field_id = 2;
+    string field_name = 3;
+  }
+
+  message UserGrowth {
+    uint32 level_id = 1;
+  }
+
+  int64 id = 2;
+  string name = 3;
+  string name_show = 4;
+  string portrait = 5;
+  repeated Icon iconinfo = 17;
+  int32 is_coreuser = 20;
+  int32 level_id = 23;
+  int32 is_bawu = 25;
+  string bawu_type = 26;
+  string BDUSS = 29;
+  int32 fans_num = 30;
+  int32 concern_num = 31;
+  int32 sex = 32;
+  int32 my_like_num = 33;
+  string intro = 34;
+  int32 post_num = 37;
+  string tb_age = 38;
+  int32 gender = 42;
+  PrivSets priv_sets = 45;
+  int32 is_friend = 46;
+  repeated LikeForumInfo likeForum = 47;
+  int32 is_guanfang = 52;
+  UserVipInfo vipInfo = 61;
+  repeated TshowInfo new_tshow_icon = 65;
+  int32 is_fans = 91;
+  NewGodInfo new_god_data = 101;
+  int32 is_default_avatar = 106;
+  string tieba_uid = 120;
+  string ip_address = 127;
+  UserGrowth user_growth = 137;
+}
+
+// SOURCE FILE: Agree.proto
+message Agree {
+  int64 agree_num = 1;
+  int64 disagree_num = 4;
+}
+
+// SOURCE FILE: SubPostList.proto
+message SubPostList {
+  int64 id = 1;
+  repeated PbContent content = 2;
+  uint32 time = 3;
+  int64 author_id = 4;
+  string title = 5;
+  uint32 floor = 6;
+  User author = 7;
+  Agree agree = 9;
+}
+
+message SubPost {
+  uint64 pid = 1;
+  repeated SubPostList sub_post_list = 2;
+}
+
+// SOURCE FILE: Post.proto
+message Post {
+  message SubPost {
+    repeated SubPostList sub_post_list = 2;
+  }
+
+  message SignatureData {
+    message SignatureContent {
+      int32 type = 1;
+      string text = 2;
+    }
+
+    repeated SignatureContent content = 4;
+  }
+
+  message CustomFigure {
+    string background_value = 3;
+  }
+
+  message CustomState {
+    string content = 2;
+  }
+
+  message ChatContent {
+    string bot_uk = 1;
+  }
+
+  message SpriteMemeInfo {
+    int64 meme_id = 1;
+  }
+
+  int64 id = 1;
+  uint32 floor = 3;
+  uint32 time = 4;
+  repeated PbContent content = 5;
+  uint32 sub_post_number = 13;
+  int64 author_id = 19;
+  SubPost sub_post_list = 15;
+  SignatureData signature = 21;
+  User author = 23;
+  Agree agree = 37;
+  int64 tid = 46;
+  CustomFigure custom_figure = 60;
+  CustomState custom_state = 61;
+  ChatContent chat_content = 78;
+  SpriteMemeInfo sprite_meme_info = 79;
+}
+
+// SOURCE FILE: Voice.proto
+message Voice {
+  int32 during_time = 2;
+  string voice_md5 = 3;
+}
+
+// SOURCE FILE: PollInfo.proto
+message PollInfo {
+  message PollOption {
+    int64 num = 2;
+    string text = 3;
+  }
+
+  int32 is_multi = 2;
+  int64 total_num = 3;
+  repeated PollOption options = 9;
+  int64 total_poll = 11;
+  string title = 12;
+}
+
+// SOURCE FILE: VideoInfo.proto
+message VideoInfo {
+  string video_url = 2;
+  uint32 video_duration = 3;
+  uint32 video_width = 4;
+  uint32 video_height = 5;
+  string thumbnail_url = 6;
+  int32 play_count = 10;
+}
+
+// SOURCE FILE: Media.proto
+message Media {
+  int32 type = 1;
+  string small_pic = 2;
+  string big_pic = 3;
+  string water_pic = 4;
+  uint32 width = 10;
+  uint32 height = 11;
+  string origin_pic = 15;
+  uint32 origin_size = 16;
+}
+
+// SOURCE FILE: ThreadInfo.proto
+message ThreadInfo {
+  message OriginThreadInfo {
+    string title = 1;
+    repeated Media media = 2;
+    string fname = 4;
+    string tid = 5;
+    int64 fid = 7;
+    repeated Voice voice_info = 12;
+    VideoInfo video_info = 13;
+    repeated PbContent content = 14;
+    PollInfo poll_info = 21;
+    int64 pid = 25;
+  }
+
+  message CustomFigure {
+    string background_value = 3;
+  }
+
+  message CustomState {
+    string content = 2;
+  }
+
+  int64 id = 1;
+  string title = 3;
+  int32 reply_num = 4;
+  int32 view_num = 5;
+  int32 last_time_int = 7;
+  int32 is_top = 9;
+  int32 is_good = 10;
+  int32 is_voice_thread = 15;
+  User author = 18;
+  User last_replyer = 19;
+  repeated Voice voice_info = 23;
+  int32 thread_type = 26;
+  int64 fid = 27;
+  string fname = 28;
+  int32 is_livepost = 30;
+  int64 first_post_id = 40;
+  int32 create_time = 45;
+  int64 post_id = 52;
+  int64 author_id = 56;
+  uint32 is_ad = 59;
+  PollInfo poll_info = 74;
+  VideoInfo video_info = 79;
+  int32 is_godthread_recommend = 85;
+  Agree agree = 126;
+  int32 share_num = 135;
+  OriginThreadInfo origin_thread_info = 141;
+  repeated PbContent first_post_content = 142;
+  int32 is_share_thread = 143;
+  int32 tab_id = 175;
+  int32 is_deleted = 181;
+  int32 is_frs_mask = 198;
+  CustomFigure custom_figure = 211;
+  CustomState custom_state = 212;
+}
+
+// SOURCE FILE: PbPageResIdl.proto
+message PbPageResIdl {
+  message DataRes {
+    SimpleForum forum = 2;
+    Page page = 3;
+    repeated Post post_list = 6;
+    ThreadInfo thread = 8;
+    repeated User user_list = 13;
+    int64 thread_freq_num = 37;
+  }
+
+  Error error = 1;
+  DataRes data = 2;
+}
