@@ -786,22 +786,34 @@ class Renderer:
         file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.{render_format}"
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
         image_path = cache_dir / file_name
+        if render_format == "webp" and not await image_path.exists():
+            jpeg_path = image_path.with_suffix(".jpeg")
+            if await jpeg_path.exists():
+                image_path = jpeg_path
         logger.info(f"渲染主题: {selected_theme.name}")
         if not await image_path.exists():
+            png_data = await self.render_image(
+                result,
+                theme=theme,
+                theme_definition=selected_theme,
+            )
             match render_format:
                 case "webp":
-                    compress_func = FFmpeg.png_to_webp
+                    # WebP 单边最多 16383 像素
+                    with Image.open(BytesIO(png_data)) as image:
+                        exceeds_webp_limit = max(image.size) > 16383
+                    if exceeds_webp_limit:
+                        logger.warning(
+                            "渲染结果高度超过 webp 编码上限，已降级为 jpeg 输出"
+                        )
+                        image_path = image_path.with_suffix(".jpeg")
+                        image_raw = await FFmpeg.png_to_jpeg(png_data)
+                    else:
+                        image_raw = await FFmpeg.png_to_webp(png_data)
                 case "jpeg":
-                    compress_func = FFmpeg.png_to_jpeg
+                    image_raw = await FFmpeg.png_to_jpeg(png_data)
                 case _:
                     raise ValueError
-            image_raw = await compress_func(
-                await self.render_image(
-                    result,
-                    theme=theme,
-                    theme_definition=selected_theme,
-                ),
-            )
             temp_path = image_path.with_name(
                 f".{image_path.stem}.{uuid.uuid4().hex}.tmp{image_path.suffix}"
             )
