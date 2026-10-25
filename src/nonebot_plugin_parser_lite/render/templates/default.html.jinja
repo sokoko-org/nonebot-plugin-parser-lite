@@ -6,6 +6,19 @@
         <title>Media Card · New</title>
         <link rel="stylesheet" href="icon.css" />
         <link rel="stylesheet" href="tailwind.css" />
+        <style>
+            .comment .single-image img {
+                width: 100%;
+                max-width: 9rem;
+                height: auto;
+                object-fit: contain;
+            }
+            .comment .single-image img[data-orientation="landscape"] {
+                width: auto;
+                max-width: 100%;
+                max-height: 9rem;
+            }
+        </style>
         {% from "macros.jinja" import render_ambient, render_content, resolve_cover_src %}
     </head>
     <body class="m-0 w-[620px] break-all font-sans antialiased">
@@ -17,35 +30,4 @@
             <div class="relative z-[1]">{{ render_content(post, data.meta) }}</div>
         </main>
     </body>
-    <script defer>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll(".comment .single-image img").forEach((img) => {
-                const applyStyle = () => {
-                    if (!img.naturalWidth || !img.naturalHeight) return;
-                    const aspectRatio = img.naturalHeight / img.naturalWidth;
-                    img.classList.remove(
-                        "w-full",
-                        "w-auto",
-                        "max-w-36",
-                        "max-h-36",
-                        "object-cover",
-                    );
-                    if (aspectRatio >= 0.9) {
-                        // 竖图：限制宽度，保持原比例自动计算高度
-                        img.classList.add("w-full", "max-w-36", "h-auto");
-                    } else {
-                        // 横图：限制高度，保持原比例自动计算宽度
-                        img.classList.add("w-auto", "max-h-36", "h-auto");
-                    }
-                    img.classList.add("object-contain");
-                };
-
-                if (img.complete) {
-                    applyStyle();
-                } else {
-                    img.addEventListener("load", applyStyle, { once: true });
-                }
-            });
-        });
-    </script>
 </html>

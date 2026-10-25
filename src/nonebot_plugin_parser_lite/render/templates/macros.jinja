@@ -121,7 +121,7 @@
 {% set MAX_VISIBLE_IMAGES = 9 %}
 {% macro build_images(img_list, full_bleed=False) %}
     {% set count = img_list|length %}
-    {% set layout = img_list[0].layout|default('grid') %}
+    {% set layout = img_list[0].layout %}
     {% set visible_imgs = img_list[:MAX_VISIBLE_IMAGES] %}
     {% set hidden_count = (count - MAX_VISIBLE_IMAGES) if count > MAX_VISIBLE_IMAGES else 0 %}
     {% if count == 1 %}
@@ -129,7 +129,9 @@
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-3 space-y-1">
             <img src="{{ item.src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} {{ POSTER_MASK_CLASS if full_bleed else '' }} single-image relative overflow-hidden">
-                <img src="{{ item.src }}" class="w-full h-auto object-cover" />
+                <img src="{{ item.src }}"
+                     data-orientation="{{ item.orientation }}"
+                     class="w-full h-auto object-cover" />
             </div>
             {% if item.is_live %}
                 <div class="{{ MEDIA_OVERLAY_CLASS }}">
@@ -240,7 +242,9 @@
                              style="width: {{ '%.2f' | format(option.percentage) }}%"></div>
                         <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-slate-200 dark:bg-slate-700">
                             {% if option.image %}
-                                <img src="{{ option.image }}" alt="{{ option.text }}" class="block h-full w-full object-cover" />
+                                <img src="{{ option.image }}"
+                                     alt="{{ option.text }}"
+                                     class="block h-full w-full object-cover" />
                             {% endif %}
                         </div>
                         <span class="relative min-w-0 flex-1 text-sm text-slate-700 dark:text-slate-200">{{ option.text }}</span>
@@ -289,18 +293,21 @@
     {% for cont in content %}
         {% if cont.type in ['image', 'live_photo', 'cover'] %}
             {% set src = cont.src if ns.current_img_index < MAX_VISIBLE_IMAGES else '' %}
-            {% set _ = ns.current_imgs.append({'src': src, 'is_live': cont.is_live, 'layout': cont.layout|default('grid')}) %}
+            {% set _ = ns.current_imgs.append({'src': src, 'is_live': cont.is_live, 'layout': cont.layout, 'orientation': cont.orientation}) %}
             {% set ns.current_img_index = ns.current_img_index + 1 %}
         {% elif cont.type == 'text' %}
             {% set _ = flush_images() %}
             {% set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ cont.text ~ '</span>') %}
         {% elif cont.type == 'graphic' %}
             {% set _ = flush_images() %}
-            {% set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1"><img src="' ~ cont.src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden"><img src="' ~ cont.src ~ '" alt="' ~ (cont.alt or '') ~ '" class="w-full h-auto object-cover" /></div>' ~ ('<p class="whitespace-pre-wrap text-center text-xs text-slate-500 dark:text-slate-400">' ~ cont.alt ~ '</p>' if cont.alt else '') ~ '</div>') %}
+            {% set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1"><img src="' ~ cont.src ~ '" class="' ~ MEDIA_GLOW_CLASS ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden"><img src="' ~ cont.src ~ '"
+                 alt="' ~ (cont.alt or '') ~ '"
+                 data-orientation="' ~ (cont.orientation) ~ '"
+                 class="w-full h-auto object-cover" /></div>' ~ ('<p class="whitespace-pre-wrap text-center text-xs text-slate-500 dark:text-slate-400">' ~ cont.alt ~ '</p>' if cont.alt else '') ~ '</div>') %}
         {% elif cont.type == 'sticker' %}
             {% set _ = html_parts.append('<img class="inline-block align-text-bottom ' ~ ('h-6' if cont.size == 'small' else 'h-12') ~ '"
                  src="' ~ cont.src ~ '"
-                 alt="' ~ (cont.description|default('')) ~ '" />' if cont.src else '<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ (cont.description|default('')) ~ '</span>') %}
+                 alt="' ~ (cont.description) ~ '" />' if cont.src else '<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ (cont.description) ~ '</span>') %}
         {% elif cont.type == 'video' %}
             {% set _ = flush_images() %}
             {% set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3"><img src="' ~ cont.src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' poster-video relative overflow-hidden bg-black"><img src="' ~ cont.src ~ '" class="w-full h-full object-cover opacity-80" /></div><div class="' ~ MEDIA_OVERLAY_CLASS ~ '"><div class="absolute top-[18px] right-6 left-6 flex items-start justify-between gap-4 text-[13px] font-extrabold leading-[1.15] text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]"><span>' ~ cont.duration ~ '</span>' ~ ('<span>' ~ cont.speedup ~ '</span>' if cont.speedup else '') ~ '<span class="text-right">' ~ cont.size ~ '</span></div><i class="fa-icon fa-play absolute right-6 bottom-5 translate-x-[5px] text-[88px] leading-none text-white/50 [text-shadow:0_4px_24px_rgba(0,0,0,0.42)]"></i></div></div>') %}

@@ -251,6 +251,9 @@ data.post; // [object] 动态/帖子核心数据
   "type": "image",
   "src": "file:///path/to/img.png",
   "layout": "grid", // 布局建议："grid" (网格) | "x" (横向推特流)
+  "width": 800, // 像素尺寸
+  "height": 400,
+  "orientation": "landscape", // "portrait"表示尺寸为竖图，"landscape"尺寸为横图
   "source_url": "http://..." // 原始网络地址（不建议模板直接请求）
 }
 ```

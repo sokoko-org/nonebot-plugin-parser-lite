@@ -13,6 +13,7 @@ from typing import Any, TypedDict, TypeVar, cast
 
 from anyio import Path
 from nonebot import logger
+from PIL import Image
 import qrcode
 
 from ..data import (
@@ -240,7 +241,7 @@ async def _serialize_content(
     if isinstance(item, ImageContent):
         content = {
             "type": "cover" if is_cover else "image",
-            "src": await safe_src(item),
+            **await _image_data(item),
             "layout": item.layout,
             "source_url": _task_url(item),
         }
@@ -250,7 +251,7 @@ async def _serialize_content(
     if isinstance(item, LivePhotoContent):
         return {
             "type": "live_photo",
-            "src": await safe_src(item, "get_base"),
+            **await _image_data(item, "get_base"),
             "layout": "grid",
             "is_live": True,
             "source_url": _task_url(item),
@@ -258,7 +259,7 @@ async def _serialize_content(
     if isinstance(item, GraphicContent):
         content = {
             "type": "cover" if is_cover else "graphic",
-            "src": await safe_src(item),
+            **await _image_data(item),
             "alt": item.alt,
             "source_url": _task_url(item),
         }
@@ -335,6 +336,31 @@ async def _serialize_content(
             "has_images": any(option.image is not None for option in item.options),
         }
     return {"type": "unknown", "text": str(item)}
+
+
+def _image_dimensions(path: Path) -> dict[str, Any]:
+    with Image.open(str(path)) as image:
+        width, height = image.size
+        if Image.Image.getexif(image).get(274) in {5, 6, 7, 8}:
+            width, height = height, width
+    return {
+        "width": width,
+        "height": height,
+        "orientation": "portrait" if height / width >= 0.9 else "landscape",
+    }
+
+
+async def _image_data(item: MediaContent, method: str = "get_path") -> dict[str, Any]:
+    try:
+        async with _resource_limit.get() or contextlib.nullcontext():
+            path = await getattr(item, method)()
+            dimensions: dict[str, Any] = {}
+            with contextlib.suppress(OSError):
+                dimensions = await asyncio.to_thread(_image_dimensions, path)
+        return {"src": await _path_to_uri(path), **dimensions}
+    except Exception as e:
+        logger.warning(f"读取图片数据失败: {type(item).__name__}: {e!r}")
+        return {"src": PLACEHOLDER_IMAGE}
 
 
 def _speedup_label(item: AudioVideoContent) -> str | None:
