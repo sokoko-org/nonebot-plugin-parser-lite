@@ -14,10 +14,12 @@ __all__ = [
     "MatchResult",
     "ParseStep",
     "Parser",
+    "ThemeData",
     "clear_result_cache",
     "configure",
     "match",
     "parse",
+    "resolve_parse_result",
     "shutdown_runtime",
 ]
 
@@ -27,9 +29,11 @@ _EXPORTS = {
     "MatchResult": (".pipeline", "MatchResult"),
     "ParseStep": (".pipeline", "ParseStep"),
     "Parser": (".pipeline", "Parser"),
+    "ThemeData": (".render", "ThemeData"),
     "clear_result_cache": (".pipeline", "clear_result_cache"),
     "match": (".pipeline", "match"),
     "parse": (".pipeline", "parse"),
+    "resolve_parse_result": (".render", "resolve_parse_result"),
     "shutdown_runtime": (".pipeline", "shutdown_runtime"),
 }
 

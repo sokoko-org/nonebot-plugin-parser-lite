@@ -33,7 +33,7 @@ from ..data import (
     StickerContent,
     VideoContent,
 )
-from .theme import MUSIC_PLATFORMS, THEME_SCHEMA_VERSION
+from .constants import MUSIC_PLATFORMS, THEME_SCHEMA_VERSION
 
 PLACEHOLDER_IMAGE = (
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"

@@ -1,4 +1,4 @@
-"""Text-only parsing pipeline for the standalone build."""
+"""Text parsing and rendering-data pipeline for the standalone build."""
 
 from __future__ import annotations
 
@@ -6,13 +6,14 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from importlib import import_module
-from typing import Any, Self, overload
+from typing import Self
 
 from .config import pconfig
 from .constants import MatchWithParams
 from .data import ParseResult
 from .exception import ParseException
 from .parsers.base import BaseParser
+from .render import ThemeData, resolve_parse_result
 from .utils.common import LimitedSizeDict
 from .utils.log import logger
 from .utils.scheduler import scheduler
@@ -54,6 +55,7 @@ async def shutdown_runtime() -> None:
 class ParseStep(StrEnum):
     MATCH = "match"
     PARSE = "parse"
+    RESOLVE = "resolve"
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,17 +128,14 @@ class Parser:
             self._instances[parser_type] = parser_type()
         return self._instances[parser_type]
 
-    @overload
     async def parse(
-        self, text: str, *, until: ParseStep = ParseStep.PARSE
-    ) -> ParseResult: ...
-
-    @overload
-    async def parse(self, text: str, *, until: str) -> Any: ...
-
-    async def parse(
-        self, text: str, *, until: ParseStep | str = ParseStep.PARSE
-    ) -> Any:
+        self,
+        text: str,
+        *,
+        until: ParseStep | str = ParseStep.PARSE,
+        color_scheme: str = "light",
+        theme_id: str | None = None,
+    ) -> MatchResult | ParseResult | ThemeData:
         _ensure_runtime_started()
         step = ParseStep(until)
         matched = self.match(text)
@@ -150,6 +149,10 @@ class Parser:
             _RESULT_CACHE[matched.cache_key] = result
         else:
             logger.debug("命中解析结果缓存: %s", matched.cache_key)
+        if step is ParseStep.RESOLVE:
+            return await resolve_parse_result(
+                result, color_scheme=color_scheme, theme_id=theme_id
+            )
         return result
 
     async def aclose(self) -> None:
@@ -175,6 +178,10 @@ async def parse(
     *,
     until: ParseStep | str = ParseStep.PARSE,
     parser_types: Sequence[type[BaseParser]] | None = None,
-) -> Any:
+    color_scheme: str = "light",
+    theme_id: str | None = None,
+) -> MatchResult | ParseResult | ThemeData:
     async with Parser(parser_types) as parser:
-        return await parser.parse(text, until=until)
+        return await parser.parse(
+            text, until=until, color_scheme=color_scheme, theme_id=theme_id
+        )

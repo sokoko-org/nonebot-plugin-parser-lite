@@ -306,9 +306,26 @@ def rewrite_bilibili_scheduler(root: Path) -> None:
     )
 
 
+def rewrite_render_resources(root: Path) -> None:
+    path = root / PACKAGE / "render/context.py"
+    text = path.read_text(encoding="utf-8")
+    tree = ast.parse(text, filename=str(path))
+    node = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "_path_to_uri"
+    )
+    replacement = (root / TEMPLATES / "render_path_to_uri.py.tmpl").read_text(
+        encoding="utf-8"
+    )
+    path.write_text(replace_statement(text, node, replacement), encoding="utf-8")
+    migration_log("迁移渲染资源: 使用 Base64 data URI")
+
+
 def remove_nonebot_runtime(root: Path) -> None:
     targets = (
-        root / PACKAGE / "render",
+        root / PACKAGE / "render/templates",
+        root / PACKAGE / "render/theme.py",
         root / PACKAGE / "delivery.py",
     )
     for target in targets:
@@ -406,6 +423,7 @@ def generate(root: Path) -> None:
     rewrite_config(root)
     rewrite_logging(root)
     rewrite_bilibili_scheduler(root)
+    rewrite_render_resources(root)
     remove_nonebot_runtime(root)
     parser_mapping = build_parser_mapping(root)
 
@@ -413,6 +431,7 @@ def generate(root: Path) -> None:
         "package_init.py.tmpl": PACKAGE / "__init__.py",
         "path.py.tmpl": PACKAGE / "path.py",
         "pipeline.py.tmpl": PACKAGE / "pipeline.py",
+        "render_init.py.tmpl": PACKAGE / "render/__init__.py",
         "parsers_init.py.tmpl": PACKAGE / "parsers/__init__.py",
         "log.py.tmpl": PACKAGE / "utils/log.py",
         "scheduler.py.tmpl": PACKAGE / "utils/scheduler.py",
@@ -420,7 +439,7 @@ def generate(root: Path) -> None:
         "matchers_init.py.tmpl": PACKAGE / "matchers/__init__.py",
         "matchers_rule.py.tmpl": PACKAGE / "matchers/rule.py",
         "matchers_filter.py.tmpl": PACKAGE / "matchers/filter.py",
-        "README.md.tmpl": Path("README.md"),
+        "README.md": Path("README.md"),
     }
     for template, destination in replacements.items():
         template_text = (root / TEMPLATES / template).read_text(encoding="utf-8")

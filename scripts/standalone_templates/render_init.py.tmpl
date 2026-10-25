@@ -1,0 +1,30 @@
+"""Resolve parser models into JSON-like rendering data without a template engine."""
+
+from ..config import _nickname, pconfig
+from ..data import ParseResult
+from .context import PLACEHOLDER_IMAGE, ThemeData, build_theme_data, safe_src
+
+__all__ = [
+    "PLACEHOLDER_IMAGE",
+    "ThemeData",
+    "build_theme_data",
+    "resolve_parse_result",
+    "safe_src",
+]
+
+
+async def resolve_parse_result(
+    result: ParseResult,
+    *,
+    color_scheme: str = "light",
+    theme_id: str | None = None,
+) -> ThemeData:
+    """Return Theme API data with rendering resources embedded as Base64 data URIs."""
+    return await build_theme_data(
+        result,
+        color_scheme=color_scheme,
+        theme_id=theme_id or pconfig.render_theme,
+        bot_name=_nickname,
+        max_comments=pconfig.max_comments,
+        append_qrcode=pconfig.append_qrcode,
+    )

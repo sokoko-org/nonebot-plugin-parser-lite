@@ -7,11 +7,10 @@ from typing import Any
 from anyio import Path
 
 from ..path import data_dir
+from .constants import MUSIC_PLATFORMS, THEME_SCHEMA_VERSION
 
-THEME_SCHEMA_VERSION = 1
 THEME_MANIFEST = "theme.json"
 THEME_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
-MUSIC_PLATFORMS = frozenset({"kugou", "netease", "kuwo", "qsmusic", "qqmusic"})
 
 
 class ThemeError(ValueError):
