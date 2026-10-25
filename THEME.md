@@ -263,6 +263,9 @@ data.post; // [object] 动态/帖子核心数据
   "type": "cover",
   "src": "file:///path/to/img.png",
   "layout": "grid", // "grid" | "x"，封面不需要处理布局建议
+  "width": 800,
+  "height": 400,
+  "orientation": "landscape",
   "alt": "...",
   "source_url": "https://.."
 }
@@ -277,6 +280,9 @@ data.post; // [object] 动态/帖子核心数据
   "type": "live_photo",
   "src": "...",
   "layout": "grid",
+  "width": 800,
+  "height": 400,
+  "orientation": "landscape",
   "is_live": true,
   "source_url": "https://.."
 }
@@ -290,6 +296,9 @@ data.post; // [object] 动态/帖子核心数据
 {
   "type": "graphic",
   "src": "file:///path/to/img.png",
+  "width": 800,
+  "height": 400,
+  "orientation": "landscape",
   "alt": "...",
   "source_url": "https://.."
 }
