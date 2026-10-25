@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from importlib import import_module
-from typing import Self
+from typing import Literal, Self, overload
 
 from .config import pconfig
 from .constants import MatchWithParams
@@ -128,6 +128,46 @@ class Parser:
             self._instances[parser_type] = parser_type()
         return self._instances[parser_type]
 
+    @overload
+    async def parse(
+        self,
+        text: str,
+        *,
+        until: Literal[ParseStep.MATCH, "match"],
+        color_scheme: str = "light",
+        theme_id: str | None = None,
+    ) -> MatchResult: ...
+
+    @overload
+    async def parse(
+        self,
+        text: str,
+        *,
+        until: Literal[ParseStep.PARSE, "parse"] = ParseStep.PARSE,
+        color_scheme: str = "light",
+        theme_id: str | None = None,
+    ) -> ParseResult: ...
+
+    @overload
+    async def parse(
+        self,
+        text: str,
+        *,
+        until: Literal[ParseStep.RESOLVE, "resolve"],
+        color_scheme: str = "light",
+        theme_id: str | None = None,
+    ) -> ThemeData: ...
+
+    @overload
+    async def parse(
+        self,
+        text: str,
+        *,
+        until: ParseStep | str,
+        color_scheme: str = "light",
+        theme_id: str | None = None,
+    ) -> MatchResult | ParseResult | ThemeData: ...
+
     async def parse(
         self,
         text: str,
@@ -171,6 +211,50 @@ def match(
     text: str, parser_types: Sequence[type[BaseParser]] | None = None
 ) -> MatchResult:
     return Parser(parser_types).match(text)
+
+
+@overload
+async def parse(
+    text: str,
+    *,
+    until: Literal[ParseStep.MATCH, "match"],
+    parser_types: Sequence[type[BaseParser]] | None = None,
+    color_scheme: str = "light",
+    theme_id: str | None = None,
+) -> MatchResult: ...
+
+
+@overload
+async def parse(
+    text: str,
+    *,
+    until: Literal[ParseStep.PARSE, "parse"] = ParseStep.PARSE,
+    parser_types: Sequence[type[BaseParser]] | None = None,
+    color_scheme: str = "light",
+    theme_id: str | None = None,
+) -> ParseResult: ...
+
+
+@overload
+async def parse(
+    text: str,
+    *,
+    until: Literal[ParseStep.RESOLVE, "resolve"],
+    parser_types: Sequence[type[BaseParser]] | None = None,
+    color_scheme: str = "light",
+    theme_id: str | None = None,
+) -> ThemeData: ...
+
+
+@overload
+async def parse(
+    text: str,
+    *,
+    until: ParseStep | str,
+    parser_types: Sequence[type[BaseParser]] | None = None,
+    color_scheme: str = "light",
+    theme_id: str | None = None,
+) -> MatchResult | ParseResult | ThemeData: ...
 
 
 async def parse(
