@@ -306,28 +306,8 @@ def rewrite_bilibili_scheduler(root: Path) -> None:
     )
 
 
-def rewrite_render_resources(root: Path) -> None:
-    path = root / PACKAGE / "render/context.py"
-    text = path.read_text(encoding="utf-8")
-    tree = ast.parse(text, filename=str(path))
-    node = next(
-        node
-        for node in tree.body
-        if isinstance(node, ast.AsyncFunctionDef) and node.name == "_path_to_uri"
-    )
-    replacement = (root / TEMPLATES / "render_path_to_uri.py.tmpl").read_text(
-        encoding="utf-8"
-    )
-    path.write_text(replace_statement(text, node, replacement), encoding="utf-8")
-    migration_log("迁移渲染资源: 使用 Base64 data URI")
-
-
 def remove_nonebot_runtime(root: Path) -> None:
-    targets = (
-        root / PACKAGE / "render/templates",
-        root / PACKAGE / "render/theme.py",
-        root / PACKAGE / "delivery.py",
-    )
+    targets = (root / PACKAGE / "delivery.py",)
     for target in targets:
         if not target.exists() and not target.is_symlink():
             continue
@@ -423,7 +403,6 @@ def generate(root: Path) -> None:
     rewrite_config(root)
     rewrite_logging(root)
     rewrite_bilibili_scheduler(root)
-    rewrite_render_resources(root)
     remove_nonebot_runtime(root)
     parser_mapping = build_parser_mapping(root)
 

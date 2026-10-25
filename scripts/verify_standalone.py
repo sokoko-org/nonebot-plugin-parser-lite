@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 from importlib import import_module
+from io import BytesIO
 import json
 from pathlib import Path
 import shutil
@@ -42,6 +43,7 @@ async def verify_pipeline() -> None:
     package = import_module("nonebot_plugin_parser_lite")
     ParseStep = package.ParseStep
     Parser = package.Parser
+    package.configure(plite_render_format="jpeg")
     url = "bilibili.com/video/BV1xx411c7mD"
     if not package.match(f"分享 https://www.{url} 给你").url.endswith(url):
         fail(["text matching returned an unexpected result"])
@@ -70,14 +72,14 @@ async def verify_pipeline() -> None:
         matched = await offline.parse(text, until=ParseStep.MATCH)
         if matched.url != url:
             fail(["match stage returned an unexpected URL"])
-        result = await offline.parse(text)
+        result = await offline.parse(matched)
         if (
             result.url != url
             or result.author.name != "tester"
             or result.content != ["offline-result"]
         ):
             fail(["parse stage returned an unexpected result"])
-        resolved = await offline.parse(text, until=ParseStep.RESOLVE)
+        resolved = await offline.parse(result, until=ParseStep.RESOLVE)
         resolved = json.loads(json.dumps(resolved))
         if (
             resolved["post"]["url"] != url
@@ -85,6 +87,24 @@ async def verify_pipeline() -> None:
             or resolved["post"]["content"][0]["text"] != "offline-result"
         ):
             fail(["resolve stage returned unexpected rendering data"])
+        rendered = await offline.parse(result, until=ParseStep.RENDER)
+        from PIL import Image
+
+        if rendered.result.url != url or rendered.result.content != ["offline-result"]:
+            fail(["render stage did not preserve the parsed post"])
+        with Image.open(BytesIO(rendered.image)) as image:
+            image.load()
+            if rendered.image_format != "jpeg" or image.format != "JPEG":
+                fail(["render stage did not produce a valid JPEG image"])
+
+        package.configure(plite_render_format="webp")
+        rendered = await package.parse(
+            text, until="render", parser_types=[OfflineParser], image_format="jpeg"
+        )
+        with Image.open(BytesIO(rendered.image)) as image:
+            image.load()
+            if rendered.image_format != "jpeg" or image.format != "JPEG":
+                fail(["parse entry point did not produce a valid JPEG image"])
 
     await package.shutdown_runtime()
 

@@ -1,16 +1,33 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import datetime
 import json
 import re
-from typing import Any
+from typing import Any, Literal
 
 from anyio import Path
 
+from ..config import pconfig
 from ..path import data_dir
 from .constants import MUSIC_PLATFORMS, THEME_SCHEMA_VERSION
 
 THEME_MANIFEST = "theme.json"
 THEME_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+
+
+def get_theme() -> Literal["light", "dark"]:
+    """根据配置的白天时间范围返回当前主题"""
+    start, end = pconfig.day_range_minutes
+    now = datetime.now()
+    current = now.hour * 60 + now.minute
+    if start == end:
+        # 为什么会有极夜
+        in_day = False
+    elif start < end:
+        in_day = start <= current < end
+    else:
+        in_day = current >= start or current < end
+    return "light" if in_day else "dark"
 
 
 class ThemeError(ValueError):

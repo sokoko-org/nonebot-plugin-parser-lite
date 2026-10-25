@@ -327,4 +327,5 @@ plite_bsb_categories=[]
 - [soloxiaoye2022](https://github.com/soloxiaoye2022) 部分签名算法
 - [nemo2011/bilibili-api (RIP)](https://github.com/Nemo2011/bilibili-api) 部分接口参考
 - [10miaomiao/bilimiao2](https://github.com/10miaomiao/bilimiao2) biliProtobuf 数据和接口参考
+- [adrienbrault/blitz-py](https://github.com/adrienbrault/blitz-py) 高性能高兼容的渲染引擎
 - 致2026年的你们

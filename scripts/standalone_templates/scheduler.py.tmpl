@@ -1,5 +1,3 @@
-"""Small asyncio-native periodic task scheduler."""
-
 from __future__ import annotations
 
 import asyncio

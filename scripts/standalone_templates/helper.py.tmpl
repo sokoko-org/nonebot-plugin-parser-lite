@@ -1,5 +1,3 @@
-"""Framework-neutral media helpers kept at the original import path."""
-
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Literal

@@ -1,5 +1,3 @@
-"""Lazy exports for platform parsers."""
-
 from importlib import import_module
 from typing import Any
 

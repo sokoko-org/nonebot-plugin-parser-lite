@@ -1,18 +1,11 @@
-import asyncio
 from collections.abc import AsyncGenerator, Callable, Iterator, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime
-from io import BytesIO
-import re
 from typing import Any, ClassVar, Literal, TypeVar
 import uuid
 
 from anyio import Path
-from jinja2 import Environment, FileSystemLoader
 from nonebot import logger
 from nonebot_plugin_alconna.uniseg import Text
-from nonebot_plugin_htmlrender import get_new_page
-from PIL import Image
 
 from ..config import _nickname, gconfig, pconfig
 from ..data import (
@@ -35,11 +28,17 @@ from ..exception import (
 )
 from ..helper import ForwardNodeInner, UniHelper, UniMessage, mark_media_role
 from ..utils.cache import CacheManager
-from ..utils.ffmpeg import FFmpeg
 from .context import PLACEHOLDER_IMAGE, ThemeData, build_theme_data, safe_src
-from .theme import ThemeDefinition, ThemeManager
+from .image import render_theme_data
+from .theme import ThemeDefinition, ThemeManager, get_theme
 
-__all__ = ["PLACEHOLDER_IMAGE", "ThemeData", "ThemeManager", "safe_src"]
+__all__ = [
+    "PLACEHOLDER_IMAGE",
+    "ThemeData",
+    "ThemeManager",
+    "render_theme_data",
+    "safe_src",
+]
 
 SPLIT_THRESHOLD = pconfig.forward_text_threshold
 """单段文本拆分阈值"""
@@ -49,25 +48,10 @@ MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
 IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20261025-1"
+RENDER_TEMPLATE_VERSION = "20261026-1"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
-
-
-def get_theme() -> Theme:
-    """根据配置的白天时间范围返回当前主题"""
-    start, end = pconfig.day_range_minutes
-    now = datetime.now()
-    current = now.hour * 60 + now.minute
-    if start == end:
-        # 为什么会有极夜
-        in_day = False
-    elif start < end:
-        in_day = start <= current < end
-    else:
-        in_day = current >= start or current < end
-    return "light" if in_day else "dark"
 
 
 def _find_text_split_end(text: str, start: int, max_len: int) -> int:
@@ -636,93 +620,12 @@ class Renderer:
             color_scheme=theme,
             theme_id=selected_theme.id,
         )
-        selected_template = await selected_theme.resolve_template(
-            str(result.platform.name)
+        return await render_theme_data(
+            template_data,
+            image_format=image_format,
+            theme_definition=selected_theme,
+            debug=IS_DEBUG,
         )
-
-        env = Environment(
-            loader=FileSystemLoader(str(selected_template.root)),
-            enable_async=True,
-            autoescape=False,
-        )
-        template = env.get_template(selected_template.name)
-        html = await template.render_async(data=template_data)
-        html = await self._inject_fallback_icon_css(html)
-
-        scale = 2
-        viewport_width, viewport_height = 620, 1000
-        async with get_new_page(
-            scale,
-            **{
-                "viewport": {"width": viewport_width, "height": viewport_height},
-                "base_url": selected_template.base_url,
-            },
-        ) as page:
-            page.on("console", lambda msg: logger.debug(f"浏览器控制台: {msg.text}"))
-            await page.goto(selected_template.base_url)
-            await page.set_content(html, wait_until="load")
-            height = await page.locator("main").evaluate(
-                "el => Math.ceil(el.getBoundingClientRect().height)"
-            )
-            # 分段滚动并截图。每段只包含当前视口，避免 full_page 的大位图限制
-            canvas = await asyncio.to_thread(
-                Image.new,
-                "RGBA",
-                (viewport_width * scale, height * scale),
-                (255, 255, 255, 0),
-            )
-
-            def paste_segment(segment: bytes, offset: int, end_offset: int) -> None:
-                start = offset * scale
-                with Image.open(BytesIO(segment)) as image:
-                    with image.crop(
-                        (
-                            0,
-                            0,
-                            image.width,
-                            min(image.height, (end_offset - offset) * scale),
-                        )
-                    ) as part:
-                        canvas.paste(part, (0, start))
-
-            offsets = list(range(0, max(height - viewport_height, 0), viewport_height))
-            final_offset = max(height - viewport_height, 0)
-            if not offsets or offsets[-1] != final_offset:
-                offsets.append(final_offset)
-            for index, offset in enumerate(offsets):
-                await page.evaluate("y => window.scrollTo(0, y)", offset)
-                # 等待滚动位置生效，避免截到上一段内容
-                await page.evaluate("() => new Promise(requestAnimationFrame)")
-                await asyncio.to_thread(
-                    paste_segment,
-                    await page.screenshot(
-                        type="png", full_page=False, omit_background=True
-                    ),
-                    offset,
-                    offsets[index + 1] if index + 1 < len(offsets) else height,
-                )
-
-        if image_format == "webp" and max(canvas.size) > 16383:
-            logger.warning("渲染结果尺寸超过 WebP 编码上限，已改用 JPEG 输出")
-            image_format = "jpeg"
-
-        if image_format == "webp":
-            width, height = canvas.size
-
-            def raw_pixels() -> bytes:
-                with canvas:
-                    return canvas.tobytes()
-
-            # 提取像素后释放画布
-            rgba_data = await asyncio.to_thread(raw_pixels)
-            return image_format, await FFmpeg.rgba_to_webp(rgba_data, width, height)
-
-        def encode_jpeg() -> bytes:
-            with canvas, canvas.convert("RGB") as rgb, BytesIO() as output:
-                rgb.save(output, format="JPEG", quality=85, subsampling=0)
-                return output.getvalue()
-
-        return image_format, await asyncio.to_thread(encode_jpeg)
 
     async def _resolve_theme(self) -> ThemeDefinition:
         return await ThemeManager(
@@ -736,23 +639,6 @@ class Renderer:
             self.templates_dir,
             pconfig.theme_dirs,
         ).list_themes()
-
-    async def _inject_fallback_icon_css(self, html: str) -> str:
-        """把内置图标样式注入所有主题，供自定义样式覆盖前使用"""
-        try:
-            icon_css = await (self.templates_dir / "icon.css").read_text(
-                encoding="utf-8"
-            )
-        except OSError as error:
-            logger.warning(f"读取内置 icon.css 失败: {error!r}")
-            return html
-
-        style = f'<style data-parser-fallback="icon-css">\n{icon_css}\n</style>'
-        head_match = re.search(r"<head\b[^>]*>", html, flags=re.IGNORECASE)
-        if head_match is None:
-            return style + html
-        index = head_match.end()
-        return f"{html[:index]}\n{style}{html[index:]}"
 
     async def resolve_parse_result(
         self,

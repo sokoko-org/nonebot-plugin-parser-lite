@@ -23,11 +23,13 @@ your_project/
 
 ### 1. 文本解析流水线
 
-解析入口接收纯文本。可通过 `until` 参数控制解析阶段
+解析入口接收文本，也可以接收已有的 `MatchResult` 或 `ParseResult` 继续后续阶段。
+通过 `until` 参数控制执行到哪一步
 
 - `ParseStep.MATCH`：仅匹配阶段
 - `ParseStep.PARSE`：结构化解析（默认）
 - `ParseStep.RESOLVE`：生成渲染数据（会触发媒体下载）
+- `ParseStep.RENDER`：返回 `RenderResult`，含解析结果、实际图片格式和图片 bytes
 
 ```python
 from nonebot_plugin_parser_lite import ParseStep, Parser
@@ -37,25 +39,45 @@ async with Parser() as parser:
     matched = await parser.parse(text, until=ParseStep.MATCH)
 
     # 2. 结构化解析
-    result = await parser.parse(text, until=ParseStep.PARSE)
+    result = await parser.parse(matched, until=ParseStep.PARSE)
 
     # 3. 生成模板数据（含媒体下载）
-    render_data = await parser.parse(text, until=ParseStep.RESOLVE, color_scheme="dark")
+    render_data = await parser.parse(result, until=ParseStep.RESOLVE)
+
+    # 4. 从解析结果继续生成图片，也可直接传入 text
+    rendered = await parser.parse(result, until=ParseStep.RENDER)
+
+    # 可从渲染结果获取原始媒体
+    for media in rendered.result.iter_sendable_media():
+        media_path = await media.get_path()
+
+    from pathlib import Path
+
+    Path(f"post.{rendered.image_format}").write_bytes(rendered.image)
 
 # 注：长期运行的应用可复用 Parser 实例，退出前调用 await parser.aclose()
 ```
 
-`render_data`中的图片、头像、平台图标、封面等资源使用 `data:image/...;base64,...`
-内嵌
-
-已有 `ParseResult` 时，也可直接转换
+`RenderResult.result` 保留传入的解析结果及其媒体。
+仅需生成渲染数据，或已有渲染数据时，也可直接使用底层接口
 
 ```python
 from nonebot_plugin_parser_lite import resolve_parse_result
 
 render_data = await resolve_parse_result(result, color_scheme="dark", theme_id="custom")
-# 事实上，`theme_id` 在独立版没有用
 ```
+
+```python
+from pathlib import Path
+from nonebot_plugin_parser_lite import render_theme_data
+
+image_format, image = await render_theme_data(render_data)
+Path(f"post.{image_format}").write_bytes(image)
+```
+
+图片格式默认读取 `plite_render_format` 配置，也可传入 `image_format` 单次覆盖。
+配色默认按 `plite_day_range` 配置自动选择日间或夜间模式，也可传入 `color_scheme` 单次覆盖。
+返回的格式是实际编码格式；长图超出 WebP 尺寸限制时会改用 JPEG
 
 ### 2. 按需加载指定平台
 

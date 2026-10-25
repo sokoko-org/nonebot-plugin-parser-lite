@@ -43,31 +43,6 @@ jobs:
           python -m pip install "nonebot2[fastapi]>=2.4.3,<3.0.0"
           python -m pip check
 
-      - name: Read Playwright version
-        id: playwright
-        run: echo "version=$(python -m playwright --version | cut -d ' ' -f 2)" >> "$GITHUB_OUTPUT"
-
-      - name: Restore Chromium
-        id: chromium-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
-
-      - name: Install Chromium system dependencies
-        run: python -m playwright install-deps chromium
-
-      - name: Install Chromium
-        if: steps.chromium-cache.outputs.cache-hit != 'true'
-        run: python -m playwright install chromium
-
-      - name: Save Chromium
-        if: steps.chromium-cache.outputs.cache-hit != 'true' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
-
       - name: Run plugin startup test
         run: python scripts/verify_plugin_startup.py
 

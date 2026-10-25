@@ -23,10 +23,6 @@ localstore.get_plugin_config_dir = lambda: store_root / "config"  # type: ignore
 localstore.get_plugin_data_dir = lambda: store_root / "data"  # type: ignore[attr-defined]
 sys.modules[localstore.__name__] = localstore
 
-htmlrender = ModuleType("nonebot_plugin_htmlrender")
-htmlrender.get_new_page = None  # type: ignore[attr-defined]
-sys.modules[htmlrender.__name__] = htmlrender
-
 parser_package = ModuleType("nonebot_plugin_parser_lite")
 parser_package.__path__ = [str(SOURCE)]
 parser_package.__package__ = parser_package.__name__

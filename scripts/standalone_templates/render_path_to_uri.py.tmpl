@@ -1,8 +1,0 @@
-async def _path_to_uri(value: Any) -> str:
-    import mimetypes
-
-    path = Path(str(value))
-    mime_type = mimetypes.guess_type(str(path))[0] or "application/octet-stream"
-    async with _resource_limit.get() or contextlib.nullcontext():
-        encoded = base64.b64encode(await path.read_bytes()).decode("ascii")
-        return f"data:{mime_type};base64,{encoded}"

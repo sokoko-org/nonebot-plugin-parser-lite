@@ -111,16 +111,6 @@ async def test_music_theme_data_uses_content_for_cover_and_plain_text(
 
 
 @pytest.mark.asyncio
-async def test_builtin_icon_css_is_injected_before_theme_styles():
-    html = '<html><head><link rel="stylesheet" href="icon.css" /></head></html>'
-    rendered = await Renderer()._inject_fallback_icon_css(html)
-
-    assert '<style data-parser-fallback="icon-css">' in rendered
-    assert "--icon-color-view" in rendered
-    assert rendered.index("data-parser-fallback") < rendered.index('href="icon.css"')
-
-
-@pytest.mark.asyncio
 async def test_theme_data_is_json_like(monkeypatch, tmp_path):
     async def logo_path(self):
         return SyncPath("logo.webp")

@@ -1,5 +1,3 @@
-"""Logging adapter used by the standalone build."""
-
 import logging
 
 

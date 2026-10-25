@@ -13,12 +13,13 @@ if TYPE_CHECKING:
         MatchResult,
         Parser,
         ParseStep,
+        RenderResult,
         clear_result_cache,
         match,
         parse,
         shutdown_runtime,
     )
-    from .render import ThemeData, resolve_parse_result
+    from .render import ThemeData, render_theme_data, resolve_parse_result
 
 __version__ = "{{VERSION}}"
 
@@ -27,11 +28,13 @@ __all__ = [
     "MatchResult",
     "ParseStep",
     "Parser",
+    "RenderResult",
     "ThemeData",
     "clear_result_cache",
     "configure",
     "match",
     "parse",
+    "render_theme_data",
     "resolve_parse_result",
     "shutdown_runtime",
 ]
@@ -42,10 +45,12 @@ _EXPORTS = {
     "MatchResult": (".pipeline", "MatchResult"),
     "ParseStep": (".pipeline", "ParseStep"),
     "Parser": (".pipeline", "Parser"),
+    "RenderResult": (".pipeline", "RenderResult"),
     "ThemeData": (".render", "ThemeData"),
     "clear_result_cache": (".pipeline", "clear_result_cache"),
     "match": (".pipeline", "match"),
     "parse": (".pipeline", "parse"),
+    "render_theme_data": (".render", "render_theme_data"),
     "resolve_parse_result": (".render", "resolve_parse_result"),
     "shutdown_runtime": (".pipeline", "shutdown_runtime"),
 }

@@ -1,5 +1,3 @@
-"""Standalone platform enablement helper."""
-
 from ..config import pconfig
 
 
