@@ -5,7 +5,20 @@ platform module directly, or use ``Parser`` for lazy discovery.
 """
 
 from importlib import import_module
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .config import Config, configure
+    from .pipeline import (
+        MatchResult,
+        Parser,
+        ParseStep,
+        clear_result_cache,
+        match,
+        parse,
+        shutdown_runtime,
+    )
+    from .render import ThemeData, resolve_parse_result
 
 __version__ = "{{VERSION}}"
 
