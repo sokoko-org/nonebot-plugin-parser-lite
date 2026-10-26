@@ -7,6 +7,11 @@ on:
       - '.github/workflows/standalone.yml'
       - 'LICENSE'
       - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'MANIFEST.in'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
       - 'ruff.toml'
       - 'scripts/generate_standalone.py'
       - 'scripts/verify_standalone.py'
@@ -37,6 +42,9 @@ jobs:
           python-version: "3.11"
           cache: pip
 
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Generate standalone tree
         run: python scripts/generate_standalone.py
 
@@ -51,7 +59,7 @@ jobs:
         run: python scripts/verify_standalone.py
 
       - name: Install standalone dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -e .
 
       - name: Verify standalone input and output
         run: python scripts/verify_standalone.py --imports
@@ -75,7 +83,7 @@ jobs:
           rm -f "$publish_index"
           export GIT_INDEX_FILE="$publish_index"
           git read-tree --empty
-          git add -- README.md LICENSE requirements.txt pyproject.toml \
+          git add -- README.md LICENSE requirements.txt pyproject.toml setup.py MANIFEST.in Cargo.toml Cargo.lock \
             src/nonebot_plugin_parser_lite
 
           unexpected_paths="$(git ls-files | awk -F/ '
@@ -83,6 +91,10 @@ jobs:
             $1 != "LICENSE" &&
             $1 != "requirements.txt" &&
             $1 != "pyproject.toml" &&
+            $1 != "setup.py" &&
+            $1 != "MANIFEST.in" &&
+            $1 != "Cargo.toml" &&
+            $1 != "Cargo.lock" &&
             !($1 == "src" && $2 == "nonebot_plugin_parser_lite")
           ')"
           if [[ -n "$unexpected_paths" ]]; then

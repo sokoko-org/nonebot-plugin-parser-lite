@@ -33,7 +33,7 @@ jobs:
 
   build_release_distributions:
     if: github.event_name == 'release'
-    name: Build ${{ matrix.distribution }} distributions
+    name: Build ${{ matrix.distribution }} source distribution
     strategy:
       matrix:
         distribution: [plugin, standalone]
@@ -69,7 +69,7 @@ jobs:
       - name: Build and verify distributions
         run: |
           python -m pip install build
-          python -m build
+          python -m build --sdist
           python scripts/verify_package.py
 
       - name: Attach distributions to published release
@@ -77,4 +77,61 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$RELEASE_TAG" dist/*.whl dist/*.tar.gz --clobber
+        run: gh release upload "$RELEASE_TAG" dist/*.tar.gz --clobber
+
+  build_release_wheels:
+    if: github.event_name == 'release'
+    name: Build ${{ matrix.distribution }} wheels (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        distribution: [plugin, standalone]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-15-intel, macos-latest]
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Rust
+        if: runner.os != 'Linux'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate standalone tree
+        if: matrix.distribution == 'standalone'
+        run: python scripts/generate_standalone.py
+
+      - name: Normalize standalone imports
+        if: matrix.distribution == 'standalone'
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check --config ruff.toml --fix
+          src: src/nonebot_plugin_parser_lite
+
+      - name: Build platform wheel
+        env:
+          CIBW_BUILD: cp311-*
+          CIBW_SKIP: '*-musllinux_*'
+          CIBW_ARCHS: native
+          CIBW_BEFORE_ALL_LINUX: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+          CIBW_ENVIRONMENT_LINUX: 'PATH="$HOME/.cargo/bin:$PATH"'
+        run: |
+          python -m pip install "cibuildwheel>=3,<4"
+          python -m cibuildwheel --output-dir dist
+          python scripts/verify_package.py
+
+      - name: Attach wheel to published release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" dist/*.whl --clobber

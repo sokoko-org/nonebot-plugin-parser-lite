@@ -6,7 +6,21 @@
 
 ## 📦 安装与项目集成
 
-将 `src/nonebot_plugin_parser_lite` 整个目录复制到你的项目中
+推荐安装 Release 提供的对应平台 wheel，安装后即可导入使用
+
+如果要将模块复制到自己的项目，需要先安装 Rust 环境，然后在仓库根目录编译
+
+```shell
+python -m pip install "setuptools>=77" "setuptools-rust>=1.12,<2"
+python setup.py build_ext --inplace
+```
+
+直接运行 `setup.py` 前需安装上述构建依赖；`pip install .` 的隔离构建不会将它们安装到当前虚拟环境。
+
+随后将 `src/nonebot_plugin_parser_lite` 整个目录连同编译扩展复制到你的项目中
+目标环境需使用相同的操作系统和 CPU 架构，以及 CPython 3.11 或更高版本
+
+若手动编译并安装包，可以使用 `pip install -e .`
 
 ```text
 your_project/

@@ -65,7 +65,9 @@
 
 需要 Python **3.11 或更高版本**
 
-### 从 Git 安装(main 或指定 tag)
+从 Git 或源码安装还需要 Rust 工具链用于编译模块
+
+### 从 Git 安装
 
 <details>
 <summary>pip</summary>
@@ -74,7 +76,7 @@
 python -m pip install "nonebot-plugin-parser-lite @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@main"
 ```
 
-指定版本安装时，将 `main` 替换为实际 tag 名称：
+指定版本安装时，将 `main` 替换为实际 tag 或 hash
 
 ```shell
 python -m pip install "nonebot-plugin-parser-lite @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@<tag>"
@@ -101,7 +103,16 @@ uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --tag <t
 
 ### 手动安装
 
-将 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录(比如 `plugins`)后手动安装依赖
+先在仓库根目录编译 QMC 模块
+
+```shell
+python -m pip install "setuptools>=77" "setuptools-rust>=1.12,<2"
+python setup.py build_ext --inplace
+```
+
+直接运行 `setup.py` 前需安装上述构建依赖；`pip install .` 的隔离构建不会将它们安装到当前虚拟环境。
+
+再将 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录后手动安装依赖
 
 <details>
 <summary>pip</summary>

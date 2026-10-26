@@ -1,0 +1,18 @@
+[package]
+name = "parser-lite-qmc"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "qmc"
+path = "src/nonebot_plugin_parser_lite/parsers/qqmusic/qmc.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+base64 = "0.22"
+pyo3 = { version = "0.27", features = ["extension-module", "abi3-py311"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

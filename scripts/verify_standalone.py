@@ -1,12 +1,12 @@
 """验证独立分支是否可以工作"""
 
 import argparse
-import asyncio
 from importlib import import_module
 from io import BytesIO
 import json
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -34,8 +34,17 @@ def import_checks(root: Path) -> None:
             root / "src/nonebot_plugin_parser_lite",
             Path(directory) / "nonebot_plugin_parser_lite",
         )
-        sys.path.insert(0, directory)
-        asyncio.run(verify_pipeline())
+        subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import asyncio, runpy, sys; sys.path.insert(0, sys.argv[1]); "
+                "asyncio.run(runpy.run_path(sys.argv[2])['verify_pipeline']())",
+                directory,
+                str(Path(__file__).resolve()),
+            ],
+            check=True,
+        )
     print("Standalone input and output checks passed")  # noqa: T201
 
 
