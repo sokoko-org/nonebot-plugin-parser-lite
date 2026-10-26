@@ -320,7 +320,7 @@ def remove_nonebot_runtime(root: Path) -> None:
         )
 
 
-def rewrite_requirements(root: Path) -> list[str]:
+def rewrite_requirements(root: Path) -> None:
     path = root / "requirements.txt"
     lines: list[str] = []
     seen: set[str] = set()
@@ -347,21 +347,26 @@ def rewrite_requirements(root: Path) -> list[str]:
         if normalized not in seen:
             lines.append(requirement)
             migration_log(f"补充直接依赖: {requirement}")
-    requirements = [
-        line for line in lines if line and not line.lstrip().startswith("#")
-    ]
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
-    return requirements
 
 
-def write_pyproject(root: Path, requirements: list[str], version: str) -> None:
-    deps = "\n".join(f'  "{item}",' for item in requirements)
-    content = (root / TEMPLATES / "pyproject.toml.tmpl").read_text(encoding="utf-8")
-    (root / "pyproject.toml").write_text(
-        content.replace("{{DEPENDENCIES}}", deps).replace("{{VERSION}}", version),
-        encoding="utf-8",
+def rewrite_pyproject(root: Path) -> None:
+    path = root / "pyproject.toml"
+    content = path.read_text(encoding="utf-8")
+    content = content.replace(
+        'name = "nonebot-plugin-parser-lite"',
+        'name = "nonebot-plugin-parser-lite-standalone"',
+        1,
     )
-    migration_log("生成可安装元数据: pyproject.toml")
+    content = re.sub(
+        r"^description = .*$",
+        'description = "Standalone social-media link parser"',
+        content,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    path.write_text(content, encoding="utf-8")
+    migration_log("复用根目录构建配置，调整独立版包名和描述: pyproject.toml")
 
 
 def audit(root: Path) -> None:
@@ -432,8 +437,8 @@ def generate(root: Path) -> None:
         }
         copy_template(root, template, destination, template_replacements or None)
 
-    requirements = rewrite_requirements(root)
-    write_pyproject(root, requirements, version)
+    rewrite_requirements(root)
+    rewrite_pyproject(root)
     audit(root)
     migration_log(f"迁移完成: {root}")
 

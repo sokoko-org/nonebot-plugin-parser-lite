@@ -3,3 +3,6 @@ node_modules/
 build/
 dist/
 *.egg-info/
+target/
+*.pyd
+*.so

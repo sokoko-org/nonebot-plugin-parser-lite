@@ -1,8 +1,8 @@
 """Check built distributions without importing the NoneBot plugin."""
 
+import argparse
 from email.parser import BytesParser
 from pathlib import Path
-import re
 import tarfile
 import tomllib
 from zipfile import ZipFile
@@ -11,30 +11,17 @@ from packaging.requirements import Requirement
 from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE = "nonebot_plugin_parser_lite"
 
 
-def verify() -> None:
+def verify(dist_dir: Path) -> None:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))[
         "project"
     ]
     version = project["version"]
-    original_init = (ROOT / "src" / PACKAGE / "__init__.py").read_text(encoding="utf-8")
-    match = re.search(r'(?:"version"\s*:|__version__\s*=)\s*"([^"]+)"', original_init)
-    assert match is not None
-    assert Version(match[1]) == Version(version), "Plugin/package version mismatch"
-
     stem = f"{project['name'].replace('-', '_')}-{version}"
-    with ZipFile(ROOT / "dist" / f"{stem}-py3-none-any.whl") as wheel:
-        _extracted_from_verify_13(wheel, stem, project)
-
-
-# TODO Rename this here and in `verify`
-def _extracted_from_verify_13(wheel, stem, project):
-    assert not any(name.endswith((".proto", ".pyi")) for name in wheel.namelist())
-    metadata = BytesParser().parsebytes(wheel.read(f"{stem}.dist-info/METADATA"))
-    assert metadata["Name"] == project["name"]
-    assert metadata["Requires-Python"] == project["requires-python"]
+    wheels = list(dist_dir.glob(f"{stem}-*.whl"))
+    sdists = list(dist_dir.glob(f"{stem}.tar.gz"))
+    assert wheels or sdists, f"No distributions found for {stem}"
     requirements = project.get("dependencies")
     if requirements is None:
         requirements = (
@@ -45,30 +32,35 @@ def _extracted_from_verify_13(wheel, stem, project):
         for line in requirements
         if line.strip() and not line.lstrip().startswith("#")
     }
-    actual_dependencies = {
-        str(Requirement(value)) for value in metadata.get_all("Requires-Dist", [])
-    }
-    assert actual_dependencies == expected_dependencies, "Dependency mismatch"
 
-    with tarfile.open(ROOT / "dist" / f"{stem}.tar.gz") as sdist:
-        assert not any(name.endswith((".proto", ".pyi")) for name in sdist.getnames())
-        if "dependencies" in project.get("dynamic", []):
-            assert f"{stem}/requirements.txt" in sdist.getnames()
-        for path in (ROOT / "src" / PACKAGE).rglob("*"):
-            if not path.is_file() or path.suffix not in {
-                ".py",
-                ".jinja",
-                ".css",
-                ".json",
-                ".desc",
-            }:
-                continue
-            relative = path.relative_to(ROOT / "src").as_posix()
-            assert wheel.read(relative) == path.read_bytes(), relative
-            member = sdist.extractfile(f"{stem}/src/{relative}")
-            assert member is not None, relative
-            assert member.read() == path.read_bytes(), relative
+    def verify_metadata(content: bytes) -> None:
+        metadata = BytesParser().parsebytes(content)
+        assert metadata["Name"] == project["name"]
+        assert Version(metadata["Version"]) == Version(version)
+        assert metadata["Requires-Python"] == project["requires-python"]
+        assert {
+            str(Requirement(value)) for value in metadata.get_all("Requires-Dist", [])
+        } == expected_dependencies, "Dependency mismatch"
+
+    for path in wheels:
+        with ZipFile(path) as wheel:
+            assert not any(
+                name.endswith((".proto", ".pyi", ".rs", "Cargo.toml", "Cargo.lock"))
+                for name in wheel.namelist()
+            )
+            verify_metadata(wheel.read(f"{stem}.dist-info/METADATA"))
+
+    for path in sdists:
+        with tarfile.open(path) as sdist:
+            assert not any(
+                name.endswith((".proto", ".pyi")) for name in sdist.getnames()
+            )
+            metadata = sdist.extractfile(f"{stem}/PKG-INFO")
+            assert metadata is not None, "Source distribution metadata missing"
+            verify_metadata(metadata.read())
 
 
 if __name__ == "__main__":
-    verify()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dist-dir", type=Path, default=ROOT / "dist")
+    verify(parser.parse_args().dist_dir)

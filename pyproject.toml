@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77"]
+requires = ["setuptools>=77", "setuptools-rust>=1.12,<2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -33,4 +33,14 @@ nonebot_plugin_parser_lite = [
 ]
 
 [tool.setuptools.exclude-package-data]
-"*" = ["*.proto", "*.pyi"]
+"*" = ["*.proto", "*.pyi", "*.rs", "Cargo.toml", "Cargo.lock"]
+
+[[tool.setuptools-rust.ext-modules]]
+target = "nonebot_plugin_parser_lite.parsers.qqmusic.qmc"
+path = "Cargo.toml"
+binding = "PyO3"
+debug = false
+py-limited-api = true
+
+[tool.distutils.bdist_wheel]
+py-limited-api = "cp311"

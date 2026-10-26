@@ -9,6 +9,8 @@ on:
       - "requirements.txt"
       - "pyproject.toml"
       - "MANIFEST.in"
+      - "Cargo.toml"
+      - "Cargo.lock"
       - "scripts/verify_plugin_startup.py"
       - "scripts/verify_package.py"
       - ".github/workflows/plugin-startup.yml"
@@ -33,6 +35,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Build and install package
         run: |
