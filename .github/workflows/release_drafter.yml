@@ -33,6 +33,10 @@ jobs:
 
   build_release_distributions:
     if: github.event_name == 'release'
+    name: Build ${{ matrix.distribution }} distributions
+    strategy:
+      matrix:
+        distribution: [plugin, standalone]
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -46,6 +50,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Generate standalone tree from release tag
+        if: matrix.distribution == 'standalone'
+        run: python scripts/generate_standalone.py
+
+      - name: Normalize standalone imports
+        if: matrix.distribution == 'standalone'
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check --config ruff.toml --fix
+          src: src/nonebot_plugin_parser_lite
+
+      - name: Verify standalone source
+        if: matrix.distribution == 'standalone'
+        run: python scripts/verify_standalone.py
 
       - name: Build and verify distributions
         run: |

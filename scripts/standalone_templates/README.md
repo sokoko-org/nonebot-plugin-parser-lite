@@ -75,10 +75,6 @@ image_format, image = await render_theme_data(render_data)
 Path(f"post.{image_format}").write_bytes(image)
 ```
 
-图片格式默认读取 `plite_render_format` 配置，也可传入 `image_format` 单次覆盖。
-配色默认按 `plite_day_range` 配置自动选择日间或夜间模式，也可传入 `color_scheme` 单次覆盖。
-返回的格式是实际编码格式；长图超出 WebP 尺寸限制时会改用 JPEG
-
 ### 2. 按需加载指定平台
 
 若只需使用特定平台，建议直接导入对应 Parser，避免加载无用模块

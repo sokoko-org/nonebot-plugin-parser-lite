@@ -20,11 +20,11 @@ def verify() -> None:
     ]
     version = project["version"]
     original_init = (ROOT / "src" / PACKAGE / "__init__.py").read_text(encoding="utf-8")
-    match = re.search(r'"version"\s*:\s*"([^"]+)"', original_init)
+    match = re.search(r'(?:"version"\s*:|__version__\s*=)\s*"([^"]+)"', original_init)
     assert match is not None
     assert Version(match[1]) == Version(version), "Plugin/package version mismatch"
 
-    stem = f"{PACKAGE}-{version}"
+    stem = f"{project['name'].replace('-', '_')}-{version}"
     with ZipFile(ROOT / "dist" / f"{stem}-py3-none-any.whl") as wheel:
         _extracted_from_verify_13(wheel, stem, project)
 
@@ -35,10 +35,14 @@ def _extracted_from_verify_13(wheel, stem, project):
     metadata = BytesParser().parsebytes(wheel.read(f"{stem}.dist-info/METADATA"))
     assert metadata["Name"] == project["name"]
     assert metadata["Requires-Python"] == project["requires-python"]
-    requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
+    requirements = project.get("dependencies")
+    if requirements is None:
+        requirements = (
+            (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines()
+        )
     expected_dependencies = {
         str(Requirement(line))
-        for line in requirements.splitlines()
+        for line in requirements
         if line.strip() and not line.lstrip().startswith("#")
     }
     actual_dependencies = {
@@ -48,7 +52,8 @@ def _extracted_from_verify_13(wheel, stem, project):
 
     with tarfile.open(ROOT / "dist" / f"{stem}.tar.gz") as sdist:
         assert not any(name.endswith((".proto", ".pyi")) for name in sdist.getnames())
-        assert f"{stem}/requirements.txt" in sdist.getnames()
+        if "dependencies" in project.get("dynamic", []):
+            assert f"{stem}/requirements.txt" in sdist.getnames()
         for path in (ROOT / "src" / PACKAGE).rglob("*"):
             if not path.is_file() or path.suffix not in {
                 ".py",
