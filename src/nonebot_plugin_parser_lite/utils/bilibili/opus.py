@@ -28,14 +28,11 @@ class Opus:
                 local_time=8,
                 player_args=preload_pb2.PlayerArgs(qn=32, fnval=400),
             )
-            access_token = self.credential.access_token if self.credential else ""
             self.info = await GRPC_CLIENT.request(
                 "/bilibili.app.dynamic.v2.Opus/OpusDetail",
                 req,
                 opus_pb2.OpusDetailResp,
-                access_token=access_token,
-                user_mid=(
-                    self.credential.mid if self.credential and access_token else None
-                ),
+                access_token=self.credential.access_token if self.credential else "",
+                dedeuserid=self.credential.dedeuserid if self.credential else "",
             )
         return self.info

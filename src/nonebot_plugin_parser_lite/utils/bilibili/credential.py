@@ -22,7 +22,6 @@ class Credential:
         sessdata: str,
         bili_jct: str,
         dedeuserid: str,
-        mid: int | str,
         access_token: str,
         refresh_token: str,
         expires_at: float,
@@ -40,7 +39,6 @@ class Credential:
         self.sessdata = sessdata if "%" in sessdata else urllib.parse.quote(sessdata)
         self.bili_jct = bili_jct
         self.dedeuserid = dedeuserid
-        self.mid = int(mid)
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.expires_at = expires_at
@@ -133,7 +131,6 @@ class Credential:
             "sessdata": self.sessdata,
             "bili_jct": self.bili_jct,
             "dedeuserid": self.dedeuserid,
-            "mid": self.mid,
             "refresh_token": self.refresh_token,
             "access_token": self.access_token,
             "expires_at": self.expires_at,

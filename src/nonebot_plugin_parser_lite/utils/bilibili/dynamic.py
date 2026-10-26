@@ -24,26 +24,22 @@ class Dynamic:
         """
         if self.detail is None:
             req = dynamic_pb2.DynDetailReq(
-                uid=self.credential.mid if self.credential else 0,
+                uid=0, # 不知道传入登录用户 uid 和 0 什么区别
                 dynamic_id=self.dynamic_id,
                 share_id="dt.opus-detail.0.0.pv",
                 share_mode=3,
                 local_time=8,
                 player_args=preload_pb2.PlayerArgs(qn=32, fnval=400),
             )
-            access_token = self.credential.access_token if self.credential else ""
             self.detail = await GRPC_CLIENT.request(
                 "/bilibili.app.dynamic.v2.Dynamic/DynDetail",
                 req,
                 dynamic_pb2.DynDetailReply,
-                access_token=access_token,
-                user_mid=self.credential.mid
-                if self.credential and access_token
-                else None,
+                access_token=self.credential.access_token if self.credential else "",
+                dedeuserid=self.credential.dedeuserid if self.credential else "",
             )
             self._is_opus = self.detail.HasField("item") and (
-                self.detail.item.card_type
-                in (dynamic_pb2.draw, dynamic_pb2.article)
+                self.detail.item.card_type in (dynamic_pb2.draw, dynamic_pb2.article)
             )
         return self.detail
 
