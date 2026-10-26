@@ -61,19 +61,19 @@ def _apply_stat(result: ParseResult, stat: dynamic_pb2.ModuleStat) -> None:
         result.stats.comment_count = format_num(stat.reply)
 
 
-def _video_url(bvid: str, avid: int) -> str | None:
-    if bvid:
-        return f"https://www.bilibili.com/video/{bvid}"
-    return f"https://www.bilibili.com/video/av{avid}" if avid else None
+# def _video_url(bvid: str, avid: int) -> str | None:
+#     if bvid:
+#         return f"https://www.bilibili.com/video/{bvid}"
+#     return f"https://www.bilibili.com/video/av{avid}" if avid else None
 
 
 def _append_archive(result: ParseResult, archive: dynamic_pb2.MdlDynArchive) -> None:
     if archive.title and result.title is None:
         result.title = archive.title
-    if archive.jump_url.startswith("http"):
-        result.url = archive.jump_url
-    elif archive_url := _video_url(archive.bvid, archive.avid):
-        result.url = archive_url
+    # if archive.jump_url.startswith("http"):
+    #     result.url = archive.jump_url
+    # elif archive_url := _video_url(archive.bvid, archive.avid):
+    #     result.url = archive_url
     if archive.cover:
         result.content.append(Creator.graphic(url=archive.cover))
 
