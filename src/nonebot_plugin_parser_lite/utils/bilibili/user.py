@@ -153,15 +153,12 @@ class User:
             local_time=local_time,
             page=page,
         )
-        access_token = self.credential.access_token if self.credential else ""
         return await GRPC_CLIENT.request(
             "/bilibili.app.dynamic.v2.Dynamic/DynSpace",
             request,
             dynamic_pb2.DynSpaceRsp,
-            access_token=access_token,
-            user_mid=(
-                self.credential.mid if self.credential and access_token else None
-            ),
+            access_token=self.credential.access_token if self.credential else "",
+            dedeuserid=self.credential.dedeuserid if self.credential else "",
         )
 
     async def get_videos(

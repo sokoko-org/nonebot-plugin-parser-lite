@@ -59,7 +59,7 @@ def _base64_without_padding(value: bytes) -> str:
 
 
 def get_bilibili_headers(
-    access_token: str = "", user_mid: int | None = None
+    access_token: str = "", dedeuserid: str = ""
 ) -> dict[str, str]:
     """Build the headers"""
     device = device_pb2.Device(
@@ -116,8 +116,8 @@ def get_bilibili_headers(
     }
     if access_token:
         headers["authorization"] = f"identify_v1 {access_token}"
-        if user_mid is not None:
-            headers["x-bili-mid"] = str(user_mid)
+        if dedeuserid:
+            headers["x-bili-mid"] = dedeuserid
     return headers
 
 
@@ -157,14 +157,14 @@ class BiliGRPCClient:
         response_type: type[ResponseT],
         *,
         access_token: str = "",
-        user_mid: int | None = None,
+        dedeuserid: str = "",
     ) -> ResponseT:
         message = request.SerializeToString()
         body = b"\x00" + struct.pack(">I", len(message)) + message
         response = await self._client.post(
             self.base_url + method.lstrip("/"),
             content=body,
-            headers=get_bilibili_headers(access_token, user_mid),
+            headers=get_bilibili_headers(access_token, dedeuserid),
         )
         grpc_status = int(response.headers.get("grpc-status", "0"))
         if response.status_code >= 400 or grpc_status:

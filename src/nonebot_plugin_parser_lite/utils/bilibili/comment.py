@@ -45,11 +45,10 @@ async def get_comments(
     if type is CommentResourceType.DYNAMIC:
         req.extra = '{"spmid":"dt.dt-detail.0.0","from_spmid":""}'
         req.filter_tag_name = "全部"
-    access_token = credential.access_token if credential else ""
     return await GRPC_CLIENT.request(
         "/bilibili.main.community.reply.v1.Reply/MainList",
         req,
         reply_pb2.MainListReply,
-        access_token=access_token,
-        user_mid=credential.mid if credential and access_token else None,
+        access_token=credential.access_token if credential else "",
+        dedeuserid=credential.dedeuserid if credential else "",
     )
