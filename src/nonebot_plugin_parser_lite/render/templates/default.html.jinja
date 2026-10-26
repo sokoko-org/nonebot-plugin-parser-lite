@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ data.theme }}">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Media Card · New</title>
+        <link rel="stylesheet" href="icon.css" />
+        <link rel="stylesheet" href="tailwind.css" />
+        <style>
+            .comment .single-image img {
+                width: 100%;
+                max-width: 9rem;
+                height: auto;
+                object-fit: contain;
+            }
+            .comment .single-image img[data-orientation="landscape"] {
+                width: auto;
+                max-width: 100%;
+                max-height: 9rem;
+            }
+        </style>
+        {% from "macros.jinja" import render_ambient, render_content, resolve_cover_src %}
+    </head>
+    <body class="m-0 w-[620px] break-all font-sans antialiased">
+        {% set post = data.post %}
+        {% set cover_src = resolve_cover_src(post) %}
+        {% set logo_src = post.platform.logo %}
+        <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 rounded-2xl dark:bg-slate-950">
+            {{ render_ambient(cover_src, logo_src) }}
+            <div class="relative z-[1]">{{ render_content(post, data.meta) }}</div>
+        </main>
+    </body>
+</html>
