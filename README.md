@@ -110,8 +110,6 @@ python -m pip install "setuptools>=77" "setuptools-rust>=1.12,<2"
 python setup.py build_ext --inplace
 ```
 
-直接运行 `setup.py` 前需安装上述构建依赖；`pip install .` 的隔离构建不会将它们安装到当前虚拟环境。
-
 再将 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录后手动安装依赖
 
 <details>

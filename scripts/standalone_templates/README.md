@@ -15,8 +15,6 @@ python -m pip install "setuptools>=77" "setuptools-rust>=1.12,<2"
 python setup.py build_ext --inplace
 ```
 
-直接运行 `setup.py` 前需安装上述构建依赖；`pip install .` 的隔离构建不会将它们安装到当前虚拟环境。
-
 随后将 `src/nonebot_plugin_parser_lite` 整个目录连同编译扩展复制到你的项目中
 目标环境需使用相同的操作系统和 CPU 架构，以及 CPython 3.11 或更高版本
 
