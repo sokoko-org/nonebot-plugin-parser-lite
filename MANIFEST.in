@@ -1,0 +1,4 @@
+global-exclude *.proto *.pyi tests/*
+include Cargo.toml Cargo.lock
+include src/nonebot_plugin_parser_lite/parsers/qqmusic/*.rs
+prune target

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77"]
+requires = ["setuptools>=77", "setuptools-rust>=1.12,<2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,35 +9,38 @@ description = "Standalone social-media link parser"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = [
-  "rich>=15.0.0,<16.0.0",
-  "aiofiles>=23.2.1",
-  "msgspec>=0.20.0,<1.0.0",
-  "beautifulsoup4>=4.12.0,<5.0.0",
-  "curl_cffi>=0.15.0,<1.0.0",
-  "httpx[http2]>=0.20.0,<1.0.0",
-  "Jinja2>=3.1.0,<4.0.0",
-  "protobuf>=7.34.2,<8.0.0",
-  "anyio>=4.0.0,<5.0.0",
-  "ujson>=5.0.0,<6.0.0",
-  "cryptography>45.0.0",
-  "qrcode>=8.0,<9.0",
-  "puremagic>=1.30",
-  "Pillow>=9.0.0",
-  "blitz-py>=0.5.0",
-  "pydantic>=2.10.0,<3.0.0",
-  "typing-extensions>=4.12.0",
-  "yarl>=1.9.0,<2.0.0",
-]
+authors = [{ name = "sokoko-org" }]
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/sokoko-org/nonebot-plugin-parser-lite"
+Repository = "https://github.com/sokoko-org/nonebot-plugin-parser-lite"
+Issues = "https://github.com/sokoko-org/nonebot-plugin-parser-lite/issues"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["nonebot_plugin_parser_lite*"]
 
 [tool.setuptools.package-data]
 nonebot_plugin_parser_lite = [
-  "parsers/tieba/*.desc",
-  "parsers/miyoushe/sticker.json",
-  "render/templates/*.jinja",
-  "render/templates/*.css",
-  "render/templates/*.json",
+    "render/templates/*.jinja",
+    "render/templates/*.css",
+    "render/templates/*.json",
+    "parsers/miyoushe/sticker.json",
 ]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.proto", "*.pyi", "*.rs", "Cargo.toml", "Cargo.lock"]
+
+[[tool.setuptools-rust.ext-modules]]
+target = "nonebot_plugin_parser_lite.parsers.qqmusic.qmc"
+path = "Cargo.toml"
+binding = "PyO3"
+debug = false
+py-limited-api = true
+
+[tool.distutils.bdist_wheel]
+py-limited-api = "cp311"
