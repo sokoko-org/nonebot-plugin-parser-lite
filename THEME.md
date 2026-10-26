@@ -21,7 +21,7 @@
 >
 > 渲染模板时，模板上下文**仅接收一个名为 `data` 的根对象**。模板的核心职责即为对 `data` 内部的数据进行样式渲染与排版展示。
 
-渲染模板中对 http(s) 的访问会被故意忽略，渲染引擎详细文档可参考 [blitz-py](https://github.com/adrienbrault/blitz-py)
+渲染模板中对 http(s) 的访问会被故意忽略，也不支持加载 JavaScripts。详细文档可参考 [blitz-py](https://github.com/adrienbrault/blitz-py)
 
 ```jinja
 {# 示例：访问全局 data 对象 #}
