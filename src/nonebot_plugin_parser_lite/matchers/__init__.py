@@ -26,6 +26,12 @@ from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
 from ..render import RENDERER
 from ..utils.common import LimitedSizeDict
+from .community_dedup import (
+    ParseAttempt,
+    community_parse_dedup,
+    community_parse_key,
+)
+from .filter import _make_target_key
 from .rule import Searched, SearchResult, _extract_text, on_keyword_regex
 
 # 关键词 / 类型 -> Parser 映射
@@ -150,16 +156,41 @@ async def _get_or_parse_result(sr: SearchResult) -> ParseResult:
     return await asyncio.shield(task)
 
 
-@UniHelper.with_reaction
 async def parser_handler(
     session: Uninfo,
     sr: SearchResult = Searched(),
 ):
     """统一的解析处理器"""
+    platforms = pconfig.parse_dedup_platforms
+    if platforms is not None:
+        parser_cls = _KEYWORD_CLASS_MAP.get(sr.keyword)
+        if parser_cls is None or parser_cls.platform.name not in platforms:
+            await _parse_and_send(session, sr)
+            return
+    key = community_parse_key(_make_target_key(session), sr)
+    community_parse_dedup.window_seconds = pconfig.parse_dedup_minutes * 60
+    async with community_parse_dedup.acquire(key) as attempt:
+        if attempt is None:
+            return
+        if attempt.succeeded:
+            if pconfig.lazy_download and attempt.result is not None:
+                await LazyManager.add(LazyManager.session_key(session), attempt.result)
+            return
+        await _parse_and_send(session, sr, attempt)
+
+
+@UniHelper.with_reaction
+async def _parse_and_send(
+    session: Uninfo, sr: SearchResult, attempt: ParseAttempt | None = None,
+):
     result = await _get_or_parse_result(sr)
+    if attempt is not None and pconfig.lazy_download:
+        attempt.result = result
     summary_msg = await RENDERER.render_messages(result)
     summary_in_forward = pconfig.summary_in_forward and not pconfig.lazy_download
     if not summary_in_forward:
+        if attempt is not None:
+            attempt.output_started = True
         await send_with_media_fallback(summary_msg, result)
 
     if pconfig.lazy_download:
@@ -175,7 +206,11 @@ async def parser_handler(
             result,
             summary_node=summary_msg if summary_in_forward else None,
         ):
+            if attempt is not None:
+                attempt.output_started = True
             await send_with_media_fallback(content_msg, result)
+    if attempt is not None:
+        attempt.succeeded = True
 
 
 @driver.on_startup

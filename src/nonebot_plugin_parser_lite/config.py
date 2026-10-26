@@ -76,6 +76,10 @@ class Config(BaseModel):
     """是否在解析结果中添加原始URL二维码"""
     plite_disabled_platforms: list[PlatformEnum] = []
     """禁用的解析器"""
+    plite_parse_dedup_minutes: int = 0
+    """同会话重复解析忽略分钟数；0 仅抑制并发重复"""
+    plite_parse_dedup_platforms: list[PlatformEnum] | None = None
+    """开启解析冷却的平台；None 为全部，空列表为全部关闭"""
     plite_bili_video_codes: list[BiliVideoCodecs] = [
         BiliVideoCodecs.AVC,
         BiliVideoCodecs.AV1,
@@ -193,6 +197,16 @@ class Config(BaseModel):
     def disabled_platforms(self) -> list[PlatformEnum]:
         """禁用的解析器"""
         return self.plite_disabled_platforms
+
+    @property
+    def parse_dedup_minutes(self) -> int:
+        """同会话重复解析忽略分钟数"""
+        return self.plite_parse_dedup_minutes
+
+    @property
+    def parse_dedup_platforms(self) -> list[PlatformEnum] | None:
+        """开启解析冷却的平台"""
+        return self.plite_parse_dedup_platforms
 
     @property
     def bili_video_codes(self) -> list[BiliVideoCodecs]:

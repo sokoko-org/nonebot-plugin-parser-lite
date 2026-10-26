@@ -105,7 +105,7 @@ async def test_parser_summary_uses_file_timeout_when_rendered_as_file(
     monkeypatch.setattr(pconfig, "plite_lazy_download", False)
     monkeypatch.setattr(pconfig, "plite_append_url", False)
     monkeypatch.setattr(pconfig, "plite_embed_url", False)
-    await matchers.parser_handler.__wrapped__(session=None, sr=None)
+    await matchers._parse_and_send.__wrapped__(session=None, sr=None)
     assert len(calls) == 1
     assert calls[0][0][0] is summary_segment
     assert calls[0][1] == {"_timeout": expected_timeout}

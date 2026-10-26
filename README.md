@@ -208,6 +208,14 @@ plite_max_size=90
 # "rednote", "taptap", "tieba", "weibo", "wmpvp", "x", "zhihu", "zlb"]
 plite_disabled_platforms=["x"]
 
+# [可选] 解析冷却的平台范围：不配置或 null 为全部已启用平台，[] 为全部关闭
+# 示例 ["taptap", "ds"] 仅对 TapTap、网易大神开启；["bilibili"] 仅对 B 站开启
+# 此项不会禁用平台本身的解析
+plite_parse_dedup_platforms=null
+
+# [可选] 所选平台：同会话相同链接或编号成功解析后的忽略分钟数
+plite_parse_dedup_minutes=30
+
 # [可选] 是否在解析结果中附加原始URL
 plite_append_url=False
 
