@@ -96,7 +96,7 @@ async def test_parser_summary_uses_file_timeout_when_rendered_as_file(
     async def send(message, **kwargs):
         calls.append((message, kwargs))
 
-    monkeypatch.setattr(matchers, "_get_or_parse_result", parse_result)
+    monkeypatch.setattr(matchers, "get_or_parse_result", parse_result)
     monkeypatch.setattr(matchers.RENDERER, "cache_or_render_image", cached_summary)
     monkeypatch.setattr(matchers.RENDERER, "send_content", no_content)
     monkeypatch.setattr(UniMessage, "send", send)

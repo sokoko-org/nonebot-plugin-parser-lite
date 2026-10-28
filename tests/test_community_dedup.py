@@ -1,4 +1,5 @@
 import asyncio
+from collections import OrderedDict
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -8,7 +9,7 @@ import pytest
 from render_test_support import ROOT  # noqa: F401
 
 from nonebot_plugin_parser_lite import matchers
-from nonebot_plugin_parser_lite.matchers import community_dedup as cooldown
+from nonebot_plugin_parser_lite.matchers import limit
 from nonebot_plugin_parser_lite.matchers.rule import SearchResult
 from nonebot_plugin_parser_lite.parsers.bilibili import BilibiliParser
 from nonebot_plugin_parser_lite.parsers.ds import DsParser
@@ -41,9 +42,8 @@ def pipeline(monkeypatch):
     async def content(*_args, **_kwargs):
         yield "body"
 
-    monkeypatch.setattr(
-        matchers, "community_parse_dedup", cooldown.CommunityParseDeduplicator()
-    )
+    monkeypatch.setattr(limit.ParseCooldown, "recent", OrderedDict())
+    monkeypatch.setattr(limit.ParseCooldown, "active", {})
     monkeypatch.setattr(
         matchers,
         "_KEYWORD_CLASS_MAP",
@@ -53,7 +53,7 @@ def pipeline(monkeypatch):
             for keyword, _pattern, _params in parser._key_patterns
         },
     )
-    monkeypatch.setattr(matchers, "_get_or_parse_result", parsed)
+    monkeypatch.setattr(matchers, "get_or_parse_result", parsed)
     monkeypatch.setattr(matchers.RENDERER, "render_messages", rendered)
     monkeypatch.setattr(matchers.RENDERER, "send_content", content)
     monkeypatch.setattr(matchers, "send_with_media_fallback", sent)
@@ -62,7 +62,7 @@ def pipeline(monkeypatch):
     monkeypatch.setattr(matchers.pconfig, "plite_summary_in_forward", False)
     monkeypatch.setattr(matchers.pconfig, "plite_parse_dedup_minutes", 30)
     monkeypatch.setattr(matchers.pconfig, "plite_parse_dedup_platforms", None)
-    token = current_event.set(object()) # pyright: ignore[reportArgumentType]
+    token = current_event.set(object())  # pyright: ignore[reportArgumentType]
     yield SimpleNamespace(parsed=parsed, sent=sent)
     current_event.reset(token)
 
@@ -73,15 +73,15 @@ def pipeline(monkeypatch):
     [
         (
             "https://www.taptap.cn/moment/123?share=first",
-            "https://www.taptap.cn/explore/123?share=second",
+            "https://www.taptap.cn/moment/123?share=second",
         ),
         (
             "https://ds.163.com/feed/abc123?share=first",
-            "https://ds.163.com/article/abc123?share=second",
+            "https://ds.163.com/feed/abc123?share=second",
         ),
     ],
 )
-async def test_same_group_members_and_url_variants_share_one_window(
+async def test_same_group_members_and_share_parameters_share_one_window(
     pipeline, first, second
 ):
     await matchers.parser_handler(session(), search(first))
@@ -227,7 +227,7 @@ async def test_cooldown_expires_from_success_without_extending_on_duplicates(
     pipeline, monkeypatch
 ):
     clock = [100.0]
-    monkeypatch.setattr(cooldown, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    monkeypatch.setattr(limit, "time", SimpleNamespace(monotonic=lambda: clock[0]))
 
     async def parse(_sr):
         clock[0] = 200
