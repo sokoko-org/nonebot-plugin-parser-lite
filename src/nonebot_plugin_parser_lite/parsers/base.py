@@ -23,6 +23,7 @@ from ..constants import (
     COMMON_HEADER,
     COMMON_TIMEOUT,
     QQ_HEADER,
+    MatchRule,
     MatchWithParams,
     ParamRules,
 )
@@ -52,7 +53,6 @@ T = TypeVar("T", bound="BaseParser")
 
 HandlerFunc = Callable[[T, MatchWithParams], Coroutine[Any, Any, ParseResult]]
 KeyPatterns = list[tuple[str, Pattern[str], ParamRules]]
-HandlerEntry = tuple[Pattern[str], HandlerFunc[T], ParamRules]
 
 _KEY_PATTERNS = "_key_patterns"
 
@@ -164,8 +164,8 @@ class BaseParser:
     """ 平台信息（包含名称和显示名称） """
 
     if TYPE_CHECKING:
-        _key_patterns: ClassVar[KeyPatterns]
-        _handlers: ClassVar[dict[str, list[HandlerEntry]]]
+        _key_patterns: ClassVar[list[MatchRule]]
+        _handlers: ClassVar[dict[str, dict[str, HandlerFunc]]]
 
     def __init__(self):
         self.headers = COMMON_HEADER.copy()
@@ -185,7 +185,7 @@ class BaseParser:
         if ABC not in cls.__bases__:  # 跳过抽象类
             BaseParser._registry.append(cls)
 
-        cls._handlers: dict[str, list[HandlerEntry]] = {}
+        cls._handlers = {}
         cls._key_patterns = []
 
         # 获取所有被 handle 装饰的方法
@@ -194,16 +194,15 @@ class BaseParser:
             if callable(attr) and hasattr(attr, _KEY_PATTERNS):
                 key_patterns: KeyPatterns = getattr(attr, _KEY_PATTERNS)
                 handler = cast(HandlerFunc, attr)
+                handler_key = f"{cls.__module__}.{cls.__qualname__}.{attr_name}"
                 for keyword, pattern, param_rules in key_patterns:
-                    # 记录 keyword -> (pattern, handler, param_rules) 列表
-                    cls._handlers.setdefault(keyword, []).append(
-                        (pattern, handler, param_rules)
+                    cls._handlers.setdefault(keyword, {})[handler_key] = handler
+                    cls._key_patterns.append(
+                        MatchRule(keyword, pattern, param_rules, handler_key)
                     )
-                    # _key_patterns 用于 matcher 注册，保留 param_rules
-                    cls._key_patterns.append((keyword, pattern, param_rules))
 
         # 按关键字长度降序排序（search_url 仍然按原逻辑）
-        cls._key_patterns.sort(key=lambda x: -len(x[0]))
+        cls._key_patterns.sort(key=lambda rule: -len(rule.keyword))
 
     @classmethod
     def get_all_subclass(cls) -> list[type["BaseParser"]]:
@@ -217,34 +216,20 @@ class BaseParser:
         :param keyword: 关键词
         :param searched: 正则表达式匹配对象，由平台对应的模式匹配得到
         :return: 解析结果
-        :raise ParseException: 未找到匹配的 handler 时抛出
         """
-        handlers = self._handlers.get(keyword)
-        if not handlers:
-            raise ParseException(f"未找到关键字 {keyword!r} 对应的 handler")
-
-        text = searched.url
-        for pattern, handler, param_rules in handlers:
-            # pattern 是当初 handle 时 compile 出来的正则；参数规则也必须复核，
-            # 因为同一 keyword 下可能有多个只靠 query 区分的 handler
-            if pattern.search(text) and self._match_param_rules(searched, param_rules):
-                result = await handler(self, searched)
-                ratio = (
-                    pconfig.media_speedup_rules.get(
-                        (result.platform.name, result.author.id), 1.0
-                    )
-                    if result.author.id
-                    else 1.0
-                )
-                for content in result.iter_sendable_media():
-                    if isinstance(content, AudioVideoContent):
-                        content.speedup = ratio
-                return result
-
-        # 理论上不该走到这里，防御性错误
-        raise ParseException(
-            f"关键字 {keyword!r} 存在 handler 但无任何模式匹配 {text!r}"
+        handler = self._handlers[keyword][searched.rule.handler_key]
+        result = await handler(self, searched)
+        ratio = (
+            pconfig.media_speedup_rules.get(
+                (result.platform.name, result.author.id), 1.0
+            )
+            if result.author.id
+            else 1.0
         )
+        for content in result.iter_sendable_media():
+            if isinstance(content, AudioVideoContent):
+                content.speedup = ratio
+        return result
 
     async def parse_with_redirect(
         self,
@@ -266,56 +251,11 @@ class BaseParser:
         return await self.parse(keyword, searched)
 
     @classmethod
-    def _match_param_rules(cls, mwp: MatchWithParams, rules: ParamRules) -> bool:
-        """根据 ParamRules 检查并补充 mwp.params."""
-        if not rules:
-            return True
-
-        for name, rule in rules.items():
-            required = rule.get("required", True)
-            value = mwp.params.get(name)
-
-            # 默认值处理
-            if value is None and "default" in rule:
-                value = rule["default"]
-                mwp.params[name] = value  # 写回，后续 handler 可以直接用
-
-            if value is None:
-                if required:
-                    return False
-                # 非必填且无值 -> 略过后续 equals/one_of/as_int 校验
-                continue
-
-            # equals
-            if "equals" in rule and value != rule["equals"]:
-                return False
-
-            # one_of
-            if "one_of" in rule and value not in rule["one_of"]:
-                return False
-
-            # as_int 仅做格式校验
-            if rule.get("as_int"):
-                try:
-                    int(value)
-                except ValueError:
-                    return False
-
-        return True
-
-    @classmethod
     def search_url(cls, url: str) -> tuple[str, MatchWithParams]:
         """搜索 URL 匹配模式（支持基于 params 的筛选）"""
-        for keyword, pattern, param_rules in cls._key_patterns:
-            if keyword not in url:
-                continue
-            m = pattern.search(url)
-            if not m:
-                continue
-            mwp = MatchWithParams(m)
-            mwp.param_rules = param_rules
-            if cls._match_param_rules(mwp, param_rules):
-                return keyword, mwp
+        for rule in cls._key_patterns:
+            if searched := rule.match(url):
+                return rule.keyword, searched
         raise ParseException(f"无法匹配 {url}")
 
     @classmethod

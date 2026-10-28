@@ -74,7 +74,7 @@ class MatchResult:
 
     @property
     def cache_key(self) -> str:
-        return f"{self.keyword}:{self.searched.cache_key}"
+        return self.searched.cache_key
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,22 +113,15 @@ class Parser:
 
         patterns = sorted(
             (
-                (keyword, pattern, rules, parser_type)
+                (rule, parser_type)
                 for parser_type in self._types()
-                for keyword, pattern, rules in parser_type._key_patterns
+                for rule in parser_type._key_patterns
             ),
-            key=lambda item: -len(item[0]),
+            key=lambda item: -len(item[0].keyword),
         )
-        for keyword, pattern, rules, parser_type in patterns:
-            if keyword not in text:
-                continue
-            matched = pattern.search(text)
-            if matched is None:
-                continue
-            searched = MatchWithParams(matched)
-            searched.param_rules = rules
-            if parser_type._match_param_rules(searched, rules):
-                return MatchResult(text, keyword, searched, parser_type)
+        for rule, parser_type in patterns:
+            if searched := rule.match(text):
+                return MatchResult(text, rule.keyword, searched, parser_type)
         raise ParseException("文本中没有可解析的内容")
 
     def _instance(self, parser_type: type[BaseParser]) -> BaseParser:
