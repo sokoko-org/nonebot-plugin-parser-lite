@@ -13,6 +13,9 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  PYTHONUTF8: "1"
+
 concurrency:
   group: release-drafter-${{ github.ref }}
   cancel-in-progress: false
@@ -118,6 +121,7 @@ jobs:
 
       - name: Build platform wheel
         env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ runner.arch == 'ARM64' && '11.0' || '10.12' }}
           CIBW_BUILD: cp311-*
           CIBW_SKIP: '*-musllinux_*'
           CIBW_ARCHS: native

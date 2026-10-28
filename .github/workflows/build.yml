@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  PYTHONUTF8: "1"
+
 jobs:
   build:
     name: Build ${{ matrix.distribution }} (${{ matrix.os }})
@@ -52,6 +55,7 @@ jobs:
 
       - name: Build platform wheel
         env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ runner.arch == 'ARM64' && '11.0' || '10.12' }}
           CIBW_BUILD: cp311-*
           CIBW_SKIP: '*-musllinux_*'
           CIBW_ARCHS: native
