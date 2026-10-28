@@ -1,0 +1,77 @@
+name: Build artifacts
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.distribution }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        distribution: [plugin, standalone]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-15-intel, macos-latest]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Rust
+        if: runner.os != 'Linux'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate standalone tree
+        if: matrix.distribution == 'standalone'
+        run: python scripts/generate_standalone.py
+
+      - name: Normalize standalone imports
+        if: matrix.distribution == 'standalone'
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check --config ruff.toml --fix
+          src: src/nonebot_plugin_parser_lite
+
+      - name: Verify standalone source
+        if: matrix.distribution == 'standalone'
+        run: python scripts/verify_standalone.py
+
+      - name: Install build tools
+        run: python -m pip install build packaging "cibuildwheel>=3,<4"
+
+      - name: Build platform wheel
+        env:
+          CIBW_BUILD: cp311-*
+          CIBW_SKIP: '*-musllinux_*'
+          CIBW_ARCHS: native
+          CIBW_BEFORE_ALL_LINUX: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+          CIBW_ENVIRONMENT_LINUX: 'PATH="$HOME/.cargo/bin:$PATH"'
+        run: python -m cibuildwheel --output-dir dist
+
+      - name: Build source distribution
+        if: matrix.os == 'ubuntu-latest'
+        run: python -m build --sdist
+
+      - name: Verify distributions
+        run: python scripts/verify_package.py
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.distribution }}-${{ matrix.os }}-${{ github.sha }}
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 7
