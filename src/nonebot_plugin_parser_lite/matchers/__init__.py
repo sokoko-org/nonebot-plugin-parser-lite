@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import nullcontext
 from dataclasses import dataclass
 import re
 from typing import ClassVar, TypeVar
@@ -26,12 +27,8 @@ from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
 from ..render import RENDERER
 from ..utils.common import LimitedSizeDict
-from .community_dedup import (
-    ParseAttempt,
-    community_parse_dedup,
-    community_parse_key,
-)
 from .filter import _make_target_key
+from .limit import ParseCooldown, ParseState
 from .rule import Searched, SearchResult, _extract_text, on_keyword_regex
 
 # 关键词 / 类型 -> Parser 映射
@@ -106,8 +103,8 @@ def register_parser_matcher() -> None:
     keyword_class_map: dict[str, type[BaseParser]] = {}
     for parser_cls in _ENABLED_PARSER_CLASSES:
         enabled_platforms.append(parser_cls.platform.display_name)
-        for keyword, _, _ in parser_cls._key_patterns:
-            keyword_class_map[keyword] = parser_cls
+        for rule in parser_cls._key_patterns:
+            keyword_class_map[rule.keyword] = parser_cls
 
     _KEYWORD_CLASS_MAP = keyword_class_map
 
@@ -128,7 +125,7 @@ async def close_http_clients() -> None:
     )
 
 
-async def _get_or_parse_result(sr: SearchResult) -> ParseResult:
+async def get_or_parse_result(sr: SearchResult) -> ParseResult:
     cache_key = sr.cache_key
     if result := _RESULT_CACHE.get(cache_key):
         logger.debug(f"命中缓存: {cache_key}, 结果: {result!r}")
@@ -161,56 +158,60 @@ async def parser_handler(
     sr: SearchResult = Searched(),
 ):
     """统一的解析处理器"""
-    platforms = pconfig.parse_dedup_platforms
-    if platforms is not None:
-        parser_cls = _KEYWORD_CLASS_MAP.get(sr.keyword)
-        if parser_cls is None or parser_cls.platform.name not in platforms:
-            await _parse_and_send(session, sr)
+    dedup_platforms = pconfig.parse_dedup_platforms
+    parser_cls = _KEYWORD_CLASS_MAP.get(sr.keyword)
+    dedup_enabled = dedup_platforms is None or (
+        parser_cls is not None and parser_cls.platform.name in dedup_platforms
+    )
+    key = _make_target_key(session), sr.cache_key
+    context = ParseCooldown.acquire(key) if dedup_enabled else nullcontext(ParseState())
+    async with context as state:
+        if state is None:
             return
-    key = community_parse_key(_make_target_key(session), sr)
-    community_parse_dedup.window_seconds = pconfig.parse_dedup_minutes * 60
-    async with community_parse_dedup.acquire(key) as attempt:
-        if attempt is None:
+        if not state.succeeded:
+            await _parse_and_send(session, sr, state)
+        if state.result is None:
             return
-        if attempt.succeeded:
-            if pconfig.lazy_download and attempt.result is not None:
-                await LazyManager.add(LazyManager.session_key(session), attempt.result)
-            return
-        await _parse_and_send(session, sr, attempt)
+        if pconfig.lazy_download:
+            await LazyManager.add(LazyManager.session_key(session), state.result)
+        else:
+            state.result = None
+        state.succeeded = True
 
 
 @UniHelper.with_reaction
 async def _parse_and_send(
-    session: Uninfo, sr: SearchResult, attempt: ParseAttempt | None = None,
+    session: Uninfo,
+    sr: SearchResult,
+    state: ParseState | None = None,
 ):
-    result = await _get_or_parse_result(sr)
-    if attempt is not None and pconfig.lazy_download:
-        attempt.result = result
+    result = await get_or_parse_result(sr)
     summary_msg = await RENDERER.render_messages(result)
     summary_in_forward = pconfig.summary_in_forward and not pconfig.lazy_download
     if not summary_in_forward:
-        if attempt is not None:
-            attempt.output_started = True
+        if state:
+            state.output_started = True
         await send_with_media_fallback(summary_msg, result)
 
     if pconfig.lazy_download:
         if pconfig.lazy_download_tip:
             download_cmd = ", ".join(pconfig.download_command)
+            if state:
+                state.output_started = True
             await UniMessage(
                 f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
                 f"\n{download_cmd}"
             ).send()
-        await LazyManager.add(LazyManager.session_key(session), result)
     else:
         async for content_msg in RENDERER.send_content(
             result,
             summary_node=summary_msg if summary_in_forward else None,
         ):
-            if attempt is not None:
-                attempt.output_started = True
+            if state:
+                state.output_started = True
             await send_with_media_fallback(content_msg, result)
-    if attempt is not None:
-        attempt.succeeded = True
+    if state:
+        state.result = result
 
 
 @driver.on_startup
