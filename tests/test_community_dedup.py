@@ -48,9 +48,9 @@ def pipeline(monkeypatch):
         matchers,
         "_KEYWORD_CLASS_MAP",
         {
-            keyword: parser
+            rule.keyword: parser
             for parser in (TapTapParser, DsParser, BilibiliParser)
-            for keyword, _pattern, _params, _handler in parser._key_patterns
+            for rule in parser._key_patterns
         },
     )
     monkeypatch.setattr(matchers, "get_or_parse_result", parsed)

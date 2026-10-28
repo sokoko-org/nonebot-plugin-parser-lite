@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from enum import StrEnum
-from re import Match
+import json
+from re import Match, Pattern
 from typing import Final, TypedDict, TypeVar, overload
 from urllib.parse import parse_qs, urlparse
 
@@ -77,9 +79,10 @@ _TDefault = TypeVar("_TDefault")
 class MatchWithParams:
     """在原有 re.Match 基础上，附带 URL 与解析好的 params，并挂载额外分组"""
 
-    __slots__ = ("match", "param_rules", "params", "url")
+    __slots__ = ("cache_key", "match", "params", "rule", "url")
 
-    def __init__(self, match: Match[str]):
+    def __init__(self, match: Match[str], rule: "MatchRule"):
+        self.rule = rule
         self.match = match
         self.url = match.group(0)
         parsed = urlparse(self.url)
@@ -89,8 +92,7 @@ class MatchWithParams:
         qs.update(fragment_qs)
         # 只取第一个
         self.params: dict[str, str] = {k: v[0] for k, v in qs.items()}
-        self.param_rules: ParamRules = {}
-        """当前匹配对应的 ParamRules（由 BaseParser / rule 填充）"""
+        self.cache_key = ""
 
     def __getitem__(self, key) -> str:
         if isinstance(key, str) and (value := self.params.get(key)) is not None:
@@ -118,32 +120,6 @@ class MatchWithParams:
     def string(self):
         return self.match.string
 
-    @property
-    def cache_key(self) -> str:
-        """
-        用于结果缓存的 key：
-        - 若没有 ParamRules：只使用原始 URL（与旧逻辑兼容）
-        - 若有 ParamRules：URL + ParamRules 中提及的参数（按 key 排序）
-        """
-        base = self.url
-
-        # 没有任何参数规则，保持与旧逻辑完全一致
-        if not self.param_rules:
-            return base
-
-        # 只使用 ParamRules 中提到的参数
-        keys = sorted(self.param_rules.keys())
-        used_params = {k: self.params[k] for k in keys if k in self.params}
-
-        # 没有实际值
-        if not used_params:
-            return base
-
-        parts = [base.split("#", 1)[0]]  # 去掉 fragment
-        param_str = "&".join(f"{k}={used_params[k]}" for k in sorted(used_params))
-        parts.append(param_str)
-        return "?".join(parts)
-
 
 class ParamRule(TypedDict, total=False):
     """单个参数的匹配规则."""
@@ -161,3 +137,65 @@ class ParamRule(TypedDict, total=False):
 
 
 ParamRules = dict[str, ParamRule]
+
+
+@dataclass(frozen=True, slots=True)
+class MatchRule:
+    """处理器的匹配规则，统一准备参数和缓存键"""
+
+    keyword: str
+    pattern: Pattern[str]
+    params: ParamRules
+    handler_key: str
+
+    def match(self, text: str) -> MatchWithParams | None:
+        if self.keyword not in text or not (matched := self.pattern.search(text)):
+            return None
+        searched = MatchWithParams(matched, self)
+        if not self._match_params(searched.params):
+            return None
+        searched.cache_key = self._cache_key(searched)
+        return searched
+
+    def _match_params(self, params: dict[str, str]) -> bool:
+        for name, rule in self.params.items():
+            value = params.get(name)
+            if value is None and "default" in rule:
+                value = params[name] = rule["default"]
+            if value is None:
+                if rule.get("required", True):
+                    return False
+                continue
+            if "equals" in rule and value != rule["equals"]:
+                return False
+            if "one_of" in rule and value not in rule["one_of"]:
+                return False
+            if rule.get("as_int"):
+                try:
+                    int(value)
+                except ValueError:
+                    return False
+        return True
+
+    def _cache_key(self, searched: MatchWithParams) -> str:
+        named_indexes = set(self.pattern.groupindex.values())
+        values = {
+            name: searched[name]
+            for name, value in searched.match.groupdict().items()
+            if value is not None
+        }
+        values.update(
+            (str(index), value)
+            for index, value in enumerate(searched.match.groups(), 1)
+            if index not in named_indexes and value is not None
+        )
+        values.update(
+            (name, searched.params[name])
+            for name in self.params
+            if name in searched.params
+        )
+        return json.dumps(
+            (self.handler_key, values or searched.url),
+            sort_keys=True,
+            separators=(",", ":"),
+        )

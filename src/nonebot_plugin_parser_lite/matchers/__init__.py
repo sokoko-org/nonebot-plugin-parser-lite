@@ -103,8 +103,8 @@ def register_parser_matcher() -> None:
     keyword_class_map: dict[str, type[BaseParser]] = {}
     for parser_cls in _ENABLED_PARSER_CLASSES:
         enabled_platforms.append(parser_cls.platform.display_name)
-        for keyword, _, _ in parser_cls._key_patterns:
-            keyword_class_map[keyword] = parser_cls
+        for rule in parser_cls._key_patterns:
+            keyword_class_map[rule.keyword] = parser_cls
 
     _KEYWORD_CLASS_MAP = keyword_class_map
 
