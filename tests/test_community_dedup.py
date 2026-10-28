@@ -50,7 +50,7 @@ def pipeline(monkeypatch):
         {
             keyword: parser
             for parser in (TapTapParser, DsParser, BilibiliParser)
-            for keyword, _pattern, _params in parser._key_patterns
+            for keyword, _pattern, _params, _handler in parser._key_patterns
         },
     )
     monkeypatch.setattr(matchers, "get_or_parse_result", parsed)
@@ -73,15 +73,15 @@ def pipeline(monkeypatch):
     [
         (
             "https://www.taptap.cn/moment/123?share=first",
-            "https://www.taptap.cn/moment/123?share=second",
+            "https://www.taptap.cn/explore/123?share=second",
         ),
         (
             "https://ds.163.com/feed/abc123?share=first",
-            "https://ds.163.com/feed/abc123?share=second",
+            "https://ds.163.com/article/abc123?share=second",
         ),
     ],
 )
-async def test_same_group_members_and_share_parameters_share_one_window(
+async def test_same_group_members_and_url_variants_share_one_window(
     pipeline, first, second
 ):
     await matchers.parser_handler(session(), search(first))
