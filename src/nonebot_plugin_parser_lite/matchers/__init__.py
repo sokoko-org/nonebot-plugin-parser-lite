@@ -196,6 +196,8 @@ async def _parse_and_send(
     if pconfig.lazy_download:
         if pconfig.lazy_download_tip:
             download_cmd = ", ".join(pconfig.download_command)
+            if state:
+                state.output_started = True
             await UniMessage(
                 f"请在{LazyManager.TIMEOUT_SECONDS}秒内发送以下命令之一来获取媒体资源: "
                 f"\n{download_cmd}"
