@@ -6,19 +6,32 @@
 
 ## 📦 安装与项目集成
 
-推荐安装 Release 提供的对应平台 wheel，安装后即可导入使用
+需要 Python **3.11 或更高版本**
 
-如果要将模块复制到自己的项目，需要先安装 Rust 环境，然后在仓库根目录编译
+从 Git 或源码安装还需要 Rust 工具链用于编译模块。以下方式任选其一
+
+### 下载编译产物安装
+
+从 Release 下载独立版 wheel，或在 [Actions](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml) 下载安装对应平台的产物
+
+### 从 Git 或源码安装
+
+```shell
+python -m pip install "nonebot-plugin-parser-lite-standalone @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@standalone"
+```
+
+安装完成后即可在项目中导入使用
+
+### 手动复制到项目
+
+在仓库根目录安装依赖并编译 QMC 模块(或者从产物 whl 解压)
 
 ```shell
 python -m pip install "setuptools>=77" "setuptools-rust>=1.12,<2"
 python setup.py build_ext --inplace
 ```
 
-随后将 `src/nonebot_plugin_parser_lite` 整个目录连同编译扩展复制到你的项目中
-目标环境需使用相同的操作系统和 CPU 架构，以及 CPython 3.11 或更高版本
-
-若手动编译并安装包，可以使用 `pip install -e .`
+随后将 `src/nonebot_plugin_parser_lite` 复制到你的项目中
 
 ```text
 your_project/
@@ -29,7 +42,11 @@ your_project/
 └── your_code.py
 ```
 
-同时，在你的项目中安装 `requirements.txt` 中列出的基础依赖即可
+并在项目环境安装运行依赖
+
+```shell
+python -m pip install -r requirements.txt
+```
 
 ## 🚀 快速上手
 

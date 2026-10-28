@@ -67,6 +67,10 @@
 
 从 Git 或源码安装还需要 Rust 工具链用于编译模块
 
+### 从 Action 安装
+
+如果不想编译，可从 [Action](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml) 中下载对应平台的产物
+
 ### 从 Git 安装
 
 <details>
