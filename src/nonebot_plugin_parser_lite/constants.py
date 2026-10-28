@@ -184,12 +184,12 @@ class MatchRule:
             for name, value in searched.match.groupdict().items()
             if value is not None
         }
-        values.update(
+        values |= (
             (str(index), value)
             for index, value in enumerate(searched.match.groups(), 1)
             if index not in named_indexes and value is not None
         )
-        values.update(
+        values |= (
             (name, searched.params[name])
             for name in self.params
             if name in searched.params
