@@ -3,6 +3,23 @@ name: Build artifacts
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/nonebot_plugin_parser_lite/**'
+      - '!src/nonebot_plugin_parser_lite/**/*.md'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'MANIFEST.in'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.cargo/**'
+      - 'ruff.toml'
+      - 'scripts/generate_standalone.py'
+      - 'scripts/standalone_templates/**'
+      - '!scripts/standalone_templates/**/*.md'
+      - 'scripts/verify_standalone.py'
+      - 'scripts/verify_package.py'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 permissions:
