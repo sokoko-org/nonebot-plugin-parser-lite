@@ -147,4 +147,4 @@ configure(plite_max_comments=10, plite_disabled_platforms=["x"])
 
 ## 第三方许可
 
-项目代码采用 [GNU AGPL v3.0 only](LICENSE)。第三方代码和资源的来源、许可证及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+本项目自身代码采用 [MIT](LICENSE)。第三方代码和资源保留各自许可，来源、许可例外及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2024 Project Unlock Music
+// Copyright (c) 2026 006lp
+// Adapted for parser-lite; see THIRD-PARTY-NOTICES.md.
+
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write};
 use std::path::Path;
