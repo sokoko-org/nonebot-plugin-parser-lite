@@ -144,3 +144,7 @@ configure(plite_max_comments=10, plite_disabled_platforms=["x"])
 - 缓存根目录默认为当前目录下的 `.parser-lite`（可通过配置项 `PARSER_LITE_BASE_DIR` 修改）
 - 首次进入异步解析时，会在当前事件循环自动注册周期缓存清理任务
 - 应用程序退出前，可调用 `await shutdown_runtime()` 关闭后台定时任务
+
+## 第三方许可
+
+项目代码采用 [GNU AGPL v3.0 only](LICENSE)。第三方代码和资源的来源、许可证及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
