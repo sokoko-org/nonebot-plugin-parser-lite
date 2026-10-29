@@ -3,6 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from itertools import chain, islice
 from typing import ClassVar
 
+from httpx import HTTPError
 from nonebot import logger
 
 from ..utils.format import format_num
@@ -94,20 +95,24 @@ class KuWoParser(BaseParser):
 
     async def fetch_audio(self, rid: str) -> tuple[str, str]:
         for bitrate in (320, 192, 128):
-            response = await self.httpx.get(
-                "http://mobi.kuwo.cn/mobi.s",
-                params={
-                    "type": "convert_url_with_sign",
-                    "br": f"{bitrate}kmp3",
-                    "user": "0",
-                    "priority": "bitrate",
-                    "surl": "1",
-                    "source": "kwplayer_ar_5.1.0.0_B_jiakong_vh.apk",
-                    "rid": rid,
-                    "f": "web",
-                },
-            )
-            response.raise_for_status()
+            try:
+                response = await self.httpx.get(
+                    "http://mobi.kuwo.cn/mobi.s",
+                    params={
+                        "type": "convert_url_with_sign",
+                        "br": f"{bitrate}kmp3",
+                        "user": "0",
+                        "priority": "bitrate",
+                        "surl": "1",
+                        "source": "kwplayer_ar_5.1.0.0_B_jiakong_vh.apk",
+                        "rid": rid,
+                        "f": "web",
+                    },
+                )
+                response.raise_for_status()
+            except HTTPError as e:
+                logger.warning(f"酷我音乐 {bitrate}K 音频获取失败: {e}")
+                continue
             data = response.json()
             data = data.get("data", data)
             audio_url = data.get("url") or data.get("purl") or data.get("surl")
@@ -120,26 +125,30 @@ class KuWoParser(BaseParser):
         raise ParseException("无法获取酷我音乐音频下载地址")
 
     async def fetch_lyric(self, rid: str) -> str:
-        response = await self.httpx.get(
-            "https://kuwo.cn/openapi/v1/www/lyric/getlyric",
-            params={"musicId": rid},
-        )
-        response.raise_for_status()
-        data = response.json()
-        if data["code"] != 200:
-            raise ParseException(f"酷我音乐歌词接口返回错误: {data}")
-        lines = []
-        for row in data["data"]["lrclist"]:
-            centiseconds = int(
-                (Decimal(str(row["time"])) * 100).quantize(
-                    Decimal("1"), rounding=ROUND_HALF_UP
-                )
+        try:
+            response = await self.httpx.get(
+                "https://kuwo.cn/openapi/v1/www/lyric/getlyric",
+                params={"musicId": rid},
             )
-            minutes, remainder = divmod(centiseconds, 6000)
-            seconds, fraction = divmod(remainder, 100)
-            text = " ".join(row["lineLyric"].split())
-            lines.append(f"[{minutes:02d}:{seconds:02d}.{fraction:02d}]{text}")
-        return "\n".join(lines)
+            response.raise_for_status()
+            data = response.json()
+            if data["code"] != 200:
+                raise ParseException(f"酷我音乐歌词接口返回错误: {data}")
+            lines = []
+            for row in data["data"]["lrclist"]:
+                centiseconds = int(
+                    (Decimal(str(row["time"])) * 100).quantize(
+                        Decimal("1"), rounding=ROUND_HALF_UP
+                    )
+                )
+                minutes, remainder = divmod(centiseconds, 6000)
+                seconds, fraction = divmod(remainder, 100)
+                text = " ".join(row["lineLyric"].split())
+                lines.append(f"[{minutes:02d}:{seconds:02d}.{fraction:02d}]{text}")
+            return "\n".join(lines)
+        except Exception as e:
+            logger.warning(f"酷我音乐歌词获取失败: {e}")
+            return ""
 
     @handle("kuwo.cn", r"play_detail/(\d+)")
     async def _parse_kuwo_share(self, searched: MatchWithParams):
