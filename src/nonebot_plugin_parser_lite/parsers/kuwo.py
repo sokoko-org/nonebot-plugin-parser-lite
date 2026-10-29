@@ -69,7 +69,7 @@ class KuWoParser(BaseParser):
                 comment_count=format_num(data.get("child_comment_count", 0)),
             ),
         )
-        for reply in data.get("child_comments", []):
+        for reply in data.get("child_comments", [])[:5]:
             comment.add_reply(self._to_comment(reply))
         return comment
 
