@@ -9,6 +9,7 @@ description = "NoneBot2 通用媒体链接分享解析插件"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
+license-files = ["LICENSE", "THIRD-PARTY-NOTICES.md"]
 authors = [{ name = "sokoko-org" }]
 dynamic = ["dependencies"]
 

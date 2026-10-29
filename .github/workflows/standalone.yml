@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/standalone.yml'
       - 'LICENSE'
+      - 'THIRD-PARTY-NOTICES.md'
       - 'requirements.txt'
       - 'pyproject.toml'
       - 'setup.py'
@@ -86,12 +87,13 @@ jobs:
           rm -f "$publish_index"
           export GIT_INDEX_FILE="$publish_index"
           git read-tree --empty
-          git add -- README.md LICENSE requirements.txt pyproject.toml setup.py MANIFEST.in Cargo.toml Cargo.lock \
+          git add -- README.md LICENSE THIRD-PARTY-NOTICES.md requirements.txt pyproject.toml setup.py MANIFEST.in Cargo.toml Cargo.lock \
             src/nonebot_plugin_parser_lite
 
           unexpected_paths="$(git ls-files | awk -F/ '
             $1 != "README.md" &&
             $1 != "LICENSE" &&
+            $1 != "THIRD-PARTY-NOTICES.md" &&
             $1 != "requirements.txt" &&
             $1 != "pyproject.toml" &&
             $1 != "setup.py" &&

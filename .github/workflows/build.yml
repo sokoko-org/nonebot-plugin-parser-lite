@@ -6,6 +6,8 @@ on:
     paths:
       - 'src/nonebot_plugin_parser_lite/**'
       - '!src/nonebot_plugin_parser_lite/**/*.md'
+      - 'LICENSE'
+      - 'THIRD-PARTY-NOTICES.md'
       - 'requirements.txt'
       - 'pyproject.toml'
       - 'setup.py'

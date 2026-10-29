@@ -103,7 +103,7 @@ uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --tag <t
 
 </details>
 
-指定版本安装仅支持 `1.3.7+`, 更早的版本请使用手动安装。
+指定版本安装仅支持 `1.3.7+`, 更早的版本请使用手动安装
 
 ### 手动安装
 
@@ -242,8 +242,8 @@ plite_summary_in_forward=False
 plite_video_in_forward=False
 
 # 合并转发遇到明确的媒体上传错误时，只重发失败的分包：先省略视频并保留其他内容；
-# 若再次上传失败或没有视频，则将媒体替换为文字，仍以合并转发发送。
-# 降级消息会补上缺失的标题、作者和原链接，不受 plite_append_url 影响。
+# 若再次上传失败或没有视频，则将媒体替换为文字，仍以合并转发发送
+# 降级消息会补上缺失的标题、作者和原链接，不受 plite_append_url 影响
 
 # [可选] 是否开启懒下载模式，仅在用户请求时才下载视频
 plite_lazy_download=False
@@ -322,9 +322,9 @@ plite_bsb_categories=[]
 |    bm    | bv号或引用一个链接/卡片 |           -           |  否   | 全部 |                 下载 B 站音频                 |
 |  blogin  |            -            |       SUPERUSER       |  是   | 全部 |               扫码获取 B 站凭证               |
 
-不带参数时，群聊和频道指令操作当前会话，私聊指令操作当前用户。
+不带参数时，群聊和频道指令操作当前会话，私聊指令操作当前用户
 
-超级管理员可以指定其他目标：群聊中填写群号，私聊中填写用户 ID。
+超级管理员可以指定其他目标：群聊中填写群号，私聊中填写用户 ID
 
 私聊中关闭解析后，该用户在同一平台的私聊、群聊和频道中都不能触发解析
 
@@ -338,6 +338,8 @@ plite_bsb_categories=[]
 
 ## 🎉 致谢
 
+本项目自身代码采用 [MIT](LICENSE)。第三方代码和资源保留各自许可，来源、许可例外及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+
 <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=sokoko-org/nonebot-plugin-parser-lite" />
 </a>
@@ -347,7 +349,6 @@ plite_bsb_categories=[]
 - [lumina37/aiotieba](https://github.com/lumina37/aiotieba) 贴吧解析参考
 - [ikenxuan/karin-plugin-kkk](https://github.com/ikenxuan/karin-plugin-kkk) 部分逻辑参考
 - [ikenxuan/amagi](https://github.com/ikenxuan/amagi) 部分接口参考
-- [zly2006/zhihu-plus-plus](https://github.com/zly2006/zhihu-plus-plus) 知乎解析参考
 - [Uesugi Hanako](https://github.com/negichan) 渲染模板设计和部分签名算法
 - [soloxiaoye2022](https://github.com/soloxiaoye2022) 部分签名算法
 - [nemo2011/bilibili-api (RIP)](https://github.com/Nemo2011/bilibili-api) 部分接口参考

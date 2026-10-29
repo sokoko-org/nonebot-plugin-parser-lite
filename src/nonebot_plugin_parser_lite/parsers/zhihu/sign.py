@@ -1,5 +1,4 @@
 # 知乎 zse96 签名算法
-# 移植自 zly2006/zhihu-plus-plus
 
 
 import hashlib
