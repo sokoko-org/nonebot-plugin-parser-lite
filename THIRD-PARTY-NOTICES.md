@@ -14,8 +14,6 @@
 | [Tailwind CSS v4.2.2](https://github.com/tailwindlabs/tailwindcss/tree/v4.2.2)                                                                                           | `render/templates/tailwind.css`，随模板发布的生成 CSS                                            | MIT；Copyright (c) Tailwind Labs, Inc.                                                    |
 | [Font Awesome Free](https://fontawesome.com/)                                                                                                                            | `render/templates/icon.css` 中的 SVG，嵌入 CSS mask 并调整尺寸、颜色和布局；保留图标内版本及署名 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)；Copyright 2026 Fonticons, Inc. |
 
-上述 MIT 组件及下列原生扩展依赖共同适用本文末尾的 MIT 许可文本。QMC 更上游选择 MIT，采用的 Rust 改写也已确认 MIT 授权，保留 Project Unlock Music、006lp 及相关贡献者署名。
-
 Font Awesome 使用的是 SVG 图标，适用 [CC BY 4.0 法律文本](https://creativecommons.org/licenses/by/4.0/legalcode)；字体的 SIL OFL 许可不适用于这些 SVG。品牌商标归各自权利人所有
 
 ## Bilibili Protobuf

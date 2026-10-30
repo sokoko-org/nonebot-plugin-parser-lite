@@ -3,7 +3,12 @@ from typing import Final
 
 from anyio import CancelScope, Path, to_thread
 
-from .qmc import decrypt_qmc_file
+try:
+    from .qmc import decrypt_qmc_file
+except ModuleNotFoundError:
+    raise RuntimeError(
+        "未找到编译模块，请检查是否根据安装步骤运行了 `python setup.py build_ext --inplace`"
+    )
 
 _OUTPUT_EXTENSIONS: Final = MappingProxyType(
     {
