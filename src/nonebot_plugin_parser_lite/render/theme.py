@@ -115,6 +115,10 @@ class ThemeDefinition:
         return (await self.resolve_template(platform)).name
 
 
+# 主题目录在启动后固定，发现结果按搜索根缓存，避免每次渲染重复扫盘
+_DISCOVERED: dict[tuple[str, ...], dict[str, ThemeDefinition]] = {}
+
+
 class ThemeManager:
     """发现并选择内置或用户目录中的主题
 
@@ -133,18 +137,25 @@ class ThemeManager:
         roots.append(self.builtin_dir)
         self.search_roots = tuple(roots)
 
-    async def list_themes(self) -> list[ThemeDefinition]:
-        """返回按搜索优先级去重后的主题列表"""
+    async def _themes(self) -> dict[str, ThemeDefinition]:
+        key = tuple(str(root) for root in self.search_roots)
+        if (cached := _DISCOVERED.get(key)) is not None:
+            return cached
         builtin_root = await self.builtin_dir.resolve()
         themes: dict[str, ThemeDefinition] = {}
         for root in await _unique_paths(self.search_roots):
             for theme in await _discover_root(root, builtin_root):
                 themes.setdefault(theme.id, theme)
-        return list(themes.values())
+        _DISCOVERED[key] = themes
+        return themes
+
+    async def list_themes(self) -> list[ThemeDefinition]:
+        """返回按搜索优先级去重后的主题列表"""
+        return list((await self._themes()).values())
 
     async def resolve(self, theme_id: str) -> ThemeDefinition:
         """按 ID 选择主题，找不到时回退到内置 default"""
-        themes = {theme.id: theme for theme in await self.list_themes()}
+        themes = await self._themes()
         selected = themes.get(theme_id) or themes.get("default")
         if selected is None:
             raise ThemeError("未找到可用主题，也没有内置 default 主题")
