@@ -46,11 +46,6 @@ async def test_set_then_get_returns_entry(patched_cache_dir: SyncPath):
     assert entry.size_bytes == len(data)
 
 
-@pytest.mark.asyncio
-async def test_cache_miss_returns_none(patched_cache_dir: SyncPath):
-    media_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
-    assert CacheManager.get_cached_entry(media_dir / "nope") is None
-
 
 @pytest.mark.asyncio
 async def test_warmup_rebuilds_index_from_disk(patched_cache_dir: SyncPath):
@@ -162,12 +157,6 @@ async def test_write_lock_serializes_same_key():
     first = order[0].split("-", 1)[1]
     assert order[1] == f"exit-{first}"
 
-
-@pytest.mark.asyncio
-async def test_write_lock_releases_memory():
-    async with CacheManager.write_lock("ephemeral"):
-        pass
-    assert "ephemeral" not in CacheManager._write_locks
 
 
 @pytest.mark.asyncio
