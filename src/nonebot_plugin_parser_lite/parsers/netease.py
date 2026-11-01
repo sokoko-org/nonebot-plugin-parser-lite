@@ -57,7 +57,9 @@ class NCMParser(BaseParser):
             raise ParseException(f"网易云音频外链接口没有音源跳转: {outer.status_code}")
         audio_url = str(outer.url.join(location))
         if urlparse(audio_url).path.rstrip("/") == "/404":
-            raise TipException("网易云音乐没有可播放的音频源，可能需要 VIP 或受版权限制")
+            if song.get("fee"):
+                raise TipException("网易云音乐该歌曲需要 VIP 或付费，取不到整曲音源")
+            raise TipException("网易云音乐没有可播放的音频源，可能受版权限制")
 
         lyric = ""
         with contextlib.suppress(Exception):

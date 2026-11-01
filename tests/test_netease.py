@@ -199,6 +199,21 @@ def test_redirect_to_not_found_is_reported_as_tip(serve, location):
     assert [request.url.path for request in seen] == [DETAIL_PATH, OUTER_PATH]
 
 
+def test_paid_song_without_source_says_vip(serve):
+    parser, _ = serve(
+        detail=detail_of(fee=1),
+        outer=resp(302, headers={"location": "http://music.163.com/404"}),
+    )
+    error = parse_error(parser)
+    assert isinstance(error, TipException)
+    assert "VIP" in error.message
+
+
+def test_free_song_without_source_does_not_blame_vip(serve):
+    parser, _ = serve(outer=resp(302, headers={"location": "http://music.163.com/404"}))
+    assert "VIP" not in parse_error(parser).message
+
+
 @pytest.mark.parametrize(
     "outer",
     [
