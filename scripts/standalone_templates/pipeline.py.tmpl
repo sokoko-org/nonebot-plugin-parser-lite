@@ -50,12 +50,12 @@ def _ensure_runtime_started() -> None:
 
     import asyncio
 
-    from .render import RENDERER
+    from .render.image import warmup_themes
     from .utils.cache import CacheManager
 
     async def _warmup() -> None:
         await CacheManager.warmup_all()
-        await RENDERER.list_themes()
+        await warmup_themes()
 
     asyncio.get_running_loop().create_task(_warmup())
 

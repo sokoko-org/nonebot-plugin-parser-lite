@@ -44,6 +44,11 @@ async def _get_icon_css() -> str:
     return _ICON_CSS
 
 
+async def warmup_themes() -> None:
+    """预热主题发现，使首次渲染无需扫盘"""
+    await ThemeManager(TEMPLATES_DIR, pconfig.theme_dirs).list_themes()
+
+
 async def render_theme_data(
     data: ThemeData,
     *,
