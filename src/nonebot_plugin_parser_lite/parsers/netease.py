@@ -1,71 +1,26 @@
 import contextlib
-import random
-import time
 from typing import ClassVar
+from urllib.parse import urlparse
 
-from nonebot.log import logger
-
+from ..exception import ParseException, TipException
 from .base import (
     BaseParser,
     ContentItem,
     MatchWithParams,
-    ParseException,
     Platform,
     PlatformEnum,
     handle,
 )
 
-
-def random_ip() -> str:
-    return ".".join(str(random.randint(0, 255)) for _ in range(4))
-
-
-def parse_duration_to_seconds(duration: str) -> int:
-    """将时长字符串解析为总秒数"""
-    parts = duration.split(":")
-    if not (1 <= len(parts) <= 3):
-        raise ValueError(f"非法的时长格式: {duration!r}")
-
-    try:
-        parts_int = [int(p) for p in parts]
-    except ValueError as exc:
-        raise ValueError(f"时长中包含非法数字: {duration!r}") from exc
-
-    if len(parts_int) == 1:
-        hours = 0
-        minutes = 0
-        seconds = parts_int[0]
-    elif len(parts_int) == 2:
-        hours = 0
-        minutes, seconds = parts_int
-    else:
-        hours, minutes, seconds = parts_int
-
-    if not (0 <= seconds < 60 and 0 <= minutes < 60 and hours >= 0):
-        raise ValueError(f"时长数值不合法: {duration!r}")
-
-    return hours * 3600 + minutes * 60 + seconds
+SONG_DETAIL = "https://music.163.com/api/song/detail"
+SONG_LYRIC = "https://music.163.com/api/song/lyric"
+OUTER_AUDIO = "https://music.163.com/song/media/outer/url"
 
 
 class NCMParser(BaseParser):
     platform: ClassVar[Platform] = Platform(
         name=PlatformEnum.NETEASE, display_name="网易云音乐"
     )
-
-    def __init__(self):
-        super().__init__()
-        self.httpx.headers.update({"Referer": "https://wyapi.toubiec.cn/"})
-        self.httpx.base_url = "https://nextmusic.toubiec.cn/api"
-
-    async def fetch(self, endpoint: str, payload: dict) -> dict:
-        payload["timestamp"] = int(time.time() * 1000)
-        payload["ip"] = random_ip()
-        resp = await self.httpx.post(endpoint, json=payload)
-        resp.raise_for_status()
-        result = resp.json()
-        if result.get("code") != 200:
-            raise ParseException(f"接口返回错误: {result}")
-        return result["data"]
 
     @handle("163cn.tv", r"https?://[^\s]*?163cn\.tv/[a-zA-Z0-9]+")
     async def _parse_163cn(self, searched: MatchWithParams):
@@ -75,31 +30,46 @@ class NCMParser(BaseParser):
     @handle("music.163.com", r"song/(?P<id>\d+)")
     async def _parse_netease(self, searched: MatchWithParams):
         ncm_id = searched["id"]
-        song = await self.fetch("getSongInfo", {"id": ncm_id})
-        title = song.get("name", "未知")
-        artist = song.get("singer", "未知歌手")
-        duration = parse_duration_to_seconds(song.get("duration", "0"))
+        detail = await self.httpx.get(SONG_DETAIL, params={"ids": f"[{ncm_id}]"})
+        detail.raise_for_status()
+        info = detail.json()
+        code = info.get("code")
+        if code != 200:
+            raise ParseException(f"网易云歌曲详情接口返回 code={code}")
+        songs = info.get("songs") or []
+        if not songs:
+            raise TipException("网易云音乐没有查到这首歌，歌单和专辑链接暂不支持解析")
+        song = songs[0]
+
+        title = song.get("name") or "未知"
+        artist = (
+            "、".join(name for item in song.get("artists") or [] if (name := item.get("name")))
+            or "未知歌手"
+        )
+        duration = float(song.get("duration") or 0) / 1000
+
+        # 匿名可用的音源只有这条外链，只有 302 落在 /404 才是真的没有音源
+        outer = await self.httpx.get(
+            OUTER_AUDIO, params={"id": f"{ncm_id}.mp3"}, follow_redirects=False
+        )
+        location = outer.headers.get("location") or ""
+        if not outer.is_redirect or not location:
+            raise ParseException(f"网易云音频外链接口没有音源跳转: {outer.status_code}")
+        audio_url = str(outer.url.join(location))
+        if urlparse(audio_url).path.rstrip("/") == "/404":
+            if song.get("fee"):
+                raise TipException("网易云音乐该歌曲需要 VIP 或付费，取不到整曲音源")
+            raise TipException("网易云音乐没有可播放的音频源，可能受版权限制")
+
         lyric = ""
         with contextlib.suppress(Exception):
-            lyric = (await self.fetch("getSongLyric", {"id": ncm_id})).get("lrc")
-        audio_url: str | None = None
-        for level in ("lossless", "standard"):
-            try:
-                url_data = await self.fetch(
-                    "getSongUrl", {"id": ncm_id, "level": level}
-                )
-                audio_url = url_data.get("url")
-                if audio_url:
-                    break
-            except Exception as e:
-                logger.warning(f"[网易云解析] {level} 获取失败: {e}")
-        if not audio_url:
-            raise ParseException("无法获取音频下载地址")
-        url_no_params = audio_url.split("?", 1)[0]
-        ext = url_no_params.rsplit(".", 1)[-1].lower() if "." in url_no_params else ""
-        audio_type = ext if ext in {"flac", "wav", "m4a", "aac", "mp3"} else "mp3"
-        contents: list[ContentItem] = []
+            lyric_resp = await self.httpx.get(
+                SONG_LYRIC, params={"id": ncm_id, "lv": "-1", "kv": "-1", "tv": "-1"}
+            )
+            lyric_resp.raise_for_status()
+            lyric = (lyric_resp.json().get("lrc") or {}).get("lyric") or ""
 
+        contents: list[ContentItem] = []
         audio = self.create_audio(
             audio_url,
             duration=duration,
@@ -107,19 +77,12 @@ class NCMParser(BaseParser):
         )
         contents.append(audio)
 
-        if cover_url := song.get("picimg"):
+        if cover_url := (song.get("album") or {}).get("picUrl"):
             contents.append(self.create_image(cover_url))
         if lyric:
             contents.append(lyric)
 
-        audio_info = (
-            f"音质: {level} | 大小: {await audio.get_display_size()} |"
-            f" 格式: {audio_type}"
-        )
-
-        extra = {
-            "info": audio_info,
-        }
+        extra = {"info": f"大小: {await audio.get_display_size()}"}
 
         return self.result(
             title=title,
