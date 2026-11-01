@@ -202,8 +202,8 @@ def test_redirect_to_not_found_is_reported_as_tip(serve, location):
 @pytest.mark.parametrize(
     "outer",
     [
-        # 实测：该端点缺少 id 时回 200 + JSON 且没有 Location
-        resp(200, json={"code": 400, "songs": None}),
+        # 实测：该端点缺少 id 时回 200 + {"msg":"参数错误","code":400}，没有 Location
+        resp(200, json={"msg": "参数错误", "code": 400}),
         resp(302, headers={"location": ""}),
         resp(403, text="forbidden"),
     ],
