@@ -677,38 +677,44 @@ class Renderer:
         )
         cache_key = (
             f"{RENDER_TEMPLATE_VERSION}:{selected_theme.id}:"
-            f"{selected_theme.version}:{theme}:{result.url}"
+            f"{selected_theme.version}:{theme}:{render_format}:{result.url}"
             f":{speedup_digest}"
         )
-        file_name = f"{uuid.uuid5(uuid.NAMESPACE_URL, cache_key)}.{render_format}"
+        base_name = str(uuid.uuid5(uuid.NAMESPACE_URL, cache_key))
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
-        image_path = cache_dir / file_name
-        if render_format == "webp" and not await image_path.exists():
-            jpeg_path = image_path.with_suffix(".jpeg")
-            if await jpeg_path.exists():
-                image_path = jpeg_path
-        logger.info(f"渲染主题: {selected_theme.name}")
-        if not await image_path.exists():
-            image_format, image_raw = await self.render_image(
-                result,
-                theme=theme,
-                image_format=render_format,
-                theme_definition=selected_theme,
-            )
-            image_path = image_path.with_suffix(f".{image_format}")
-            temp_path = image_path.with_name(
-                f".{image_path.stem}.{uuid.uuid4().hex}.tmp{image_path.suffix}"
-            )
-            try:
-                await temp_path.write_bytes(image_raw)
-                await temp_path.replace(image_path)
-            finally:
-                await temp_path.unlink(missing_ok=True)
-        result.render_image = image_path
-        if (await image_path.stat()).st_size >= 5 * 1024 * 1024:
-            return await UniHelper.file_seg(image_path)
+        base_path = cache_dir / base_name
 
-        return await UniHelper.img_seg(image_path)
+        entry = CacheManager.get_cached_entry(base_path)
+        if entry is None:
+            # 以 key 为粒度加锁，避免同一张图被多次并发渲染
+            async with CacheManager.write_lock(f"render:{cache_key}"):
+                entry = CacheManager.get_cached_entry(base_path)
+                if entry is None:
+                    logger.info(f"渲染主题: {selected_theme.name}")
+                    image_format, image_raw = await self.render_image(
+                        result,
+                        theme=theme,
+                        image_format=render_format,
+                        theme_definition=selected_theme,
+                    )
+                    image_path = base_path.with_suffix(f".{image_format}")
+                    temp_path = image_path.with_name(
+                        f".{image_path.stem}.{uuid.uuid4().hex}.tmp{image_path.suffix}"
+                    )
+                    try:
+                        await temp_path.write_bytes(image_raw)
+                        await temp_path.replace(image_path)
+                    finally:
+                        await temp_path.unlink(missing_ok=True)
+                    entry = await CacheManager.set_cached_file(
+                        base_path, image_path, size_bytes=len(image_raw)
+                    )
+
+        result.render_image = entry.path
+        if entry.size_bytes >= 5 * 1024 * 1024:
+            return await UniHelper.file_seg(entry.path)
+
+        return await UniHelper.img_seg(entry.path)
 
 
 RENDERER = Renderer()

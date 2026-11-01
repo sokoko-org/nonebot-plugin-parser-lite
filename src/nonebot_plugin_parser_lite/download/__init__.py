@@ -179,8 +179,8 @@ class StreamDownloader:
             return await active_download
 
         async def __download_task() -> Path:
-            if cached_path := await CacheManager.get_cached_file(base_path):
-                return cached_path
+            if entry := CacheManager.get_cached_entry(base_path):
+                return entry.path
             result = await self.__download_with_retry(
                 download_urls=download_urls,
                 base_path=base_path,

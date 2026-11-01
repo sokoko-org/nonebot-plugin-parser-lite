@@ -1,5 +1,6 @@
-from contextlib import asynccontextmanager
+﻿from contextlib import asynccontextmanager
 import gzip
+import json
 from types import SimpleNamespace
 
 from anyio import Path
@@ -20,6 +21,9 @@ def downloader_modules(tmp_path, monkeypatch):
         type(support.pconfig), "cache_dir", property(lambda _: Path(tmp_path))
     )
     monkeypatch.setattr(download.StreamDownloader, "MAX_RETRIES", 2)
+    CacheManager._index.clear()
+    CacheManager._dirs_ready.clear()
+    CacheManager._write_locks.clear()
     return download, client_module, CacheManager
 
 
@@ -133,7 +137,12 @@ async def test_generic_binary_content_type_uses_puremagic_and_updates_cache_meta
     )
 
     assert path.suffix == ".mp4"
-    assert await path.with_suffix(".meta").read_bytes() == path.suffix.encode()
+    assert (
+        json.loads(await path.with_suffix(".meta").read_text(encoding="utf-8"))[
+            "suffix"
+        ]
+        == path.suffix
+    )
 
 
 @pytest.mark.asyncio
@@ -161,7 +170,12 @@ async def test_unidentified_binary_uses_default_suffix(downloader_modules):
     )
 
     assert path.suffix == ".dat"
-    assert await path.with_suffix(".meta").read_bytes() == path.suffix.encode()
+    assert (
+        json.loads(await path.with_suffix(".meta").read_text(encoding="utf-8"))[
+            "suffix"
+        ]
+        == path.suffix
+    )
 
 
 @pytest.mark.asyncio
@@ -178,7 +192,7 @@ async def test_unidentified_binary_uses_default_suffix(downloader_modules):
 async def test_unidentified_audio_preserves_source_suffix(
     downloader_modules, url, expected_suffix
 ):
-    download, _, cache_manager = downloader_modules  # noqa: RUF059
+    download, _, _cache_manager = downloader_modules
     client = FakeClient(
         [response(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
     )
@@ -188,7 +202,12 @@ async def test_unidentified_audio_preserves_source_suffix(
 
     assert path.suffix == expected_suffix
     assert await path.read_bytes() == b"\x00\x01\x02"
-    assert await path.with_suffix(".meta").read_bytes() == path.suffix.encode()
+    assert (
+        json.loads(await path.with_suffix(".meta").read_text(encoding="utf-8"))[
+            "suffix"
+        ]
+        == path.suffix
+    )
 
 
 @pytest.mark.asyncio
@@ -204,7 +223,7 @@ async def test_unidentified_audio_preserves_source_suffix(
 async def test_reserved_suffix_does_not_destroy_download(
     downloader_modules, monkeypatch, url, default_suffix, expected_suffix
 ):
-    download, _, cache_manager = downloader_modules  # noqa: RUF059
+    download, _, _cache_manager = downloader_modules
     client = FakeClient(
         [response(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
     )
@@ -214,7 +233,12 @@ async def test_reserved_suffix_does_not_destroy_download(
 
     assert path.suffix == expected_suffix
     assert await path.read_bytes() == b"\x00\x01\x02"
-    assert await path.with_suffix(".meta").read_bytes() == expected_suffix.encode()
+    assert (
+        json.loads(await path.with_suffix(".meta").read_text(encoding="utf-8"))[
+            "suffix"
+        ]
+        == expected_suffix
+    )
     assert not await path.with_suffix(".part").exists()
 
 
