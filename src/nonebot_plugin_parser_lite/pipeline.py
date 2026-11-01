@@ -34,17 +34,32 @@ async def _clean_runtime_cache() -> None:
     clear_result_cache()
 
 
+_runtime_started = False
+
+
 def _ensure_runtime_started() -> None:
+    global _runtime_started
     scheduler.add_job(
         _clean_runtime_cache,
         seconds=2 * 60 * 60,
         id=_CACHE_JOB_ID,
     )
+    if _runtime_started:
+        return
+    _runtime_started = True
+
+    import asyncio
+
+    from .utils.cache import CacheManager
+
+    asyncio.get_running_loop().create_task(CacheManager.warmup_all())
 
 
 async def shutdown_runtime() -> None:
     from .download import DOWNLOADER
 
+    global _runtime_started
+    _runtime_started = False
     await scheduler.shutdown()
     await DOWNLOADER.aclose()
     clear_result_cache()
