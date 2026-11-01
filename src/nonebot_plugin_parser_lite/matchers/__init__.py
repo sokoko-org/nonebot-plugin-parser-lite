@@ -93,11 +93,15 @@ driver = get_driver()
 
 @driver.on_startup
 async def warmup_cache_index() -> None:
-    """启动时预热缓存索引，命中走内存无需 I/O"""
+    """启动时预热缓存索引与主题发现，命中走内存无需 I/O"""
     try:
         await CacheManager.warmup_all()
     except Exception as e:
         logger.exception(f"预热缓存索引失败: {e!r}")
+    try:
+        await RENDERER.list_themes()
+    except Exception as e:
+        logger.exception(f"预热主题发现失败: {e!r}")
 
 
 @driver.on_startup

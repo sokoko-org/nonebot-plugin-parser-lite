@@ -19,6 +19,30 @@ from .theme import ThemeDefinition, ThemeManager
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
+# 模板根目录在启动后固定，按根目录缓存 Jinja 环境，避免每次渲染重建
+_ENVIRONMENTS: dict[str, Environment] = {}
+_ICON_CSS: str | None = None
+
+
+def _environment_for(root: Path) -> Environment:
+    key = str(root)
+    env = _ENVIRONMENTS.get(key)
+    if env is None:
+        env = Environment(
+            loader=FileSystemLoader(key),
+            enable_async=True,
+            autoescape=False,
+        )
+        _ENVIRONMENTS[key] = env
+    return env
+
+
+async def _get_icon_css() -> str:
+    global _ICON_CSS
+    if _ICON_CSS is None:
+        _ICON_CSS = await (TEMPLATES_DIR / "icon.css").read_text(encoding="utf-8")
+    return _ICON_CSS
+
 
 async def render_theme_data(
     data: ThemeData,
@@ -34,13 +58,9 @@ async def render_theme_data(
         TEMPLATES_DIR, pconfig.theme_dirs
     ).resolve(data["theme_id"])
     selected = await theme.resolve_template(data["post"]["platform"]["id"])
-    env = Environment(
-        loader=FileSystemLoader(str(selected.root)),
-        enable_async=True,
-        autoescape=False,
-    )
+    env = _environment_for(selected.root)
     html = await env.get_template(selected.name).render_async(data=data)
-    icon_css = await (TEMPLATES_DIR / "icon.css").read_text(encoding="utf-8")
+    icon_css = await _get_icon_css()
     style = f'<style data-parser-fallback="icon-css">\n{icon_css}\n</style>'
     head = re.search(r"<head\b[^>]*>", html, flags=re.IGNORECASE)
     html = (
