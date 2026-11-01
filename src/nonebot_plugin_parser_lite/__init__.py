@@ -1,4 +1,4 @@
-from nonebot import logger, require
+﻿from nonebot import logger, require
 from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 require("nonebot_plugin_alconna")
@@ -25,7 +25,7 @@ __plugin_meta__ = PluginMetadata(
     extra={
         "author": "sokoko-org",
         "homepage": "https://github.com/sokoko-org/nonebot-plugin-parser-lite",
-        "version": "1.3.11rc4",
+        "version": "1.4.0rc1",
         "plugin_type": "NORMAL",
     },
 )

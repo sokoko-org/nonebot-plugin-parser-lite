@@ -26,6 +26,7 @@ from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
 from ..render import RENDERER
+from ..utils.cache import CacheManager
 from ..utils.common import LimitedSizeDict
 from .filter import _make_target_key
 from .limit import ParseCooldown, ParseState
@@ -88,6 +89,15 @@ def clear_result_cache():
 
 
 driver = get_driver()
+
+
+@driver.on_startup
+async def warmup_cache_index() -> None:
+    """启动时预热缓存索引，命中走内存无需 I/O"""
+    try:
+        await CacheManager.warmup_all()
+    except Exception as e:
+        logger.exception(f"预热缓存索引失败: {e!r}")
 
 
 @driver.on_startup
