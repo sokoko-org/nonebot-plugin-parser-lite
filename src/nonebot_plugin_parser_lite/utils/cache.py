@@ -91,7 +91,7 @@ _PayloadRaw = tuple[str, float, int]
 def _entry_from_meta(
     meta: _MetaRaw, payload: _PayloadRaw
 ) -> CacheEntry:
-    meta_path, meta_mtime, data = meta
+    _meta_path, meta_mtime, data = meta
     payload_path, payload_mtime, payload_size = payload
     extra = {k: v for k, v in data.items() if k not in {"v", "suffix", "size"}}
     return CacheEntry(

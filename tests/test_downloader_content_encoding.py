@@ -192,7 +192,7 @@ async def test_unidentified_binary_uses_default_suffix(downloader_modules):
 async def test_unidentified_audio_preserves_source_suffix(
     downloader_modules, url, expected_suffix
 ):
-    download, _, cache_manager = downloader_modules
+    download, _, _cache_manager = downloader_modules
     client = FakeClient(
         [response(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
     )
@@ -223,7 +223,7 @@ async def test_unidentified_audio_preserves_source_suffix(
 async def test_reserved_suffix_does_not_destroy_download(
     downloader_modules, monkeypatch, url, default_suffix, expected_suffix
 ):
-    download, _, cache_manager = downloader_modules
+    download, _, _cache_manager = downloader_modules
     client = FakeClient(
         [response(200, headers={"Content-Length": "3"}, chunks=[b"\x00\x01\x02"])]
     )
