@@ -28,6 +28,8 @@ class CacheEntry:
     size_bytes: int
     last_hit: float = field(default_factory=time.time)
     extra: dict[str, object] = field(default_factory=dict)
+    # 已经写回磁盘的 last_hit；clean_expired 用它判断是否需要 flush
+    _persisted_hit: float = field(default=0.0, repr=False)
 
     @property
     def suffix(self) -> str:
@@ -88,23 +90,37 @@ _MetaRaw = tuple[str, float, dict]
 _PayloadRaw = tuple[str, float, int]
 
 
-def _entry_from_meta(
-    meta: _MetaRaw, payload: _PayloadRaw
-) -> CacheEntry:
+_RESERVED_META_KEYS = frozenset({"v", "suffix", "size", "last_hit"})
+
+
+def _coerce_number(value: object, fallback: float) -> float:
+    try:
+        return float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _entry_from_meta(meta: _MetaRaw, payload: _PayloadRaw) -> CacheEntry:
     _meta_path, meta_mtime, data = meta
     payload_path, payload_mtime, payload_size = payload
-    extra = {k: v for k, v in data.items() if k not in {"v", "suffix", "size"}}
+    extra = {k: v for k, v in data.items() if k not in _RESERVED_META_KEYS}
+    # last_hit 取三源最大：JSON 显式值 / .meta mtime (周期 flush) / payload mtime
+    stored_hit = _coerce_number(data.get("last_hit", 0), 0.0)
+    disk_hit = max(stored_hit, meta_mtime, payload_mtime)
     return CacheEntry(
         path=Path(payload_path),
-        size_bytes=int(data.get("size", payload_size)),
-        last_hit=max(meta_mtime, payload_mtime),
+        size_bytes=int(_coerce_number(data.get("size", payload_size), payload_size)),
+        last_hit=disk_hit,
+        _persisted_hit=disk_hit,
         extra=extra,
     )
 
 
 def _entry_from_payload(payload: _PayloadRaw) -> CacheEntry:
     payload_path, mtime, size = payload
-    return CacheEntry(path=Path(payload_path), size_bytes=size, last_hit=mtime)
+    return CacheEntry(
+        path=Path(payload_path), size_bytes=size, last_hit=mtime, _persisted_hit=mtime
+    )
 
 
 def _classify_files(
@@ -154,10 +170,11 @@ def _sync_build_index(
             # 孤立 .meta，payload 已经消失
             expired.append(meta[0])
             continue
-        if now - max(meta[1], payload[1]) >= ttl:
+        candidate = _entry_from_meta(meta, payload)
+        if now - candidate.last_hit >= ttl:
             expired.extend((meta[0], payload[0]))
             continue
-        index[stem] = _entry_from_meta(meta, payload)
+        index[stem] = candidate
 
     # 没有 .meta 的裸 payload：过 TTL 清掉，否则建最小索引
     for stem, payload in payloads.items():
@@ -261,13 +278,15 @@ class CacheManager:
             except OSError:
                 size_bytes = 0
 
+        now = time.time()
         payload: dict[str, object] = {
             "v": 1,
             "suffix": file_path.suffix.lower(),
             "size": size_bytes,
+            "last_hit": now,
         }
         if extra:
-            payload |= extra
+            payload |= {k: v for k, v in extra.items() if k not in _RESERVED_META_KEYS}
 
         meta_path = str(base_path.with_suffix(".meta"))
         if not await asyncio.to_thread(_sync_write_meta, meta_path, payload):
@@ -276,7 +295,11 @@ class CacheManager:
         entry = CacheEntry(
             path=file_path,
             size_bytes=size_bytes,
-            extra=dict(extra) if extra else {},
+            last_hit=now,
+            _persisted_hit=now,
+            extra={k: v for k, v in extra.items() if k not in _RESERVED_META_KEYS}
+            if extra
+            else {},
         )
         cls._index.setdefault(cls._cache_type_of(base_path), {})[str(base_path)] = entry
         return entry
@@ -298,11 +321,12 @@ class CacheManager:
 
     @classmethod
     async def clean_expired(cls) -> None:
-        """遍历内存索引计算过期项，批量删文件"""
+        """清理过期条目，刷新 dirty last_hit，回收游离 .part/.tmp"""
         now = time.time()
         totals: dict[str, int] = {}
         expired_paths: list[Path] = []
         expired_stems: list[tuple[str, str]] = []
+        dirty: list[tuple[str, CacheEntry]] = []
 
         for cache_type, policy in cls._POLICIES.items():
             if cache_type not in cls._dirs_ready:
@@ -313,19 +337,56 @@ class CacheManager:
                 if now - entry.last_hit >= policy.ttl_seconds:
                     expired_paths.extend((entry.path, Path(f"{stem}.meta")))
                     expired_stems.append((cache_type, stem))
+                elif entry.last_hit - entry._persisted_hit >= policy.ttl_seconds / 4:
+                    dirty.append((stem, entry))
+
+        expired_paths.extend(
+            await asyncio.to_thread(cls._collect_transient_leftovers, now)
+        )
 
         for cache_type, stem in expired_stems:
             cls._index[cache_type].pop(stem, None)
 
+        if dirty:
+            await asyncio.to_thread(cls._flush_dirty_hits, dirty)
+
         if not expired_paths:
             logger.info(
-                "缓存清理完成，无过期文件；"
+                "缓存清理完成，无过期文件"
+                + (f"; flushed={len(dirty)}" if dirty else "")
+                + "; "
                 + ", ".join(f"{name}={count}" for name, count in totals.items())
             )
             return
 
         await asyncio.gather(*(safe_unlink(path) for path in expired_paths))
         logger.success(
-            f"已清理 {len(expired_stems)} 组缓存文件；"
+            f"已清理 {len(expired_stems)} 组缓存文件"
+            + (f"; flushed={len(dirty)}" if dirty else "")
+            + "; "
             + ", ".join(f"{name}={count}" for name, count in totals.items())
         )
+
+    @staticmethod
+    def _flush_dirty_hits(entries: list[tuple[str, "CacheEntry"]]) -> None:
+        """批量把 last_hit 写入 .meta mtime（os.utime 不重写 JSON）"""
+        for stem, entry in entries:
+            with contextlib.suppress(OSError):
+                os.utime(f"{stem}.meta", (entry.last_hit, entry.last_hit))
+            entry._persisted_hit = entry.last_hit
+
+    @classmethod
+    def _collect_transient_leftovers(cls, now: float) -> list[Path]:
+        """同步扫磁盘，返回过 TTL 的 .part/.tmp 文件"""
+        leftovers: list[Path] = []
+        for cache_type, policy in cls._POLICIES.items():
+            if cache_type not in cls._dirs_ready:
+                continue
+            root = str(cls.cache_dir(cache_type))
+            leftovers.extend(
+                Path(file_path)
+                for file_path, mtime in _sync_scan_tree(root)
+                if file_path.endswith((".part", ".tmp"))
+                and now - mtime >= policy.ttl_seconds
+            )
+        return leftovers

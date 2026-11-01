@@ -677,7 +677,7 @@ class Renderer:
         )
         cache_key = (
             f"{RENDER_TEMPLATE_VERSION}:{selected_theme.id}:"
-            f"{selected_theme.version}:{theme}:{result.url}"
+            f"{selected_theme.version}:{theme}:{render_format}:{result.url}"
             f":{speedup_digest}"
         )
         base_name = str(uuid.uuid5(uuid.NAMESPACE_URL, cache_key))

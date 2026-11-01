@@ -95,16 +95,24 @@ async def test_orphan_meta_is_cleaned_on_warmup(patched_cache_dir: SyncPath):
 async def test_expired_entry_is_cleaned_on_warmup(patched_cache_dir: SyncPath):
     """超过 TTL 的条目在 warmup 时直接清掉，不进入索引"""
 
+    import json
+
     media_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
     base = media_dir / "old"
     payload = base.with_suffix(".jpg")
     await payload.write_bytes(b"img")
     await CacheManager.set_cached_file(base, payload)
 
+    # 把持久化的 last_hit 也推回去，模拟真正的「上次命中已过 TTL」
     import os
-    old = time.time() - 3 * 3600
-    for suffix in (".jpg", ".meta"):
-        os.utime(str(base.with_suffix(suffix)), (old, old))
+    stale = time.time() - 3 * 3600
+    meta_path = base.with_suffix(".meta")
+    data = json.loads(await meta_path.read_text(encoding="utf-8"))
+    data["last_hit"] = stale
+    await meta_path.write_text(json.dumps(data), encoding="utf-8")
+    # 把 .meta 和 payload 的 mtime 也推回去，避免 max() 救活
+    for pth in (meta_path, payload):
+        os.utime(str(pth), (stale, stale))
 
     CacheManager._index.clear()
     CacheManager._dirs_ready.clear()
@@ -112,7 +120,7 @@ async def test_expired_entry_is_cleaned_on_warmup(patched_cache_dir: SyncPath):
 
     assert CacheManager.get_cached_entry(base) is None
     assert not await base.with_suffix(".jpg").exists()
-    assert not await base.with_suffix(".meta").exists()
+    assert not await meta_path.exists()
 
 
 @pytest.mark.asyncio
@@ -181,3 +189,115 @@ async def test_set_cached_file_persists_extra(patched_cache_dir: SyncPath):
     assert rehydrated is not None
     assert rehydrated.extra.get("codec") == "h264"
 
+@pytest.mark.asyncio
+async def test_clean_expired_removes_stale_part_files(patched_cache_dir: SyncPath):
+    """clean_expired should sweep stale .part/.tmp leftovers"""
+
+    import os
+
+    media_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+    part = media_dir / "pending.part"
+    tmp = media_dir / "pending.tmp"
+    await part.write_bytes(b"x")
+    await tmp.write_bytes(b"x")
+
+    old = time.time() - 3 * 3600
+    for pth in (part, tmp):
+        os.utime(str(pth), (old, old))
+
+    await CacheManager.clean_expired()
+    assert not await part.exists()
+    assert not await tmp.exists()
+
+
+@pytest.mark.asyncio
+async def test_last_hit_survives_restart(patched_cache_dir: SyncPath):
+    """last_hit is persisted and survives restart even when mtime decays"""
+
+    import os
+
+    media_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+    base = media_dir / "warm"
+    payload = base.with_suffix(".jpg")
+    await payload.write_bytes(b"img")
+    await CacheManager.set_cached_file(base, payload)
+
+    old = time.time() - 3 * 3600
+    for suffix in (".jpg", ".meta"):
+        os.utime(str(base.with_suffix(suffix)), (old, old))
+
+    CacheManager._index.clear()
+    CacheManager._dirs_ready.clear()
+    await CacheManager.ensure_dir(CacheManager.MEDIA)
+
+    entry = CacheManager.get_cached_entry(base)
+    assert entry is not None, "warm entry should survive restart via last_hit"
+
+
+@pytest.mark.asyncio
+async def test_extra_cannot_shadow_reserved_fields(patched_cache_dir: SyncPath):
+    """extra must not override v/suffix/size/last_hit"""
+
+    media_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+    base = media_dir / "guarded"
+    payload = base.with_suffix(".jpg")
+    await payload.write_bytes(b"img")
+
+    entry = await CacheManager.set_cached_file(
+        base,
+        payload,
+        size_bytes=3,
+        extra={"size": 999999, "codec": "h264"},
+    )
+    assert entry.size_bytes == 3
+    assert entry.extra == {"codec": "h264"}
+
+
+@pytest.mark.asyncio
+async def test_warmup_tolerates_corrupt_size(patched_cache_dir: SyncPath):
+    """corrupt size field in .meta falls back to payload size instead of aborting"""
+
+    import json
+
+    media_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+    base = media_dir / "bad-size"
+    payload = base.with_suffix(".jpg")
+    data = b"abc"
+    await payload.write_bytes(data)
+    await base.with_suffix(".meta").write_text(
+        json.dumps({"v": 1, "suffix": ".jpg", "size": "not-a-number"}),
+        encoding="utf-8",
+    )
+
+    CacheManager._index.clear()
+    CacheManager._dirs_ready.clear()
+    await CacheManager.ensure_dir(CacheManager.MEDIA)
+
+    entry = CacheManager.get_cached_entry(base)
+    assert entry is not None
+    assert entry.size_bytes == len(data)
+
+@pytest.mark.asyncio
+async def test_clean_expired_flushes_dirty_hits(patched_cache_dir: SyncPath):
+    """runtime hit updates last_hit; clean_expired must flush it to .meta mtime"""
+
+    media_dir = await CacheManager.ensure_dir(CacheManager.MEDIA)
+    base = media_dir / "dirty"
+    payload = base.with_suffix(".jpg")
+    await payload.write_bytes(b"img")
+    await CacheManager.set_cached_file(base, payload)
+
+    entry = CacheManager.get_cached_entry(base)
+    assert entry is not None
+    # 推进超过 TTL/4 的时间，才会触发 flush
+    from nonebot_plugin_parser_lite.utils.cache import CacheManager as CM
+    ttl = CM._POLICIES[CM.MEDIA].ttl_seconds
+    hit_time = entry._persisted_hit + ttl / 4 + 1
+    entry.last_hit = hit_time
+
+    meta_path = base.with_suffix(".meta")
+    await CacheManager.clean_expired()
+
+    after_mtime = (await meta_path.stat()).st_mtime
+    assert abs(after_mtime - hit_time) < 1.0, "clean_expired should flush last_hit"
+    assert entry._persisted_hit == entry.last_hit
