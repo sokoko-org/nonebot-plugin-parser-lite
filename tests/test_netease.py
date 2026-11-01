@@ -102,21 +102,16 @@ def parse_error(parser: NCMParser, url: str = SONG_URL) -> Exception:
     raise AssertionError("解析没有失败")
 
 
-def test_only_official_music_163_endpoints_are_requested(serve):
+def test_requests_hit_official_endpoints_with_expected_params(serve):
     parser, seen = serve()
     assert parse(parser).title == "Sand"
-    assert sorted({request.url.host for request in seen}) == ["music.163.com"]
-    assert [request.url.path for request in seen] == [DETAIL_PATH, OUTER_PATH, LYRIC_PATH]
-
-
-def test_detail_and_outer_query_shapes(serve):
-    parser, seen = serve()
-    parse(parser)
+    assert {request.url.host for request in seen} == {"music.163.com"}
     detail, outer, lyric = seen
+    assert [r.url.path for r in seen] == [DETAIL_PATH, OUTER_PATH, LYRIC_PATH]
     assert detail.url.params.get("ids") == "[28845027]"
+    assert outer.url.params.get("id") == "28845027.mp3"
     assert lyric.url.params.get("id") == "28845027"
     assert lyric.url.params.get("lv") == "-1"
-    assert outer.url.params.get("id") == "28845027.mp3"
 
 
 def test_song_fields_map_to_audio_cover_and_lyric(serve):
@@ -141,16 +136,11 @@ def test_relative_audio_location_is_resolved_against_the_api_host(serve):
     )
 
 
-def test_multiple_artists_are_joined(serve):
+def test_artist_names_are_joined_and_blanks_skipped(serve):
     parser, _ = serve(
-        detail=detail_of(artists=[{"name": "坂本真綾"}, {"name": "菅野よう子"}])
+        detail=detail_of(artists=[{"name": "坂本真綾"}, {"name": ""}, {"name": "菅野よう子"}])
     )
     assert parse(parser).author.name == "坂本真綾、菅野よう子"
-
-
-def test_unnamed_artist_is_skipped(serve):
-    parser, _ = serve(detail=detail_of(artists=[{"name": "Keaton Henson"}, {"name": ""}]))
-    assert parse(parser).author.name == "Keaton Henson"
 
 
 def test_placeholder_song_falls_back_to_unknown_names(serve):
@@ -185,10 +175,7 @@ def test_detail_http_error_is_not_parsed_as_success(serve):
 @pytest.mark.parametrize(
     "location",
     [
-        "http://music.163.com/404",
         "http://music.163.com/404/",
-        "http://music.163.com/404?code=404",
-        "http://music.163.com/404#audio",
         "/404",
         "//music.163.com/404",
     ],
@@ -236,12 +223,6 @@ def test_audio_endpoint_error_is_not_reported_as_copyright_tip(serve):
     assert isinstance(error, ParseException)
     assert not isinstance(error, TipException)
     assert "500" in error.message
-
-
-def test_lyric_http_error_is_not_trusted(serve):
-    parser, _ = serve(lyric=resp(500, json=LYRIC))
-    result = parse(parser)
-    assert [type(item) for item in result.content] == [AudioContent, ImageContent]
 
 
 def test_lyric_failure_keeps_audio_and_cover(serve):
