@@ -1,4 +1,4 @@
-﻿from nonebot import logger, require
+from nonebot import logger, require
 from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 require("nonebot_plugin_alconna")

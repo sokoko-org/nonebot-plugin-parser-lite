@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 from collections.abc import AsyncGenerator
 import contextlib
 from dataclasses import dataclass, field
