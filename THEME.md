@@ -592,5 +592,6 @@ body {
   - 包含了 `pink-cute`、`minimal-mono`、`hatsune-miku` 等示例主题源码，可作为开发参考
 - 内置默认主题源码：`src/nonebot_plugin_parser_lite/render/templates/`
   - `default.html.jinja` - 默认模板
+  - `music.html.jinja` - 音乐类平台模板（唱片播放器样式）
   - `macros.jinja` - 可复用的 Jinja2 宏定义
   - `icon.css` - 内置图标样式
