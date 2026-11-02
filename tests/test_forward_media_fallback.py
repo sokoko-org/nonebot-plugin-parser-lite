@@ -16,7 +16,13 @@ from nonebot_plugin_alconna.uniseg import (
     Voice,
 )
 import pytest
-from render_test_support import Renderer, UniHelper, make_result, pconfig
+from render_test_support import (
+    Renderer,
+    UniHelper,
+    make_result,
+    pconfig,
+    set_send_layout,
+)
 
 from nonebot_plugin_parser_lite import delivery, matchers, render
 from nonebot_plugin_parser_lite.config import gconfig
@@ -101,10 +107,8 @@ async def test_parser_summary_uses_file_timeout_when_rendered_as_file(
     monkeypatch.setattr(matchers.RENDERER, "send_content", no_content)
     monkeypatch.setattr(UniMessage, "send", send)
     monkeypatch.setattr(pconfig, "plite_file_upload_timeout", 900)
-    monkeypatch.setattr(pconfig, "plite_summary_in_forward", False)
+    set_send_layout(monkeypatch)
     monkeypatch.setattr(pconfig, "plite_lazy_download", False)
-    monkeypatch.setattr(pconfig, "plite_append_url", False)
-    monkeypatch.setattr(pconfig, "plite_embed_url", False)
     await matchers._parse_and_send.__wrapped__(session=None, sr=None)
     assert len(calls) == 1
     assert calls[0][0][0] is summary_segment
@@ -198,7 +202,7 @@ def test_media_replaced_without_losing_text_or_source(media, label, monkeypatch)
     result.title = "作品标题"
     result.repost = make_result()
     result.repost.url = "https://example.com/original"
-    monkeypatch.setattr(pconfig, "plite_append_url", False)
+    set_send_layout(monkeypatch)
     message = forward(UniMessage.text("前文") + media + "说明文字", "后文")
     original = deepcopy(message)
 
@@ -347,7 +351,7 @@ async def test_summary_and_video_from_renderer_fall_back_inside_forward(
 ):
     result = make_result()
     result.title = "实际渲染路径"
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", video_in_forward)
+    set_send_layout(monkeypatch, video_in_forward=video_in_forward, send_url=True)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", as_file)
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
 
@@ -370,7 +374,6 @@ async def test_summary_and_video_from_renderer_fall_back_inside_forward(
     monkeypatch.setattr(UniHelper, "video_seg", video_segment)
     monkeypatch.setattr(UniHelper, "file_seg", file_segment)
     monkeypatch.setattr(Renderer, "cache_or_render_image", cached_summary)
-    monkeypatch.setattr(pconfig, "plite_append_url", True)
     monkeypatch.setattr(
         UniHelper, "construct_forward_message", lambda segments: forward(*segments)[0]
     )
@@ -531,7 +534,7 @@ async def test_fallback_text_uses_normal_split_and_pack_rules(monkeypatch, text)
     monkeypatch.setattr(render, "SPLIT_THRESHOLD", 10)
     monkeypatch.setattr(delivery, "SPLIT_THRESHOLD", 10)
     monkeypatch.setattr(render, "MAX_FORWARD_NODES", 2)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", True)
+    set_send_layout(monkeypatch)
     monkeypatch.setattr(
         UniHelper, "construct_forward_message", lambda contents: forward(*contents)[0]
     )

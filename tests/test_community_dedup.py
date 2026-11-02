@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 from nonebot.matcher import current_event
 from nonebot_plugin_uninfo import Scene, SceneType, Session, SupportScope, User
 import pytest
-from render_test_support import ROOT  # noqa: F401
+from render_test_support import set_send_layout
 
 from nonebot_plugin_parser_lite import matchers
 from nonebot_plugin_parser_lite.matchers import limit
@@ -59,7 +59,7 @@ def pipeline(monkeypatch):
     monkeypatch.setattr(matchers, "send_with_media_fallback", sent)
     monkeypatch.setattr(matchers.UniHelper, "message_reaction", AsyncMock())
     monkeypatch.setattr(matchers.pconfig, "plite_lazy_download", False)
-    monkeypatch.setattr(matchers.pconfig, "plite_summary_in_forward", False)
+    set_send_layout(monkeypatch)
     monkeypatch.setattr(matchers.pconfig, "plite_parse_dedup_minutes", 30)
     monkeypatch.setattr(matchers.pconfig, "plite_parse_dedup_platforms", None)
     token = current_event.set(object())  # pyright: ignore[reportArgumentType]

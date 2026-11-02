@@ -4,7 +4,7 @@ from anyio import Path
 from nonebot import get_driver, get_plugin_config
 from pydantic import BaseModel, field_validator, model_validator
 
-from .constants import PlatformEnum
+from .constants import PlatformEnum, SendComponent
 from .path import cache_dir as _cache_dir
 from .path import config_dir as _config_dir
 from .path import data_dir as _data_dir
@@ -68,10 +68,6 @@ class Config(BaseModel):
     """是否使用 base64 编码发送图片，音频，视频"""
     plite_max_size: int = 90
     """资源最大大小，默认 90 单位 MB"""
-    plite_append_url: bool = False
-    """是否在解析结果中添加原始URL"""
-    plite_embed_url: bool = False
-    """是否在解析结果中添加嵌入式播放链接"""
     plite_append_qrcode: bool = False
     """是否在解析结果中添加原始URL二维码"""
     plite_disabled_platforms: list[PlatformEnum] = []
@@ -91,12 +87,19 @@ class Config(BaseModel):
     """B站视频清晰度"""
     plite_bili_audio_quality: BiliAudioQuality = BiliAudioQuality._192K
     """B站音频流音质上限"""
-    plite_need_forward_contents: bool = True
-    """是否需要合并转发内容(大于四项时始终转发)"""
-    plite_summary_in_forward: bool = False
-    """是否将总结卡片放入内容合并转发"""
-    plite_video_in_forward: bool = False
-    """是否将视频放入内容合并转发"""
+    plite_send_components: list[SendComponent] = [
+        SendComponent.CARD,
+        SendComponent.CONTENT,
+        SendComponent.COVER,
+        SendComponent.VIDEO,
+        SendComponent.AUDIO,
+    ]
+    """发送哪些内容块；card 为渲染卡片不可禁用，可选 url/embed/content/cover/video/audio"""
+    plite_forward_components: list[SendComponent] = [
+        SendComponent.CONTENT,
+        SendComponent.COVER,
+    ]
+    """放入合并转发的内容块；card 入列即总结卡片置于转发首节点，video 入列即视频并入转发"""
     plite_lazy_download: bool = False
     """是否开启懒下载模式，仅在用户请求时才下载视频"""
     plite_lazy_download_tip: bool = False
@@ -157,6 +160,16 @@ class Config(BaseModel):
         # 启动时就解析一遍，笔误不至于等到发消息才静默不生效
         parse_media_speedup_rules(value)
         return [item.strip() for item in value if item.strip()]
+
+    @field_validator("plite_send_components")
+    @classmethod
+    def validate_send_components(
+        cls, value: list[SendComponent]
+    ) -> list[SendComponent]:
+        components = list(dict.fromkeys(value))
+        if SendComponent.CARD not in components:
+            components.insert(0, SendComponent.CARD)
+        return components
 
     @model_validator(mode="after")
     def validate_lazy_download(self) -> "Config":
@@ -254,34 +267,19 @@ class Config(BaseModel):
         return self.plite_use_base64
 
     @property
-    def append_url(self) -> bool:
-        """是否在解析结果中添加原始URL"""
-        return self.plite_append_url
-
-    @property
-    def embed_url(self) -> bool:
-        """是否在解析结果中添加嵌入式播放链接"""
-        return self.plite_embed_url
-
-    @property
     def append_qrcode(self) -> bool:
         """是否在解析结果中添加原始URL二维码"""
         return self.plite_append_qrcode
 
     @property
-    def need_forward_contents(self) -> bool:
-        """是否需要合并转发"""
-        return self.plite_need_forward_contents
+    def send_components(self) -> list[SendComponent]:
+        """发送哪些内容块"""
+        return self.plite_send_components
 
     @property
-    def summary_in_forward(self) -> bool:
-        """是否将总结卡片放入内容合并转发"""
-        return self.plite_summary_in_forward
-
-    @property
-    def video_in_forward(self) -> bool:
-        """是否将视频放入内容合并转发"""
-        return self.plite_video_in_forward
+    def forward_components(self) -> set[SendComponent]:
+        """放入合并转发的内容块"""
+        return set(self.plite_forward_components)
 
     @property
     def download_command(self) -> list[str]:

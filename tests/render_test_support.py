@@ -31,10 +31,11 @@ sys.modules[parser_package.__name__] = parser_package
 from nonebot_plugin_alconna.uniseg import File, Image, Reference, Video
 
 from nonebot_plugin_parser_lite.config import pconfig
-from nonebot_plugin_parser_lite.constants import PlatformEnum
+from nonebot_plugin_parser_lite.constants import PlatformEnum, SendComponent
 from nonebot_plugin_parser_lite.data import (
     Author,
     ImageContent,
+    LivePhotoContent,
     ParseResult,
     Platform,
     VideoContent,
@@ -56,12 +57,14 @@ __all__ = [
     "ForwardNodeInner",
     "Image",
     "ImageContent",
+    "LivePhotoContent",
     "ParseResult",
     "Platform",
     "PlatformEnum",
     "Reference",
     "Renderer",
     "ResolvedPathTask",
+    "SendComponent",
     "SyncPath",
     "ThemeManager",
     "UniHelper",
@@ -70,6 +73,7 @@ __all__ = [
     "build_theme_data",
     "make_result",
     "pconfig",
+    "set_send_layout",
 ]
 
 
@@ -103,3 +107,36 @@ def make_result() -> ParseResult:
         url="https://example.com/video",
         content=[video],
     )
+
+
+def set_send_layout(
+    monkeypatch,
+    *,
+    video_in_forward: bool = False,
+    content_in_forward: bool = True,
+    summary_in_forward: bool = False,
+    send_content: bool = True,
+    send_cover: bool = True,
+    send_url: bool = False,
+    send_embed: bool = False,
+) -> None:
+    """按测试意图组装 send/forward 组件清单"""
+    components = [SendComponent.CARD]
+    if send_url:
+        components.append(SendComponent.URL)
+    if send_embed:
+        components.append(SendComponent.EMBED)
+    if send_content:
+        components.append(SendComponent.CONTENT)
+    if send_cover:
+        components.append(SendComponent.COVER)
+    components += [SendComponent.VIDEO, SendComponent.AUDIO]
+    forward: list[SendComponent] = []
+    if summary_in_forward:
+        forward.append(SendComponent.CARD)
+    if content_in_forward:
+        forward += [SendComponent.CONTENT, SendComponent.COVER]
+    if video_in_forward:
+        forward.append(SendComponent.VIDEO)
+    monkeypatch.setattr(pconfig, "plite_send_components", components)
+    monkeypatch.setattr(pconfig, "plite_forward_components", forward)

@@ -68,6 +68,21 @@ class PlatformEnum(StrEnum):
         return self.value
 
 
+class SendComponent(StrEnum):
+    """可发送内容块，清单顺序即发送顺序"""
+
+    CARD = "card"
+    URL = "url"
+    EMBED = "embed"
+    CONTENT = "content"
+    COVER = "cover"
+    VIDEO = "video"
+    AUDIO = "audio"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 EMOJI_MAP: Final[dict[str, tuple[str, str]]] = {
     "fail": ("10060", "❌"),
     "resolving": ("38", "🔨"),
