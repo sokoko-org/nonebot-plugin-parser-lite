@@ -15,6 +15,7 @@ from render_test_support import (
     UniHelper,
     make_result,
     pconfig,
+    set_send_layout,
 )
 
 
@@ -49,8 +50,9 @@ def capture_forward_nodes(monkeypatch) -> list[list[ForwardNodeInner]]:
 async def test_video_is_sent_separately_by_default(monkeypatch, fake_media_segments):
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", True)
+    set_send_layout(
+        monkeypatch, video_in_forward=False, content_in_forward=True
+    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
 
@@ -69,8 +71,9 @@ async def test_video_is_appended_after_cover_in_forward(
 ):
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(
+        monkeypatch, video_in_forward=True, content_in_forward=False
+    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
 
@@ -87,8 +90,9 @@ async def test_video_is_appended_after_cover_in_forward(
 async def test_uploaded_video_is_appended_as_file(monkeypatch, fake_media_segments):
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(
+        monkeypatch, video_in_forward=True, content_in_forward=False
+    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", True)
 
@@ -106,8 +110,9 @@ async def test_summary_is_first_forward_node(monkeypatch, fake_media_segments):
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
     summary = UniMessage([Text("summary")])
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(
+        monkeypatch, video_in_forward=True, content_in_forward=False
+    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
 
@@ -130,8 +135,9 @@ async def test_summary_forces_forward_and_includes_deferred_video(
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
     summary = UniMessage([Text("summary")])
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(
+        monkeypatch, video_in_forward=False, content_in_forward=False
+    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
 
@@ -159,8 +165,9 @@ async def test_summary_keeps_deferred_media_in_content_order(
     result.content.append(ImageContent(ResolvedPathTask(image_path)))  # pyright: ignore[reportArgumentType]
     captured = capture_forward_nodes(monkeypatch)
     summary = UniMessage([Text("summary")])
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(
+        monkeypatch, video_in_forward=False, content_in_forward=False
+    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
 
@@ -187,8 +194,9 @@ async def test_title_node_has_no_trailing_newline_in_forward(
     result.content.append("正文\n\n   第二段\n")
     result.content.append("\n\n第三段\naa")
     captured = capture_forward_nodes(monkeypatch)
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", True)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(
+        monkeypatch, video_in_forward=True, content_in_forward=False
+    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
 
@@ -208,8 +216,7 @@ async def test_title_is_separated_from_text_in_single_message(
     result = make_result()
     result.title = "标题"
     result.content = ["正文\n\n", "   第二段\ngg"]
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", False)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(monkeypatch, video_in_forward=False, content_in_forward=False)
 
     messages = [message async for message in Renderer().send_content(result)]
 

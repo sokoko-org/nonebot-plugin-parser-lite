@@ -220,30 +220,25 @@ plite_parse_dedup_platforms=null
 # [可选] 所选平台：同会话相同链接或编号成功解析后的忽略分钟数
 plite_parse_dedup_minutes=30
 
-# [可选] 是否在解析结果中附加原始URL
-plite_append_url=False
+# [可选] 发送哪些内容块（媒体和正文仍按原帖出现顺序穿插渲染，列表不改变渲染顺序）
+# card 为渲染卡片，强制保留且不可禁用；其余可选项：
+#   url    原始 URL　　　　embed  在线播放链接
+#   content 解析正文(文字/图片/贴纸/链接/引用/投票)
+#   cover  视频封面　　　video  视频　　audio  音频
+plite_send_components=["card", "content", "cover", "video", "audio"]
 
-# [可选] 是否在解析结果中添加`在线播放`链接(如果有)
-plite_embed_url=False
+# [可选] 放入合并转发的内容块（仅对已在 plite_send_components 启用的块生效）
+# card  入列：总结卡片置于转发首节点（强制合并转发；懒下载仍单独发卡片）
+# video 入列：视频并入转发（需协议端支持转发节点中发送 Video / File）
+# content / cover 入列：正文体进入转发（超过 4 项时始终使用合并转发）
+plite_forward_components=["content", "cover"]
 
 # [可选] 是否在解析结果中添加原始URL二维码
 plite_append_qrcode=False
 
-# [可选] 是否需要转发媒体内容(超过 4 项时始终使用合并转发)
-plite_need_forward_contents=True
-
-# [可选] 是否将首张总结卡片作为第一个节点放入内容合并转发
-# 开启后会强制使用合并转发；懒下载模式下仍立即单独发送总结卡片
-plite_summary_in_forward=False
-
-# [可选] 是否将视频作为节点放入内容合并转发
-# 需要协议端支持在合并转发节点中发送 Video / File
-# 开启后仍保留视频封面，并在包含视频时强制使用合并转发
-plite_video_in_forward=False
-
 # 合并转发遇到明确的媒体上传错误时，只重发失败的分包：先省略视频并保留其他内容；
 # 若再次上传失败或没有视频，则将媒体替换为文字，仍以合并转发发送
-# 降级消息会补上缺失的标题、作者和原链接，不受 plite_append_url 影响
+# 降级消息会补上缺失的标题、作者和原链接
 
 # [可选] 是否开启懒下载模式，仅在用户请求时才下载视频
 plite_lazy_download=False
@@ -312,6 +307,30 @@ plite_bsb_categories=[]
 ```
 
 </details>
+
+### 📦 发送组合
+
+`plite_send_components` 和 `plite_forward_components` 共同决定解析结果发哪些块、哪些块进合并转发。媒体和正文仍按原帖中的出现顺序穿插渲染，清单只控制启用与否，不改变渲染先后。
+
+块的含义（`SendComponent`）：
+
+|   块    |               含义               | 可否禁用 |
+| :-----: | :------------------------------: | :------: |
+|  card   |           渲染的总结卡片         | 否（强制）|
+|   url   |           解析源原始链接         |    是    |
+|  embed  |         在线播放链接（如有）     |    是    |
+| content | 解析正文：文字 / 图片 / 贴纸 / 链接 / 引用 / 投票 | 是 |
+|  cover  |             视频封面             |    是    |
+|  video  |               视频               |    是    |
+|  audio  |               音频               |    是    |
+
+- **`plite_send_components`**：列出要发送的块；未列出的块不发送。`card` 始终保留，若未填会自动补回。例如不想发原始正文和封面，只留 `["card", "video", "audio"]` 即可。
+- **`plite_forward_components`**：在已启用的块中，指定哪些进入合并转发（未在 `plite_send_components` 启用的块在此无效）：
+  - `card` 入列：总结卡片作为转发首节点，强制合并转发；懒下载模式下仍单独发送卡片
+  - `video` 入列：视频并入转发，需协议端支持在转发节点中发送 Video / File
+  - `content` / `cover` 入列：正文体进入转发（节点超过 4 项时始终使用合并转发）
+
+默认值：发送 `[card, content, cover, video, audio]`，转发 `[content, cover]`。
 
 ## 🎉 使用
 

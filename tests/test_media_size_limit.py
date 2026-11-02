@@ -1,7 +1,7 @@
 from anyio import Path
 from nonebot_plugin_alconna.uniseg import Reference, Text, UniMessage
 import pytest
-from render_test_support import Renderer, UniHelper, pconfig
+from render_test_support import Renderer, UniHelper, pconfig, set_send_layout
 
 from nonebot_plugin_parser_lite.constants import PlatformEnum
 from nonebot_plugin_parser_lite.data import (
@@ -97,8 +97,9 @@ async def test_oversized_video_keeps_summary_and_sends_notice(
         url="https://example.com/video",
         content=[video],
     )
-    monkeypatch.setattr(pconfig, "plite_video_in_forward", video_in_forward)
-    monkeypatch.setattr(pconfig, "plite_need_forward_contents", False)
+    set_send_layout(
+        monkeypatch, video_in_forward=video_in_forward, content_in_forward=False
+    )
     construct = UniHelper.construct_forward_message
     monkeypatch.setattr(
         UniHelper,

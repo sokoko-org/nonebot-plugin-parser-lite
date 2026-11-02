@@ -21,6 +21,7 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
+from ..constants import SendComponent
 from ..delivery import send_with_media_fallback
 from ..download import DOWNLOADER
 from ..helper import UniHelper
@@ -201,7 +202,10 @@ async def _parse_and_send(
 ):
     result = await get_or_parse_result(sr)
     summary_msg = await RENDERER.render_messages(result)
-    summary_in_forward = pconfig.summary_in_forward and not pconfig.lazy_download
+    summary_in_forward = (
+        SendComponent.CARD in pconfig.forward_components
+        and not pconfig.lazy_download
+    )
     if not summary_in_forward:
         if state:
             state.output_started = True

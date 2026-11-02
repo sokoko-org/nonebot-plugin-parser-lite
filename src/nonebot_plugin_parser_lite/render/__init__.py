@@ -8,6 +8,7 @@ from nonebot import logger
 from nonebot_plugin_alconna.uniseg import Text
 
 from ..config import _nickname, gconfig, pconfig
+from ..constants import SendComponent
 from ..data import (
     AudioContent,
     AudioVideoContent,
@@ -261,12 +262,12 @@ class Renderer:
         if image_seg is not None:
             mark_media_role(image_seg, "summary")
         msg = UniMessage(image_seg or "图片渲染失败")
-        if pconfig.append_url:
+        components = pconfig.send_components
+        if SendComponent.URL in components:
             urls = (result.display_url, result.repost_display_url)
             msg += "\n".join(url for url in urls if url)
-        if pconfig.embed_url:
-            if embed := result.embed_url:
-                msg += "\n在线播放: " + embed
+        if SendComponent.EMBED in components and (embed := result.embed_url):
+            msg += "\n在线播放: " + embed
         return msg
 
     async def send_content(
@@ -284,11 +285,23 @@ class Renderer:
         failed_count = 0
         deferred_media_segs: dict[int, list[UniMessage[Any]]] = {}
         forward_video_segs: dict[int, ForwardNodeInner] = {}
+        components = pconfig.send_components
+        forward = pconfig.forward_components
         for cont in result.iter_sendable_media():
             # 先处理需要立即发送的音视频，或准备待合并转发的视频节点
             try:
-                if isinstance(cont, VideoContent) and pconfig.video_in_forward:
-                    forward_video_segs[id(cont)] = await self.__build_video_seg(cont)
+                if isinstance(cont, VideoContent):
+                    if SendComponent.VIDEO not in components:
+                        continue
+                    if SendComponent.VIDEO in forward:
+                        forward_video_segs[id(cont)] = await self.__build_video_seg(
+                            cont
+                        )
+                        continue
+                if (
+                    isinstance(cont, AudioContent)
+                    and SendComponent.AUDIO not in components
+                ):
                     continue
                 async for msg in self.__handle_immediate_media(cont):
                     if summary_node is None:
@@ -332,14 +345,16 @@ class Renderer:
                 processed_segs.extend(split_forward_content(seg, SPLIT_THRESHOLD))
 
             # 是否需要合并转发：
-            # 1) 配置项 need_forward_contents
+            # 1) forward_components 含 content / cover（正文体进转发）
             # 2) 纯文字部分超过阈值
             # 3) 节点数较多
-            # 4) 包含配置为合并转发的视频
-            # 5) 包含配置为合并转发的总结卡片
+            # 4) 包含 forward_components 指定并入转发的视频
 
+            body_in_forward = bool(
+                forward & {SendComponent.CONTENT, SendComponent.COVER}
+            )
             if (
-                pconfig.need_forward_contents
+                body_in_forward
                 or total_plain_len > SPLIT_THRESHOLD
                 or node_count > 4
                 or bool(forward_video_segs)
@@ -429,14 +444,17 @@ class Renderer:
         deferred_media_segs: dict[int, list[UniMessage[Any]]],
     ) -> None:
         cover_in_forward = False
-        try:
-            path = await cont.get_cover_path()
-            if path:
-                nodes.append(await UniHelper.img_seg(file=path))
-                cover_in_forward = True
-        except Exception as e:
-            logger.warning(f"构建转发媒体片段失败: {type(cont).__name__}: {e}")
-            nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
+        if SendComponent.COVER in pconfig.send_components:
+            try:
+                path = await cont.get_cover_path()
+                if path:
+                    nodes.append(await UniHelper.img_seg(file=path))
+                    cover_in_forward = True
+            except Exception as e:
+                logger.warning(
+                    f"构建转发媒体片段失败: {type(cont).__name__}: {e}"
+                )
+                nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
 
         video_seg = forward_video_segs.get(id(cont))
         if video_seg is not None:
@@ -472,10 +490,13 @@ class Renderer:
 
         try:
             if isinstance(cont, ImageContent):
-                nodes.append(await UniHelper.img_seg(await cont.get_path()))
+                if SendComponent.CONTENT in pconfig.send_components:
+                    nodes.append(await UniHelper.img_seg(await cont.get_path()))
                 return
 
             if isinstance(cont, GraphicContent):
+                if SendComponent.CONTENT not in pconfig.send_components:
+                    return
                 seg: ForwardNodeInner = await UniHelper.img_seg(await cont.get_path())
                 if cont.alt:
                     seg = seg + cont.alt
@@ -525,14 +546,15 @@ class Renderer:
             nodes: list[ForwardNodeInner | _ForwardText] = []
             text_buffer: list[_ForwardTextPart] = []
             author_prefix_pending = True
-            if title := pr.title:
+            send_text = SendComponent.CONTENT in pconfig.send_components
+            if send_text and (title := pr.title):
                 nodes.append(
                     _ForwardText(author_name, [_ForwardTextPart(f"{title}\n")], False)
                 )
 
             async def flush_text() -> None:
                 nonlocal author_prefix_pending, text_buffer
-                if text_buffer:
+                if text_buffer and send_text:
                     nodes.append(
                         _ForwardText(
                             author_name,
@@ -541,7 +563,7 @@ class Renderer:
                         )
                     )
                     author_prefix_pending = False
-                    text_buffer = []
+                text_buffer = []
 
             def append_text_block(text: str) -> None:
                 """将块级文本加入当前文本段，并与相邻内容换行分隔"""
@@ -553,13 +575,6 @@ class Renderer:
 
             # 按 content 顺序遍历
             for item in pr.content:
-                if isinstance(item, str):
-                    # 文本：保留接口返回的空白和换行，段落边界由原始文本控制
-                    text_buffer.append(_ForwardTextPart(item))
-                    continue
-                if isinstance(item, StickerContent):
-                    text_buffer.append(_ForwardTextPart(item.desc or "[表情]"))
-                    continue
                 if isinstance(item, MediaContent):
                     if not item.need_send:
                         continue
@@ -567,6 +582,15 @@ class Renderer:
                     await self.__append_forward_media(
                         item, nodes, forward_video_segs, deferred_media_segs
                     )
+                    continue
+                if not send_text:
+                    continue
+                if isinstance(item, str):
+                    # 文本：保留接口返回的空白和换行，段落边界由原始文本控制
+                    text_buffer.append(_ForwardTextPart(item))
+                    continue
+                if isinstance(item, StickerContent):
+                    text_buffer.append(_ForwardTextPart(item.desc or "[表情]"))
                     continue
                 if isinstance(item, LinkContent):
                     await flush_text()

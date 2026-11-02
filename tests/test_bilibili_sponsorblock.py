@@ -219,8 +219,9 @@ async def test_skipped_video_renders_notice_and_cover_without_downloading(
     download = AsyncMock(side_effect=AssertionError("不应下载视频"))
     monkeypatch.setattr(bilibili.DOWNLOADER, "download_video", download)
     monkeypatch.setattr(support.Platform, "get_logo_path", AsyncMock(return_value=None))
-    monkeypatch.setattr(support.pconfig, "plite_video_in_forward", video_in_forward)
-    monkeypatch.setattr(support.pconfig, "plite_need_forward_contents", False)
+    support.set_send_layout(
+        monkeypatch, video_in_forward=video_in_forward, content_in_forward=False
+    )
     async with httpx.AsyncClient(
         transport=httpx.MockTransport(lambda _: httpx.Response(200, json=[entry]))
     ) as client:
