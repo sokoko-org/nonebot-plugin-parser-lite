@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 from nonebot.matcher import current_event
 from nonebot_plugin_uninfo import Scene, SceneType, Session, SupportScope, User
 import pytest
-from render_test_support import ROOT, set_send_layout  # noqa: F401
+from render_test_support import set_send_layout
 
 from nonebot_plugin_parser_lite import matchers
 from nonebot_plugin_parser_lite.matchers import limit

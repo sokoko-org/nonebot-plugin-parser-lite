@@ -406,9 +406,12 @@ class Renderer:
             segment = await UniHelper.file_seg(video_path)
             mark_media_role(segment, "video")
             return segment
-        return await UniHelper.video_seg(
-            file=video_path, thumbnail=await cont.get_cover_path()
+        thumbnail = (
+            await cont.get_cover_path()
+            if SendComponent.COVER in pconfig.send_components
+            else None
         )
+        return await UniHelper.video_seg(file=video_path, thumbnail=thumbnail)
 
     @staticmethod
     def __format_quote(item: QuoteContent) -> str:
@@ -504,6 +507,8 @@ class Renderer:
                 return
 
             if isinstance(cont, LivePhotoContent):
+                if SendComponent.CONTENT not in pconfig.send_components:
+                    return
                 if pconfig.live_photo:
                     nodes.append(
                         await UniHelper.video_seg(

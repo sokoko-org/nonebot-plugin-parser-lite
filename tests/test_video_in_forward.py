@@ -50,9 +50,6 @@ def capture_forward_nodes(monkeypatch) -> list[list[ForwardNodeInner]]:
 async def test_video_is_sent_separately_by_default(monkeypatch, fake_media_segments):
     result = make_result()
     captured = capture_forward_nodes(monkeypatch)
-    set_send_layout(
-        monkeypatch, video_in_forward=False, content_in_forward=True
-    )
     monkeypatch.setattr(pconfig, "plite_need_upload", False)
     monkeypatch.setattr(pconfig, "plite_need_upload_video", False)
 
