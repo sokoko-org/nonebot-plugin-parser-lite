@@ -35,6 +35,7 @@ from nonebot_plugin_parser_lite.constants import PlatformEnum, SendComponent
 from nonebot_plugin_parser_lite.data import (
     Author,
     ImageContent,
+    LivePhotoContent,
     ParseResult,
     Platform,
     VideoContent,
@@ -56,6 +57,7 @@ __all__ = [
     "ForwardNodeInner",
     "Image",
     "ImageContent",
+    "LivePhotoContent",
     "ParseResult",
     "Platform",
     "PlatformEnum",
