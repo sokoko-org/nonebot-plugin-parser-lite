@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ data.theme }}">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Media Card · Music</title>
+        <link rel="stylesheet" href="icon.css" />
+        <link rel="stylesheet" href="tailwind.css" />
+        {% from "macros.jinja" import render_ambient, render_stats, render_comments %}
+    </head>
+    <body class="m-0 w-[620px] break-all font-sans antialiased">
+        {% set post = data.post %}
+        {% set meta = data.meta %}
+        {% set ns = namespace(cover='', audio=none, lyric='') %}
+        {% for item in post.content %}
+            {% if not ns.cover and item.type in ['cover', 'image', 'graphic'] %}{% set ns.cover = item.src or '' %}{% endif %}
+            {% if not ns.audio and item.type == 'audio' %}{% set ns.audio = item %}{% endif %}
+            {% if not ns.lyric and item.type == 'text' and item.text %}{% set ns.lyric = item.text %}{% endif %}
+        {% endfor %}
+        {% set album = post.extra.album if post.extra and post.extra.album else '' %}
+        {% set cover_src = ns.cover %}
+        {% set logo_src = post.platform.logo %}
+        <main class="relative isolate w-[620px] overflow-hidden rounded-2xl bg-slate-50 dark:bg-slate-950">
+            {{ render_ambient(cover_src, logo_src) }}
+            <div class="relative z-[1] flex flex-col">
+                <div class="flex items-center justify-between px-8 pt-8 pb-2">
+                    <div class="flex items-center gap-3">
+                        <img src="{{ post.author.avatar }}" alt="" class="h-11 w-11 rounded-full object-cover ring-2 ring-white/70 dark:ring-white/10" />
+                        <div class="min-w-0">
+                            <div class="truncate text-base font-black leading-tight text-slate-800 dark:text-slate-100">{{ post.author.name }}</div>
+                            <div class="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">正在播放</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5 dark:bg-white/5">
+                        <img src="{{ post.platform.logo }}" alt="" class="h-4 w-4 rounded-[2px] object-cover" />
+                        <span class="text-xs font-black tracking-widest text-slate-500 dark:text-slate-300">{{ post.platform.name }}</span>
+                    </div>
+                </div>
+
+                <div class="relative mt-5 flex justify-center px-8">
+                    {% if cover_src %}
+                        <div class="pointer-events-none absolute top-1/2 right-[96px] h-[220px] w-[220px] -translate-y-1/2 rounded-full bg-slate-900/80 shadow-[0_18px_60px_rgba(0,0,0,0.45)] dark:bg-black">
+                            <img src="{{ cover_src }}" alt="" class="absolute top-1/2 left-1/2 h-[82px] w-[82px] -translate-x-1/2 -translate-y-1/2 rounded-full object-cover opacity-90" />
+                            <div class="absolute top-1/2 left-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-50 dark:bg-slate-900"></div>
+                        </div>
+                        <div class="relative z-[1]">
+                            <img src="{{ cover_src }}" alt="" class="h-[262px] w-[262px] scale-[1.04] rounded-[22px] object-cover opacity-70 blur-[26px] saturate-[1.5]" />
+                            <div class="absolute inset-0 overflow-hidden rounded-[22px] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
+                                <img src="{{ cover_src }}" alt="专辑封面" class="h-[262px] w-[262px] object-cover" />
+                                <div class="absolute inset-0 rounded-[22px] ring-1 ring-inset ring-white/15"></div>
+                            </div>
+                            <div class="absolute right-3 bottom-3 flex h-12 w-12 items-center justify-center rounded-full bg-black/45 backdrop-blur-sm">
+                                <i class="fa-icon fa-play translate-x-[2px] text-xl leading-none text-white/90"></i>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="flex h-[262px] w-[262px] items-center justify-center rounded-[22px] bg-slate-200 dark:bg-slate-800">
+                            <i class="fa-icon fa-music text-6xl leading-none text-slate-400 dark:text-slate-600"></i>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="px-8 pt-7">
+                    <h1 class="text-2xl font-black leading-tight text-slate-800 dark:text-slate-100">{{ post.title }}</h1>
+                    <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                        <span>{{ post.author.name }}</span>
+                        {% if album %}<span class="text-slate-300 dark:text-slate-600">·</span><span class="truncate">{{ album }}</span>{% endif %}
+                    </div>
+                </div>
+
+                {% if ns.audio %}
+                    <div class="px-8 pt-6">
+                        <div class="h-[3px] w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                            <div class="h-full w-1/3 rounded-full bg-slate-700 dark:bg-slate-200"></div>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between text-xs font-medium text-slate-400 dark:text-slate-500">
+                            <span>00:00</span>
+                            <div class="flex items-center gap-3">
+                                {% if ns.audio.speedup %}<span class="rounded-full bg-white/60 px-2 py-0.5 dark:bg-white/5">{{ ns.audio.speedup }}</span>{% endif %}
+                                {% if ns.audio.size %}<span>{{ ns.audio.size }}</span>{% endif %}
+                                <span class="font-semibold text-slate-500 dark:text-slate-300">{{ ns.audio.duration }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if ns.lyric %}
+                    <div class="mx-8 mt-6 rounded-2xl bg-white/55 px-5 py-4 dark:bg-white/5">
+                        <div class="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                            <i class="fa-icon fa-music text-xs"></i><span>歌词</span>
+                        </div>
+                        <div class="space-y-1">
+                            {% set lines = namespace(shown=0) %}
+                            {% for raw in ns.lyric.split('\n') %}
+                                {% set line = raw.split(']')|last|trim %}
+                                {% if line and lines.shown < 6 %}
+                                    <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ line }}</p>
+                                    {% set lines.shown = lines.shown + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if post.ai_summary %}
+                    <div class="px-8 pt-6">
+                        <div class="flex items-start gap-2.5 border-l-2 border-indigo-400 py-1 pl-3 dark:border-indigo-500">
+                            <div class="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500">
+                                <i class="fa-icon fa-wand-magic-sparkles text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="mb-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">AI 总结</div>
+                                <p class="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{{ post.ai_summary }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if post.stats and (post.stats.like_count is not none or post.stats.comment_count is not none or post.stats.view_count is not none) %}
+                    {{ render_stats(post.stats) }}
+                {% endif %}
+
+                {% if post.comments %}
+                    <div class="mx-8 mt-4 mb-4"><div class="h-px bg-slate-100 dark:bg-slate-700"></div></div>
+                    {{ render_comments(post.comments) }}
+                {% endif %}
+
+                <div class="mx-8 mt-6 mb-7 flex items-end justify-between gap-6">
+                    <div class="min-w-0">
+                        {% if post.url %}<div class="truncate text-xs text-slate-400 dark:text-slate-500">{{ post.url }}</div>{% endif %}
+                    </div>
+                    {% if post.qrcode %}
+                        <img src="{{ post.qrcode }}" alt="二维码" class="h-20 w-20 shrink-0 rounded-lg" />
+                    {% endif %}
+                </div>
+                <footer class="mx-8 flex items-center justify-between border-t border-gray-100 py-5 text-[10px] font-black uppercase tracking-widest text-gray-300 antialiased dark:border-slate-800 dark:text-slate-600">
+                    <span>{{ meta.bot_name }} Parser · Design negichan</span><span>Rendering at {{ meta.rendering_time }}</span>
+                </footer>
+            </div>
+        </main>
+    </body>
+</html>
