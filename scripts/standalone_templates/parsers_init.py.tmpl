@@ -28,14 +28,14 @@ def load_all() -> tuple[type, ...]:
     of failing the whole registry. Keys are enum member names because module names
     follow ``PlatformEnum.name`` rather than its value: ``FIVEEPLAY`` lives in
     ``fiveeplay``, not ``5eplay``.
+
+    A disabled platform stays out of the result even if an earlier call already
+    cached its class here, because ``sys.modules`` cannot be undone.
     """
     skipped = {plat.name.lower() for plat in pconfig.disabled_platforms}
     loaded: list[type] = []
     for name in __all__:
-        if name in globals():
-            loaded.append(globals()[name])
-        elif _PARSERS[name].lstrip(".").lower() in skipped:
+        if _PARSERS[name].lstrip(".").lower() in skipped:
             continue
-        else:
-            loaded.append(__getattr__(name))
+        loaded.append(globals()[name] if name in globals() else __getattr__(name))
     return tuple(loaded)

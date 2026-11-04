@@ -85,6 +85,32 @@ def disable_checks(root: Path) -> None:
                 f"disabled={label}: imported {sorted(imported_names) or 'nothing'}, "
                 f"expected {sorted(expected_loaded) or 'nothing'}"
             )
+    # Disabling after a platform is already cached must still drop it from the
+    # registry: sys.modules cannot be undone, so the skip has to cover cache hits.
+    reload_program = (
+        "import sys; sys.path.insert(0, sys.argv[1]); "
+        "import nonebot_plugin_parser_lite as package; "
+        "import nonebot_plugin_parser_lite.parsers as registry; "
+        "print(len(registry.load_all())); "
+        "package.configure(plite_disabled_platforms=['qqmusic', '5eplay']); "
+        "types = registry.load_all(); print(len(types)); "
+        "print(','.join(sorted(str(t.platform.name) for t in types "
+        "if str(t.platform.name) in {'qqmusic', '5eplay'})))"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", reload_program, str(root / "src")],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        errors.append(f"reload: {result.stderr.strip()[-160:]}")
+    else:
+        before, after, cached = (line.strip() for line in result.stdout.splitlines())
+        if int(before) - int(after) != 2:
+            errors.append(f"reload: {before} -> {after} parsers, expected 2 fewer")
+        if cached:
+            errors.append(f"reload: disabled platforms still returned: {cached}")
     fail(errors)
     print("Standalone disabled-platform checks passed")  # noqa: T201
 
