@@ -63,7 +63,9 @@ async def test_theme_manager_discovers_external_theme(tmp_path):
     assert str(selected_music.root) == str(selected.root)
 
     default_theme = await manager.resolve("default")
-    assert await default_theme.template_for("netease") == "default.html.jinja"
+    # netease 在 MUSIC_PLATFORMS 里，内置主题按音乐卡片渲染，不是通用卡片
+    assert await default_theme.template_for("netease") == "music.html.jinja"
+    assert await default_theme.template_for("bilibili") == "default.html.jinja"
     assert (await Renderer()._resolve_theme()).id == "default"
 
 
