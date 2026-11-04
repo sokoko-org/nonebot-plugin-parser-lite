@@ -57,7 +57,7 @@
 > - ✅ 表示完整支持解析与富文本渲染
 > - ❌ 表示插件尚未适配该模块
 > - 🚫 表示该平台暂无此类内容形态 (如有遗漏或平台更新，欢迎提交 Issue 告知)
-> - **图文**：指代一切以文本为主体、图片混排、多图相册、社区长文、问答、多媒体笔记等内容形态。
+> - **图文**：指代一切以文本为主体、图片混排、多图相册、社区长文、问答、多媒体笔记等内容形态
 
 支持的链接，可参考 [测试链接](https://github.com/fllesser/nonebot-plugin-parser/blob/master/tests/others/test_urls.md)
 
@@ -310,7 +310,7 @@ plite_bsb_categories=[]
 
 ### 📦 发送组合
 
-`plite_send_components` 和 `plite_forward_components` 共同决定解析结果发哪些块、哪些块进合并转发。媒体和正文仍按原帖中的出现顺序穿插渲染，清单只控制启用与否，不改变渲染先后。
+`plite_send_components` 和 `plite_forward_components` 共同决定解析结果发哪些块、哪些块进合并转发。媒体和正文仍按原帖中的出现顺序穿插渲染，清单只控制启用与否，不改变渲染先后
 
 块的含义（`SendComponent`）：
 
@@ -324,13 +324,13 @@ plite_bsb_categories=[]
 |  video  |                       视频                        |     是     |
 |  audio  |                       音频                        |     是     |
 
-- **`plite_send_components`**：列出要发送的块；未列出的块不发送。`card` 始终保留，若未填会自动补回。例如不想发原始正文和封面，只留 `["card", "video", "audio"]` 即可。
-- **`plite_forward_components`**：在已启用的块中，指定哪些进入合并转发（未在 `plite_send_components` 启用的块在此无效）：
+- **`plite_send_components`**：列出要发送的块；未列出的块不发送。`card` 始终保留，若未填会自动补回。例如不想发原始正文和封面，只留 `["card", "video", "audio"]` 即可
+- **`plite_forward_components`**：在已启用的块中，指定哪些进入合并转发（未在 `plite_send_components` 启用的块在此无效）
   - `card` 入列：总结卡片作为转发首节点，强制合并转发；懒下载模式下仍单独发送卡片
   - `video` 入列：视频并入转发，需协议端支持在转发节点中发送 Video / File
   - `content` / `cover` 入列：正文体进入转发（节点超过 4 项时始终使用合并转发）
 
-默认值：发送 `[card, content, cover, video, audio]`，转发 `[content, cover]`。
+默认值：发送 `[card, content, cover, video, audio]`，转发 `[content, cover]`
 
 ## 🎉 使用
 

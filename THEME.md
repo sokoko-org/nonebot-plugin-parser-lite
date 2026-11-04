@@ -1,10 +1,10 @@
 ﻿# 渲染主题开发指南
 
-本指南帮助开发者了解并快速开发 `nonebot-plugin-parser-lite` 的自定义渲染主题。主题基于 Jinja2 模板引擎与 CSS 构建，最终由渲染器生成图片消息。
+本指南帮助开发者了解并快速开发 `nonebot-plugin-parser-lite` 的自定义渲染主题。主题基于 Jinja2 模板引擎与 CSS 构建，最终由渲染器生成图片消息
 
 ## 一、整体解析与渲染流程
 
-插件在处理数据并渲染成图时，遵循以下核心工作流：
+插件在处理数据并渲染成图时，遵循以下核心工作流
 
 ```text
 平台解析器
@@ -19,9 +19,9 @@
 > [!NOTE]
 > **数据传入机制**
 >
-> 渲染模板时，模板上下文**仅接收一个名为 `data` 的根对象**。模板的核心职责即为对 `data` 内部的数据进行样式渲染与排版展示。
+> 渲染模板时，模板上下文**仅接收一个名为 `data` 的根对象**。模板的核心职责即为对 `data` 内部的数据进行样式渲染与排版展示
 
-渲染模板中对 http(s) 的访问会被忽略，也不支持加载 JavaScript。详细文档可参考 [blitz-py](https://github.com/adrienbrault/blitz-py)。
+渲染模板中对 http(s) 的访问会被忽略，也不支持加载 JavaScript。详细文档可参考 [blitz-py](https://github.com/adrienbrault/blitz-py)
 
 ```jinja
 {# 示例：访问全局 data 对象 #}
@@ -37,7 +37,7 @@
 
 ### 1. 基础主题结构
 
-一个合法的最小主题包必须包含以下两个文件：
+一个合法的最小主题包必须包含以下两个文件
 
 ```text
 my-theme/
@@ -47,7 +47,7 @@ my-theme/
 
 ### 2. 完整主题结构示例
 
-可根据需求在主题目录中扩展多个平台专属模板及静态资源：
+可根据需求在主题目录中扩展多个平台专属模板及静态资源
 
 ```text
 my-theme/
@@ -70,7 +70,7 @@ my-theme/
 
 ### 1. 编写元数据文件 theme.json
 
-每个主题根目录下必须包含 `theme.json`，用于声明主题信息：
+每个主题根目录下必须包含 `theme.json`，用于声明主题信息
 
 ```json
 {
@@ -83,26 +83,26 @@ my-theme/
 }
 ```
 
-| 字段名称         | 是否必填 | 类型     | 说明                                                                                             |
-| ---------------- | -------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `schema_version` | 否       | `number` | 配置规范版本，目前固定为 `1`（缺省时默认为 `1`）。若后续版本不兼容将自动忽略该主题                 |
+| 字段名称         | 是否必填 | 类型     | 说明                                                                                                |
+| ---------------- | -------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `schema_version` | 否       | `number` | 配置规范版本，目前固定为 `1`（缺省时默认为 `1`）。若后续版本不兼容将自动忽略该主题                  |
 | `id`             | **是**   | `string` | 主题唯一标识。仅允许小写字母、数字、点（`.`）、下划线（`_`）和连字符（`-`），且必须以字母或数字开头 |
-| `name`           | 否       | `string` | 主题展示名称，缺省时自动使用 `id`                                                                  |
-| `desc`           | 否       | `string` | 主题简要描述                                                                                       |
-| `author`         | 否       | `string` | 主题作者信息                                                                                       |
-| `version`        | 否       | `string` | 主题语义化版本号。更新版本号可强制刷新插件的渲染缓存                                               |
+| `name`           | 否       | `string` | 主题展示名称，缺省时自动使用 `id`                                                                   |
+| `desc`           | 否       | `string` | 主题简要描述                                                                                        |
+| `author`         | 否       | `string` | 主题作者信息                                                                                        |
+| `version`        | 否       | `string` | 主题语义化版本号。更新版本号可强制刷新插件的渲染缓存                                                |
 
 ### 2. 主题安装与加载顺序
 
-插件启动时，会按照以下优先级顺序检索主题：
+插件启动时，会按照以下优先级顺序检索主题
 
 1. 用户自定义配置目录 `plite_theme_dirs`
 2. 插件数据存储目录下的 `themes/`
 3. 插件包内置的模板目录 `render/templates/`（最终兜底）
 
-**加载方式配置**（`.env` 或配置文件）：
+**加载方式配置**（`.env` 或配置文件）
 
-`plite_theme_dirs` 支持配置为**单个主题目录**，或者**包含多个子主题的根目录**：
+`plite_theme_dirs` 支持配置为**单个主题目录**，或者**包含多个子主题的根目录**
 
 ```toml
 # extra_config.toml
@@ -114,7 +114,7 @@ plite_theme_dirs = [
 ]
 ```
 
-多主题集合目录的合法结构示例：
+多主题集合目录的合法结构示例
 
 ```text
 community-themes-pack/
@@ -127,13 +127,13 @@ community-themes-pack/
 ```
 
 > [!WARNING]
-> 若多个主题定义了重复的 `id`，后加载的主题将覆盖先加载的主题。
+> 若多个主题定义了重复的 `id`，后加载的主题将覆盖先加载的主题
 >
-> 若目标主题无效（包含损坏的 `theme.json` 或版本不兼容），插件将自动回退使用内置默认主题。
+> 若目标主题无效（包含损坏的 `theme.json` 或版本不兼容），插件将自动回退使用内置默认主题
 
 ## 四、模板选择与回退机制
 
-当解析目标平台（例如：网易云音乐 `netease`）时，插件查找模板的匹配顺序如下：
+当解析目标平台（例如：网易云音乐 `netease`）时，插件查找模板的匹配顺序如下
 
 ```text
 1. <platform>.html.jinja   (例如: netease.html.jinja - 平台专属)
@@ -150,24 +150,24 @@ community-themes-pack/
 
 ### 1. 音乐平台定义
 
-目前系统认定的音乐平台标识 ID：
+目前系统认定的音乐平台标识 ID
 
-| 平台 ID    | 平台名称   |
-| ---------- | ---------- |
-| `kugou`    | 酷狗音乐   |
-| `netease`  | 网易云音乐 |
-| `kuwo`     | 酷我音乐   |
-| `qsmusic`  | 汽水音乐   |
-| `qqmusic`  | QQ 音乐    |
+| 平台 ID   | 平台名称   |
+| --------- | ---------- |
+| `kugou`   | 酷狗音乐   |
+| `netease` | 网易云音乐 |
+| `kuwo`    | 酷我音乐   |
+| `qsmusic` | 汽水音乐   |
+| `qqmusic` | QQ 音乐    |
 
 ### 2. 全部平台 ID 参考
 
 > [!IMPORTANT]
-> 模板文件名必须严格使用**平台 ID**（小写字母），不能使用平台的中文显示名称。
+> 模板文件名必须严格使用**平台 ID**（小写字母），不能使用平台的中文显示名称
 >
-> 例如：网易云音乐应命名为 `netease.html.jinja`，而非 `网易云音乐.html.jinja`。
+> 例如：网易云音乐应命名为 `netease.html.jinja`，而非 `网易云音乐.html.jinja`
 
-当前支持的全部平台 ID（详见 `constants.py`）：
+当前支持的全部平台 ID（详见 `constants.py`）
 
 ```text
 acfun, bilibili, douyin, kuaishou, kugou, netease, x, weibo, rednote,
@@ -178,14 +178,14 @@ taptap, ds, qqmusic
 
 ## 五、Theme API v1 数据结构
 
-模板中通过 `data` 对象获取渲染所需的全部信息，支持的顶层字段如下：
+模板中通过 `data` 对象获取渲染所需的全部信息，支持的顶层字段如下
 
 ```javascript
-data.schema_version  // [number] 当前协议版本号 (1)
-data.theme           // [string] 当前色彩模式："light" | "dark"
-data.theme_id        // [string] 当前生效的主题 ID
-data.meta            // [object] 渲染相关的元数据
-data.post            // [object] 动态/帖子核心数据
+data.schema_version; // [number] 当前协议版本号 (1)
+data.theme; // [string] 当前色彩模式："light" | "dark"
+data.theme_id; // [string] 当前生效的主题 ID
+data.meta; // [object] 渲染相关的元数据
+data.post; // [object] 动态/帖子核心数据
 ```
 
 ### 1. `data.meta`（元信息）
@@ -219,33 +219,33 @@ data.post            // [object] 动态/帖子核心数据
 | 字段   | 类型     | 说明                                           |
 | ------ | -------- | ---------------------------------------------- |
 | `id`   | `string` | 平台 ID（如 `"bilibili"`, `"netease"`）        |
-| `name` | `string` | 平台显示名称（如 `"哔哩哔哩"`）                  |
+| `name` | `string` | 平台显示名称（如 `"哔哩哔哩"`）                |
 | `logo` | `string` | 平台图标 URI（若获取失败会自动使用内置占位图） |
 
 **作者信息 `post.author`**
 
-| 字段          | 类型             | 说明                     |
-| ------------- | ---------------- | ------------------------ |
-| `name`        | `string`         | 作者昵称                 |
-| `id`          | `string \| null` | 作者唯一 ID              |
-| `avatar`      | `string`         | 头像 URI                 |
-| `description` | `string \| null` | 个人简介                 |
-| `location`    | `string \| null` | IP 归属地                |
+| 字段          | 类型             | 说明        |
+| ------------- | ---------------- | ----------- |
+| `name`        | `string`         | 作者昵称    |
+| `id`          | `string \| null` | 作者唯一 ID |
+| `avatar`      | `string`         | 头像 URI    |
+| `description` | `string \| null` | 个人简介    |
+| `location`    | `string \| null` | IP 归属地   |
 
 **交互统计 `post.stats`**
 
-基础指标（均已格式化为字符串，如 `"1.2万"`）：
+基础指标（均已格式化为字符串，如 `"1.2万"`）
 
-| 字段            | 类型             | 说明     |
-| --------------- | ---------------- | -------- |
-| `view_count`    | `string \| null` | 浏览数   |
-| `like_count`    | `string \| null` | 点赞数   |
-| `collect_count` | `string \| null` | 收藏数   |
-| `share_count`   | `string \| null` | 分享数   |
-| `comment_count` | `string \| null` | 评论数   |
+| 字段            | 类型             | 说明           |
+| --------------- | ---------------- | -------------- |
+| `view_count`    | `string \| null` | 浏览数         |
+| `like_count`    | `string \| null` | 点赞数         |
+| `collect_count` | `string \| null` | 收藏数         |
+| `share_count`   | `string \| null` | 分享数         |
+| `comment_count` | `string \| null` | 评论数         |
 | `extra`         | `array`          | 平台特殊统计项 |
 
-平台特殊统计项示例：
+平台特殊统计项示例
 
 ```jinja
 {% for item in post.stats.extra %}
@@ -261,7 +261,7 @@ data.post            // [object] 动态/帖子核心数据
 
 ## 六、正文内容类型 (`post.content`) 渲染规范
 
-`post.content` 数组包含了文章或动态的所有正文元素，模板需针对不同的 `type` 逐一渲染：
+`post.content` 数组包含了文章或动态的所有正文元素，模板需针对不同的 `type` 逐一渲染
 
 ### 1. 文本 (`text`)
 
@@ -273,9 +273,13 @@ data.post            // [object] 动态/帖子核心数据
 ```
 
 > [!NOTE]
-> 文本内容可能包含换行符，建议在 CSS 中设置：
+> 文本内容可能包含换行符，建议在 CSS 中设置
+>
 > ```css
-> .text { white-space: pre-wrap; word-break: break-word; }
+> .text {
+>   white-space: pre-wrap;
+>   word-break: break-word;
+> }
 > ```
 
 ### 2. 普通图片与封面 (`image` / `cover`)
@@ -305,14 +309,14 @@ data.post            // [object] 动态/帖子核心数据
 }
 ```
 
-| 字段          | 类型     | 说明                                                         |
-| ------------- | -------- | ------------------------------------------------------------ |
-| `src`         | `string` | 本地文件 URI                                                 |
-| `layout`      | `string` | 布局建议：`"grid"`（网格）或 `"x"`（横向推特流）             |
-| `width`       | `number` | 像素宽度                                                     |
-| `height`      | `number` | 像素高度                                                     |
-| `orientation` | `string` | `"portrait"`（竖图，高/宽 ≥ 0.9）或 `"landscape"`（横图）    |
-| `source_url`  | `string` | 原始网络地址（不建议模板直接请求）                           |
+| 字段          | 类型     | 说明                                                      |
+| ------------- | -------- | --------------------------------------------------------- |
+| `src`         | `string` | 本地文件 URI                                              |
+| `layout`      | `string` | 布局建议：`"grid"`（网格）或 `"x"`（横向推特流）          |
+| `width`       | `number` | 像素宽度                                                  |
+| `height`      | `number` | 像素高度                                                  |
+| `orientation` | `string` | `"portrait"`（竖图，高/宽 ≥ 0.9）或 `"landscape"`（横图） |
+| `source_url`  | `string` | 原始网络地址（不建议模板直接请求）                        |
 
 - 封面图 (`cover`)：音乐平台的第一张图片或封面卡片会标记为 `cover`
 
@@ -361,11 +365,11 @@ data.post            // [object] 动态/帖子核心数据
 }
 ```
 
-| 字段          | 类型             | 说明                             |
-| ------------- | ---------------- | -------------------------------- |
-| `src`         | `string \| null` | 贴纸图片 URI                     |
-| `size`        | `string`         | 表情尺寸：`small` 或 `medium`    |
-| `description` | `string`         | 贴纸描述                         |
+| 字段          | 类型             | 说明                          |
+| ------------- | ---------------- | ----------------------------- |
+| `src`         | `string \| null` | 贴纸图片 URI                  |
+| `size`        | `string`         | 表情尺寸：`small` 或 `medium` |
+| `description` | `string`         | 贴纸描述                      |
 
 - 若 `src` 为 `null`，应回退显示 `description`（如 `[笑哭]`）
 
@@ -392,12 +396,12 @@ data.post            // [object] 动态/帖子核心数据
 }
 ```
 
-| 字段        | 类型             | 说明                          |
-| ----------- | ---------------- | ----------------------------- |
-| `src`       | `string`         | 封面 URI（video）或 `null`    |
-| `duration`  | `string`         | 时长（如 `"01:23"`）          |
-| `speedup`   | `string \| null` | 倍速标签，1 倍速时为 `null`   |
-| `size`      | `string`         | 文件大小（如 `"12.34MB"`）    |
+| 字段       | 类型             | 说明                        |
+| ---------- | ---------------- | --------------------------- |
+| `src`      | `string`         | 封面 URI（video）或 `null`  |
+| `duration` | `string`         | 时长（如 `"01:23"`）        |
+| `speedup`  | `string \| null` | 倍速标签，1 倍速时为 `null` |
+| `size`     | `string`         | 文件大小（如 `"12.34MB"`）  |
 
 ### 7. 链接卡片与引用 (`link` / `quote`)
 
@@ -447,19 +451,19 @@ data.post            // [object] 动态/帖子核心数据
 }
 ```
 
-| 字段               | 类型             | 说明                                         |
-| ------------------ | ---------------- | -------------------------------------------- |
-| `title`            | `string \| null` | 投票标题                                     |
-| `options`          | `array`          | 选项列表                                     |
-| `option_vote_total`| `number`         | 选项票数之和                                 |
-| `total_votes`      | `number \| null` | 平台返回的总票数（多选时可能大于投票人数）   |
-| `total_voters`     | `number \| null` | 投票人数                                     |
-| `multiple`         | `boolean`        | 是否允许多选                                 |
-| `closed`           | `boolean`        | 投票是否已结束                               |
-| `close_at`         | `string \| null` | 投票结束时间（平台原始格式）                 |
-| `has_images`       | `boolean`        | 是否有选项图片                               |
+| 字段                | 类型             | 说明                                       |
+| ------------------- | ---------------- | ------------------------------------------ |
+| `title`             | `string \| null` | 投票标题                                   |
+| `options`           | `array`          | 选项列表                                   |
+| `option_vote_total` | `number`         | 选项票数之和                               |
+| `total_votes`       | `number \| null` | 平台返回的总票数（多选时可能大于投票人数） |
+| `total_voters`      | `number \| null` | 投票人数                                   |
+| `multiple`          | `boolean`        | 是否允许多选                               |
+| `closed`            | `boolean`        | 投票是否已结束                             |
+| `close_at`          | `string \| null` | 投票结束时间（平台原始格式）               |
+| `has_images`        | `boolean`        | 是否有选项图片                             |
 
-`percentage` 字段已计算为百分比数值，可直接用于进度条渲染：
+`percentage` 字段已计算为百分比数值，可直接用于进度条渲染
 
 ```jinja
 <div class="poll-bar" style="width: {{ '%.2f'|format(option.percentage) }}%"></div>
@@ -467,7 +471,7 @@ data.post            // [object] 动态/帖子核心数据
 
 ### 9. 未知类型兜底 (`unknown`)
 
-为保证向前兼容，未识别的新类型数据统一封装为 `type="unknown"`：
+为保证向前兼容，未识别的新类型数据统一封装为 `type="unknown"`
 
 ```jinja
 {% if item.type == 'text' %}
@@ -486,28 +490,28 @@ data.post            // [object] 动态/帖子核心数据
 > [!IMPORTANT]
 > **切勿使用转义过滤器 `|e`**
 >
-> 渲染管道在向 Jinja2 传入数据前已统一完成安全转义，同时自动转义功能在 Jinja 环境中已关闭。
+> 渲染管道在向 Jinja2 传入数据前已统一完成安全转义，同时自动转义功能在 Jinja 环境中已关闭
 >
 > - **正确**：`{{ post.title }}`
 > - **错误**：`{{ post.title | e }}`（会导致字符被双重转义，如显示为 `&amp;lt;`）
 
 ### 2. HTML 与容器结构要求
 
-生成图的截图区域基于 HTML 中的 `<main>` 节点，因此模板**必须包含 `<main>` 元素**作为根容器：
+生成图的截图区域基于 HTML 中的 `<main>` 节点，因此模板**必须包含 `<main>` 元素**作为根容器
 
 ```html
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="{{ data.theme }}">
-<head>
-  <meta charset="UTF-8" />
-  <link rel="stylesheet" href="theme.css" />
-</head>
-<body>
-  <!-- 必须存在 main 容器，用于捕获渲染区域 -->
-  <main class="theme-card">
-    <!-- 内容区域 -->
-  </main>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="theme.css" />
+  </head>
+  <body>
+    <!-- 必须存在 main 容器，用于捕获渲染区域 -->
+    <main class="theme-card">
+      <!-- 内容区域 -->
+    </main>
+  </body>
 </html>
 ```
 
@@ -515,7 +519,7 @@ data.post            // [object] 动态/帖子核心数据
 
 **相对路径与静态资源**
 
-CSS 及图片资源的引入推荐使用相对路径，其解释起点为**当前主题文件根目录**：
+CSS 及图片资源的引入推荐使用相对路径，其解释起点为**当前主题文件根目录**
 
 ```html
 <link rel="stylesheet" href="theme.css" />
@@ -524,7 +528,7 @@ CSS 及图片资源的引入推荐使用相对路径，其解释起点为**当�
 
 **内置图标支持 (`icon.css`)**
 
-渲染器会自动向页面注入全局图标样式表。即使不引入外部图标库，也可直接使用内置类名：
+渲染器会自动向页面注入全局图标样式表。即使不引入外部图标库，也可直接使用内置类名
 
 ```html
 <i class="fa-icon fa-heart"></i>
@@ -538,7 +542,7 @@ CSS 及图片资源的引入推荐使用相对路径，其解释起点为**当�
 
 **深浅色模式适配 (`data-theme`)**
 
-结合 `data.theme` 全局变量控制暗色模式：
+结合 `data.theme` 全局变量控制暗色模式
 
 ```css
 :root {
@@ -568,7 +572,7 @@ body {
 
 ### Q2: 为什么修改了 CSS 或 HTML 后渲染效果没有发生变化？
 
-渲染器为了保证性能默认启用了渲染结果缓存。在开发和调试阶段，可以通过**递增 `theme.json` 中的 `version` 字段**（如 `1.0.0` → `1.0.1`）来强制刷新缓存。
+渲染器为了保证性能默认启用了渲染结果缓存。在开发和调试阶段，可以通过**递增 `theme.json` 中的 `version` 字段**（如 `1.0.0` → `1.0.1`）来强制刷新缓存
 
 ### Q3: 图片显示为占位图？
 
@@ -578,7 +582,7 @@ body {
 
 ### Q4: 如何调试模板渲染数据？
 
-可以在模板中临时输出 `data` 对象来检查数据结构：
+可以在模板中临时输出 `data` 对象来检查数据结构
 
 ```jinja
 <pre style="font-size: 10px; overflow: auto;">
@@ -588,7 +592,7 @@ body {
 
 ## 九、拓展资源与样例
 
-- 官方主题仓库：[sokoko-org/nonebot-plugin-parser-themes](https://github.com/sokoko-org/nonebot-plugin-parser-themes)
+- 主题仓库：[sokoko-org/nonebot-plugin-parser-themes](https://github.com/sokoko-org/nonebot-plugin-parser-themes)
   - 包含了 `pink-cute`、`minimal-mono`、`hatsune-miku` 等示例主题源码，可作为开发参考
 - 内置默认主题源码：`src/nonebot_plugin_parser_lite/render/templates/`
   - `default.html.jinja` - 默认模板
