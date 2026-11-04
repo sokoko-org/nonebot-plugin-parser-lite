@@ -1,6 +1,8 @@
 from importlib import import_module
 from typing import Any
 
+from ..config import pconfig
+
 _PARSERS = {
 {{PARSERS}}
 }
@@ -19,8 +21,21 @@ def __getattr__(name: str) -> Any:
 
 
 def load_all() -> tuple[type, ...]:
-    """Load every platform parser for automatic text matching."""
-    return tuple(
-        __getattr__(name) if name not in globals() else globals()[name]
-        for name in __all__
-    )
+    """Load every enabled platform parser for automatic text matching.
+
+    The disabled platforms are consulted here, ahead of ``import_module``, so a
+    platform whose optional native extension is missing can be turned off instead
+    of failing the whole registry. Keys are enum member names because module names
+    follow ``PlatformEnum.name`` rather than its value: ``FIVEEPLAY`` lives in
+    ``fiveeplay``, not ``5eplay``.
+
+    A disabled platform stays out of the result even if an earlier call already
+    cached its class here, because ``sys.modules`` cannot be undone.
+    """
+    skipped = {plat.name.lower() for plat in pconfig.disabled_platforms}
+    loaded: list[type] = []
+    for name in __all__:
+        if _PARSERS[name].lstrip(".").lower() in skipped:
+            continue
+        loaded.append(globals()[name] if name in globals() else __getattr__(name))
+    return tuple(loaded)
