@@ -165,7 +165,7 @@ uv add --requirements ./xxx/requirements.txt
 API_TIMEOUT=100
 
 # [可选] 文件发送的超时秒数，由适配器(Onebot)支持；未设置时沿用默认等待时间
-plite_file_upload_timeout=None
+plite_file_upload_timeout=null
 
 # [可选] 允许的 B 站视频编码，越靠前的编码优先级越高
 # 可选 "avc"(H.264，体积较大), "hev"(HEVC), "av01"(AV1), "unknown"(未知)
