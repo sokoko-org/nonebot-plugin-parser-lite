@@ -292,11 +292,11 @@ class BilibiliParser(BaseParser):
     @handle(
         "bilibili.com",
         "/favlist",
-        params={"fav_id": {"as_int": True}},
+        params={"fid": {"as_int": True}},
     )
     async def _parse_favlist(self, searched: MatchWithParams):
         """解析收藏夹信息"""
-        fav_id = int(searched["fav_id"])
+        fav_id = int(searched["fid"])
         return await self.parse_favlist(fav_id)
 
     @handle("bilibili.com", r"/read/cv(?P<read_id>\d+)")
@@ -371,7 +371,6 @@ class BilibiliParser(BaseParser):
         cache_key = f"bilibili:{bvid}:{page_index + 1}"
         if audio_stream is not None:
             cache_key += f":audio:{audio_stream.audio_quality.value}"
-        retryable_http_statuses = self.BILI_RETRYABLE_HTTP_STATUSES
 
         sponsorblock = await SponsorBlock.query(bvid=bvid, cid=cid, duration=duration)
         is_full_video_ad = sponsorblock.is_full_video_ad
@@ -382,7 +381,7 @@ class BilibiliParser(BaseParser):
             video_urls=video_urls,
             audio_urls=audio_urls,
             ext_headers=self.headers,
-            retryable_http_statuses=retryable_http_statuses,
+            retryable_http_statuses=self.BILI_RETRYABLE_HTTP_STATUSES,
             cache_key=cache_key,
             sponsorblock=sponsorblock,
         )
