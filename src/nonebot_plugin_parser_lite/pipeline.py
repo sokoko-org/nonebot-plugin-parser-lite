@@ -85,10 +85,6 @@ class MatchResult:
     parser_type: type[BaseParser]
 
     @property
-    def url(self) -> str:
-        return self.searched.url
-
-    @property
     def params(self) -> dict[str, str]:
         return self.searched.params.copy()
 
