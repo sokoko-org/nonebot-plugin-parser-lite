@@ -5,10 +5,10 @@ from anyio import CancelScope, Path, to_thread
 
 try:
     from .qmc import decrypt_qmc_file
-except ModuleNotFoundError:
+except ModuleNotFoundError as e:
     raise RuntimeError(
-        "未找到编译模块，请检查是否根据安装步骤运行了 `python setup.py build_ext --inplace`"
-    )
+        "未找到编译模块，请检查是否根据安装步骤运行了 `python setup.py build_ext --inplace` 或使用了正确的预编译包"
+    ) from e
 
 _OUTPUT_EXTENSIONS: Final = MappingProxyType(
     {
