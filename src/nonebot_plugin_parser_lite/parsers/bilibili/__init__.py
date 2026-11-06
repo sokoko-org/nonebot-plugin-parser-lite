@@ -211,8 +211,8 @@ class BilibiliParser(BaseParser):
         if mid in self.black_mids:
             raise TipException("该up属于黑名单")
 
-    @handle("bilibili.com/bangumi/play", r"ep(?P<ep_id>\d+)")
-    @handle("bilibili.com/bangumi/play", r"ss(?P<season_id>\d+)")
+    @handle("bilibili.com", r"/bangumi/play/ep(?P<ep_id>\d+)")
+    @handle("bilibili.com", r"/bangumi/play/ss(?P<season_id>\d+)")
     async def _parse_bangumi(self, searched: MatchWithParams):
         ep_id = searched.get("ep_id")
         season_id = searched.get("season_id")
@@ -243,19 +243,19 @@ class BilibiliParser(BaseParser):
         )
 
     @handle("b23.tv", r"b23\.tv/[0-9a-zA-Z._?%&+\-=/#]+")
-    @handle("bili2233", r"bili2233\.cn/[0-9a-zA-Z._?%&+\-=/#]+")
+    @handle("bili2233.cn", r"bili2233\.cn/[0-9a-zA-Z._?%&+\-=/#]+")
     async def _parse_short_link(self, searched: MatchWithParams):
         """解析短链"""
         url = f"https://{searched.url}"
         return await self.parse_with_redirect(url)
 
     @handle(
-        "/BV",
-        r"bilibili\.com(?:/video)?/(?P<bvid>BV[0-9A-Za-z]{10})",
+        "bilibili.com",
+        r"/(?P<bvid>BV[0-9A-Za-z]{10})",
         params={"p": {"default": "1", "as_int": True, "required": False}},
     )
     @handle("BV", r"^(?P<bvid>BV[0-9a-zA-Z]{10})(?:\s)?(?P<p>\d{1,3})?$")
-    @handle("bilibili.com/list/watchlater", params={"bvid": {}})
+    @handle("bilibili.com", "/list/watchlater", params={"bvid": {}})
     async def _parse_bv(self, searched: MatchWithParams):
         """解析视频信息"""
         bvid = searched["bvid"]
@@ -264,8 +264,8 @@ class BilibiliParser(BaseParser):
         return await self.parse_video(bvid=bvid, page_num=page_num)
 
     @handle(
-        "/av",
-        r"bilibili\.com(?:/video)?/av(?P<avid>\d{6,})",
+        "bilibili.com",
+        r"/av(?P<avid>\d{6,})",
         params={"p": {"default": "1", "as_int": True, "required": False}},
     )
     @handle("av", r"^av(?P<avid>\d{6,})(?:\s)?(?P<p>\d{1,3})?$")
@@ -276,26 +276,30 @@ class BilibiliParser(BaseParser):
 
         return await self.parse_video(avid=avid, page_num=page_num)
 
-    @handle("/dynamic/", r"bilibili\.com/dynamic/(?P<dynamic_id>\d+)")
-    @handle("t.bili", r"t\.bilibili\.com/(?P<dynamic_id>\d+)")
-    @handle("/opus/", r"bilibili\.com/opus/(?P<dynamic_id>\d+)")
+    @handle("bilibili.com", r"/dynamic/(?P<dynamic_id>\d+)")
+    @handle("t.bilibili.com", r"/(?P<dynamic_id>\d+)")
+    @handle("bilibili.com", r"/opus/(?P<dynamic_id>\d+)")
     async def _parse_dynamic(self, searched: MatchWithParams):
         """解析动态信息"""
         return await self.parse_dynamic_or_opus(searched["dynamic_id"])
 
-    @handle("live.bili", r"live\.bilibili\.com/(?P<room_id>\d+)")
+    @handle("live.bilibili.com", r"/(?P<room_id>\d+)")
     async def _parse_live(self, searched: MatchWithParams):
         """解析直播信息"""
         room_id = int(searched["room_id"])
         return await self.parse_live(room_id)
 
-    @handle("/favlist", r"favlist\?fid=(?P<fav_id>\d+)")
+    @handle(
+        "bilibili.com",
+        "/favlist",
+        params={"fid": {"as_int": True}},
+    )
     async def _parse_favlist(self, searched: MatchWithParams):
         """解析收藏夹信息"""
-        fav_id = int(searched["fav_id"])
+        fav_id = int(searched["fid"])
         return await self.parse_favlist(fav_id)
 
-    @handle("/read/", r"bilibili\.com/read/cv(?P<read_id>\d+)")
+    @handle("bilibili.com", r"/read/cv(?P<read_id>\d+)")
     async def _parse_read(self, searched: MatchWithParams):
         """解析专栏信息"""
         read_id = int(searched["read_id"])
@@ -367,7 +371,6 @@ class BilibiliParser(BaseParser):
         cache_key = f"bilibili:{bvid}:{page_index + 1}"
         if audio_stream is not None:
             cache_key += f":audio:{audio_stream.audio_quality.value}"
-        retryable_http_statuses = self.BILI_RETRYABLE_HTTP_STATUSES
 
         sponsorblock = await SponsorBlock.query(bvid=bvid, cid=cid, duration=duration)
         is_full_video_ad = sponsorblock.is_full_video_ad
@@ -378,7 +381,7 @@ class BilibiliParser(BaseParser):
             video_urls=video_urls,
             audio_urls=audio_urls,
             ext_headers=self.headers,
-            retryable_http_statuses=retryable_http_statuses,
+            retryable_http_statuses=self.BILI_RETRYABLE_HTTP_STATUSES,
             cache_key=cache_key,
             sponsorblock=sponsorblock,
         )
