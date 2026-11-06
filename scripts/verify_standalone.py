@@ -78,7 +78,9 @@ def disable_checks(root: Path) -> None:
         loaded, size, imported = (line.strip() for line in result.stdout.splitlines())
         expected = int(size) - len([name for name in disabled.split(",") if name])
         if int(loaded) != expected:
-            errors.append(f"disabled={label}: loaded {loaded} of {size}, expected {expected}")
+            errors.append(
+                f"disabled={label}: loaded {loaded} of {size}, expected {expected}"
+            )
         imported_names = {name for name in imported.split(",") if name}
         if imported_names != expected_loaded:
             errors.append(
@@ -120,9 +122,14 @@ async def verify_pipeline() -> None:
     ParseStep = package.ParseStep
     Parser = package.Parser
     package.configure(plite_render_format="jpeg")
-    url = "bilibili.com/video/BV1xx411c7mD"
-    if not package.match(f"分享 https://www.{url} 给你").url.endswith(url):
-        fail(["text matching returned an unexpected result"])
+    for path in ("video/BV1xx411c7mD", "zh-Hans/video/BV1xx411c7mD"):
+        matched = package.match(f"分享 https://www.bilibili.com/{path}?p=2 给你")
+        if (
+            matched.parser_type.platform.name != "bilibili"
+            or matched.searched["bvid"] != "BV1xx411c7mD"
+            or matched.params.get("p") != "2"
+        ):
+            fail(["text matching returned an unexpected video or page"])
 
     base = import_module("nonebot_plugin_parser_lite.parsers.base")
     data = import_module("nonebot_plugin_parser_lite.data")
@@ -146,8 +153,8 @@ async def verify_pipeline() -> None:
         url = "https://example.test/item"
         text = f"input {url}"
         matched = await offline.parse(text, until=ParseStep.MATCH)
-        if matched.url != url:
-            fail(["match stage returned an unexpected URL"])
+        if matched.parser_type is not OfflineParser or matched.text != text:
+            fail(["match stage returned an unexpected parser or input text"])
         result = await offline.parse(matched)
         if (
             result.url != url

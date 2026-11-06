@@ -64,10 +64,6 @@ class SearchResult:
         return self.searched.cache_key
 
     @property
-    def url(self) -> str:
-        return self.searched.url
-
-    @property
     def params(self) -> dict[str, str]:
         return self.searched.params
 
