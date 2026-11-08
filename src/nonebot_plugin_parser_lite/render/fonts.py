@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import hashlib
 from io import BytesIO
 import tarfile
-from typing import Literal
+from typing import Final, Literal
 
 from bs4 import BeautifulSoup, Comment
 from httpx import HTTPError
@@ -15,11 +15,15 @@ import regex
 import ujson
 
 from ..download import DOWNLOADER
+from ..download.client import RetryableDownloadError
 from ..exception import DownloadException
 from ..path import data_dir
 
 EmojiStyle = Literal["system", "twitter", "google"]
 FONT_DIR = data_dir / "fonts"
+MAX_METADATA_BYTES: Final = 1024 * 1024
+MAX_FONT_ARCHIVE_BYTES: Final = 64 * 1024 * 1024
+MAX_FONT_BYTES: Final = 32 * 1024 * 1024
 NPM_REGISTRIES = ("https://registry.npmjs.org", "https://registry.npmmirror.com")
 FONT_PACKAGES = {
     "twitter": ("twemoji-colr-font", "package/twemoji.woff2"),
@@ -96,13 +100,18 @@ async def _save_font(provider: str, version: str, data: bytes, digest: str) -> N
                 logger.warning(f"清理旧 emoji 字体失败: {previous}: {exc}")
 
 
-async def _get(urls: tuple[str, ...]) -> bytes:
+async def _get(urls: tuple[str, ...], *, max_size: int) -> bytes:
     errors = []
     for url in urls:
         try:
             async with asyncio.timeout(15):
-                return await DOWNLOADER.content(url)
-        except (DownloadException, HTTPError, TimeoutError) as exc:
+                return await DOWNLOADER.content(url, max_size=max_size)
+        except (
+            DownloadException,
+            RetryableDownloadError,
+            HTTPError,
+            TimeoutError,
+        ) as exc:
             errors.append(f"{url}: {exc}")
     raise DownloadException("; ".join(errors))
 
@@ -111,7 +120,10 @@ async def _latest_release(provider: str) -> FontRelease:
     package, _ = FONT_PACKAGES[provider]
 
     metadata = ujson.loads(
-        await _get(tuple(f"{registry}/{package}/latest" for registry in NPM_REGISTRIES))
+        await _get(
+            tuple(f"{registry}/{package}/latest" for registry in NPM_REGISTRIES),
+            max_size=MAX_METADATA_BYTES,
+        )
     )
     version = metadata["version"]
     return FontRelease(
@@ -129,19 +141,26 @@ def _extract_font(provider: str, release: FontRelease, data: bytes) -> bytes:
     actual = base64.b64encode(hashlib.new(algorithm, data).digest()).decode()
     if actual != expected:
         raise ValueError(f"{provider} 字体包完整性校验失败")
-    with tarfile.open(fileobj=BytesIO(data), mode="r:gz") as archive:
-        member = archive.extractfile(FONT_PACKAGES[provider][1])
-        if member is None:
-            raise ValueError(f"{provider} 字体包缺少 WOFF2 字体")
-        with member:
-            return member.read()
+    with tarfile.open(fileobj=BytesIO(data), mode="r|gz") as archive:
+        for info in archive:
+            if info.name != FONT_PACKAGES[provider][1]:
+                continue
+            if not info.isfile() or info.size > MAX_FONT_BYTES:
+                raise ValueError(
+                    f"{provider} 字体类型无效或超过 {MAX_FONT_BYTES} 字节限制"
+                )
+            member = archive.extractfile(info)
+            if member is not None:
+                with member:
+                    return member.read(MAX_FONT_BYTES)
+    raise ValueError(f"{provider} 字体包缺少 WOFF2 字体")
 
 
 async def _download_font(provider: str, release: FontRelease) -> bytes:
     errors = []
     for url in release.urls:
         try:
-            data = await _get((url,))
+            data = await _get((url,), max_size=MAX_FONT_ARCHIVE_BYTES)
             return await asyncio.to_thread(_extract_font, provider, release, data)
         except (DownloadException, ValueError, KeyError, tarfile.TarError) as exc:
             errors.append(f"{url}: {exc}")
@@ -173,14 +192,28 @@ async def _prepare_font(provider: str) -> EmojiFont | None:
         return None
 
 
+def warmup_emoji_font(style: EmojiStyle) -> None:
+    """启动字体准备任务"""
+    provider = "twitter" if style == "system" else style
+    if provider not in _FONTS and provider not in _FONT_TASKS:
+        _FONT_TASKS[provider] = asyncio.create_task(_prepare_font(provider))
+
+
+async def shutdown_emoji_fonts() -> None:
+    """关闭下载器前停止仍在运行的字体准备任务"""
+    tasks = tuple(_FONT_TASKS.values())
+    for task in tasks:
+        task.cancel()
+    await asyncio.gather(*tasks, return_exceptions=True)
+    _FONT_TASKS.clear()
+
+
 async def ensure_emoji_font(style: EmojiStyle) -> EmojiFont | None:
-    """每次启动检查一次版本；并发预热和渲染共享同一任务及结果。"""
+    """每次启动检查一次版本；并发预热和渲染共享同一任务及结果"""
     provider = "twitter" if style == "system" else style
     if provider not in _FONTS:
-        task = _FONT_TASKS.get(provider)
-        if task is None:
-            task = asyncio.create_task(_prepare_font(provider))
-            _FONT_TASKS[provider] = task
+        warmup_emoji_font(style)
+        task = _FONT_TASKS[provider]
         try:
             _FONTS[provider] = await asyncio.shield(task)
         finally:

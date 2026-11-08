@@ -27,6 +27,7 @@ from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
 from ..render import RENDERER
+from ..render.fonts import shutdown_emoji_fonts
 from ..render.image import warmup_themes
 from ..utils.cache import CacheManager
 from ..utils.common import LimitedSizeDict
@@ -135,6 +136,7 @@ def register_parser_matcher() -> None:
 
 @driver.on_shutdown
 async def close_http_clients() -> None:
+    await shutdown_emoji_fonts()
     await asyncio.gather(
         *(parser.aclose() for parser in _ALL_PARSERS),
         DOWNLOADER.aclose(),

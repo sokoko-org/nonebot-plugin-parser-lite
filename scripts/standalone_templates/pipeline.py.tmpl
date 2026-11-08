@@ -65,10 +65,12 @@ def _ensure_runtime_started() -> None:
 
 async def shutdown_runtime() -> None:
     from .download import DOWNLOADER
+    from .render.fonts import shutdown_emoji_fonts
 
     global _runtime_started
     _runtime_started = False
     await scheduler.shutdown()
+    await shutdown_emoji_fonts()
     await DOWNLOADER.aclose()
     clear_result_cache()
 

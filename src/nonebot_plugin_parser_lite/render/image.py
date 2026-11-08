@@ -15,7 +15,7 @@ from ..config import gconfig, pconfig
 from ..utils.ffmpeg import FFmpeg
 from .context import ThemeData
 from .engine import render_html
-from .fonts import ensure_emoji_font
+from .fonts import ensure_emoji_font, warmup_emoji_font
 from .theme import ThemeDefinition, ThemeManager
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -47,8 +47,8 @@ async def _get_icon_css() -> str:
 
 
 async def warmup_themes() -> None:
-    """预热主题发现与字体"""
-    await ensure_emoji_font(pconfig.emoji_style)
+    """预热主题发现并准备字体"""
+    warmup_emoji_font(pconfig.emoji_style)
     await ThemeManager(TEMPLATES_DIR, pconfig.theme_dirs).list_themes()
 
 
