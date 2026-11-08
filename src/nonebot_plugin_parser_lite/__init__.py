@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
     from .render import ThemeData, render_theme_data, resolve_parse_result
 
-__version__ = "1.4.1rc1"
+__version__ = "1.4.1rc2"
 
 __all__ = [
     "Config",
