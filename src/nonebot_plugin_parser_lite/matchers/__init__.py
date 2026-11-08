@@ -27,6 +27,8 @@ from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
 from ..render import RENDERER
+from ..render.fonts import shutdown_emoji_fonts
+from ..render.image import warmup_themes
 from ..utils.cache import CacheManager
 from ..utils.common import LimitedSizeDict
 from .filter import _make_target_key
@@ -94,15 +96,15 @@ driver = get_driver()
 
 @driver.on_startup
 async def warmup_cache_index() -> None:
-    """启动时预热缓存索引与主题发现，命中走内存无需 I/O"""
+    """启动时预热缓存索引与主题发现"""
     try:
         await CacheManager.warmup_all()
     except Exception as e:
         logger.exception(f"预热缓存索引失败: {e!r}")
     try:
-        await RENDERER.list_themes()
+        await warmup_themes()
     except Exception as e:
-        logger.exception(f"预热主题发现失败: {e!r}")
+        logger.exception(f"预热主题/字体失败: {e!r}")
 
 
 @driver.on_startup
@@ -134,6 +136,7 @@ def register_parser_matcher() -> None:
 
 @driver.on_shutdown
 async def close_http_clients() -> None:
+    await shutdown_emoji_fonts()
     await asyncio.gather(
         *(parser.aclose() for parser in _ALL_PARSERS),
         DOWNLOADER.aclose(),
@@ -203,8 +206,7 @@ async def _parse_and_send(
     result = await get_or_parse_result(sr)
     summary_msg = await RENDERER.render_messages(result)
     summary_in_forward = (
-        SendComponent.CARD in pconfig.forward_components
-        and not pconfig.lazy_download
+        SendComponent.CARD in pconfig.forward_components and not pconfig.lazy_download
     )
     if not summary_in_forward:
         if state:

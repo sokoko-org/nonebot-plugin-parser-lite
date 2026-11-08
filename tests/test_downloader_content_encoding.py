@@ -611,3 +611,44 @@ async def test_ffmpeg_failure_does_not_publish_partial_output(tmp_path, monkeypa
 
     assert not await output_path.exists()
     assert not list(tmp_path.glob(".video.*.tmp.mp4"))
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("declared_size", [None, "2", "100"])
+async def test_content_limit_stops_stream_and_closes_response(declared_size):
+    consumed = []
+    closed = []
+
+    class StreamingResponse:
+        status_code = 200
+
+        def __init__(self):
+            self.headers = {"content-length": declared_size}
+
+        async def aiter_bytes(self, chunk_size):
+            for chunk in (b"abc", b"def", b"unread"):
+                consumed.append(chunk)
+                yield chunk
+
+    @asynccontextmanager
+    async def stream(*args, **kwargs):
+        try:
+            yield StreamingResponse()
+        finally:
+            closed.append(True)
+
+    downloader = _new_downloader(download, SimpleNamespace(stream=stream))
+    with pytest.raises(download.DownloadException, match="字节限制"):
+        await downloader.content("https://cdn.example/font.tgz", max_size=5)
+    assert consumed == ([] if declared_size == "100" else [b"abc", b"def"])
+    assert closed == [True]
+
+
+@pytest.mark.asyncio
+async def test_content_limit_accepts_body_at_limit():
+    downloader = _new_downloader(
+        download, FakeClient([response(200, chunks=(b"abcde",))])
+    )
+    assert (
+        await downloader.content("https://cdn.example/font.tgz", max_size=5) == b"abcde"
+    )

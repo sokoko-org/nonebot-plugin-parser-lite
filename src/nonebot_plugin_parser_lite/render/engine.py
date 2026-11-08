@@ -3,13 +3,17 @@
 from collections import defaultdict
 from math import ceil
 import re
-from typing import Any, cast
+from typing import Any, Final, cast
 
 import blitz_py
 from bs4 import BeautifulSoup, Tag
 from PIL import Image, ImageChops
 
-TILE_HEIGHT = 2048
+from .fonts import EmojiFont, EmojiStyle, apply_emoji_font
+
+MAX_IMAGE_EDGE: Final = 16_000  # MAX 16384
+MAX_IMAGE_PIXELS: Final = 60_000_000  # MAX 64M
+MAX_BLUR_RADIUS: Final = 100
 BLUR_CLASS = re.compile(r"(dark:)?blur-\[(\d+)px\]")
 
 
@@ -20,6 +24,8 @@ def render_html(
     color_scheme: str = "light",
     width: int = 620,
     scale: float = 2,
+    emoji_font: EmojiFont | None = None,
+    emoji_style: EmojiStyle = "system",
 ) -> Image.Image:
     """绘制 HTML，返回 RGBA 图片"""
     page = BeautifulSoup(
@@ -27,6 +33,7 @@ def render_html(
         "html.parser",
         preserve_whitespace_tags={"span", "p", "div", "pre", "textarea", "code"},
     )
+    apply_emoji_font(page, emoji_font, emoji_style)
     root = cast(Tag, page.find("main"))
     root_id = str(root.get("id", "parser-render-root"))
     root["id"] = root_id
@@ -57,7 +64,16 @@ def render_html(
         "allow_file_urls": True,
         "background": None,
         "color_scheme": color_scheme,
+        "resources": emoji_font.resources if emoji_font else {},
     }
+    physical_width = int(width * scale)
+    if not 0 < physical_width <= MAX_IMAGE_EDGE:
+        raise ValueError(f"截图物理宽度须在 1 到 {MAX_IMAGE_EDGE} 像素之间")
+    max_frame_height = int(
+        min(MAX_IMAGE_EDGE, MAX_IMAGE_PIXELS // physical_width) / scale
+    )
+    if max_frame_height < 1:
+        raise ValueError("缩放比例过大，无法在 Blitz 限制内绘制一行")
     layout = blitz_py.Template(html, width=width, height=1, **options)
     height = ceil(layout.get_box(root_id)[3])
     del layout
@@ -76,7 +92,7 @@ def render_html(
         )
         if not base:
             css += "main{background:transparent!important}"
-        return {"css": css, "blur": min(blur * scale, 100)}
+        return {"css": css, "blur": min(blur * scale, MAX_BLUR_RADIUS)}
 
     layers = [layer([f"#{root_id}"], base=True)]
     layers.extend(
@@ -94,20 +110,30 @@ def render_html(
     layers.append({"css": foreground_css, "blur": 0})
 
     # 三次 box blur 的影响范围是半径的三倍，重叠绘制后裁切可避免接缝
-    padding = ceil(3 * max(item["blur"] for item in layers) / scale)
-    canvas = Image.new("RGBA", (round(width * scale), round(height * scale)))
-    for offset in range(0, height, TILE_HEIGHT):
-        end = min(offset + TILE_HEIGHT, height)
+    padding = ceil(3 * max(item["blur"] for item in layers))
+    physical_height = int(height * scale)
+    frame_height = int(max_frame_height * scale)
+    tile_height = (
+        physical_height
+        if physical_height <= frame_height
+        else frame_height - 2 * padding
+    )
+    if tile_height <= 0:
+        raise ValueError("模糊重叠区域超过 Blitz 单张截图限制")
+    canvas = Image.new("RGBA", (physical_width, physical_height))
+    for offset in range(0, physical_height, tile_height):
+        end = min(offset + tile_height, physical_height)
         start = max(0, offset - padding)
-        stop = min(height, end + padding)
+        stop = min(physical_height, end + padding)
+        viewport_height = ceil((stop - start) / scale)
         viewport_css = (
-            f"body{{height:{stop - start}px!important;overflow:hidden!important}}"
-            f"main{{height:{height}px!important;transform:translateY({-start}px)!important}}"
+            f"body{{height:{viewport_height}px!important;overflow:hidden!important}}"
+            f"main{{height:{height}px!important;transform:translateY({-start / scale}px)!important}}"
         )
         frame_options = {
             **options,
             "width": width,
-            "height": stop - start,
+            "height": viewport_height,
             "scale": scale,
         }
         if blur_selectors:
@@ -122,8 +148,8 @@ def render_html(
             ]
             w, h, rgba = blitz_py.render_layers(
                 frame_layers,
-                width=round(width * scale),
-                height=round((stop - start) * scale),
+                width=physical_width,
+                height=int(viewport_height * scale),
                 background="#00000000",
             )
             frame = Image.frombytes("RGBA", (w, h), rgba)
@@ -147,10 +173,10 @@ def render_html(
             with frame.crop(
                 (
                     0,
-                    round((offset - start) * scale),
+                    offset - start,
                     frame.width,
-                    round((end - start) * scale),
+                    end - start,
                 )
             ) as part:
-                canvas.paste(part, (0, round(offset * scale)))
+                canvas.paste(part, (0, offset))
     return canvas
