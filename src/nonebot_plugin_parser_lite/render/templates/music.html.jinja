@@ -122,15 +122,12 @@
                 {% endif %}
 
                 <div class="mx-8 mt-6 mb-7 flex items-end justify-between gap-6">
-                    <div class="min-w-0">
-                        {% if post.url %}<div class="truncate text-xs text-slate-400 dark:text-slate-500">{{ post.url }}</div>{% endif %}
-                    </div>
                     {% if post.qrcode %}
                         <img src="{{ post.qrcode }}" alt="二维码" class="h-20 w-20 shrink-0 rounded-lg" />
                     {% endif %}
                 </div>
                 <footer class="mx-8 flex items-center justify-between border-t border-gray-100 py-5 text-[10px] font-black uppercase tracking-widest text-gray-300 antialiased dark:border-slate-800 dark:text-slate-600">
-                    <span>{{ meta.bot_name }} Parser · Design negichan</span><span>Rendering at {{ meta.rendering_time }}</span>
+                    <span>{{ meta.bot_name }} Parser</span><span>Rendering at {{ meta.rendering_time }}</span>
                 </footer>
             </div>
         </main>
