@@ -11,10 +11,11 @@ from anyio import Path
 from jinja2 import Environment, FileSystemLoader
 from nonebot import logger
 
-from ..config import pconfig
+from ..config import gconfig, pconfig
 from ..utils.ffmpeg import FFmpeg
 from .context import ThemeData
 from .engine import render_html
+from .fonts import ensure_emoji_font
 from .theme import ThemeDefinition, ThemeManager
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -22,6 +23,7 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 # 模板根目录在启动后固定，按根目录缓存 Jinja 环境，避免每次渲染重建
 _ENVIRONMENTS: dict[str, Environment] = {}
 _ICON_CSS: str | None = None
+IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
 
 
 def _environment_for(root: Path) -> Environment:
@@ -45,7 +47,8 @@ async def _get_icon_css() -> str:
 
 
 async def warmup_themes() -> None:
-    """预热主题发现，使首次渲染无需扫盘"""
+    """预热主题发现与字体"""
+    await ensure_emoji_font(pconfig.emoji_style)
     await ThemeManager(TEMPLATES_DIR, pconfig.theme_dirs).list_themes()
 
 
@@ -54,7 +57,6 @@ async def render_theme_data(
     *,
     image_format: Literal["jpeg", "webp"] | None = None,
     theme_definition: ThemeDefinition | None = None,
-    debug: bool = False,
 ) -> tuple[Literal["jpeg", "webp"], bytes]:
     """按主题绘制数据，返回实际图片格式和图片内容"""
     if image_format is None:
@@ -71,16 +73,19 @@ async def render_theme_data(
     html = (
         f"{html[: head.end()]}\n{style}{html[head.end() :]}" if head else style + html
     )
-    # if debug:
+    # if IS_DEBUG:
     #     path = TEMPLATES_DIR / f"{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.html"
     #     await path.write_text(html, encoding="utf-8")
     #     logger.info(f"已生成调试 HTML: {path}")
 
+    emoji_font = await ensure_emoji_font(pconfig.emoji_style)
     canvas = await asyncio.to_thread(
         render_html,
         html,
         base_url=selected.base_url,
         color_scheme=data["theme"],
+        emoji_font=emoji_font,
+        emoji_style=pconfig.emoji_style,
     )
     if image_format == "webp" and max(canvas.size) > 16383:
         logger.warning("渲染结果尺寸超过 WebP 编码上限，已改用 JPEG 输出")

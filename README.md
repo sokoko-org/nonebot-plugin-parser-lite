@@ -290,6 +290,11 @@ plite_x_ck="auth_token=xxx"
 # [可选] 渲染图片格式，jpeg会丢失透明度但可能兼容性更好，仅建议在默认格式无法发送时更改
 plite_render_format="webp"
 
+# [可选] emoji 样式，不改变主题的正文字体
+# system（默认）：优先系统 emoji 字体，以下载的 Twemoji 兜底
+# twitter：固定使用 Twemoji；google：固定使用 Noto Color Emoji
+plite_emoji_style="system"
+
 # [可选] 媒体倍速规则，格式 `平台:作者id:倍速`
 # 示例 plite_media_speedup_rules=["bilibili:123456:1.25"] 表示该 UP 主的音视频以 1.25 倍速发送
 plite_media_speedup_rules=[]

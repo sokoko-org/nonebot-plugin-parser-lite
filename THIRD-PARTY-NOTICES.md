@@ -33,3 +33,12 @@ Font Awesome 使用的是 SVG 图标，适用 [CC BY 4.0 法律文本](https://c
 | `once_cell` 1.21.4、`portable-atomic` 1.15.0 | 上游 MIT 许可文本未列单独版权署名                                                 |
 | `pyo3`、`pyo3-ffi` 0.29.3                    | Copyright (c) 2023-present PyO3 Project and Contributors. https://github.com/PyO3 |
 | QMC Rust 改写                                | Copyright (c) 2026 006lp                                                          |
+
+## 字体
+
+配置 `plite_emoji_style` 后，插件按需下载以下字体
+
+| 字体             | 来源                                                                                                                               | 许可                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Twemoji COLR     | [twemoji-color-font](https://github.com/mrdrogdrog/twemoji-color-font)，npm `twemoji-colr-font`                                    | SIL Open Font License 1.1 |
+| Noto Color Emoji | [Fontsource](https://github.com/fontsource/font-files/tree/main/fonts/google/noto-color-emoji)，npm `@fontsource/noto-color-emoji` | SIL Open Font License 1.1 |

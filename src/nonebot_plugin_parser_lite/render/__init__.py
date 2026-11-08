@@ -7,7 +7,7 @@ from anyio import Path
 from nonebot import logger
 from nonebot_plugin_alconna.uniseg import Text
 
-from ..config import _nickname, gconfig, pconfig
+from ..config import _nickname, pconfig
 from ..constants import SendComponent
 from ..data import (
     AudioContent,
@@ -30,6 +30,7 @@ from ..exception import (
 from ..helper import ForwardNodeInner, UniHelper, UniMessage, mark_media_role
 from ..utils.cache import CacheManager
 from .context import PLACEHOLDER_IMAGE, ThemeData, build_theme_data, safe_src
+from .fonts import ensure_emoji_font
 from .image import render_theme_data
 from .theme import ThemeDefinition, ThemeManager, get_theme
 
@@ -48,8 +49,7 @@ MAX_FORWARD_TEXT_LEN = 30000
 MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
-IS_DEBUG = gconfig.log_level in ["DEBUG", "TRACE", 10, 5]
-RENDER_TEMPLATE_VERSION = "20261026-1"
+RENDER_TEMPLATE_VERSION = "20261108-1"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")
@@ -454,9 +454,7 @@ class Renderer:
                     nodes.append(await UniHelper.img_seg(file=path))
                     cover_in_forward = True
             except Exception as e:
-                logger.warning(
-                    f"构建转发媒体片段失败: {type(cont).__name__}: {e}"
-                )
+                logger.warning(f"构建转发媒体片段失败: {type(cont).__name__}: {e}")
                 nodes.append(f"[媒体加载失败：{type(cont).__name__}]")
 
         video_seg = forward_video_segs.get(id(cont))
@@ -653,7 +651,6 @@ class Renderer:
             template_data,
             image_format=image_format,
             theme_definition=selected_theme,
-            debug=IS_DEBUG,
         )
 
     async def _resolve_theme(self) -> ThemeDefinition:
@@ -704,10 +701,12 @@ class Renderer:
             for content in result.iter_sendable_media()
             if isinstance(content, AudioVideoContent)
         )
+        emoji_font = await ensure_emoji_font(pconfig.emoji_style)
+        emoji_digest = emoji_font.digest if emoji_font else ""
         cache_key = (
             f"{RENDER_TEMPLATE_VERSION}:{selected_theme.id}:"
             f"{selected_theme.version}:{theme}:{render_format}:{result.url}"
-            f":{speedup_digest}"
+            f":{speedup_digest}:{emoji_digest}:{pconfig.emoji_style}"
         )
         base_name = str(uuid.uuid5(uuid.NAMESPACE_URL, cache_key))
         cache_dir = await CacheManager.ensure_dir(CacheManager.RENDER)
