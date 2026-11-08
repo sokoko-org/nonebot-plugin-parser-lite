@@ -183,8 +183,8 @@ plite_bili_video_quality=80
 # 默认 30280，限制的是下载源流；单独请求音频时仍会转码为 MP3
 plite_bili_audio_quality=30280
 
-# [可选] B 站下载 CDN 地区；仅支持内置线路 zh、en、ja、proxy(网宿全网多线)
-plite_bili_cdn_region="zh"
+# [可选] B 站下载 CDN 地区；default 不替换地区， zh、en、ja、proxy（网宿全网多线）
+plite_bili_cdn_region="default"
 
 # [可选] 自定义 B 站下载 CDN 域名，设置后优先于地区配置
 # 留空则使用地区配置；只接受 bilivideo.com 域名，不要包含协议、端口或路径
