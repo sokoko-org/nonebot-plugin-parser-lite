@@ -54,18 +54,23 @@ def _ensure_runtime_started() -> None:
     from .utils.cache import CacheManager
 
     async def _warmup() -> None:
-        await CacheManager.warmup_all()
-        await warmup_themes()
+        try:
+            await CacheManager.warmup_all()
+            await warmup_themes()
+        except Exception:
+            logger.exception("预热缓存/主题/字体失败")
 
     asyncio.get_running_loop().create_task(_warmup())
 
 
 async def shutdown_runtime() -> None:
     from .download import DOWNLOADER
+    from .render.fonts import shutdown_emoji_fonts
 
     global _runtime_started
     _runtime_started = False
     await scheduler.shutdown()
+    await shutdown_emoji_fonts()
     await DOWNLOADER.aclose()
     clear_result_cache()
 

@@ -591,6 +591,8 @@ class StreamDownloader:
         url: str,
         ext_headers: dict[str, str] | None = None,
         use_curl_cffi: bool = False,
+        *,
+        max_size: int | None = None,
     ) -> bytes:
         """
         获取内容
@@ -599,10 +601,30 @@ class StreamDownloader:
         :param ext_headers: 额外的请求头，会与默认请求头合并
         :param use_curl_cffi: 是否使用 curl_cffi 请求
 
+        :param max_size: 响应体字节上限；设置后流式读取，超限立即中止
         :return: 响应体的内容
         :raise DownloadException: 请求状态码非 200 时抛出
         """
         headers = {**self.headers, **(ext_headers or {})}
+        if max_size is not None:
+            async with self.client.stream(
+                "GET", url, headers=headers, use_curl_cffi=use_curl_cffi
+            ) as resp:
+                if resp.status_code != 200:
+                    raise DownloadException(f"请求失败: {resp.status_code}")
+                content_length = resp.headers.get("content-length")
+                if (
+                    content_length
+                    and content_length.isdigit()
+                    and int(content_length) > max_size
+                ):
+                    raise DownloadException(f"响应体超过 {max_size} 字节限制")
+                content = bytearray()
+                async for chunk in resp.aiter_bytes(64 * 1024):
+                    if len(content) + len(chunk) > max_size:
+                        raise DownloadException(f"响应体超过 {max_size} 字节限制")
+                    content.extend(chunk)
+                return bytes(content)
         resp = await self.client.get(
             url,
             headers=headers,
