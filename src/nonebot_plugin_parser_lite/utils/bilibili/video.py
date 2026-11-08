@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import IntEnum, StrEnum
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from .a2v import av2bv, bv2av
@@ -358,7 +358,7 @@ def sanitize_stream_urls(
     video: VideoStreamDownloadURL | FLVStreamDownloadURL | MP4StreamDownloadURL | None,
     audio: AudioStreamDownloadURL | None,
     *,
-    cdn_region: str = "zh",
+    cdn_region: Literal["zh", "en", "ja", "proxy", "default"] = "default",
     cdn_domain: str | None = None,
 ) -> tuple[
     VideoStreamDownloadURL | FLVStreamDownloadURL | MP4StreamDownloadURL | None,
@@ -370,21 +370,20 @@ def sanitize_stream_urls(
     逻辑：
 
     1. 过滤 PCDN 链接，优先使用 B 站返回的非 PCDN 地址；
-    2. 将地区或自定义 CDN 放在首位；
+    2. 配置了地区或自定义 CDN 时，将对应地址放在首位；
     3. 保留 B 站返回的非 PCDN 原始地址作为故障切换线路
 
     :param video: 视频流 URL 信息
     :param audio: 音频流 URL 信息
-    :param cdn_region: CDN 地区；支持固定线路 zh、en、ja、proxy
+    :param cdn_region: CDN 地区；支持固定线路 zh、en、ja、proxy，default 即不修改
     :param cdn_domain: 自定义 CDN 域名，设置后优先于地区配置
     :return: (清洗后的 video, audio)
     """
-    replacement_domain = (
-        normalize_cdn_domain(cdn_domain) if cdn_domain and cdn_domain.strip() else None
-    ) or pick_cdn_domain(cdn_region)
-
-    def _replace_host(url: str, domain: str = replacement_domain) -> str:
-        return urlsplit(url)._replace(netloc=domain).geturl()
+    replacement_domain = None
+    if cdn_domain and cdn_domain.strip():
+        replacement_domain = normalize_cdn_domain(cdn_domain)
+    elif cdn_region != "default":
+        replacement_domain = pick_cdn_domain(cdn_region)
 
     for stream in (video, audio):
         if stream is None:
@@ -395,9 +394,13 @@ def sanitize_stream_urls(
             stream.url
         ]
         source_domain = get_szbdyd_source(stream.url) or replacement_domain
-        download_urls = list(
-            dict.fromkeys([_replace_host(clean_urls[0], source_domain), *clean_urls])
-        )
+        download_urls = clean_urls
+        if source_domain:
+            replaced_url = (
+                urlsplit(clean_urls[0])._replace(netloc=source_domain).geturl()
+            )
+            download_urls = [replaced_url, *clean_urls]
+        download_urls = list(dict.fromkeys(download_urls))
         stream.url = download_urls[0]
         stream.backup_url = download_urls[1:]
     return video, audio
@@ -465,7 +468,7 @@ class VideoDownloadURLDataDetecter:
         no_dolby_audio: bool = False,
         no_hdr: bool = False,
         no_hires: bool = False,
-        cdn_region: str = "zh",
+        cdn_region: Literal["zh", "en", "ja", "proxy", "default"] = "default",
         cdn_domain: str | None = None,
     ) -> tuple[
         VideoStreamDownloadURL | FLVStreamDownloadURL | MP4StreamDownloadURL | None,

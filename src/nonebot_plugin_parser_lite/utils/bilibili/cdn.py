@@ -1,5 +1,5 @@
 import re
-from typing import Final
+from typing import Final, Literal
 from urllib.parse import parse_qs, urlsplit
 
 DEFAULT_CDN_DOMAINS: Final[dict[str, str]] = {
@@ -36,7 +36,7 @@ def normalize_cdn_domain(domain: str) -> str:
     return normalized_domain
 
 
-def pick_cdn_domain(region: str) -> str:
+def pick_cdn_domain(region: Literal["zh", "en", "ja", "proxy"]) -> str:
     """从 B 站 CDN 地区线路中选择域名"""
     try:
         return DEFAULT_CDN_DOMAINS[region]
