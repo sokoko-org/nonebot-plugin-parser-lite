@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 import re
 
@@ -55,6 +57,34 @@ class PageInfo(Struct):
     media_info: MediaInfo | None = None
 
 
+class MixPic(Struct, tag="pic", tag_field="type"):
+    data: Pic
+
+    @property
+    def content(self):
+        return self.data.content
+
+
+class MixVideo(Struct, tag="video", tag_field="type"):
+    id: str
+    data: PageInfo
+
+    @property
+    def content(self):
+        if self.data.media_info:
+            return Creator.video(
+                url_or_task=self.data.media_info.stream_url_hd,
+                cover_url=self.data.page_pic,
+                cache_key=f"weibo:{self.id}",
+                ext_headers={"Referer": "https://weibo.com/"},
+            )
+        return None
+
+
+class MixMediaInfo(Struct):
+    items: list[MixPic | MixVideo]
+
+
 class User(Struct):
     idstr: str
     screen_name: str
@@ -78,13 +108,14 @@ class WeiboData(Struct):
     """点赞数"""
     isLongText: bool
     """是否需要请求长文"""
-    pic_num: int
     region_name: str | None = None
     pic_infos: dict[str, Pic] | None = None
     page_info: PageInfo | None = None
     """媒体信息"""
-    retweeted_status: "WeiboData | None" = None
+    retweeted_status: WeiboData | None = None
     """转发微博"""
+    mix_media_info: MixMediaInfo | None = None
+    """混合媒体，按 items 顺序提取"""
 
     async def get_content(self):
         if self.isLongText:
@@ -97,6 +128,11 @@ class WeiboData(Struct):
             text = self.text_raw
         cleaned_text = _URL_PATTERN.sub("", text).strip()
         content = replace_placeholder_to_sticker(cleaned_text, WEIBO_PATTERN, "weibo")
+        if self.mix_media_info and self.mix_media_info.items:
+            for item in self.mix_media_info.items:
+                if (media := item.content) is not None:
+                    content.append(media)
+            return content
         if self.pic_infos:
             content.extend(pic.content for pic in self.pic_infos.values())
         if self.page_info and self.page_info.media_info:
