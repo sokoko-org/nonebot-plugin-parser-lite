@@ -1,0 +1,95 @@
+name: Apply PR Labels
+
+on:
+  workflow_run:
+    workflows: [PR Auto Label]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-labeler-apply-${{ github.event.workflow_run.head_repository.id }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  autolabel:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install configuration parser
+        run: python -m pip install --disable-pip-version-check "PyYAML==6.0.3"
+
+      # No PR checkout or artifacts: only API metadata and default-branch configuration.
+      - name: Apply labels from release-drafter configuration
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { execFileSync } = require('node:child_process');
+            const { matchesGlob } = require('node:path');
+            const run = context.payload.workflow_run;
+            if (run.path !== '.github/workflows/pr-labeler.yml') {
+              core.info('Ignoring an unrelated workflow');
+              return;
+            }
+
+            const candidates = run.pull_requests.length > 0
+              ? run.pull_requests
+              : await github.paginate(github.rest.repos.listPullRequestsAssociatedWithCommit, {
+                  ...context.repo, commit_sha: run.head_sha, per_page: 100,
+                });
+
+            const { data: file } = await github.rest.repos.getContent({
+              ...context.repo,
+              path: '.github/release-drafter.yml',
+              ref: context.payload.repository.default_branch,
+            });
+            const config = JSON.parse(execFileSync('python', [
+              '-c', 'import json, sys, yaml; json.dump(yaml.safe_load(sys.stdin.buffer), sys.stdout)',
+            ], {
+              input: Buffer.from(file.content, 'base64'),
+              encoding: 'utf8',
+            }));
+            const matchesRegex = (expression, value) => {
+              const literal = expression.match(/^\/(.*)\/([a-z]*)$/s);
+              return new RegExp(literal ? literal[1] : expression, literal ? literal[2] : '').test(value);
+            };
+
+            for (const candidate of candidates) {
+              const { data: pr } = await github.rest.pulls.get({
+                ...context.repo, pull_number: candidate.number,
+              });
+              if (pr.state !== 'open'
+                  || pr.base.repo.id !== context.payload.repository.id
+                  || pr.head.repo?.id !== run.head_repository.id
+                  || pr.head.sha !== run.head_sha) {
+                core.info(`Skipping closed or outdated PR #${pr.number}`);
+                continue;
+              }
+
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                ...context.repo, pull_number: pr.number, per_page: 100,
+              });
+              const labels = new Set();
+              for (const rule of config.autolabeler) {
+                const matches = (rule.files || []).some(pattern =>
+                  files.some(file => matchesGlob(file.filename, pattern)))
+                  || (rule.title || []).some(pattern => matchesRegex(pattern, pr.title));
+                if (matches) labels.add(rule.label);
+              }
+              if (labels.size > 0) {
+                await github.rest.issues.addLabels({
+                  ...context.repo, issue_number: pr.number, labels: [...labels],
+                });
+              }
+              core.info(`PR #${pr.number}: ${[...labels].join(', ') || 'no matching labels'}`);
+            }

@@ -1,7 +1,7 @@
 name: PR Auto Label
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, reopened, synchronize, edited]
 
 permissions:
@@ -12,13 +12,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  autolabel:
-    permissions:
-      contents: read
-      pull-requests: write
+  notify:
     runs-on: ubuntu-latest
     steps:
-      # Read the base repository's configuration via the API; never check out or run PR code.
-      - uses: release-drafter/release-drafter/autolabeler@v7
-        with:
-          config-name: release-drafter.yml
+      # The privileged follow-up reads PR metadata through the API, without artifacts.
+      - name: Trigger label evaluation
+        run: echo "PR metadata is ready for label evaluation"
