@@ -75,7 +75,6 @@ class QQMusicParser(BaseParser):
             "https://parse-api.sokoko.org/api/qq/song",
             params={"music_id": music_id, "quality": "high"},
         )
-        resp.raise_for_status()
         data = resp.json()
         if data["code"] != 200:
             raise ParseException(f"接口返回错误: {data}")
