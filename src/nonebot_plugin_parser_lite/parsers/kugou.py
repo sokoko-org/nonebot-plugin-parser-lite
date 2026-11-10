@@ -126,7 +126,8 @@ class KuGouParser(BaseParser):
     @handle(
         "kugou.com",
         r"https?://[^\s]*?kugou\.com.*?(?:/(?:share|mixsong)/[a-zA-Z0-9]+\.html|(?:id|chain)=[a-zA-Z0-9]+)",
-    )
+    )  # BUG: 这里 chain 短链是另一种解析路径，但是不想写了，这样会报错，不过也无所谓了
+    # https://m.kugou.com/share/song.html?chain=1KHs5e3G7V2
     async def _parse_kugou_share(self, searched: MatchWithParams):
         """解析酷狗分享链接"""
         share_url = searched.url
