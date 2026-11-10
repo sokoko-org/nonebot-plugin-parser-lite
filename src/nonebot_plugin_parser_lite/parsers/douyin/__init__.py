@@ -9,6 +9,7 @@ from ...utils.log import logger
 from ..base import (
     BaseParser,
     ContentItem,
+    HandlerFunc,
     MatchWithParams,
     ParseException,
     Platform,
@@ -21,6 +22,57 @@ from .comment import decoder as commentDecoder
 from .live import Room
 
 WEB_RID_RE = re.compile(r'\\"webRid\\":\\"(\d+)\\"')
+
+SHARE_CODE_PATTERNS = [
+    r"%%([0-9a-zA-Z]{11})%%",
+    r"ππ([0-9a-zA-Z]{11})ππ",
+    r"[ωω|ÊÊ|ΨΨ|ΘΘ|ππ|ㄍㄍ|ΦΦ|ÑÑ|ŠŠ|▽▽|ÄÄ|ΔΔ|￠￠|ηη|Э|Ю|Я|д|ё|ζ|ξ|ǐ|爱|哈|喽|嗨|嗯|好|么|哒|吗|我|︽︽|∏∏|※※|➝➝|ǚǚ|бб|жж|ˇˇ|êê|йй|¥¥|^^]([0-9a-zA-Z]{11,16})[ωω|ÊÊ|ΨΨ|ΘΘ|ππ|ㄍㄍ|ΦΦ|ÑÑ|ŠŠ|▽▽|ÄÄ|ΔΔ|￠￠|ηη|Э|Ю|Я|д|ё|ζ|ξ|ǐ|爱|哈|喽|嗨|嗯|好|么|哒|吗|我|︽︽|∏∏|※※|➝➝|ǚǚ|бб|жж|ˇˇ|êê|йй|¥¥|^^]",
+    r"ΞΞ([0-9a-zA-Z]{11})ΞΞ",
+    r"ωω([0-9a-zA-Z]{11})ωω",
+    r"ΔΔ([0-9a-zA-Z]{11})ΔΔ",
+    r"▽▽([0-9a-zA-Z]{11})▽▽",
+    r"\$\$([0-9a-zA-Z]{11})\$\$",
+    r"ΨΨ([0-9a-zA-Z]{11})ΨΨ",
+    r"ÀÀ([0-9a-zA-Z]{11})ÀÀ",
+    r"αα([0-9a-zA-Z]{11})αα",
+    r"%%([0-9a-zA-Z]{11,16})%%",
+    r"(€[0-9A-Za-z]{4}€[0-9A-Za-z]{7}€)",
+    r"ΦΦ([0-9a-zA-Z]{11})ΦΦ",
+    r"ÊÊ([0-9a-zA-Z]{11})ÊÊ",
+    r"ㄍㄍ([0-9a-zA-Z]{11})ㄍㄍ",
+    r"##([0-9a-zA-Z]{11,16})##",
+    r"##([0-9a-zA-Z]{11})##",
+    r"ÑÑ([0-9a-zA-Z]{11})ÑÑ",
+    r"฿฿([0-9a-zA-Z]{11})฿฿",
+    r"ΣΣ([0-9a-zA-Z]{11})ΣΣ",
+    r"ÄÄ([0-9a-zA-Z]{11})ÄÄ",
+    r"ŠŠ([0-9a-zA-Z]{11})ŠŠ",
+    r"ββ([0-9a-zA-Z]{11})ββ",
+    r"#([0-9a-zA-Z]{11,16})#",
+    r"￠￠([0-9a-zA-Z]{11})￠￠",
+    r"ΘΘ([0-9a-zA-Z]{11})ΘΘ",
+    r"ηη([0-9a-zA-Z]{11})ηη",
+    r"(€[0-9A-Za-z]{4}€[0-9A-Za-z]{7}€|(€|З|Л|Ж|€€|ЗЗ|ЛЛ|ЖЖ|Ⓐ|Ⓑ|Ⓒ|Ⓓ|Ⓔ|Ⓕ|Ⓖ|Ⓗ|Ⓘ|Ⓙ|Ⓚ|Ⓛ|Ⓜ|Ⓝ|Ⓞ|Ⓟ|Ⓠ|Ⓡ|Ⓢ|Ⓣ|Ⓤ|Ⓥ|Ⓦ|Ⓧ|Ⓨ|Ⓩ|ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|ⓚ|ⓛ|ⓜ|ⓝ|ⓞ|ⓟ|ⓠ|ⓡ|ⓢ|ⓣ|ⓤ|ⓥ|ⓦ|ⓧ|ⓨ|ⓩ|¿|¶|†|‡|←|♠|♣|♥|↑|◊|↔|∞|≠|∫|→|▣|▤|▥|▦|▩|▧|▨|◘|◙|◈|◐|◑|◎|⊙|ﻬ|ஐ|▶|ண|ゅ|ღ|๑|۩|۞|❈|✲|➹|◕|✿|☽|☾|❥|♡|★|♧|➳|➴|➵|❁|ஓ|☜|☞|✡|♦|◘|◙|▣|♟|■|▓|∏|☃|☇|☈|☊|☋|☍|☑|☒|✉|✎|✐|✰|❦|❧|➽|♝|➳|➴|♈|₪|௫|✪|✣|✤|✥|✦|✧|〆|〾)([0-9A-Za-z]{4})(€|З|Л|Ж|€€|ЗЗ|ЛЛ|ЖЖ|Ⓐ|Ⓑ|Ⓒ|Ⓓ|Ⓔ|Ⓕ|Ⓖ|Ⓗ|Ⓘ|Ⓙ|Ⓚ|Ⓛ|Ⓜ|Ⓝ|Ⓞ|Ⓟ|Ⓠ|Ⓡ|Ⓢ|Ⓣ|Ⓤ|Ⓥ|Ⓦ|Ⓧ|Ⓨ|Ⓩ|ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|ⓚ|ⓛ|ⓜ|ⓝ|ⓞ|ⓟ|ⓠ|ⓡ|ⓢ|ⓣ|ⓤ|ⓥ|ⓦ|ⓧ|ⓨ|ⓩ|¿|¶|†|‡|←|♠|♣|♥|↑|◊|↔|∞|≠|∫|→|▣|▤|▥|▦|▩|▧|▨|◘|◙|◈|◐|◑|◎|⊙|ﻬ|ஐ|▶|ண|ゅ|ღ|๑|۩|۞|❈|✲|➹|◕|✿|☽|☾|❥|♡|★|♧|➳|➴|➵|❁|ஓ|☜|☞|✡|♦|◘|◙|▣|♟|■|▓|∏|☃|☇|☈|☊|☋|☍|☑|☒|✉|✎|✐|✰|❦|❧|➽|♝|➳|➴|♈|₪|௫|✪|✣|✤|✥|✦|✧|〆|〾)([0-9A-Za-z]{7})(€|З|Л|Ж|€€|ЗЗ|ЛЛ|ЖЖ|Ⓐ|Ⓑ|Ⓒ|Ⓓ|Ⓔ|Ⓕ|Ⓖ|Ⓗ|Ⓘ|Ⓙ|Ⓚ|Ⓛ|Ⓜ|Ⓝ|Ⓞ|Ⓟ|Ⓠ|Ⓡ|Ⓢ|Ⓣ|Ⓤ|Ⓥ|Ⓦ|Ⓧ|Ⓨ|Ⓩ|ⓐ|ⓑ|ⓒ|ⓓ|ⓔ|ⓕ|ⓖ|ⓗ|ⓘ|ⓙ|ⓚ|ⓛ|ⓜ|ⓝ|ⓞ|ⓟ|ⓠ|ⓡ|ⓢ|ⓣ|ⓤ|ⓥ|ⓦ|ⓧ|ⓨ|ⓩ|¿|¶|†|‡|←|♠|♣|♥|↑|◊|↔|∞|≠|∫|→|▣|▤|▥|▦|▩|▧|▨|◘|◙|◈|◐|◑|◎|⊙|ﻬ|ஐ|▶|ண|ゅ|ღ|๑|۩|۞|❈|✲|➹|◕|✿|☽|☾|❥|♡|★|♧|➳|➴|➵|❁|ஓ|☜|☞|✡|♦|◘|◙|▣|♟|■|▓|∏|☃|☇|☈|☊|☋|☍|☑|☒|✉|✎|✐|✰|❦|❧|➽|♝|➳|➴|♈|₪|௫|✪|✣|✤|✥|✦|✧|〆|〾)|activity_[0-9A-Za-z]{11})",
+]
+
+
+def _extract_share_code(match: re.Match[str]) -> str:
+    groups = match.groups()
+    # 分段规则的第 1 组是整段，第 3、5 组才是两段口令。
+    if len(groups) == 6 and groups[2] is not None and groups[4] is not None:
+        return groups[2] + groups[4]
+
+    code = match[1]
+    # 简单欧元分段规则只有一个捕获组，需去掉内部的分隔符。
+    if code.startswith("€") and code.endswith("€"):
+        code = code.replace("€", "")
+    return code.removeprefix("activity_")
+
+
+def _handle_share_codes(func: HandlerFunc) -> HandlerFunc:
+    for pattern in SHARE_CODE_PATTERNS:
+        func = handle("", pattern)(func)
+    return func
 
 
 class DouyinParser(BaseParser):
@@ -66,6 +118,17 @@ class DouyinParser(BaseParser):
     async def _parse_short_link(self, searched: MatchWithParams):
         url = f"https://{searched.url}"
         return await self.parse_with_redirect(url)
+
+    @_handle_share_codes
+    async def _parse_share_code(self, searched: MatchWithParams):
+        response = await self.httpx.get(
+            "https://parse-api.sokoko.org/api/douyin/resolve",
+            params={"code": _extract_share_code(searched.match)},
+        )
+        data = response.json()
+        if data["code"] != 200:
+            raise ParseException(f"口令解析失败: {data}")
+        return await self.parse_aweme_id(data["data"]["item_id"])
 
     @handle("webcast.amemv.com", r"douyin/webcast/reflow/(?P<room_id>\d+)")
     async def parse_live_by_room_id(self, searched: MatchWithParams):
@@ -142,7 +205,9 @@ class DouyinParser(BaseParser):
         r"jingxuan\.douyin.com/m/[a-z]+/(?P<aweme_id>\d+)",
     )
     async def parse_work(self, searched: MatchWithParams):
-        aweme_id = searched["aweme_id"]
+        return await self.parse_aweme_id(searched["aweme_id"])
+
+    async def parse_aweme_id(self, aweme_id: str):
         note = await self.httpx.get(
             "https://www.douyin.com/aweme/v1/web/aweme/detail/",
             params={
