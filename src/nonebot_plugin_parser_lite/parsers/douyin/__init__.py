@@ -121,6 +121,7 @@ class DouyinParser(BaseParser):
 
     @_handle_share_codes
     async def _parse_share_code(self, searched: MatchWithParams):
+        # NOTE: by @soloxiaoye2022
         response = await self.httpx.get(
             "https://parse-api.sokoko.org/api/douyin/resolve",
             params={"code": _extract_share_code(searched.match)},
