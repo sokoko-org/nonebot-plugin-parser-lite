@@ -33,6 +33,7 @@ class BiliVideoQuality(IntEnum):
     :cvar _1080P_PLUS: 高清 1080P 高码率
     :cvar _1080P_60: 高清 1080P 60 帧码率
     :cvar _4K: 超清 4K
+    :cvar SDR: SDR 增强
     :cvar HDR: 真彩 HDR
     :cvar DOLBY: 杜比视界
     :cvar _8K: 超高清 8K
@@ -49,6 +50,7 @@ class BiliVideoQuality(IntEnum):
     _1080P_PLUS = 112
     _1080P_60 = 116
     _4K = 120
+    SDR = 122
     HDR = 125
     DOLBY = 126
     _8K = 127
