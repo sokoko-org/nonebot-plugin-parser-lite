@@ -1,8 +1,5 @@
 from typing import ClassVar
 
-from anyio import Path
-
-from ...download import DOWNLOADER
 from ..base import (
     BaseParser,
     ContentItem,
@@ -12,22 +9,6 @@ from ..base import (
     PlatformEnum,
     handle,
 )
-from .decrypt import decrypt_qqmusic_file
-
-
-class QQMusicDecrypter:
-    def __init__(self, url: str, mid: str, ekey: str):
-        self.url = url
-        self.ekey = ekey
-        self.mid = mid
-
-    async def __call__(self) -> Path:
-        f = await DOWNLOADER.download_audio(
-            url=self.url,
-            cache_key=f"qqmusic:{self.mid}",
-            cache_variant="source",
-        )
-        return await decrypt_qqmusic_file(f, self.ekey) if self.ekey else f
 
 
 class QQMusicParser(BaseParser):
@@ -85,8 +66,7 @@ class QQMusicParser(BaseParser):
             raise ParseException("无效音乐URL")
         duration = music_data["duration_seconds"]
         audio_content = self.create_audio(
-            url_or_task=QQMusicDecrypter(audio_url, mid, music_data["ekey"]),
-            duration=duration,
+            url_or_task=audio_url, duration=duration, cache_key=f"qqmusic:{mid}"
         )
         dis_dura = audio_content.display_duration
 
