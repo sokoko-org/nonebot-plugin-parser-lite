@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, MutableSequence, Sequence
+from collections.abc import Callable, Iterator, MutableSequence, Sequence
 import re
 from typing import Final, Literal
 from urllib.parse import urljoin
@@ -100,18 +100,23 @@ def append_html_text(
         result.append(normalized)
 
 
-def html_to_text(root: BeautifulSoup | Tag | str) -> str:
-    """按 HTML 标签语义提取文本，保留文本节点内的空白"""
-    parts: list[str] = []
+def iter_html(root: BeautifulSoup | Tag | str) -> Iterator[str | Tag]:
+    """按顺序输出 HTML 文本、换行和图片节点"""
     if isinstance(root, str):
         root = BeautifulSoup(root)
     for element in root.descendants:
         if isinstance(element, Tag):
-            if element.name in HTML_NEWLINE_TAGS:
-                parts.append("\n")
+            if element.name == "img":
+                yield element
+            elif element.name in HTML_NEWLINE_TAGS:
+                yield "\n"
         elif isinstance(element, NavigableString):
-            parts.append(str(element))
-    return "".join(parts).strip()
+            yield str(element)
+
+
+def html_to_text(root: BeautifulSoup | Tag | str) -> str:
+    """按 HTML 标签语义提取文本，保留文本节点内的空白"""
+    return "".join(part for part in iter_html(root) if isinstance(part, str)).strip()
 
 
 def anchor_text(element: Tag, base_url: str) -> str | None:
