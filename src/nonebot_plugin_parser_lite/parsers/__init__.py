@@ -22,6 +22,7 @@ _PARSERS = {
     "KuaiShouParser": ".kuaishou",
     "LinuxDoParser": ".linuxdo",
     "LofterParser": ".lofter",
+    "MiguParser": ".migu",
     "MiyousheParser": ".miyoushe",
     "NCMParser": ".netease",
     "QQMusicParser": ".qqmusic",
