@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=77", "setuptools-rust>=1.12,<2"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "nonebot-plugin-parser-lite"
-version = "1.4.1rc4"
+version = "1.4.1rc5"
 description = "NoneBot2 通用媒体链接分享解析插件"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,14 +34,4 @@ nonebot_plugin_parser_lite = [
 ]
 
 [tool.setuptools.exclude-package-data]
-"*" = ["*.proto", "*.pyi", "*.rs", "Cargo.toml", "Cargo.lock"]
-
-[[tool.setuptools-rust.ext-modules]]
-target = "nonebot_plugin_parser_lite.parsers.qqmusic.qmc"
-path = "Cargo.toml"
-binding = "PyO3"
-debug = false
-py-limited-api = true
-
-[tool.distutils.bdist_wheel]
-py-limited-api = "cp311"
+"*" = ["*.proto", "*.pyi", "*.pyd", "*.so"]

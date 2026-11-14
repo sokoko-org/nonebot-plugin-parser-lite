@@ -11,6 +11,7 @@ from packaging.requirements import Requirement
 from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
+EXCLUDED_SUFFIXES = (".proto", ".pyi", ".rs", ".pyd", ".so", ".dll", ".dylib")
 
 
 def verify(dist_dir: Path) -> None:
@@ -45,15 +46,23 @@ def verify(dist_dir: Path) -> None:
     for path in wheels:
         with ZipFile(path) as wheel:
             assert not any(
-                name.endswith((".proto", ".pyi", ".rs", "Cargo.toml", "Cargo.lock"))
-                for name in wheel.namelist()
+                name.endswith(EXCLUDED_SUFFIXES) for name in wheel.namelist()
             )
+            wheel_metadata = BytesParser().parsebytes(
+                wheel.read(f"{stem}.dist-info/WHEEL")
+            )
+            assert (
+                wheel_metadata["Root-Is-Purelib"] == "true"
+            ), "Wheel is not pure Python"
+            assert wheel_metadata.get_all("Tag") == [
+                "py3-none-any"
+            ], "Wheel is not universal"
             verify_metadata(wheel.read(f"{stem}.dist-info/METADATA"))
 
     for path in sdists:
         with tarfile.open(path) as sdist:
             assert not any(
-                name.endswith((".proto", ".pyi")) for name in sdist.getnames()
+                name.endswith(EXCLUDED_SUFFIXES) for name in sdist.getnames()
             )
             metadata = sdist.extractfile(f"{stem}/PKG-INFO")
             assert metadata is not None, "Source distribution metadata missing"

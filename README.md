@@ -65,11 +65,9 @@
 
 需要 Python **3.11 或更高版本**
 
-从 Git 或源码安装还需要 Rust 工具链用于编译模块
+### 从 Actions 安装
 
-### 从 Action 安装
-
-如果不想编译，可从 [Action](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml) 中下载对应平台的产物
+从 [Actions](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml) 中下载通用 wheel 安装
 
 ### 从 Git 安装
 
@@ -107,14 +105,7 @@ uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --tag <t
 
 ### 手动安装
 
-先在仓库根目录编译 QMC 模块
-
-```shell
-python -m pip install "setuptools>=77" "setuptools-rust>=1.12,<2"
-python setup.py build_ext --inplace
-```
-
-再将 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录后手动安装依赖
+将 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录后手动安装依赖
 
 <details>
 <summary>pip</summary>
