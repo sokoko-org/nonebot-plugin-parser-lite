@@ -250,6 +250,7 @@ class DouyinParser(BaseParser):
         aweme = convert(note.json(), Response).aweme_detail
         content: list[ContentItem] = aweme.content
         return self.result(
+            title=aweme.title,
             author=self.create_author(
                 name=aweme.author.nickname,
                 avatar_url=aweme.author.avatar_thumb.url_list[0],
