@@ -1,6 +1,7 @@
 """限制原生 CSS 模糊，并为长图分段计算保守的重叠范围。"""
 
 from base64 import b64decode
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote_to_bytes, urljoin, urlsplit
@@ -53,28 +54,12 @@ class BlurStyles:
                     if children:
                         self._rewrite(children)
 
-    def _stylesheet(self, rules: list[Any], base_url: str) -> str:
-        for rule in rules:
-            if isinstance(rule, AtRule) and rule.lower_at_keyword == "import":
-                args = [
-                    token
-                    for token in rule.prelude
-                    if token.type not in {"whitespace", "comment"}
-                ]
-                if not args:
-                    continue
-                target = args[0]
-                if isinstance(target, FunctionBlock) and target.lower_name == "url":
-                    args = [
-                        token for token in target.arguments if token.type == "string"
-                    ]
-                    if not args:
-                        continue
-                    target = args[0]
-                if target.type in {"url", "string"}:
-                    self._load(urljoin(base_url, target.value))
-        self._rewrite(rules)
-        return tinycss2.serialize(rules)
+    def _stylesheet(self, source: str | bytes, base_url: str) -> tuple[str, str]:
+        css, encoding, radius, imports = _prepare_stylesheet(source, self.limit)
+        self.radius = max(self.radius, radius)
+        for target in imports:
+            self._load(urljoin(base_url, target))
+        return css, encoding
 
     def _load(self, url: str) -> None:
         if url in self._visited:
@@ -100,9 +85,8 @@ class BlurStyles:
                     data = b64decode(data)
             else:
                 return  # 渲染器不加载 HTTP(S) 资源。
-        rules, encoding = tinycss2.parse_stylesheet_bytes(data)
-        css = self._stylesheet(rules, url)
-        self.resources[url] = css.encode(encoding.name)
+        css, encoding = self._stylesheet(data, url)
+        self.resources[url] = css.encode(encoding)
 
     def apply(self, page: BeautifulSoup, base_url: str) -> None:
         base = page.find("base", href=True)
@@ -111,10 +95,43 @@ class BlurStyles:
         for link in page.select('link[rel~="stylesheet"][href]'):
             self._load(urljoin(base_url, str(link["href"])))
         for style in page.find_all("style"):
-            style.string = self._stylesheet(
-                tinycss2.parse_stylesheet(style.get_text()), base_url
-            )
+            style.string = self._stylesheet(style.get_text(), base_url)[0]
         for element in page.select("[style]"):
             tokens = tinycss2.parse_component_value_list(str(element["style"]))
             self._rewrite(tokens)
             element["style"] = tinycss2.serialize(tokens)
+
+
+@lru_cache(maxsize=64)
+def _prepare_stylesheet(
+    source: str | bytes, limit: int
+) -> tuple[str, str, float, tuple[str, ...]]:
+    """仅缓存不可变结果；导入路径每次按当前样式表 URL 解析。"""
+    if isinstance(source, bytes):
+        rules, encoding = tinycss2.parse_stylesheet_bytes(source)
+        encoding_name = encoding.name
+    else:
+        rules = tinycss2.parse_stylesheet(source)
+        encoding_name = "utf-8"
+    imports = []
+    for rule in rules:
+        if not isinstance(rule, AtRule) or rule.lower_at_keyword != "import":
+            continue
+        args = [
+            token
+            for token in rule.prelude
+            if token.type not in {"whitespace", "comment"}
+        ]
+        if not args:
+            continue
+        target = args[0]
+        if isinstance(target, FunctionBlock) and target.lower_name == "url":
+            args = [token for token in target.arguments if token.type == "string"]
+            if not args:
+                continue
+            target = args[0]
+        if target.type in {"url", "string"}:
+            imports.append(target.value)
+    styles = BlurStyles(limit, {})
+    styles._rewrite(rules)
+    return tinycss2.serialize(rules), encoding_name, styles.radius, tuple(imports)

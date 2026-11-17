@@ -49,7 +49,7 @@ MAX_FORWARD_TEXT_LEN = 30000
 MAX_FORWARD_NODES = 90
 """单个 forward 节点数上限"""
 
-RENDER_TEMPLATE_VERSION = "20261117-1"
+RENDER_TEMPLATE_VERSION = "20261117-2"
 
 Theme = Literal["light", "dark"]
 TEXT_SPLIT_PUNCTUATION = frozenset("。！？!?；;，,、…")

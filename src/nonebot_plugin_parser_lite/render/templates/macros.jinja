@@ -10,33 +10,10 @@
 {% set POSTER_MEDIA_CLASS = "w-[calc(100%+4rem)] -ml-8 -mr-8" %}
 {% set POSTER_MASK_CLASS = "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_92%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_92%)]" %}
 {% set LIVE_TAG_CLASS = "h-[19px] rounded-[2px] border-0 bg-black/50 px-[5px] text-white outline-none" %}
-{% macro resolve_cover_src(post) -%}
-    {% set cover = namespace(src='') -%}
-    {% for item in post.content if not cover.src -%}
-        {% if item.type in ['video', 'image', 'live_photo', 'graphic', 'cover'] -%}
-            {% set cover.src = item.src or '' -%}
-        {% endif -%}
-    {% endfor -%}
-    {{- cover.src -}}
-{%- endmacro %}
-{% macro render_ambient(cover_src, logo_src) %}
-    {% if cover_src %}
-        <img src="{{ cover_src }}"
-             alt=""
-             class="absolute -inset-24 z-0 h-[calc(100%+192px)] w-[calc(100%+192px)] scale-[1.2] object-cover blur-[80px] saturate-[1.65] opacity-[0.58] dark:opacity-50" />
-    {% endif %}
-    {% if logo_src %}
-        <img src="{{ logo_src }}"
-             alt=""
-             class="absolute top-[4%] -right-[90px] z-0 h-[280px] w-[280px] scale-[1.25] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
-        <img src="{{ logo_src }}"
-             alt=""
-             class="absolute top-[44%] -left-[110px] z-0 h-[280px] w-[280px] rotate-[18deg] scale-[1.45] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
-        <img src="{{ logo_src }}"
-             alt=""
-             class="absolute -right-[80px] bottom-[5%] z-0 h-[280px] w-[280px] -rotate-[12deg] scale-[1.35] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
-    {% endif %}
-    <div class="absolute inset-0 z-0 bg-slate-50/70 dark:bg-slate-950/70"></div>
+{# 固定高度的渐变取代整卡模糊和旋转 logo，长图也只绘制首尾色块。 #}
+{% macro render_ambient(color) %}
+    <div aria-hidden="true" class="card-ambient" style="--ambient-rgb: {{ color|default('99, 102, 241', true) }}"></div>
+    <div aria-hidden="true" class="card-ambient card-ambient-bottom" style="--ambient-rgb: {{ color|default('99, 102, 241', true) }}"></div>
 {% endmacro %}
 {% macro render_stats(stats) %}
     <div class="flex flex-wrap items-end gap-x-8 gap-y-5 px-8 pt-5 pb-4">
