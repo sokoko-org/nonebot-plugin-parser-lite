@@ -19,14 +19,12 @@
                 max-height: 9rem;
             }
         </style>
-        {% from "macros.jinja" import render_ambient, render_content, resolve_cover_src %}
+        {% from "macros.jinja" import render_ambient, render_content %}
     </head>
     <body class="m-0 w-[620px] break-all font-sans antialiased">
         {% set post = data.post %}
-        {% set cover_src = resolve_cover_src(post) %}
-        {% set logo_src = post.platform.logo %}
         <main class="relative isolate w-[620px] overflow-hidden bg-slate-50 rounded-2xl dark:bg-slate-950">
-            {{ render_ambient(cover_src, logo_src) }}
+            {{ render_ambient(data.meta.ambient_rgb) }}
             <div class="relative z-[1]">{{ render_content(post, data.meta) }}</div>
         </main>
     </body>
