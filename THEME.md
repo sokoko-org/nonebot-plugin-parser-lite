@@ -190,11 +190,12 @@ data.post; // [object] 动态/帖子核心数据
 
 ### 1. `data.meta`（元信息）
 
-| 字段             | 类型     | 说明                                  |
-| ---------------- | -------- | ------------------------------------- |
-| `bot_name`       | `string` | 机器人名称                            |
-| `rendering_time` | `string` | 渲染时间，格式：`YYYY-MM-DD HH:MM:SS` |
-| `width`          | `number` | 建议卡片容器宽度（默认 `620px`）      |
+| 字段             | 类型     | 说明                                       |
+| ---------------- | -------- | ------------------------------------------ |
+| `bot_name`       | `string` | 机器人名称                                 |
+| `rendering_time` | `string` | 渲染时间，格式：`YYYY-MM-DD HH:MM:SS`      |
+| `width`          | `number` | 建议卡片容器宽度（默认 `620px`）           |
+| `ambient_rgb`    | `string` | 背景强调色的 RGB 通道，如 `"99, 102, 241"` |
 
 ### 2. `data.post`（帖子/动态主数据）
 
