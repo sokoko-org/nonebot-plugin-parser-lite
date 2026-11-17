@@ -32,6 +32,7 @@ from ..data import (
     StickerContent,
     VideoContent,
 )
+from .colors import ambient_rgb
 from .constants import MUSIC_PLATFORMS, THEME_SCHEMA_VERSION
 
 PLACEHOLDER_IMAGE = (
@@ -116,6 +117,9 @@ async def build_theme_data(
             "bot_name": bot_name,
             "rendering_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "width": 620,
+            "ambient_rgb": await asyncio.to_thread(
+                ambient_rgb, post["platform"]["logo"], post["platform"]["id"]
+            ),
         },
     }
     return cast(ThemeData, _escape_html(data))

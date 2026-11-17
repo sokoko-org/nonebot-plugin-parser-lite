@@ -3,3 +3,29 @@
 @source "../src/nonebot_plugin_parser_lite/render/templates/*.jinja";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* 背景只覆盖首尾固定区域，避免长卡片的大面积实时模糊。 */
+.card-ambient {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 0;
+  height: 520px;
+  background: radial-gradient(ellipse at top left, rgba(var(--ambient-rgb), 0.26), rgba(var(--ambient-rgb), 0) 72%);
+}
+
+.card-ambient-bottom {
+  top: auto;
+  bottom: 0;
+  height: 360px;
+  background: radial-gradient(ellipse at bottom right, rgba(var(--ambient-rgb), 0.16), rgba(var(--ambient-rgb), 0) 72%);
+}
+
+[data-theme="dark"] .card-ambient {
+  background: radial-gradient(ellipse at top left, rgba(var(--ambient-rgb), 0.34), rgba(var(--ambient-rgb), 0) 72%);
+}
+
+[data-theme="dark"] .card-ambient-bottom {
+  background: radial-gradient(ellipse at bottom right, rgba(var(--ambient-rgb), 0.22), rgba(var(--ambient-rgb), 0) 72%);
+}
