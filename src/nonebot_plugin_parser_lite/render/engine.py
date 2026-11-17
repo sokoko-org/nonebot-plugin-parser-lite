@@ -1,18 +1,17 @@
 """Blitz 原生 CSS 绘制与长图分段"""
 
 from math import ceil
-import re
 from typing import Any, Final, cast
 
 import blitz_py
 from bs4 import BeautifulSoup, Tag
 from PIL import Image
 
+from .blur import MAX_BLUR_RADIUS, BlurStyles
 from .fonts import EmojiFont, EmojiStyle, apply_emoji_font
 
 MAX_IMAGE_EDGE: Final = 16_000  # MAX 16384
 MAX_IMAGE_PIXELS: Final = 60_000_000  # MAX 64M
-BLUR_CLASS = re.compile(r"(?:dark:)?blur-\[(\d+)px\]")
 
 
 def render_html(
@@ -35,24 +34,6 @@ def render_html(
     root = cast(Tag, page.find("main"))
     root_id = str(root.get("id", "parser-render-root"))
     root["id"] = root_id
-    # 只用类名估算长图分段的重叠范围，滤镜及明暗模式均由 CSS 绘制
-    blur_radius = max(
-        (
-            int(match[1])
-            for element in page.select("[class]")
-            for name in element.get_attribute_list("class")
-            if (match := BLUR_CLASS.fullmatch(str(name)))
-        ),
-        default=0,
-    )
-    html = str(page)
-    options: dict[str, Any] = {
-        "base_url": base_url,
-        "allow_file_urls": True,
-        "background": None,
-        "color_scheme": color_scheme,
-        "resources": emoji_font.resources if emoji_font else {},
-    }
     physical_width = int(width * scale)
     if not 0 < physical_width <= MAX_IMAGE_EDGE:
         raise ValueError(f"截图物理宽度须在 1 到 {MAX_IMAGE_EDGE} 像素之间")
@@ -61,21 +42,33 @@ def render_html(
     )
     if max_frame_height < 1:
         raise ValueError("缩放比例过大，无法在 Blitz 限制内绘制一行")
+    frame_height = int(max_frame_height * scale)
+    # 留出至少三分之一帧绘制正文；0.7.0 的原生模糊在缩小时也不缩小半径。
+    blur_scale = max(1, scale)
+    blur_limit = min(MAX_BLUR_RADIUS, int((frame_height - 1) // 3 / (3 * blur_scale)))
+    resources = dict(emoji_font.resources) if emoji_font else {}
+    styles = BlurStyles(blur_limit, resources)
+    styles.apply(page, base_url)
+    html = str(page)
+    options: dict[str, Any] = {
+        "base_url": base_url,
+        "allow_file_urls": True,
+        "background": None,
+        "color_scheme": color_scheme,
+        "resources": resources,
+    }
     layout = blitz_py.Template(html, width=width, height=1, **options)
     height = ceil(layout.get_box(root_id)[3])
     del layout
 
     physical_height = int(height * scale)
     # 原生滤镜也会裁掉视口外元素的光晕，分段时保留三倍模糊半径
-    padding = ceil(3 * blur_radius * scale)
-    frame_height = int(max_frame_height * scale)
+    padding = ceil(3 * styles.radius * blur_scale)
     tile_height = (
         physical_height
         if physical_height <= frame_height
         else frame_height - 2 * padding
     )
-    if tile_height <= 0:
-        raise ValueError("模糊重叠区域超过 Blitz 单张截图限制")
     canvas = Image.new("RGBA", (physical_width, physical_height))
     for offset in range(0, physical_height, tile_height):
         end = min(offset + tile_height, physical_height)

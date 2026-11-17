@@ -351,8 +351,8 @@
 {%- endmacro -%}
 {% macro render_content(post, meta, is_repost=False) %}
     {% set comments = post.comments %}
-    {# main 统一裁切卡片边缘，内容层避免额外裁切原生模糊光晕。 #}
-    <div class="{{ 'w-full' if is_repost else 'w-[620px]' }} flex flex-col">
+    {# 主帖保留光晕；转发独立裁剪，微小圆角绕开 Blitz 矩形裁剪的滤镜偏移。 #}
+    <div class="{{ 'w-full overflow-hidden' if is_repost else 'w-[620px]' }} flex flex-col"{% if is_repost %} style="border-radius: 0.01px"{% endif %}>
         <div class="px-8 pt-10 pb-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <img src="{{ post.author.avatar }}"
