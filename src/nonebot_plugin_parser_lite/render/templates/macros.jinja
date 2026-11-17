@@ -1,10 +1,14 @@
 {# Theme API v1: this file only consumes JSON-like data from data.post. #}
 {% set MEDIA_SHELL_CLASS = "relative isolate" %}
-{% set MEDIA_GLOW_CLASS = "absolute inset-[6%] z-[-1] h-[88%] w-[88%] translate-y-[14px] scale-[1.02] object-cover blur-[28px] saturate-[1.55] opacity-[0.38] dark:opacity-[0.56]" %}
+{% set MEDIA_GLOW_CLASS = "absolute z-[-1] object-cover blur-[28px] saturate-[1.55] opacity-[0.38] dark:opacity-[0.56]" %}
+{% set MEDIA_GLOW_BOUNDS = "inset-[6%] h-[88%] w-[88%] translate-y-[14px] scale-[1.02]" %}
+{# 通栏光晕与前景保持相同尺寸和位置，分别渐隐以免露出错位边角。 #}
+{% set POSTER_GLOW_BOUNDS = "inset-0 h-full w-full" %}
+{% set POSTER_GLOW_MASK_CLASS = "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)]" %}
 {% set MEDIA_FOREGROUND_CLASS = "relative z-[1]" %}
 {% set MEDIA_OVERLAY_CLASS = "pointer-events-none absolute inset-0 z-[3]" %}
 {% set POSTER_MEDIA_CLASS = "w-[calc(100%+4rem)] -ml-8 -mr-8" %}
-{% set POSTER_MASK_CLASS = "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)]" %}
+{% set POSTER_MASK_CLASS = "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_92%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_92%)]" %}
 {% set LIVE_TAG_CLASS = "h-[19px] rounded-[2px] border-0 bg-black/50 px-[5px] text-white outline-none" %}
 {% macro resolve_cover_src(post) -%}
     {% set cover = namespace(src='') -%}
@@ -32,7 +36,7 @@
              alt=""
              class="absolute -right-[80px] bottom-[5%] z-0 h-[280px] w-[280px] -rotate-[12deg] scale-[1.35] object-contain blur-[96px] saturate-[3.2] opacity-20 mix-blend-multiply dark:blur-[100px] dark:saturate-[3.5] dark:opacity-[0.28] dark:mix-blend-screen" />
     {% endif %}
-    <div data-render-veil class="absolute inset-0 z-0 bg-slate-50/70 dark:bg-slate-950/70"></div>
+    <div class="absolute inset-0 z-0 bg-slate-50/70 dark:bg-slate-950/70"></div>
 {% endmacro %}
 {% macro render_stats(stats) %}
     <div class="flex flex-wrap items-end gap-x-8 gap-y-5 px-8 pt-5 pb-4">
@@ -72,8 +76,8 @@
             {% for comment in comments %}
                 <div class="comment space-y-3 flex space-x-2">
                     <img src="{{ comment.author.avatar }}"
-                         class="w-10 h-10 rounded-full object-cover" />
-                    <div class="content">
+                         class="w-10 h-10 shrink-0 rounded-full object-cover" />
+                    <div class="content min-w-0">
                         <div class="text-sm font-black text-gray-500 dark:text-slate-300">{{ comment.author.name }}</div>
                         <div class="text-sm text-gray-700 dark:text-slate-200 leading-relaxed">
                             {{- render_content_items(comment.content) -}}
@@ -93,8 +97,8 @@
                                 {% for reply in comment.replies[:5] %}
                                     <div class="space-y-1.5 flex space-x-2">
                                         <img src="{{ reply.author.avatar }}"
-                                             class="w-6 h-6 rounded-full object-cover" />
-                                        <div class="content">
+                                             class="w-6 h-6 shrink-0 rounded-full object-cover" />
+                                        <div class="content min-w-0">
                                             <div class="text-sm font-bold text-gray-500 dark:text-slate-300">{{ reply.author.name }}</div>
                                             <div class="text-sm text-gray-600 dark:text-slate-300 leading-snug">{{ render_content_items(reply.content) }}</div>
                                             <div class="flex items-center space-x-3 text-xs text-gray-400 dark:text-slate-500 uppercase">
@@ -120,6 +124,7 @@
 {% endmacro %}
 {% set MAX_VISIBLE_IMAGES = 9 %}
 {% macro build_images(img_list, full_bleed=False) %}
+    {% set glow_class = MEDIA_GLOW_CLASS ~ " " ~ (POSTER_GLOW_BOUNDS if full_bleed else MEDIA_GLOW_BOUNDS) ~ (" " ~ POSTER_GLOW_MASK_CLASS if full_bleed else "") %}
     {% set count = img_list|length %}
     {% set layout = img_list[0].layout %}
     {% set visible_imgs = img_list[:MAX_VISIBLE_IMAGES] %}
@@ -127,7 +132,7 @@
     {% if count == 1 %}
         {% set item = visible_imgs[0] %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-3 space-y-1">
-            <img src="{{ item.src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <img src="{{ item.src }}" alt="" class="{{ glow_class }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} {{ POSTER_MASK_CLASS if full_bleed else '' }} single-image relative overflow-hidden">
                 <img src="{{ item.src }}" data-orientation="{{ item.orientation }}" class="w-full h-auto object-cover" />
             </div>
@@ -143,7 +148,7 @@
         {% set visible_imgs = img_list[:4] %}
         {% set hidden_count = 0 %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
-            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ glow_class }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} flex h-[400px] w-full gap-[2px] overflow-hidden">
                 {% for item in visible_imgs %}
                     <div class="relative min-w-0 flex-1 overflow-hidden">
@@ -171,7 +176,7 @@
     {% elif count <= 4 %}
         {% set grid_cols = "grid-cols-3" if count == 3 else "grid-cols-2" %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
-            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ glow_class }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} overflow-hidden grid {{ grid_cols }} gap-[2px]">
                 {% for item in visible_imgs %}
                     <div class="relative w-full h-full">
@@ -194,7 +199,7 @@
         </div>
     {% else %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
-            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ MEDIA_GLOW_CLASS }}" />
+            <img src="{{ visible_imgs[0].src }}" alt="" class="{{ glow_class }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} overflow-hidden grid grid-cols-3 gap-[2px]">
                 {% for item in visible_imgs %}
                     <div class="relative w-full h-full">
@@ -277,6 +282,7 @@
     </div>
 {% endmacro %}
 {%- macro render_content_items(content, full_bleed=False) -%}
+    {%- set glow_class = MEDIA_GLOW_CLASS ~ " " ~ (POSTER_GLOW_BOUNDS if full_bleed else MEDIA_GLOW_BOUNDS) ~ (" " ~ POSTER_GLOW_MASK_CLASS if full_bleed else "") -%}
     {%- set html_parts = [] -%}
     {%- set ns = namespace(current_imgs=[], current_img_index=0) -%}
     {%- macro flush_images() -%}
@@ -296,14 +302,14 @@
             {%- set _ = html_parts.append('<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ cont.text ~ '</span>') -%}
         {%- elif cont.type == 'graphic' -%}
             {%- set _ = flush_images() -%}
-            {%- set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1"><img src="' ~ cont.src ~ '" class="' ~ MEDIA_GLOW_CLASS ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden"><img src="' ~ cont.src ~ '" alt="' ~ (cont.alt or '') ~ '" data-orientation="' ~ (cont.orientation) ~ '" class="w-full h-auto object-cover" /></div>' ~ ('<p class="whitespace-pre-wrap text-center text-xs text-slate-500 dark:text-slate-400">' ~ cont.alt ~ '</p>' if cont.alt else '') ~ '</div>') -%}
+            {%- set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3 space-y-1"><img src="' ~ cont.src ~ '" class="' ~ glow_class ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' single-image relative overflow-hidden"><img src="' ~ cont.src ~ '" alt="' ~ (cont.alt or '') ~ '" data-orientation="' ~ (cont.orientation) ~ '" class="w-full h-auto object-cover" /></div>' ~ ('<p class="whitespace-pre-wrap text-center text-xs text-slate-500 dark:text-slate-400">' ~ cont.alt ~ '</p>' if cont.alt else '') ~ '</div>') -%}
         {%- elif cont.type == 'sticker' -%}
             {%- set _ = html_parts.append('<img class="inline-block align-text-bottom ' ~ ('h-6' if cont.size == 'small' else 'h-12') ~ '"
                  src="' ~ cont.src ~ '"
                  alt="' ~ (cont.description) ~ '" />' if cont.src else '<span class="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200">' ~ (cont.description) ~ '</span>') -%}
         {%- elif cont.type == 'video' -%}
             {%- set _ = flush_images() -%}
-            {%- set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3"><img src="' ~ cont.src ~ '" alt="" class="' ~ MEDIA_GLOW_CLASS ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' poster-video relative overflow-hidden bg-black"><img src="' ~ cont.src ~ '" class="w-full h-full object-cover opacity-80" /></div><div class="' ~ MEDIA_OVERLAY_CLASS ~ '"><div class="absolute top-[18px] right-6 left-6 flex items-start justify-between gap-4 text-[13px] font-extrabold leading-[1.15] text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]"><span>' ~ cont.duration ~ '</span>' ~ ('<span>' ~ cont.speedup ~ '</span>' if cont.speedup else '') ~ '<span class="text-right">' ~ cont.size ~ '</span></div><i class="fa-icon fa-play absolute right-6 bottom-5 translate-x-[5px] text-[88px] leading-none text-white/50 [text-shadow:0_4px_24px_rgba(0,0,0,0.42)]"></i></div></div>') -%}
+            {%- set _ = html_parts.append('<div class="' ~ MEDIA_SHELL_CLASS ~ ' ' ~ (POSTER_MEDIA_CLASS if full_bleed else '') ~ ' mt-3"><img src="' ~ cont.src ~ '" alt="" class="' ~ glow_class ~ '" /><div class="' ~ MEDIA_FOREGROUND_CLASS ~ ' ' ~ (POSTER_MASK_CLASS if full_bleed else '') ~ ' poster-video relative overflow-hidden bg-black"><img src="' ~ cont.src ~ '" class="w-full h-full object-cover opacity-80" /></div><div class="' ~ MEDIA_OVERLAY_CLASS ~ '"><div class="absolute top-[18px] right-6 left-6 flex items-start justify-between gap-4 text-[13px] font-extrabold leading-[1.15] text-white/90 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]"><span>' ~ cont.duration ~ '</span>' ~ ('<span>' ~ cont.speedup ~ '</span>' if cont.speedup else '') ~ '<span class="text-right">' ~ cont.size ~ '</span></div><i class="fa-icon fa-play absolute right-6 bottom-5 translate-x-[5px] text-[88px] leading-none text-white/50 [text-shadow:0_4px_24px_rgba(0,0,0,0.42)]"></i></div></div>') -%}
         {%- elif cont.type == 'audio' -%}
             {%- set _ = flush_images() -%}
             {%- set _ = html_parts.append('<div class="mt-3 flex items-center gap-3 border-y border-slate-100 py-3 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300"><i class="fa-icon fa-music"></i><span>音频</span><span>' ~ cont.duration ~ '</span>' ~ ('<span>' ~ cont.speedup ~ '</span>' if cont.speedup else '') ~ '<span>' ~ cont.size ~ '</span></div>') -%}
@@ -345,7 +351,8 @@
 {%- endmacro -%}
 {% macro render_content(post, meta, is_repost=False) %}
     {% set comments = post.comments %}
-    <div class="{{ 'w-full' if is_repost else 'w-[620px]' }} overflow-hidden flex flex-col">
+    {# main 统一裁切卡片边缘，内容层避免额外裁切原生模糊光晕。 #}
+    <div class="{{ 'w-full' if is_repost else 'w-[620px]' }} flex flex-col">
         <div class="px-8 pt-10 pb-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <img src="{{ post.author.avatar }}"
