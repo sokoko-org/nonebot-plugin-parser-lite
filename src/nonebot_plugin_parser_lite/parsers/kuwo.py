@@ -135,7 +135,7 @@ class KuWoParser(BaseParser):
             if data["code"] != 200:
                 raise ParseException(f"酷我音乐歌词接口返回错误: {data}")
             lines = []
-            for row in data["data"]["lrclist"]:
+            for row in (data.get("data") or {}).get("lrclist") or []:
                 centiseconds = int(
                     (Decimal(str(row["time"])) * 100).quantize(
                         Decimal("1"), rounding=ROUND_HALF_UP
