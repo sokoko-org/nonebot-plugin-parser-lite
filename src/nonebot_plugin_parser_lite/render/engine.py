@@ -43,7 +43,7 @@ def render_html(
     if max_frame_height < 1:
         raise ValueError("缩放比例过大，无法在 Blitz 限制内绘制一行")
     frame_height = int(max_frame_height * scale)
-    # 留出至少三分之一帧绘制正文；0.7.0 的原生模糊在缩小时也不缩小半径。
+    # 留出至少三分之一帧绘制正文；0.7.0 的原生模糊在缩小时也不缩小半径
     blur_scale = max(1, scale)
     blur_limit = min(MAX_BLUR_RADIUS, int((frame_height - 1) // 3 / (3 * blur_scale)))
     resources = dict(emoji_font.resources) if emoji_font else {}

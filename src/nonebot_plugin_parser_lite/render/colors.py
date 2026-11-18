@@ -1,4 +1,4 @@
-"""从平台图标提取并缓存背景强调色。"""
+"""从平台图标提取并缓存背景强调色"""
 
 from collections import defaultdict
 from colorsys import hsv_to_rgb, rgb_to_hsv
@@ -24,7 +24,7 @@ def _fallback(identity: str, pixels: bytes = b"") -> str:
 
 @lru_cache(maxsize=128)
 def _logo_rgb(path: str, mtime_ns: int, size: int, identity: str) -> str:
-    # mtime_ns 和 size 参与缓存键，替换图标后自动重新取色。
+    # mtime_ns 和 size 参与缓存键，替换图标后自动重新取色
     try:
         with Image.open(path) as source, source.convert("RGBA") as image:
             image.thumbnail((48, 48))
@@ -32,7 +32,7 @@ def _logo_rgb(path: str, mtime_ns: int, size: int, identity: str) -> str:
             buckets: dict[int, list[float]] = defaultdict(lambda: [0.0] * 4)
             visible = 0.0
             chromatic = 0.0
-            for red, green, blue, alpha in image.getdata():
+            for red, green, blue, alpha in image.getdata():  # pyright: ignore[reportGeneralTypeIssues, reportOptionalIterable]
                 if alpha < 32:
                     continue
                 opacity = alpha / 255
@@ -51,7 +51,7 @@ def _logo_rgb(path: str, mtime_ns: int, size: int, identity: str) -> str:
                 return fallback
             dominant = max(buckets.values(), key=lambda bucket: bucket[0])
             if dominant[0] < chromatic * 0.15:
-                return fallback  # 杂色图标没有可靠主色，使用稳定的备用配色。
+                return fallback  # 杂色图标没有可靠主色，使用稳定的备用配色
             hue, saturation, _ = rgb_to_hsv(
                 *(channel / dominant[0] / 255 for channel in dominant[1:])
             )
@@ -61,7 +61,7 @@ def _logo_rgb(path: str, mtime_ns: int, size: int, identity: str) -> str:
 
 
 def ambient_rgb(logo: str | None, identity: str) -> str:
-    """忽略透明和中性像素；黑白、杂色或缺失图标采用稳定备用色。"""
+    """忽略透明和中性像素；黑白、杂色或缺失图标采用稳定备用色"""
     if logo:
         parsed = urlsplit(logo)
         if parsed.scheme == "file":
