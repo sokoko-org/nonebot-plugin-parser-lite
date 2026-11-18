@@ -1,5 +1,6 @@
 from copy import deepcopy
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 from nonebot.exception import ActionFailed, NetworkError
 from nonebot.matcher import current_bot
@@ -25,7 +26,7 @@ from render_test_support import (
 )
 
 from nonebot_plugin_parser_lite import delivery, matchers, render
-from nonebot_plugin_parser_lite.config import gconfig
+from nonebot_plugin_parser_lite.config import Config, gconfig
 from nonebot_plugin_parser_lite.delivery import (
     build_text_fallback,
     build_video_fallback,
@@ -174,6 +175,69 @@ def forward(*contents):
             ]
         )
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("lazy", "components", "forward_components", "expected_types"),
+    [
+        (False, ["card", "video"], [], [Image, Video]),
+        (False, ["card", "video"], ["card"], [Reference]),
+        (False, ["video"], ["card"], [Video]),
+        (False, ["url", "embed", "video"], ["card", "video"], [Text, Reference]),
+        (False, ["embed"], [], [Text]),
+        (False, [], ["card"], []),
+        (True, ["video"], ["card"], [Image]),
+    ],
+)
+async def test_parser_card_layout(
+    monkeypatch, lazy, components, forward_components, expected_types
+):
+    config = Config(
+        plite_lazy_download=lazy,
+        plite_send_components=components,
+        plite_forward_components=forward_components,
+    )
+    monkeypatch.setattr(matchers, "pconfig", config)
+    monkeypatch.setattr(render, "pconfig", config)
+
+    result = make_result()
+    result.embed_url = "https://example.com/player"
+    result.repost = make_result()
+    result.repost.url = "https://example.com/original"
+    result.repost.content.clear()
+    summary = Image(raw=b"summary")
+    video = Video(raw=b"video")
+    render_image = AsyncMock(return_value=summary)
+    build_video = AsyncMock(return_value=video)
+    send = AsyncMock()
+    monkeypatch.setattr(matchers, "get_or_parse_result", AsyncMock(return_value=result))
+    monkeypatch.setattr(matchers.RENDERER, "cache_or_render_image", render_image)
+    monkeypatch.setattr(matchers, "send_with_media_fallback", send)
+    monkeypatch.setattr(UniHelper, "video_seg", build_video)
+    monkeypatch.setattr(
+        UniHelper, "construct_forward_message", lambda contents: forward(*contents)[0]
+    )
+
+    await matchers._parse_and_send.__wrapped__(session=None, sr=None)
+
+    messages = [call.args[0] for call in send.await_args_list]
+    assert all(messages)
+    assert [type(message[0]) for message in messages] == expected_types
+    assert config.plite_send_components == components
+    assert render_image.await_count == int(lazy or "card" in components)
+    assert build_video.await_count == int(not lazy and "video" in components)
+    if messages and isinstance(ref := messages[-1][0], Reference):
+        node_segments = [node.content[0] for node in ref.children]
+        assert node_segments == ([summary, video] if "card" in components else [video])
+    if "embed" in components:
+        embed_text = f"在线播放: {result.embed_url}"
+        expected = embed_text
+        if "url" in components:
+            expected = (
+                f"{result.display_url}\n{result.repost_display_url}\n{embed_text}"
+            )
+        assert messages[0].extract_plain_text() == expected
 
 
 def text_of(message):

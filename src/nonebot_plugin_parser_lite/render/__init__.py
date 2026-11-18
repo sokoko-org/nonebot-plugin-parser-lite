@@ -247,27 +247,24 @@ class Renderer:
     """模板目录"""
 
     async def render_messages(self, result: ParseResult) -> UniMessage[Any]:
-        """渲染消息
-
-        :param result: 解析结果
-        """
-        # 尝试获取图片路径，以便在直接发送失败时使用文件发送
-        try:
-            image_seg = await self.cache_or_render_image(result)
-        except Exception as e:
-            logger.exception(f"获取图片路径失败: {e!r}")
-            image_seg = None
-
-        # 尝试直接发送图片
-        if image_seg is not None:
-            mark_media_role(image_seg, "summary")
-        msg = UniMessage(image_seg or "图片渲染失败")
+        """按配置构建总结卡片和链接消息"""
+        msg = UniMessage()
         components = pconfig.send_components
+        if pconfig.card_delivery != "off":
+            try:
+                image_seg = await self.cache_or_render_image(result)
+            except Exception as e:
+                logger.exception(f"获取图片路径失败: {e!r}")
+                image_seg = None
+            if image_seg is not None:
+                mark_media_role(image_seg, "summary")
+            msg += image_seg or "图片渲染失败"
         if SendComponent.URL in components:
             urls = (result.display_url, result.repost_display_url)
-            msg += "\n".join(url for url in urls if url)
+            if links := "\n".join(url for url in urls if url):
+                msg += links
         if SendComponent.EMBED in components and (embed := result.embed_url):
-            msg += "\n在线播放: " + embed
+            msg += ("\n" if msg else "") + "在线播放: " + embed
         return msg
 
     async def send_content(
@@ -286,7 +283,7 @@ class Renderer:
         deferred_media_segs: dict[int, list[UniMessage[Any]]] = {}
         forward_video_segs: dict[int, ForwardNodeInner] = {}
         components = pconfig.send_components
-        forward = pconfig.forward_components
+        forward = pconfig.forward_components.intersection(components)
         for cont in result.iter_sendable_media():
             # 先处理需要立即发送的音视频，或准备待合并转发的视频节点
             try:
@@ -349,6 +346,7 @@ class Renderer:
             # 2) 纯文字部分超过阈值
             # 3) 节点数较多
             # 4) 包含 forward_components 指定并入转发的视频
+            # 5) 总结卡片指定为首节点
 
             body_in_forward = bool(
                 forward & {SendComponent.CONTENT, SendComponent.COVER}
@@ -623,13 +621,9 @@ class Renderer:
         # 1. 主帖节点
         ordered.extend(await build_nodes(result))
         # 2. 转发内容
-        repost = result.repost
-        if not repost:
-            return ordered
-        # 2.1 转发说明
-        ordered.append(">>>>>原帖<<<<<")
-        # 2.2 原帖节点
-        ordered.extend(await build_nodes(repost))
+        if result.repost and (repost_nodes := await build_nodes(result.repost)):
+            ordered.append("原帖")
+            ordered.extend(repost_nodes)
         return ordered
 
     async def render_image(

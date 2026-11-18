@@ -211,15 +211,15 @@ plite_parse_dedup_platforms=null
 # [可选] 所选平台：同会话相同链接或编号成功解析后的忽略分钟数
 plite_parse_dedup_minutes=30
 
-# [可选] 发送哪些内容块（媒体和正文仍按原帖出现顺序穿插渲染，列表不改变渲染顺序）
-# card 为渲染卡片，强制保留且不可禁用；其余可选项：
+# [可选] 发送哪些内容块
+# card 为总结卡片；关闭懒下载时可省略，开启时始终单独发送。其余可选项：
 #   url    原始 URL　　　　embed  在线播放链接
 #   content 解析正文(文字/图片/贴纸/链接/引用/投票)
 #   cover  视频封面　　　video  视频　　audio  音频
 plite_send_components=["card", "content", "cover", "video", "audio"]
 
-# [可选] 放入合并转发的内容块（仅对已在 plite_send_components 启用的块生效）
-# card  入列：总结卡片置于转发首节点（强制合并转发；懒下载仍单独发卡片）
+# [可选] 哪些内容进转发。关闭懒下载时，要完全不发卡片，只需从 plite_send_components 删掉 card
+# card  入列：关闭懒下载时，总结卡片与已启用的内容一起转发，卡片放在第一条
 # video 入列：视频并入转发（需协议端支持转发节点中发送 Video / File）
 # content / cover 入列：正文体进入转发（超过 4 项时始终使用合并转发）
 plite_forward_components=["content", "cover"]
@@ -306,27 +306,25 @@ plite_bsb_categories=[]
 
 ### 📦 发送组合
 
-`plite_send_components` 和 `plite_forward_components` 共同决定解析结果发哪些块、哪些块进合并转发。媒体和正文仍按原帖中的出现顺序穿插渲染，清单只控制启用与否，不改变渲染先后
+块的含义（`SendComponent`）
 
-块的含义（`SendComponent`）：
+|   块    |                       含义                        |      可否禁用      |
+| :-----: | :-----------------------------------------------: | :----------------: |
+|  card   |                  渲染的总结卡片                   | 关闭懒下载时可禁用 |
+|   url   |                  解析源原始链接                   |         是         |
+|  embed  |               在线播放链接（如有）                |         是         |
+| content | 解析正文：文字 / 图片 / 贴纸 / 链接 / 引用 / 投票 |         是         |
+|  cover  |                     视频封面                      |         是         |
+|  video  |                       视频                        |         是         |
+|  audio  |                       音频                        |         是         |
 
-|   块    |                       含义                        |  可否禁用  |
-| :-----: | :-----------------------------------------------: | :--------: |
-|  card   |                  渲染的总结卡片                   | 否（强制） |
-|   url   |                  解析源原始链接                   |     是     |
-|  embed  |               在线播放链接（如有）                |     是     |
-| content | 解析正文：文字 / 图片 / 贴纸 / 链接 / 引用 / 投票 |     是     |
-|  cover  |                     视频封面                      |     是     |
-|  video  |                       视频                        |     是     |
-|  audio  |                       音频                        |     是     |
-
-- **`plite_send_components`**：列出要发送的块；未列出的块不发送。`card` 始终保留，若未填会自动补回。例如不想发原始正文和封面，只留 `["card", "video", "audio"]` 即可
-- **`plite_forward_components`**：在已启用的块中，指定哪些进入合并转发（未在 `plite_send_components` 启用的块在此无效）
-  - `card` 入列：总结卡片作为转发首节点，强制合并转发；懒下载模式下仍单独发送卡片
-  - `video` 入列：视频并入转发，需协议端支持在转发节点中发送 Video / File
-  - `content` / `cover` 入列：正文体进入转发（节点超过 4 项时始终使用合并转发）
+- **`plite_send_components`**：要发送的内容。关闭懒下载时，如果不想要总结卡片，可以从列表移除 `card`。开启懒下载时，卡片始终先单独发送
+- **`plite_forward_components`**：哪些已启用的内容需要合并转发，正文节点超过 4 项时始终会进入合并转发
 
 默认值：发送 `[card, content, cover, video, audio]`，转发 `[content, cover]`
+
+- `plite_send_components=-
+- plite_forward_components=
 
 ## 🎉 使用
 
