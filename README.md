@@ -321,11 +321,6 @@ plite_bsb_categories=[]
 - **`plite_send_components`**：要发送的内容。关闭懒下载时，如果不想要总结卡片，可以从列表移除 `card`。开启懒下载时，卡片始终先单独发送
 - **`plite_forward_components`**：哪些已启用的内容需要合并转发，正文节点超过 4 项时始终会进入合并转发
 
-默认值：发送 `[card, content, cover, video, audio]`，转发 `[content, cover]`
-
-- `plite_send_components=-
-- plite_forward_components=
-
 ## 🎉 使用
 
 |   指令   |          参数           |         权限          | 需要@ | 范围 |                     说明                      |
