@@ -95,12 +95,12 @@ class Config(BaseModel):
         SendComponent.VIDEO,
         SendComponent.AUDIO,
     ]
-    """发送哪些内容块；card 为渲染卡片不可禁用，可选 url/embed/content/cover/video/audio"""
+    """发送哪些内容块；懒下载时始终发送 card"""
     plite_forward_components: list[SendComponent] = [
         SendComponent.CONTENT,
         SendComponent.COVER,
     ]
-    """放入合并转发的内容块；card 入列即总结卡片置于转发首节点，video 入列即视频并入转发"""
+    """放入合并转发的内容块；关闭懒下载时可将 card 放在转发首节点"""
     plite_lazy_download: bool = False
     """是否开启懒下载模式，仅在用户请求时才下载视频"""
     plite_lazy_download_tip: bool = False
@@ -169,10 +169,7 @@ class Config(BaseModel):
     def validate_send_components(
         cls, value: list[SendComponent]
     ) -> list[SendComponent]:
-        components = list(dict.fromkeys(value))
-        if SendComponent.CARD not in components:
-            components.insert(0, SendComponent.CARD)
-        return components
+        return list(dict.fromkeys(value))
 
     @model_validator(mode="after")
     def validate_lazy_download(self) -> "Config":
@@ -283,6 +280,15 @@ class Config(BaseModel):
     def forward_components(self) -> set[SendComponent]:
         """放入合并转发的内容块"""
         return set(self.plite_forward_components)
+
+    @property
+    def card_delivery(self) -> Literal["off", "direct", "forward"]:
+        """总结卡片的发送方式；懒下载始终先单独发卡片"""
+        if self.lazy_download:
+            return "direct"
+        if SendComponent.CARD not in self.send_components:
+            return "off"
+        return "forward" if SendComponent.CARD in self.forward_components else "direct"
 
     @property
     def download_command(self) -> list[str]:
