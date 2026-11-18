@@ -1,4 +1,4 @@
-"""限制原生 CSS 模糊，并为长图分段计算保守的重叠范围。"""
+"""限制原生 CSS 模糊，并为长图分段计算保守的重叠范围"""
 
 from base64 import b64decode
 from functools import lru_cache
@@ -15,7 +15,7 @@ MAX_BLUR_RADIUS = 128
 
 
 class BlurStyles:
-    """在 CSS 变量解析前包裹 blur 参数，实际约束交给 CSS clamp。"""
+    """在 CSS 变量解析前包裹 blur 参数，实际约束交给 CSS clamp"""
 
     def __init__(self, limit: int, resources: dict[str, bytes]):
         self.limit = limit
@@ -50,8 +50,7 @@ class BlurStyles:
                     self._rewrite(token.arguments)
             else:
                 for attribute in ("prelude", "content"):
-                    children = getattr(token, attribute, None)
-                    if children:
+                    if children := getattr(token, attribute, None):
                         self._rewrite(children)
 
     def _stylesheet(self, source: str | bytes, base_url: str) -> tuple[str, str]:
@@ -75,7 +74,7 @@ class BlurStyles:
                 try:
                     data = Path(path).read_bytes()
                 except OSError:
-                    return  # 与 Blitz 一致，忽略不可读取的样式表。
+                    return  # 与 Blitz 一致，忽略不可读取的样式表
             elif parsed.scheme == "data":
                 header, separator, payload = url.partition(",")
                 if not separator:
@@ -84,13 +83,12 @@ class BlurStyles:
                 if header.lower().endswith(";base64"):
                     data = b64decode(data)
             else:
-                return  # 渲染器不加载 HTTP(S) 资源。
+                return  # 渲染器不加载 HTTP(S) 资源
         css, encoding = self._stylesheet(data, url)
         self.resources[url] = css.encode(encoding)
 
     def apply(self, page: BeautifulSoup, base_url: str) -> None:
-        base = page.find("base", href=True)
-        if base:
+        if base := page.find("base", href=True):
             base_url = urljoin(base_url, str(base["href"]))
         for link in page.select('link[rel~="stylesheet"][href]'):
             self._load(urljoin(base_url, str(link["href"])))
@@ -106,7 +104,7 @@ class BlurStyles:
 def _prepare_stylesheet(
     source: str | bytes, limit: int
 ) -> tuple[str, str, float, tuple[str, ...]]:
-    """仅缓存不可变结果；导入路径每次按当前样式表 URL 解析。"""
+    """仅缓存不可变结果；导入路径每次按当前样式表 URL 解析"""
     if isinstance(source, bytes):
         rules, encoding = tinycss2.parse_stylesheet_bytes(source)
         encoding_name = encoding.name
@@ -126,12 +124,12 @@ def _prepare_stylesheet(
             continue
         target = args[0]
         if isinstance(target, FunctionBlock) and target.lower_name == "url":
-            args = [token for token in target.arguments if token.type == "string"]
-            if not args:
+            if args := [token for token in target.arguments if token.type == "string"]:
+                target = args[0]
+            else:
                 continue
-            target = args[0]
         if target.type in {"url", "string"}:
-            imports.append(target.value)
+            imports.append(target.value)  # pyright: ignore[reportAttributeAccessIssue]
     styles = BlurStyles(limit, {})
     styles._rewrite(rules)
     return tinycss2.serialize(rules), encoding_name, styles.radius, tuple(imports)

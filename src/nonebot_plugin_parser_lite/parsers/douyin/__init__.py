@@ -58,12 +58,12 @@ SHARE_CODE_PATTERNS = [
 
 def _extract_share_code(match: re.Match[str]) -> str:
     groups = match.groups()
-    # 分段规则的第 1 组是整段，第 3、5 组才是两段口令。
+    # 分段规则的第 1 组是整段，第 3、5 组才是两段口令
     if len(groups) == 6 and groups[2] is not None and groups[4] is not None:
         return groups[2] + groups[4]
 
     code = match[1]
-    # 简单欧元分段规则只有一个捕获组，需去掉内部的分隔符。
+    # 简单欧元分段规则只有一个捕获组，需去掉内部的分隔符
     if code.startswith("€") and code.endswith("€"):
         code = code.replace("€", "")
     return code.removeprefix("activity_")

@@ -2,7 +2,7 @@
 {% set MEDIA_SHELL_CLASS = "relative isolate" %}
 {% set MEDIA_GLOW_CLASS = "absolute z-[-1] object-cover blur-[28px] saturate-[1.55] opacity-[0.38] dark:opacity-[0.56]" %}
 {% set MEDIA_GLOW_BOUNDS = "inset-[6%] h-[88%] w-[88%] translate-y-[14px] scale-[1.02]" %}
-{# 通栏光晕与前景保持相同尺寸和位置，分别渐隐以免露出错位边角。 #}
+{# 通栏光晕与前景保持相同尺寸和位置，分别渐隐以免露出错位边角 #}
 {% set POSTER_GLOW_BOUNDS = "inset-0 h-full w-full" %}
 {% set POSTER_GLOW_MASK_CLASS = "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_100%)]" %}
 {% set MEDIA_FOREGROUND_CLASS = "relative z-[1]" %}
@@ -10,7 +10,7 @@
 {% set POSTER_MEDIA_CLASS = "w-[calc(100%+4rem)] -ml-8 -mr-8" %}
 {% set POSTER_MASK_CLASS = "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_92%)] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_9%,#000_78%,transparent_92%)]" %}
 {% set LIVE_TAG_CLASS = "h-[19px] rounded-[2px] border-0 bg-black/50 px-[5px] text-white outline-none" %}
-{# 固定高度的渐变取代整卡模糊和旋转 logo，长图也只绘制首尾色块。 #}
+{# 固定高度的渐变取代整卡模糊和旋转 logo，长图也只绘制首尾色块 #}
 {% macro render_ambient(color) %}
     <div aria-hidden="true" class="card-ambient" style="--ambient-rgb: {{ color|default('99, 102, 241', true) }}"></div>
     <div aria-hidden="true" class="card-ambient card-ambient-bottom" style="--ambient-rgb: {{ color|default('99, 102, 241', true) }}"></div>
@@ -328,7 +328,7 @@
 {%- endmacro -%}
 {% macro render_content(post, meta, is_repost=False) %}
     {% set comments = post.comments %}
-    {# 主帖保留光晕；转发独立裁剪，微小圆角绕开 Blitz 矩形裁剪的滤镜偏移。 #}
+    {# 主帖保留光晕；转发独立裁剪，微小圆角绕开 Blitz 矩形裁剪的滤镜偏移 #}
     <div class="{{ 'w-full overflow-hidden' if is_repost else 'w-[620px]' }} flex flex-col"{% if is_repost %} style="border-radius: 0.01px"{% endif %}>
         <div class="px-8 pt-10 pb-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">

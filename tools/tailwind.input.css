@@ -4,7 +4,7 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* 背景只覆盖首尾固定区域，避免长卡片的大面积实时模糊。 */
+/* 背景只覆盖首尾固定区域，避免长卡片的大面积实时模糊 */
 .card-ambient {
   pointer-events: none;
   position: absolute;
