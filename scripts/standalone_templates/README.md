@@ -1,6 +1,6 @@
 # Parser Lite Standalone 独立版指南
 
-这是从 `main` 分支自动生成的独立模块版本（发布在 `standalone` 分支），可直接在其他应用项目中使用。
+这是从 `main` 分支自动生成的独立模块版本（发布在 `standalone` 分支），可直接在其他应用项目中使用
 
 ---
 
@@ -45,7 +45,7 @@ python -m pip install -r requirements.txt
 
 ### 1. 文本解析流水线
 
-解析入口接收文本，也可以接收已有的 `MatchResult` 或 `ParseResult` 继续后续阶段。
+解析入口接收文本，也可以接收已有的 `MatchResult` 或 `ParseResult` 继续后续阶段
 通过 `until` 参数控制执行到哪一步
 
 - `ParseStep.MATCH`：仅匹配阶段
@@ -80,7 +80,7 @@ async with Parser() as parser:
 # 注：长期运行的应用可复用 Parser 实例，退出前调用 await parser.aclose()
 ```
 
-`RenderResult.result` 保留传入的解析结果及其媒体。
+`RenderResult.result` 保留传入的解析结果及其媒体
 仅需生成渲染数据，或已有渲染数据时，也可直接使用底层接口
 
 ```python
