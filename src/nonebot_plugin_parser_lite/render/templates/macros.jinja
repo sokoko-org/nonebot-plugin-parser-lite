@@ -104,8 +104,9 @@
     {% set glow_class = MEDIA_GLOW_CLASS ~ " " ~ (POSTER_GLOW_BOUNDS if full_bleed else MEDIA_GLOW_BOUNDS) ~ (" " ~ POSTER_GLOW_MASK_CLASS if full_bleed else "") %}
     {% set count = img_list|length %}
     {% set layout = img_list[0].layout %}
-    {% set visible_imgs = img_list[:MAX_VISIBLE_IMAGES] %}
-    {% set hidden_count = (count - MAX_VISIBLE_IMAGES) if count > MAX_VISIBLE_IMAGES else 0 %}
+    {% set max_visible = 20 if layout == "x" else MAX_VISIBLE_IMAGES %}
+    {% set visible_imgs = img_list[:max_visible] %}
+    {% set hidden_count = (count - max_visible) if count > max_visible else 0 %}
     {% if count == 1 %}
         {% set item = visible_imgs[0] %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-3 space-y-1">
@@ -122,8 +123,6 @@
             {% endif %}
         </div>
     {% elif layout == 'x' %}
-        {% set visible_imgs = img_list[:4] %}
-        {% set hidden_count = 0 %}
         <div class="{{ MEDIA_SHELL_CLASS }} {{ POSTER_MEDIA_CLASS if full_bleed else '' }} mt-4">
             <img src="{{ visible_imgs[0].src }}" alt="" class="{{ glow_class }}" />
             <div class="{{ MEDIA_FOREGROUND_CLASS }} flex h-[400px] w-full gap-[2px] overflow-hidden">
