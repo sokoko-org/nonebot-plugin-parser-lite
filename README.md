@@ -10,6 +10,12 @@
 
 </div>
 
+> [!IMPORTANT]
+>
+> 严禁将本项目用于任何非法用途。请遵守所在地法律法规、内容平台服务协议和著作权规则，并仅处理你有权下载、保存或传播的内容。
+>
+> 因使用不当造成的一切责任由使用者承担，本项目维护者不承担相关责任。本项目与下列平台不存在隶属、授权或合作关系。
+
 如果你需要不依赖 `nonebot2` 的插件，请切换到 [`standalone`](https://github.com/sokoko-org/nonebot-plugin-parser-lite/tree/standalone) 分支
 
 ## 📖 支持的平台
