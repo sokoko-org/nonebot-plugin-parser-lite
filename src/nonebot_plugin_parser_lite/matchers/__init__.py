@@ -21,6 +21,7 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
+from ..constants import PlatformEnum
 from ..delivery import send_with_media_fallback
 from ..download import DOWNLOADER
 from ..helper import UniHelper
@@ -131,6 +132,11 @@ def register_parser_matcher() -> None:
     ]
     matcher = on_keyword_regex(*patterns)
     matcher.append_handler(parser_handler)
+
+    if PlatformEnum.MIYOUSHE not in pconfig.disabled_platforms:
+        from ..parsers.miyoushe.sticker import update_sticker
+
+        driver.task_group.start_soon(update_sticker)
 
 
 @driver.on_shutdown

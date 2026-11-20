@@ -30,7 +30,6 @@ nonebot_plugin_parser_lite = [
     "render/templates/*.jinja",
     "render/templates/*.css",
     "render/templates/*.json",
-    "parsers/miyoushe/sticker.json",
 ]
 
 [tool.setuptools.exclude-package-data]
