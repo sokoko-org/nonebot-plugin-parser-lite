@@ -7,7 +7,7 @@ from importlib import import_module
 from typing import Literal, Self, overload
 
 from .config import pconfig
-from .constants import MatchWithParams
+from .constants import MatchWithParams, PlatformEnum
 from .data import ParseResult
 from .exception import ParseException
 from .parsers.base import BaseParser
@@ -59,6 +59,10 @@ def _ensure_runtime_started() -> None:
             await warmup_themes()
         except Exception:
             logger.exception("预热缓存/主题/字体失败")
+        if PlatformEnum.MIYOUSHE not in pconfig.disabled_platforms:
+            from .parsers.miyoushe.sticker import update_sticker
+
+            await update_sticker()
 
     asyncio.get_running_loop().create_task(_warmup())
 
