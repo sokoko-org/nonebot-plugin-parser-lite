@@ -4,6 +4,7 @@ from ...utils.log import logger
 from ..base import BaseParser, MatchWithParams, Platform, PlatformEnum, handle, pconfig
 from .comment import decoder as commentDecoder
 from .post import decoder as postDecoder
+from .sticker import update_sticker
 from .ugc import decoder as ugcDecoder
 
 
@@ -15,6 +16,9 @@ class MiyousheParser(BaseParser):
     def __init__(self):
         super().__init__()
         self.httpx.headers.update({"Referer": "https://www.miyoushe.com/"})
+
+    async def update_sticker(self):
+        await update_sticker()
 
     # https://m.miyoushe.com/zzz/#/article/76178399
     # https://m.miyoushe.com/zzz?channel=beta/#/article/76178399
