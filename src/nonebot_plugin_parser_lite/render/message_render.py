@@ -1,10 +1,12 @@
 """消息编排：将解析结果转换为可发送/合并转发的消息序列"""
 
 from collections.abc import AsyncGenerator
-from typing import Any
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
 from anyio import Path
 from nonebot import logger
+from nonebot_plugin_alconna.uniseg import File, Image
 
 from ..config import pconfig
 from ..constants import SendComponent
@@ -32,8 +34,23 @@ from .forward import (
 )
 
 
+@dataclass(slots=True)
+class _SendState:
+    """``send_content`` 遍历媒体时的累积状态"""
+
+    failed_count: int = 0
+    deferred_media_segs: dict[int, list[UniMessage[Any]]] = field(default_factory=dict)
+    forward_video_segs: dict[int, ForwardNodeInner] = field(default_factory=dict)
+
+
 class MessageRenderMixin:
     """提供解析结果到消息序列的编排能力"""
+
+    if TYPE_CHECKING:
+        # 由 ImageRenderMixin 提供，组合进 Renderer 后可用
+        async def cache_or_render_image(
+            self, result: ParseResult
+        ) -> File | Image: ...
 
     async def render_messages(self, result: ParseResult) -> UniMessage[Any]:
         """按配置构建总结卡片和链接消息"""
@@ -68,32 +85,57 @@ class MessageRenderMixin:
         - 可选的总结卡片（作为合并转发首节点）
         - 可合并转发的图文 / 图片（统一收集后一次发送）
         """
-        failed_count = 0
-        deferred_media_segs: dict[int, list[UniMessage[Any]]] = {}
-        forward_video_segs: dict[int, ForwardNodeInner] = {}
+        state = _SendState()
+        async for message in self.__collect_media(result, summary_node, state):
+            yield message
+
+        ordered_segs = await self.__build_forward_segs(
+            result, state.forward_video_segs, state.deferred_media_segs
+        )
+        if summary_node is not None:
+            ordered_segs.insert(0, summary_node)
+        for message in self.__pack_forward_messages(
+            ordered_segs, state.forward_video_segs, summary_node
+        ):
+            yield message
+
+        if state.failed_count > 0:
+            message = f"{state.failed_count} 项媒体下载失败"
+            yield UniMessage(message)
+            logger.warning(message)
+
+    async def __collect_media(
+        self,
+        result: ParseResult,
+        summary_node: UniMessage[Any] | None,
+        state: "_SendState",
+    ) -> AsyncGenerator[UniMessage[Any], None]:
+        """遍历媒体，立即发送的逐条 yield，待转发的收集进 state"""
         components = pconfig.send_components
         forward = pconfig.forward_components.intersection(components)
+
+        def collect(cont: MediaContent, message: UniMessage[Any]) -> None:
+            state.deferred_media_segs.setdefault(id(cont), []).append(message)
+
         for cont in result.iter_sendable_media():
-            # 先处理需要立即发送的音视频，或准备待合并转发的视频节点
+            if isinstance(cont, VideoContent) and SendComponent.VIDEO not in components:
+                continue
+            if isinstance(cont, AudioContent) and SendComponent.AUDIO not in components:
+                continue
             try:
-                if isinstance(cont, VideoContent):
-                    if SendComponent.VIDEO not in components:
-                        continue
-                    if SendComponent.VIDEO in forward:
-                        forward_video_segs[id(cont)] = await self.__build_video_seg(
-                            cont
-                        )
-                        continue
                 if (
-                    isinstance(cont, AudioContent)
-                    and SendComponent.AUDIO not in components
+                    isinstance(cont, VideoContent)
+                    and SendComponent.VIDEO in forward
                 ):
+                    state.forward_video_segs[id(cont)] = await self.__build_video_seg(
+                        cont
+                    )
                     continue
-                async for msg in self.__handle_immediate_media(cont):
+                async for message in self.__handle_immediate_media(cont):
                     if summary_node is None:
-                        yield msg
+                        yield message
                     else:
-                        deferred_media_segs.setdefault(id(cont), []).append(msg)
+                        collect(cont, message)
             except SizeLimitException:
                 message = UniMessage(
                     f"媒体太大啦，还是去{result.platform.display_name}看看吧~"
@@ -101,67 +143,71 @@ class MessageRenderMixin:
                 if summary_node is None:
                     yield message
                 else:
-                    deferred_media_segs.setdefault(id(cont), []).append(message)
-                continue
+                    collect(cont, message)
             except DownloadException as e:
-                failed_count += 1
+                state.failed_count += 1
                 logger.exception(f"{cont.__class__.__name__} 下载失败: {e!r}")
-                continue
 
-        # 2 构建图文 / 图片的转发列表（含主帖 + 转发，按顺序）
-        ordered_segs = await self.__build_forward_segs(
-            result,
-            forward_video_segs,
-            deferred_media_segs,
-        )
-        if summary_node is not None:
-            ordered_segs.insert(0, summary_node)
-        if ordered_segs:
-            # 一次遍历：统计+长文本拆分
-            processed_segs: list[ForwardNodeInner] = []
-            total_plain_len = 0
-            node_count = 0
+    def __pack_forward_messages(
+        self,
+        ordered_segs: list[ForwardNodeInner | _ForwardText],
+        forward_video_segs: dict[int, ForwardNodeInner],
+        summary_node: UniMessage[Any] | None,
+    ) -> list[UniMessage[Any]]:
+        """将有序段按长文本拆分，并视情况打包为合并转发消息"""
+        if not ordered_segs:
+            return []
 
-            for seg in ordered_segs:
-                node_count += 1
-                if isinstance(seg, _ForwardText):
-                    total_plain_len += seg.text_length
-                elif isinstance(seg, str):
-                    total_plain_len += len(seg)
-                processed_segs.extend(split_forward_content(seg, SPLIT_THRESHOLD))
+        processed_segs: list[ForwardNodeInner] = []
+        total_plain_len = 0
+        for seg in ordered_segs:
+            if isinstance(seg, _ForwardText):
+                total_plain_len += seg.text_length
+            elif isinstance(seg, str):
+                total_plain_len += len(seg)
+            processed_segs.extend(split_forward_content(seg, SPLIT_THRESHOLD))
 
-            # 是否需要合并转发：
-            # 1) forward_components 含 content / cover（正文体进转发）
-            # 2) 纯文字部分超过阈值
-            # 3) 节点数较多
-            # 4) 包含 forward_components 指定并入转发的视频
-            # 5) 总结卡片指定为首节点
+        if not self.__need_forward(
+            ordered_segs, total_plain_len, forward_video_segs, summary_node
+        ):
+            return [UniMessage(processed_segs)]
 
-            body_in_forward = bool(
-                forward & {SendComponent.CONTENT, SendComponent.COVER}
+        # 需要合并转发：根据平台限制按文本长度 / 节点数分批构造 forward
+        return [
+            UniMessage(UniHelper.construct_forward_message(chunk))
+            for chunk in pack_forward_items(
+                processed_segs,
+                content_of=lambda content: content,
+                with_content=lambda _original, content: content,
             )
-            if (
-                body_in_forward
-                or total_plain_len > SPLIT_THRESHOLD
-                or node_count > 4
-                or bool(forward_video_segs)
-                or summary_node is not None
-            ):
-                # 需要合并转发：根据平台限制按文本长度 / 节点数分批构造 forward
-                for chunk in pack_forward_items(
-                    processed_segs,
-                    content_of=lambda content: content,
-                    with_content=lambda _original, content: content,
-                ):
-                    yield UniMessage(UniHelper.construct_forward_message(chunk))
-            else:
-                yield UniMessage(processed_segs)
+        ]
 
-        # 汇总下载失败信息
-        if failed_count > 0:
-            message = f"{failed_count} 项媒体下载失败"
-            yield UniMessage(message)
-            logger.warning(message)
+    @staticmethod
+    def __need_forward(
+        ordered_segs: list[ForwardNodeInner | _ForwardText],
+        total_plain_len: int,
+        forward_video_segs: dict[int, ForwardNodeInner],
+        summary_node: UniMessage[Any] | None,
+    ) -> bool:
+        """判断是否需要合并转发
+
+        满足任一条件即合并：
+        - forward_components 含 content / cover（正文体进转发）
+        - 纯文字部分超过阈值
+        - 节点数较多
+        - 包含 forward_components 指定并入转发的视频
+        - 总结卡片指定为首节点
+        """
+        components = pconfig.send_components
+        forward = pconfig.forward_components.intersection(components)
+        body_in_forward = bool(forward & {SendComponent.CONTENT, SendComponent.COVER})
+        return (
+            body_in_forward
+            or total_plain_len > SPLIT_THRESHOLD
+            or len(ordered_segs) > 4
+            or bool(forward_video_segs)
+            or summary_node is not None
+        )
 
     async def __handle_immediate_media(
         self, cont: MediaContent
