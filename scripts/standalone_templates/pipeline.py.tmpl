@@ -7,7 +7,7 @@ from importlib import import_module
 from typing import Literal, Self, overload
 
 from .config import pconfig
-from .constants import MatchWithParams, PlatformEnum
+from .constants import MatchWithParams
 from .data import ParseResult
 from .exception import ParseException
 from .parsers.base import BaseParser
@@ -59,10 +59,6 @@ def _ensure_runtime_started() -> None:
             await warmup_themes()
         except Exception:
             logger.exception("预热缓存/主题/字体失败")
-        if PlatformEnum.MIYOUSHE not in pconfig.disabled_platforms:
-            from .parsers.miyoushe.sticker import update_sticker
-
-            await update_sticker()
 
     asyncio.get_running_loop().create_task(_warmup())
 
@@ -117,6 +113,7 @@ class Parser:
     def __init__(self, parser_types: Sequence[type[BaseParser]] | None = None):
         self._parser_types = tuple(parser_types) if parser_types is not None else None
         self._instances: dict[type[BaseParser], BaseParser] = {}
+        self._started: set[type[BaseParser]] = set()
 
     def _types(self) -> tuple[type[BaseParser], ...]:
         if self._parser_types is None:
@@ -143,10 +140,19 @@ class Parser:
                 return MatchResult(text, rule.keyword, searched, parser_type)
         raise ParseException("文本中没有可解析的内容")
 
-    def _instance(self, parser_type: type[BaseParser]) -> BaseParser:
-        if parser_type not in self._instances:
-            self._instances[parser_type] = parser_type()
-        return self._instances[parser_type]
+    async def _instance(self, parser_type: type[BaseParser]) -> BaseParser:
+        parser = self._instances.get(parser_type)
+        if parser is None:
+            parser = parser_type()
+            self._instances[parser_type] = parser
+        # 首次使用某解析器时执行一次其启动钩子，状态随实例保留
+        if parser_type not in self._started:
+            self._started.add(parser_type)
+            try:
+                await parser.on_startup()
+            except Exception:
+                logger.exception("解析器 %s 启动钩子执行失败", parser_type.__name__)
+        return parser
 
     @overload
     async def parse(
@@ -224,7 +230,7 @@ class Parser:
                 return matched
             result = _RESULT_CACHE.get(matched.cache_key)
             if result is None:
-                parser = self._instance(matched.parser_type)
+                parser = await self._instance(matched.parser_type)
                 result = await parser.parse(matched.keyword, matched.searched)
                 _RESULT_CACHE[matched.cache_key] = result
             else:
@@ -336,3 +342,4 @@ async def parse(
             theme_id=theme_id,
             image_format=image_format,
         )
+

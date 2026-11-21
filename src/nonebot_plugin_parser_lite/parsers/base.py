@@ -175,8 +175,17 @@ class BaseParser:
             headers=self.headers, timeout=self.timeout, follow_redirects=True
         )
 
+    async def on_startup(self) -> None:
+        """解析器启动钩子，默认不执行任何操作
+
+        需要在启动时执行预热/刷新逻辑的解析器可覆写本方法
+        """
+
     async def aclose(self) -> None:
-        """关闭底层 HTTP 客户端，释放连接等资源"""
+        """关闭底层 HTTP 客户端，释放连接等资源
+
+        需要释放额外资源的解析器可覆写本方法，并调用 ``await super().aclose()``
+        """
         await self.httpx.aclose()
 
     def __init_subclass__(cls, **kwargs):
