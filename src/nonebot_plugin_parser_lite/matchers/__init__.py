@@ -21,7 +21,6 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
-from ..constants import PlatformEnum
 from ..delivery import send_with_media_fallback
 from ..download import DOWNLOADER
 from ..helper import UniHelper
@@ -108,7 +107,7 @@ async def warmup_cache_index() -> None:
 
 
 @driver.on_startup
-def register_parser_matcher() -> None:
+async def register_parser_matcher() -> None:
     """在启动时注册各平台解析器及其匹配规则（惰性实例化）"""
     from ..parsers import load_enabled_parsers
 
@@ -133,10 +132,17 @@ def register_parser_matcher() -> None:
     matcher = on_keyword_regex(*patterns)
     matcher.append_handler(parser_handler)
 
-    if PlatformEnum.MIYOUSHE not in pconfig.disabled_platforms:
-        from ..parsers.miyoushe.sticker import update_sticker
 
-        driver.task_group.start_soon(update_sticker)
+@driver.on_startup
+async def _update_stickers():
+    from ..parsers.miyoushe import MiyousheParser
+
+    try:
+        mysp = get_parser_by_type(MiyousheParser)
+    except ValueError:
+        mysp = None
+    if mysp:
+        await mysp.update_sticker()
 
 
 @driver.on_shutdown
@@ -241,7 +247,6 @@ async def _parse_and_send(
 async def register_bili_matcher():
     from ..parsers.bilibili import BilibiliParser
 
-    bilip: BilibiliParser | None
     try:
         bilip = get_parser_by_type(BilibiliParser)
     except ValueError:
