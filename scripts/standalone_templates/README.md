@@ -83,8 +83,26 @@ async with Parser() as parser:
 
     Path(f"post.{rendered.image_format}").write_bytes(rendered.image)
 
-# 注：长期运行的应用可复用 Parser 实例，退出前调用 await parser.aclose()
+# 注：示例用 async with 便于演示，用完即关闭
 ```
+
+> [!TIP]
+>
+> 长期运行的应用**推荐持久复用同一个 `Parser` 实例**，而不是每次解析都新建后 `aclose()`
+>
+> 各解析器的启动钩子会在该实例首次用到对应平台时执行一次，其初始化状态随实例保留，供后续解析复用
+>
+> 重复新建实例会反复触发启动钩子并丢失这些状态
+>
+> ```python
+> parser = Parser()  # 应用启动时创建一次并长期持有
+> try:
+>     result = await parser.parse(text)
+>     # ... 后续复用同一个 parser ...
+> finally:
+>     await parser.aclose()        # 应用退出时关闭
+>     await shutdown_runtime()     # 关闭后台定时任务
+> ```
 
 `RenderResult.result` 保留传入的解析结果及其媒体
 仅需生成渲染数据，或已有渲染数据时，也可直接使用底层接口
@@ -147,3 +165,4 @@ configure(plite_max_comments=10, plite_disabled_platforms=["x"])
 ## 第三方许可
 
 本项目自身代码采用 [MIT](LICENSE)。第三方代码和资源保留各自许可，来源、许可例外及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+

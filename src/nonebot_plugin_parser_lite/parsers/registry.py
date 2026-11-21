@@ -33,6 +33,11 @@ class ParserRegistry:
             for parser_cls in self._enabled_classes
             for rule in parser_cls._key_patterns
         }
+        # 丢弃不再启用的已缓存实例，避免为已禁用平台返回旧实例
+        enabled = set(self._enabled_classes)
+        self._instances = {
+            cls: inst for cls, inst in self._instances.items() if cls in enabled
+        }
         self._loaded = True
         return self._enabled_classes
 
@@ -77,8 +82,9 @@ class ParserRegistry:
 
         仅在已启用（即已导入）的解析器中查找，禁用的平台不会被触碰
         """
+        enabled = self.enabled_classes
         for cls, inst in self._instances.items():
-            if cls.platform.name is platform:
+            if cls.platform.name is platform and cls in enabled:
                 return inst
 
         return next(
@@ -100,18 +106,25 @@ class ParserRegistry:
         启动钩子相互独立，单个解析器失败不影响其它解析器
         """
         for parser_cls in self.enabled_classes:
-            parser = self.instance(parser_cls)
             try:
+                parser = self.instance(parser_cls)
                 await parser.on_startup()
             except Exception:
-                logger.exception(f"解析器 {parser_cls.__name__} 启动钩子执行失败")
+                logger.exception(f"解析器 {parser_cls.__name__} 启动失败")
 
     async def aclose_all(self) -> None:
-        """并发关闭所有已实例化的解析器，释放其持有的资源"""
-        await asyncio.gather(
-            *(parser.aclose() for parser in self.instances),
+        """并发关闭所有已实例化的解析器，释放其持有的资源
+
+        单个解析器关闭失败不影响其它解析器，但会记录日志
+        """
+        parsers = self.instances
+        results = await asyncio.gather(
+            *(parser.aclose() for parser in parsers),
             return_exceptions=True,
         )
+        for parser, result in zip(parsers, results):
+            if isinstance(result, BaseException):
+                logger.error(f"解析器 {type(parser).__name__} 关闭失败: {result!r}")
 
     def reset(self) -> None:
         """清空注册表（主要供测试使用）"""
@@ -122,3 +135,4 @@ class ParserRegistry:
 
 
 REGISTRY = ParserRegistry()
+
