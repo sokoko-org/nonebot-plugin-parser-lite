@@ -21,7 +21,7 @@ from nonebot_plugin_alconna.uniseg.segment import Media
 from .config import gconfig, pconfig
 from .data import ParseResult
 from .helper import media_role
-from .render import (
+from .render.forward import (
     MAX_FORWARD_TEXT_LEN,
     SPLIT_THRESHOLD,
     pack_forward_items,
@@ -262,3 +262,4 @@ async def send_with_media_fallback(
                     logger.exception("合并转发文字降级发送失败，停止重试")
                     raise
         logger.warning("合并转发降级发送完成")
+

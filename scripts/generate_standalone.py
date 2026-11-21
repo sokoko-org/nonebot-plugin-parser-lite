@@ -307,7 +307,12 @@ def rewrite_bilibili_scheduler(root: Path) -> None:
 
 
 def remove_nonebot_runtime(root: Path) -> None:
-    targets = (root / PACKAGE / "delivery.py",)
+    targets = (
+        root / PACKAGE / "delivery.py",
+        root / PACKAGE / "render/message_render.py",
+        root / PACKAGE / "render/forward.py",
+        root / PACKAGE / "render/image_render.py",
+    )
     for target in targets:
         if not target.exists() and not target.is_symlink():
             continue
@@ -316,7 +321,7 @@ def remove_nonebot_runtime(root: Path) -> None:
         else:
             target.unlink()
         migration_log(
-            f"移除独立版 NoneBot 运行时: {target.relative_to(root).as_posix()}"
+            f"移除独立版不需要的消息投递模块: {target.relative_to(root).as_posix()}"
         )
 
 
