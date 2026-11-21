@@ -121,13 +121,7 @@ class Parser:
     def _types(self) -> tuple[type[BaseParser], ...]:
         if self._parser_types is None:
             parsers = import_module(".parsers", __package__)
-            parsers.load_all()
-            disabled = set(pconfig.disabled_platforms)
-            self._parser_types = tuple(
-                parser_type
-                for parser_type in BaseParser.get_all_subclass()
-                if parser_type.platform.name not in disabled
-            )
+            self._parser_types = parsers.load_all()
         return self._parser_types
 
     def match(self, text: str) -> MatchResult:
