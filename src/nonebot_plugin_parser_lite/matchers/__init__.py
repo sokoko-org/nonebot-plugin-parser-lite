@@ -2,7 +2,7 @@ import asyncio
 from contextlib import nullcontext
 from dataclasses import dataclass
 import re
-from typing import ClassVar, TypeVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from nonebot import get_driver, logger
 from nonebot.permission import SUPERUSER
@@ -21,10 +21,12 @@ from nonebot_plugin_uninfo import Uninfo
 from tarina import LRU
 
 from ..config import pconfig
+from ..constants import PlatformEnum
 from ..delivery import send_with_media_fallback
 from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
+from ..parsers.registry import REGISTRY
 from ..render import RENDERER
 from ..render.fonts import shutdown_emoji_fonts
 from ..render.image import warmup_themes
@@ -34,16 +36,9 @@ from .filter import _make_target_key
 from .limit import ParseCooldown, ParseState
 from .rule import Searched, SearchResult, _extract_text, on_keyword_regex
 
-# 关键词 / 类型 -> Parser 映射
-T = TypeVar("T", bound=BaseParser)
-# 已启用的解析器类（启动时确定，不含被禁用的平台）
-_ENABLED_PARSER_CLASSES: list[type[BaseParser]] = []
-# 解析器实例注册表：class -> instance（惰性创建）
-_PARSER_INSTANCES: dict[type[BaseParser], BaseParser] = {}
-# 关键字 -> 解析器类（由 _key_patterns 派生）
-_KEYWORD_CLASS_MAP: dict[str, type[BaseParser]] = {}
-# 已实例化的 parser（用于 on_shutdown 统一关闭 http 客户端）
-_ALL_PARSERS: list[BaseParser] = []
+if TYPE_CHECKING:
+    from ..parsers.bilibili import BilibiliParser
+
 # 缓存结果
 _RESULT_CACHE = LimitedSizeDict[str, ParseResult](max_size=50)
 _PARSE_TASKS: dict[str, asyncio.Task[ParseResult]] = {}
@@ -51,39 +46,9 @@ _BV_PATTERN = re.compile(r"BV[0-9A-Za-z]{10}")
 _URL_PATTERN = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 
 
-def _ensure_parser_instance(parser_cls: type[BaseParser]) -> BaseParser:
-    """按需实例化 parser，并缓存结果"""
-    parser = _PARSER_INSTANCES.get(parser_cls)
-    if parser is not None:
-        return parser
-
-    parser = parser_cls()
-    _PARSER_INSTANCES[parser_cls] = parser
-    _ALL_PARSERS.append(parser)
-    return parser
-
-
 def get_parser(keyword: str) -> BaseParser:
     """根据注册的关键字获取解析器实例（惰性加载）"""
-    parser_cls = _KEYWORD_CLASS_MAP.get(keyword)
-    if parser_cls is None:
-        raise KeyError(f"未找到关键字 {keyword!r} 对应的 parser")
-    return _ensure_parser_instance(parser_cls)
-
-
-def get_parser_by_type(parser_type: type[T]) -> T:
-    """根据解析器类型获取解析器实例（惰性加载）"""
-    # 已经有实例的情况下，直接从实例表中找
-    for cls, inst in _PARSER_INSTANCES.items():
-        if issubclass(cls, parser_type):
-            return inst  # type: ignore[return-value]
-
-    # 否则在启用的解析器类列表中找
-    for cls in _ENABLED_PARSER_CLASSES:
-        if issubclass(cls, parser_type):
-            return _ensure_parser_instance(cls)  # type: ignore[return-value]
-
-    raise ValueError(f"未找到类型为 {parser_type.__name__} 的 parser 实例")
+    return REGISTRY.get_parser(keyword)
 
 
 def clear_result_cache():
@@ -94,8 +59,9 @@ driver = get_driver()
 
 
 @driver.on_startup
-async def warmup_cache_index() -> None:
-    """启动时预热缓存索引与主题发现"""
+async def _on_startup() -> None:
+    """插件统一启动入口"""
+    # 预热缓存索引与主题/字体
     try:
         await CacheManager.warmup_all()
     except Exception as e:
@@ -105,53 +71,31 @@ async def warmup_cache_index() -> None:
     except Exception as e:
         logger.exception(f"预热主题/字体失败: {e!r}")
 
-
-@driver.on_startup
-async def register_parser_matcher() -> None:
-    """在启动时注册各平台解析器及其匹配规则（惰性实例化）"""
-    from ..parsers import load_enabled_parsers
-
-    global _ENABLED_PARSER_CLASSES, _KEYWORD_CLASS_MAP
-
-    _ENABLED_PARSER_CLASSES = load_enabled_parsers()
-
-    enabled_platforms: list[str] = []
-    keyword_class_map: dict[str, type[BaseParser]] = {}
-    for parser_cls in _ENABLED_PARSER_CLASSES:
-        enabled_platforms.append(parser_cls.platform.display_name)
-        for rule in parser_cls._key_patterns:
-            keyword_class_map[rule.keyword] = parser_cls
-
-    _KEYWORD_CLASS_MAP = keyword_class_map
-
-    logger.info(f"启用平台: {', '.join(sorted(enabled_platforms))}")
+    # 加载启用的解析器并注册统一匹配规则
+    REGISTRY.load()
+    logger.info(f"启用平台: {', '.join(sorted(REGISTRY.enabled_platforms))}")
 
     patterns = [
-        pattern for cls_ in _ENABLED_PARSER_CLASSES for pattern in cls_._key_patterns
+        pattern
+        for cls_ in REGISTRY.enabled_classes
+        for pattern in cls_._key_patterns
     ]
     matcher = on_keyword_regex(*patterns)
     matcher.append_handler(parser_handler)
 
+    # 注册平台专属的附加匹配器
+    register_extra_matchers()
 
-@driver.on_startup
-async def _update_stickers():
-    from ..parsers.miyoushe import MiyousheParser
-
-    try:
-        mysp = get_parser_by_type(MiyousheParser)
-    except ValueError:
-        mysp = None
-    if mysp:
-        await mysp.update_sticker()
+    # 逐个执行各解析器自身的启动钩子
+    await REGISTRY.run_startup()
 
 
 @driver.on_shutdown
-async def close_http_clients() -> None:
+async def _on_shutdown() -> None:
+    """插件统一关闭入口"""
     await shutdown_emoji_fonts()
-    await asyncio.gather(
-        *(parser.aclose() for parser in _ALL_PARSERS),
-        DOWNLOADER.aclose(),
-    )
+    await REGISTRY.aclose_all()
+    await DOWNLOADER.aclose()
 
 
 async def get_or_parse_result(sr: SearchResult) -> ParseResult:
@@ -188,7 +132,7 @@ async def parser_handler(
 ):
     """统一的解析处理器"""
     dedup_platforms = pconfig.parse_dedup_platforms
-    parser_cls = _KEYWORD_CLASS_MAP.get(sr.keyword)
+    parser_cls = REGISTRY.class_for_keyword(sr.keyword)
     dedup_enabled = dedup_platforms is None or (
         parser_cls is not None and parser_cls.platform.name in dedup_platforms
     )
@@ -243,14 +187,16 @@ async def _parse_and_send(
         state.result = result
 
 
-@driver.on_startup
-async def register_bili_matcher():
-    from ..parsers.bilibili import BilibiliParser
+def register_extra_matchers() -> None:
+    """注册平台专属的附加匹配器"""
+    _register_bilibili_matchers()
 
-    try:
-        bilip = get_parser_by_type(BilibiliParser)
-    except ValueError:
-        bilip = None
+
+def _register_bilibili_matchers() -> None:
+    bilip = cast(
+        "BilibiliParser | None",
+        REGISTRY.get_parser_by_platform(PlatformEnum.BILIBILI),
+    )
 
     if bilip is not None:
 

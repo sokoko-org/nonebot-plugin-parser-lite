@@ -7,7 +7,7 @@ from importlib import import_module
 from typing import Literal, Self, overload
 
 from .config import pconfig
-from .constants import MatchWithParams, PlatformEnum
+from .constants import MatchWithParams
 from .data import ParseResult
 from .exception import ParseException
 from .parsers.base import BaseParser
@@ -59,10 +59,16 @@ def _ensure_runtime_started() -> None:
             await warmup_themes()
         except Exception:
             logger.exception("预热缓存/主题/字体失败")
-        if PlatformEnum.MIYOUSHE not in pconfig.disabled_platforms:
-            from .parsers.miyoushe.sticker import update_sticker
-
-            await update_sticker()
+        # 逐个执行各解析器自身的启动钩子
+        parsers = import_module(".parsers", __package__)
+        for parser_type in parsers.load_all():
+            parser = parser_type()
+            try:
+                await parser.on_startup()
+            except Exception:
+                logger.exception("解析器 %s 启动钩子执行失败", parser_type.__name__)
+            finally:
+                await parser.aclose()
 
     asyncio.get_running_loop().create_task(_warmup())
 

@@ -13,6 +13,7 @@ from nonebot_plugin_parser_lite.matchers import limit
 from nonebot_plugin_parser_lite.matchers.rule import SearchResult
 from nonebot_plugin_parser_lite.parsers.bilibili import BilibiliParser
 from nonebot_plugin_parser_lite.parsers.ds import DsParser
+from nonebot_plugin_parser_lite.parsers.registry import REGISTRY
 from nonebot_plugin_parser_lite.parsers.taptap import TapTapParser
 
 
@@ -45,14 +46,15 @@ def pipeline(monkeypatch):
     monkeypatch.setattr(limit.ParseCooldown, "recent", OrderedDict())
     monkeypatch.setattr(limit.ParseCooldown, "active", {})
     monkeypatch.setattr(
-        matchers,
-        "_KEYWORD_CLASS_MAP",
+        REGISTRY,
+        "_keyword_class_map",
         {
             rule.keyword: parser
             for parser in (TapTapParser, DsParser, BilibiliParser)
             for rule in parser._key_patterns
         },
     )
+    monkeypatch.setattr(REGISTRY, "_loaded", True)
     monkeypatch.setattr(matchers, "get_or_parse_result", parsed)
     monkeypatch.setattr(matchers.RENDERER, "render_messages", rendered)
     monkeypatch.setattr(matchers.RENDERER, "send_content", content)
