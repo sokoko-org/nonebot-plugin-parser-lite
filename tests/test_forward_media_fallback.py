@@ -25,7 +25,7 @@ from render_test_support import (
     set_send_layout,
 )
 
-from nonebot_plugin_parser_lite import delivery, matchers, render
+from nonebot_plugin_parser_lite import delivery, matchers
 from nonebot_plugin_parser_lite.config import Config, gconfig
 from nonebot_plugin_parser_lite.delivery import (
     build_text_fallback,
@@ -33,6 +33,8 @@ from nonebot_plugin_parser_lite.delivery import (
     send_with_media_fallback,
 )
 from nonebot_plugin_parser_lite.helper import mark_media_role
+from nonebot_plugin_parser_lite.render import forward as forward_mod
+from nonebot_plugin_parser_lite.render import message_render
 
 
 class UploadFailed(ActionFailed):
@@ -199,7 +201,7 @@ async def test_parser_card_layout(
         plite_forward_components=forward_components,
     )
     monkeypatch.setattr(matchers, "pconfig", config)
-    monkeypatch.setattr(render, "pconfig", config)
+    monkeypatch.setattr(message_render, "pconfig", config)
 
     result = make_result()
     result.embed_url = "https://example.com/player"
@@ -554,7 +556,7 @@ async def test_non_media_error_in_video_fallback_stops(monkeypatch, error):
 
 @pytest.mark.asyncio
 async def test_split_video_fallback_does_not_resend_successful_packet(monkeypatch):
-    monkeypatch.setattr(render, "MAX_FORWARD_NODES", 2)
+    monkeypatch.setattr(forward_mod, "MAX_FORWARD_NODES", 2)
     message = forward(Video(raw=b"video"), Image(raw=b"cover"), "末尾正文")
     calls = []
 
@@ -595,9 +597,9 @@ async def test_third_media_error_is_terminal(monkeypatch):
     ["正文\n\n", "第一段。\n第二段内容", "第一段文字\n第二段文字", "字" * 100],
 )
 async def test_fallback_text_uses_normal_split_and_pack_rules(monkeypatch, text):
-    monkeypatch.setattr(render, "SPLIT_THRESHOLD", 10)
+    monkeypatch.setattr(message_render, "SPLIT_THRESHOLD", 10)
     monkeypatch.setattr(delivery, "SPLIT_THRESHOLD", 10)
-    monkeypatch.setattr(render, "MAX_FORWARD_NODES", 2)
+    monkeypatch.setattr(forward_mod, "MAX_FORWARD_NODES", 2)
     set_send_layout(monkeypatch)
     monkeypatch.setattr(
         UniHelper, "construct_forward_message", lambda contents: forward(*contents)[0]
@@ -658,7 +660,7 @@ def test_adjacent_media_placeholders_preserve_internal_separator():
 async def test_normal_and_video_fallback_respect_mixed_text_limits(
     monkeypatch, split_limit
 ):
-    monkeypatch.setattr(render, "SPLIT_THRESHOLD", split_limit)
+    monkeypatch.setattr(message_render, "SPLIT_THRESHOLD", split_limit)
     monkeypatch.setattr(delivery, "SPLIT_THRESHOLD", split_limit)
     monkeypatch.setattr(
         UniHelper, "construct_forward_message", lambda contents: forward(*contents)[0]
