@@ -17,7 +17,8 @@ class MiyousheParser(BaseParser):
         super().__init__()
         self.httpx.headers.update({"Referer": "https://www.miyoushe.com/"})
 
-    async def update_sticker(self):
+    async def on_startup(self) -> None:
+        """启动时刷新米游社表情包映射"""
         await update_sticker()
 
     # https://m.miyoushe.com/zzz/#/article/76178399
