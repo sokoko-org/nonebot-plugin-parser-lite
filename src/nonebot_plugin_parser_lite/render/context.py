@@ -38,8 +38,17 @@ from .constants import MUSIC_PLATFORMS, THEME_SCHEMA_VERSION
 PLACEHOLDER_IMAGE = (
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 )
-MAX_CONCURRENT_RESOURCES = 8
-"""渲染时同时获取的资源上限，避免图片很多的帖子一次打出大量请求"""
+MAX_CONCURRENT_RESOURCES = 24
+"""渲染时同时获取的资源上限，避免图片很多的帖子一次打出大量请求
+
+服务端固定 200ms RTT
+
+    并发数        4       8      12      16      24      32      48
+    30 张     1813ms   951ms   757ms   510ms   528ms   338ms   364ms
+    40 张     2283ms  1212ms  1005ms   857ms   588ms   573ms   383ms
+
+24 之后收益明显变平，而上限越高、单个帖子对目标站点越不友好，
+也越容易撞上对端限流，所以停在 24 作为吞吐与礼貌的折中"""
 # 每次渲染创建独立信号量，避免模块级对象绑定到旧事件循环
 _resource_limit: ContextVar[asyncio.Semaphore | None] = ContextVar(
     "parser_lite_resource_limit", default=None
@@ -269,12 +278,17 @@ async def _serialize_content(
             "source_url": _task_url(item),
         }
     if isinstance(item, VideoContent):
+        # 封面下载与体积 HEAD 打的是不同的 URL，并发拿可省一个往返
+        src, size = await asyncio.gather(
+            safe_src(item, "get_cover_path"),
+            _display_size(item),
+        )
         return {
             "type": "video",
-            "src": await safe_src(item, "get_cover_path"),
+            "src": src,
             "duration": item.display_duration,
             "speedup": _speedup_label(item),
-            "size": await _display_size(item),
+            "size": size,
             "source_url": _task_url(item),
         }
     if isinstance(item, AudioContent):
@@ -286,16 +300,19 @@ async def _serialize_content(
             "source_url": _task_url(item),
         }
     if isinstance(item, LinkContent):
+        # 站点图标与预览图互不依赖，并发获取
+        icon, preview = await asyncio.gather(
+            safe_src(item, "get_icon_path", return_none_on_fail=True),
+            safe_src(item, "get_preview_path", return_none_on_fail=True),
+        )
         return {
             "type": "link",
             "url": item.url,
             "title": item.title,
             "site_name": item.site_name,
             "description": item.description,
-            "icon": await safe_src(item, "get_icon_path", return_none_on_fail=True),
-            "preview": await safe_src(
-                item, "get_preview_path", return_none_on_fail=True
-            ),
+            "icon": icon,
+            "preview": preview,
         }
     if isinstance(item, QuoteContent):
         return {
@@ -307,6 +324,11 @@ async def _serialize_content(
         }
     if isinstance(item, PollContent):
         total = item.option_vote_total
+        # 列表推导里逐个 await 会把选项图片串成一条链，这里改成并发
+        option_images = await _gather_ordered(
+            safe_src(option, "get_image_path", return_none_on_fail=True)
+            for option in item.options
+        )
         return {
             "type": "poll",
             "title": item.title,
@@ -315,11 +337,9 @@ async def _serialize_content(
                     "text": option.text,
                     "votes": option.votes,
                     "percentage": item.option_percentage(option, total),
-                    "image": await safe_src(
-                        option, "get_image_path", return_none_on_fail=True
-                    ),
+                    "image": image,
                 }
-                for option in item.options
+                for option, image in zip(item.options, option_images, strict=True)
             ],
             "option_vote_total": total,
             "total_votes": item.total_votes,
@@ -346,11 +366,12 @@ def _image_dimensions(path: Path) -> dict[str, Any]:
 
 async def _image_data(item: MediaContent, method: str = "get_path") -> dict[str, Any]:
     try:
+        # 信号量只保护真正的网络获取；本地解码放到锁外，避免占着下载额度做 CPU 活
         async with _resource_limit.get() or contextlib.nullcontext():
             path = await getattr(item, method)()
-            dimensions: dict[str, Any] = {}
-            with contextlib.suppress(OSError):
-                dimensions = await asyncio.to_thread(_image_dimensions, path)
+        dimensions: dict[str, Any] = {}
+        with contextlib.suppress(OSError):
+            dimensions = await asyncio.to_thread(_image_dimensions, path)
         return {"src": await _path_to_uri(path), **dimensions}
     except Exception as e:
         logger.warning(f"读取图片数据失败: {type(item).__name__}: {e!r}")
