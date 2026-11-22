@@ -2,6 +2,7 @@
 
 import asyncio
 import base64
+import contextlib
 from dataclasses import dataclass
 import hashlib
 from io import BytesIO
@@ -21,6 +22,8 @@ from ..path import data_dir
 
 EmojiStyle = Literal["system", "twitter", "google"]
 FONT_DIR = data_dir / "fonts"
+LOCAL_FONT_TIMEOUT: Final = 0.7
+"""等待本地字体缓存落地的秒数，超时则认为需要联网下载"""
 MAX_METADATA_BYTES: Final = 1024 * 1024
 MAX_FONT_ARCHIVE_BYTES: Final = 64 * 1024 * 1024
 MAX_FONT_BYTES: Final = 32 * 1024 * 1024
@@ -60,6 +63,7 @@ class FontRelease:
 
 _FONTS: dict[str, EmojiFont | None] = {}
 _FONT_TASKS: dict[str, asyncio.Task[EmojiFont | None]] = {}
+_UPDATE_TASKS: dict[str, asyncio.Task[None]] = {}
 
 
 def _make_font(provider: str, data: bytes) -> EmojiFont:
@@ -167,25 +171,48 @@ async def _download_font(provider: str, release: FontRelease) -> bytes:
     raise ValueError("; ".join(errors))
 
 
+async def _fetch_font(provider: str, cached_version: str | None) -> EmojiFont | None:
+    """联网检查版本并在有更新时下载，返回新字体；无更新或失败返回 None"""
+    release = await _latest_release(provider)
+    if cached_version is not None and cached_version == release.version:
+        return None
+    data = await _download_font(provider, release)
+    font = _make_font(provider, data)
+    await _save_font(provider, release.version, data, font.digest)
+    logger.info(f"已更新 {provider} emoji 字体: {release.version}")
+    return font
+
+
+async def _update_font(provider: str, cached_version: str | None) -> None:
+    """后台更新字体缓存；结果留给下次渲染使用，不阻塞当前渲染"""
+    try:
+        font = await _fetch_font(provider, cached_version)
+    except (DownloadException, OSError, ValueError, KeyError, tarfile.TarError) as exc:
+        logger.warning(f"检查或更新 {provider} emoji 字体失败，沿用本地字体: {exc}")
+        return
+    if font is not None:
+        # 已有渲染正在使用旧字体对象，替换缓存即可，不影响进行中的渲染
+        _FONTS[provider] = font
+
+
 async def _prepare_font(provider: str) -> EmojiFont | None:
+    """准备字体：本地缓存可用时立即返回，版本检查放到后台进行"""
     cached = None
     try:
         cached = await _load_cached_font(provider)
     except (OSError, ValueError, KeyError) as exc:
         logger.warning(f"读取 {provider} emoji 字体缓存失败，将重新下载: {exc}")
+
+    if cached is not None:
+        # 本地字体已经可用，不必为了版本检查而等待网络
+        _UPDATE_TASKS[provider] = asyncio.create_task(
+            _update_font(provider, cached[1])
+        )
+        return cached[0]
+
     try:
-        release = await _latest_release(provider)
-        if cached is not None and cached[1] == release.version:
-            return cached[0]
-        data = await _download_font(provider, release)
-        font = _make_font(provider, data)
-        await _save_font(provider, release.version, data, font.digest)
-        logger.info(f"已更新 {provider} emoji 字体: {release.version}")
-        return font
+        return await _fetch_font(provider, None)
     except (DownloadException, OSError, ValueError, KeyError, tarfile.TarError) as exc:
-        if cached is not None:
-            logger.warning(f"检查或更新 {provider} emoji 字体失败，沿用本地字体: {exc}")
-            return cached[0]
         logger.warning(
             f"无法准备 {provider} emoji 字体，请检查 npm 或镜像站连接: {exc}"
         )
@@ -200,20 +227,32 @@ def warmup_emoji_font(style: EmojiStyle) -> None:
 
 
 async def shutdown_emoji_fonts() -> None:
-    """关闭下载器前停止仍在运行的字体准备任务"""
-    tasks = tuple(_FONT_TASKS.values())
+    """关闭下载器前停止仍在运行的字体准备与后台更新任务"""
+    tasks = (*_FONT_TASKS.values(), *_UPDATE_TASKS.values())
     for task in tasks:
         task.cancel()
     await asyncio.gather(*tasks, return_exceptions=True)
     _FONT_TASKS.clear()
+    _UPDATE_TASKS.clear()
 
 
 async def ensure_emoji_font(style: EmojiStyle) -> EmojiFont | None:
-    """每次启动检查一次版本；并发预热和渲染共享同一任务及结果"""
+    """每次启动检查一次版本；并发预热和渲染共享同一任务及结果
+
+    ``system`` 样式下字体只是系统 emoji 之外的兜底，首次下载未完成时直接
+    使用系统字族渲染，不让首张图片等待网络
+    """
     provider = "twitter" if style == "system" else style
     if provider not in _FONTS:
         warmup_emoji_font(style)
         task = _FONT_TASKS[provider]
+        if style == "system" and not task.done():
+            # 读取本地缓存只需几毫秒，给准备任务一个落地的机会；
+            # 真正要联网下载时则直接放行，用系统字族渲染这一张图
+            with contextlib.suppress(TimeoutError):
+                await asyncio.wait_for(asyncio.shield(task), LOCAL_FONT_TIMEOUT)
+            if not task.done():
+                return None
         try:
             _FONTS[provider] = await asyncio.shield(task)
         finally:

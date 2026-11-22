@@ -8,7 +8,7 @@ from typing import Any, Literal
 from curl_cffi import AsyncSession
 from curl_cffi import Response as CurlResponse
 from curl_cffi.requests.exceptions import RequestException
-from httpx import AsyncClient, DecodingError, Timeout, TransportError, codes
+from httpx import AsyncClient, DecodingError, Limits, Timeout, TransportError, codes
 from httpx import Response as HttpxResponse
 
 from ..exception import ParseException
@@ -144,9 +144,22 @@ class UniResponse:
             raise RetryableDownloadError(e.__repr__()) from e
 
 
+HTTPX_LIMITS = Limits(
+    max_connections=64,
+    max_keepalive_connections=32,
+    keepalive_expiry=30.0,
+)
+"""渲染多图帖子时会并发打出几十个小请求，给连接池留出余量并延长连接复用时间"""
+
+
 class UniHttpClient:
     def __init__(self, timeout: Timeout):
-        self._httpx = AsyncClient(timeout=timeout, verify=False, follow_redirects=True)
+        self._httpx = AsyncClient(
+            timeout=timeout,
+            verify=False,
+            follow_redirects=True,
+            limits=HTTPX_LIMITS,
+        )
         self._curl = AsyncSession(
             impersonate="chrome146",
             timeout=float(max(timeout.connect or 15, timeout.read or 240)),
