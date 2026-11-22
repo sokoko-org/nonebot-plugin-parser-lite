@@ -87,7 +87,7 @@ class MiguParser(BaseParser):
 
     async def _parse(self, contentId: str):
         resp = await self.httpx.get(
-            "https://parse-api.sokoko.org/api/qq/song",
+            "https://parse-api.sokoko.org/api/migu/song",
             params={"ctid": contentId, "quality": "320k"},
         )
         data = resp.json()
