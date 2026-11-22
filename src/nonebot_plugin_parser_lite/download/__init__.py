@@ -2,6 +2,7 @@ import asyncio
 from collections.abc import Callable, Collection, Generator, Sequence
 import contextlib
 from functools import partial
+import os
 import re
 from urllib.parse import urlsplit
 
@@ -181,7 +182,7 @@ class StreamDownloader:
         async def __download_task() -> Path:
             if entry := CacheManager.get_cached_entry(base_path):
                 return entry.path
-            result = await self.__download_with_retry(
+            result, size_bytes = await self.__download_with_retry(
                 download_urls=download_urls,
                 base_path=base_path,
                 partial_path=partial_path,
@@ -191,7 +192,10 @@ class StreamDownloader:
                 retry_http_statuses=frozenset(retry_http_statuses),
                 use_curl_cffi=use_curl_cffi,
             )
-            await CacheManager.set_cached_file(base_path, result)
+            # 大小在下载校验时已经 stat 过，直接复用，省掉一次线程池往返
+            await CacheManager.set_cached_file(
+                base_path, result, size_bytes=size_bytes
+            )
             return result
 
         download_task = asyncio.create_task(__download_task())
@@ -216,13 +220,13 @@ class StreamDownloader:
         desc: str,
         retry_http_statuses: frozenset[int],
         use_curl_cffi: bool = False,
-    ) -> Path:
+    ) -> tuple[Path, int]:
         last_error: Exception | None = None
 
         for retry in range(self.MAX_RETRIES + 1):
             current_url = download_urls[retry % len(download_urls)]
             try:
-                await self.__download_once(
+                final_size = await self.__download_once(
                     url=current_url,
                     file_path=partial_path,
                     headers=headers,
@@ -235,11 +239,11 @@ class StreamDownloader:
                     fallback_suffix = f".{default_suffix.lstrip('.')}"
                 suffix = await _detect_file_suffix(partial_path, fallback_suffix)
                 file_path = base_path.with_suffix(suffix)
-                if await file_path.exists():
-                    await safe_unlink(partial_path)
-                    return file_path
-                await partial_path.rename(file_path)
-                return file_path
+                # exists() + rename() 同样是两次线程池往返，合并成一次
+                await asyncio.to_thread(
+                    self._sync_finalize, str(partial_path), str(file_path)
+                )
+                return file_path, final_size
             except (SizeLimitException, ZeroSizeException):
                 await safe_unlink(partial_path)
                 raise
@@ -376,12 +380,12 @@ class StreamDownloader:
         self,
         file_path: Path,
         total_size: int | None,
-    ) -> None:
+    ) -> int:
         final_size = (await file_path.stat()).st_size
         if final_size == 0:
             raise ZeroSizeException
         if total_size is None or final_size == total_size:
-            return
+            return final_size
 
         size_diff = abs(final_size - total_size)
         if size_diff > self._SIZE_MISMATCH_TOLERANCE_BYTES:
@@ -391,10 +395,30 @@ class StreamDownloader:
                 f"{self._SIZE_MISMATCH_TOLERANCE_BYTES} bytes)",
                 keep_part=final_size < total_size,
             )
+        return final_size
 
     @staticmethod
-    async def __get_partial_size(file_path: Path) -> int:
-        return (await file_path.stat()).st_size if await file_path.exists() else 0
+    def _sync_finalize(partial: str, final: str) -> None:
+        """落位产物：目标已存在说明别处已下好，丢掉 .part 即可"""
+        if os.path.exists(final):
+            with contextlib.suppress(OSError):
+                os.unlink(partial)
+            return
+        os.replace(partial, final)
+
+    @staticmethod
+    def _sync_partial_size(path: str) -> int:
+        """断点文件通常不存在，用一次 os.stat 同时回答存在性和大小"""
+        try:
+            return os.stat(path).st_size
+        except OSError:
+            return 0
+
+    @classmethod
+    async def __get_partial_size(cls, file_path: Path) -> int:
+        # 原实现是 exists() + stat() 两次线程池往返；并发下载时这些小调用
+        # 会把共享线程池排满，反过来拖住事件循环派发新请求
+        return await asyncio.to_thread(cls._sync_partial_size, str(file_path))
 
     def __prepare_response(
         self,
@@ -417,7 +441,7 @@ class StreamDownloader:
         downloaded: int,
         retry_http_statuses: Collection[int],
         use_curl_cffi: bool,
-    ) -> None:
+    ) -> int:
         request_headers = self.__make_range_headers(headers, downloaded)
         async with self.client.stream(
             "GET", url, headers=request_headers, use_curl_cffi=use_curl_cffi
@@ -428,7 +452,7 @@ class StreamDownloader:
             await self.__write_response(
                 response, file_path, desc, downloaded, total_size, url
             )
-            await self.__validate_downloaded_size(file_path, total_size)
+            return await self.__validate_downloaded_size(file_path, total_size)
 
     async def __download_once(
         self,
@@ -438,9 +462,9 @@ class StreamDownloader:
         desc: str,
         retry_http_statuses: Collection[int],
         use_curl_cffi: bool,
-    ):
+    ) -> int:
         downloaded = await self.__get_partial_size(file_path)
-        await self.__download_response(
+        return await self.__download_response(
             url,
             file_path,
             headers,
