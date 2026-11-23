@@ -28,6 +28,7 @@ _PARSERS = {
     "QQMusicParser": ".qqmusic",
     "QSMusicParser": ".qsmusic",
     "RedNoteParser": ".rednote",
+    "SkylandParser": ".skyland",
     "TapTapParser": ".taptap",
     "TiebaParser": ".tieba",
     "WMPVPParser": ".wmpvp",
