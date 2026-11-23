@@ -90,7 +90,7 @@ class Image(Struct):
     def url(self) -> str:
         """图片无水印直链"""
         return (
-            f"https://ci.xiaohongshu.com/{self.fileId}?imageView2/2/w/1080/format/jpg"
+            f"https://ci.xiaohongshu.com/{self.fileId}?imageView2/2/w/2160/format/jpg"
         )
 
 
