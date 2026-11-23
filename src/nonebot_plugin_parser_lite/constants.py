@@ -64,6 +64,7 @@ class PlatformEnum(StrEnum):
     DS = "ds"
     QQMUSIC = "qqmusic"
     MIGU = "migu"
+    SKYLAND = "skyland"
 
     def __str__(self) -> str:
         return self.value
