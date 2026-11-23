@@ -29,7 +29,7 @@ DOWNLOAD_TIMEOUT: Final[Timeout] = Timeout(
     connect=15.0, read=240.0, write=10.0, pool=10.0
 )
 
-STICKER_CDN: Final[str] = "https://sticker.sokoko.org/assets/{platform}/{name}.webp"
+STICKER_CDN: Final[str] = "https://sticker.sokoko.org/assets/{platform}/{name}"
 
 
 class PlatformEnum(StrEnum):

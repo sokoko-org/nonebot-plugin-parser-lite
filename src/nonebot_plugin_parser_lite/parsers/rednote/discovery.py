@@ -10,7 +10,7 @@ from ...data import ContentItem
 from ...download import DOWNLOADER
 from ...utils.format import replace_placeholder_to_sticker
 
-REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+[a-zA-Z])\]")
+REDNOTE_PATTERN = re.compile(r"\[(?P<name>[^]]+)\]")
 REDNOTE_RETRYABLE_HTTP_STATUSES = frozenset({422, 424})
 
 
