@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import re
+
 from msgspec import Struct
 from msgspec.json import Decoder
 
 from ...creator import Creator
 from ...data import Author, Comment, ContentItem, Stats
-from ...utils.format import format_num
-from .sticker import replace_sticker
+from ...utils.format import format_num, replace_placeholder_to_sticker
+
+MYS_PATTERN = re.compile(r"_\((?P<name>.+?)\)")
 
 
 class UserInfo(Struct):
@@ -53,7 +56,9 @@ class Reply(Struct):
         author = self.author
         return Creator.comment(
             author=author,
-            content=replace_sticker(self.content),
+            content=replace_placeholder_to_sticker(
+                self.content, MYS_PATTERN, "miyoushe", lambda _: "medium"
+            ),
             timestamp=self.created_at,
             stats=self.stats,
             replies=[reply.to_comment(author) for reply in self.sub_replies],
