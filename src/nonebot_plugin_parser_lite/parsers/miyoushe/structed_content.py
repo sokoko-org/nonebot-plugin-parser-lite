@@ -1,3 +1,4 @@
+import re
 from urllib.parse import parse_qs, urlparse
 
 from msgspec import Struct
@@ -5,7 +6,9 @@ from msgspec.json import Decoder
 
 from ...creator import Creator
 from ...data import ContentItem
-from .sticker import replace_sticker
+from ...utils.format import replace_placeholder_to_sticker
+
+MYS_PATTERN = re.compile(r"_\((.+?)\)")
 
 
 class Resolution(Struct):
@@ -66,7 +69,11 @@ def build_body(s: str):
     for item in data:
         ins = item.insert
         if isinstance(ins, str):
-            content.extend(replace_sticker(ins))
+            content.extend(
+                replace_placeholder_to_sticker(
+                    ins, MYS_PATTERN, "miyoushe", lambda _: "medium"
+                )
+            )
         elif v := ins.vod:
             content.append(
                 Creator.video(
