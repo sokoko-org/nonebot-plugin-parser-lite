@@ -9,7 +9,7 @@ from ...creator import Creator
 from ...data import Author, Comment, ContentItem, Stats
 from ...utils.format import format_num, replace_placeholder_to_sticker
 
-MYS_PATTERN = re.compile(r"_\((.+?)\)")
+MYS_PATTERN = re.compile(r"_\((?P<name>.+?)\)")
 
 
 class UserInfo(Struct):

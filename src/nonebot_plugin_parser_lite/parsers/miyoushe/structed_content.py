@@ -8,7 +8,7 @@ from ...creator import Creator
 from ...data import ContentItem
 from ...utils.format import replace_placeholder_to_sticker
 
-MYS_PATTERN = re.compile(r"_\((.+?)\)")
+MYS_PATTERN = re.compile(r"_\((?P<name>.+?)\)")
 
 
 class Resolution(Struct):
