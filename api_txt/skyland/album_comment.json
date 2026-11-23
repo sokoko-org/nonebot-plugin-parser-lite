@@ -1,0 +1,1307 @@
+{
+ "code": 0,
+ "message": "OK",
+ "timestamp": "1795435412",
+ "data": {
+  "list": [
+   {
+    "meta": {
+     "comment": {
+      "id": "22676308",
+      "userId": "2977798171702",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"},{\"contentId\":\"1\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "没有吧，是你太忧郁了"
+       },
+       {
+        "id": "1",
+        "c": "[​灵魂拷问​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [
+       {
+        "id": "6b03d98023e912aea71fde26",
+        "url": "https://bbs.hycdn.cn/image/common/20261123/3369646/6b03d98023e912aea71fde26_0095c241.webp",
+        "width": 1024,
+        "height": 910,
+        "size": 73338,
+        "format": "webp",
+        "kind": 1,
+        "displayInfos": [
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/3369646/6b03d98023e912aea71fde26_0095c241.webp",
+          "width": 1024,
+          "height": 910,
+          "size": 73338,
+          "format": "",
+          "kind": 1,
+          "style": "origin"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/3369646/6b03d98023e912aea71fde26_0095c241.webp?x-oss-process=style/halfScreen",
+          "width": 655,
+          "height": 582,
+          "size": 73338,
+          "format": "",
+          "kind": 1,
+          "style": "halfScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/3369646/6b03d98023e912aea71fde26_0095c241.webp?x-oss-process=style/fullScreen",
+          "width": 1404,
+          "height": 1247,
+          "size": 73338,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/3369646/6b03d98023e912aea71fde26_0095c241.webp?x-oss-process=style/thirdScreen",
+          "width": 436,
+          "height": 387,
+          "size": 73338,
+          "format": "",
+          "kind": 1,
+          "style": "thirdScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/3369646/6b03d98023e912aea71fde26_0095c241.webp?x-oss-process=style/fullScreenLandscape",
+          "width": 775,
+          "height": 689,
+          "size": 73338,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreenLandscape"
+         }
+        ],
+        "description": "",
+        "isAIGC": false
+       }
+      ],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795414403,
+      "updatedAtTs": 1795414527,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "2977798171702",
+      "nickname": "白司辛",
+      "profile": "yj人，灵感来了会做点创作，有事可以私信，认为事情都大能够通过协商解决，不删有人看的帖",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/f2a26b94217ff470c4e05371e3c76e32.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "pendant": {
+       "id": 55,
+       "iconUrl": "https://bbs.hycdn.cn/image/2025/10/31/8ceb25d89427e94e02ed509fcdb19ead.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 7,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv7.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 23555,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv7.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "3",
+      "commented": "1"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22663173",
+      "userId": "6021230538951",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[],\"version\":0}",
+      "textSlice": [],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [
+       {
+        "id": "6b01ea5f0ef99d435cdba4c3",
+        "url": "https://bbs.hycdn.cn/image/common/20261122/1235251/6b01ea5f0ef99d435cdba4c3_0627b845.webp",
+        "width": 1220,
+        "height": 1300,
+        "size": 14006,
+        "format": "webp",
+        "kind": 1,
+        "displayInfos": [
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261122/1235251/6b01ea5f0ef99d435cdba4c3_0627b845.webp",
+          "width": 1220,
+          "height": 1300,
+          "size": 14006,
+          "format": "",
+          "kind": 1,
+          "style": "origin"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261122/1235251/6b01ea5f0ef99d435cdba4c3_0627b845.webp?x-oss-process=style/halfScreen",
+          "width": 655,
+          "height": 697,
+          "size": 14006,
+          "format": "",
+          "kind": 1,
+          "style": "halfScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261122/1235251/6b01ea5f0ef99d435cdba4c3_0627b845.webp?x-oss-process=style/fullScreen",
+          "width": 1404,
+          "height": 1496,
+          "size": 14006,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261122/1235251/6b01ea5f0ef99d435cdba4c3_0627b845.webp?x-oss-process=style/thirdScreen",
+          "width": 436,
+          "height": 464,
+          "size": 14006,
+          "format": "",
+          "kind": 1,
+          "style": "thirdScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261122/1235251/6b01ea5f0ef99d435cdba4c3_0627b845.webp?x-oss-process=style/fullScreenLandscape",
+          "width": 646,
+          "height": 689,
+          "size": 14006,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreenLandscape"
+         }
+        ],
+        "description": "",
+        "isAIGC": false
+       }
+      ],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795287651,
+      "updatedAtTs": 1795288526,
+      "firstIpLocation": "中国",
+      "caption": []
+     },
+     "user": {
+      "id": "6021230538951",
+      "nickname": "黑之棋",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar_award/ash.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "山西",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 5,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv5.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 13,
+        "score": 9462,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv5.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "14",
+      "commented": "2"
+     },
+     "relatedItemState": {
+      "first": true,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22678342",
+      "userId": "7085432120639",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "没有吧，你太不屈了"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795435173,
+      "updatedAtTs": 1795435176,
+      "firstIpLocation": "河南",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "7085432120639",
+      "nickname": "AURORA落水",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/9a555866d599f2bf0c74442225cd320f.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "河南",
+      "isModerator": false,
+      "pendant": {
+       "id": 106,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/07/16/adf1230b136d9c0aad996e64f1b51296.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 1,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 6,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22672729",
+      "userId": "3225531946032",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"id\":\"paopaotuantuan-3__paopaotuantuan3_2\",\"type\":\"emoji\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [
+       {
+        "id": "6b035d6d14e90376c8c21a5e",
+        "url": "https://bbs.hycdn.cn/image/common/20261123/981272/6b035d6d14e90376c8c21a5e_0627b845.webp",
+        "width": 1440,
+        "height": 1920,
+        "size": 112946,
+        "format": "webp",
+        "kind": 1,
+        "displayInfos": [
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/981272/6b035d6d14e90376c8c21a5e_0627b845.webp",
+          "width": 1440,
+          "height": 1920,
+          "size": 112946,
+          "format": "",
+          "kind": 1,
+          "style": "origin"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/981272/6b035d6d14e90376c8c21a5e_0627b845.webp?x-oss-process=style/halfScreen",
+          "width": 653,
+          "height": 871,
+          "size": 112946,
+          "format": "",
+          "kind": 1,
+          "style": "halfScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/981272/6b035d6d14e90376c8c21a5e_0627b845.webp?x-oss-process=style/fullScreen",
+          "width": 1404,
+          "height": 1872,
+          "size": 112946,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/981272/6b035d6d14e90376c8c21a5e_0627b845.webp?x-oss-process=style/thirdScreen",
+          "width": 435,
+          "height": 580,
+          "size": 112946,
+          "format": "",
+          "kind": 1,
+          "style": "thirdScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/981272/6b035d6d14e90376c8c21a5e_0627b845.webp?x-oss-process=style/fullScreenLandscape",
+          "width": 516,
+          "height": 689,
+          "size": 112946,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreenLandscape"
+         }
+        ],
+        "description": "",
+        "isAIGC": false
+       }
+      ],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795382650,
+      "updatedAtTs": 1795382732,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "emoji",
+        "id": "paopaotuantuan-3__paopaotuantuan3_2"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "3225531946032",
+      "nickname": "我系MH",
+      "profile": "微茫灯火，洇染折起诗笺之上；诗中一笔，化龙流连空砚一方",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/48fe52ba5e6199de907e3cce18509887.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 1,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 21,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "6",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22663628",
+      "userId": "4192713680825",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "yj就是yj喽"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795300262,
+      "updatedAtTs": 1795300265,
+      "firstIpLocation": "浙江",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "4192713680825",
+      "nickname": "刀客塔起司",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/image/2026/10/09/e0279559518329ff8c76824abc79f606.png",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "浙江",
+      "isModerator": false,
+      "pendant": {
+       "id": 118,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/09/23/0a2de68920b52007d4dd799c0bbc5358.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 1,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 26,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "8",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22671162",
+      "userId": "2292904008425",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"},{\"contentId\":\"1\",\"type\":\"text\"},{\"contentId\":\"1\",\"type\":\"text\"},{\"contentId\":\"1\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "？这真不是隔壁米家老总吗"
+       },
+       {
+        "id": "1",
+        "c": "[​流汗​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795362650,
+      "updatedAtTs": 1795362651,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "2292904008425",
+      "nickname": "领域展开出率大于一倍翻倍",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/image/2026/04/02/cd2730fc2ef4aa3c5ea7282734405a3a.png",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "pendant": {
+       "id": 42,
+       "iconUrl": "https://bbs.hycdn.cn/image/2025/08/01/88eab299489c17cd887a1d80e3054ecb.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 1,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 38,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "8"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": [
+     {
+      "comment": {
+       "id": "22672736",
+       "userId": "5697037567561",
+       "level": 2,
+       "itemId": "6503530",
+       "itemUserId": "5697037567561",
+       "parentId": "22671162",
+       "parentUserId": "2292904008425",
+       "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+       "textSlice": [
+        {
+         "id": "0",
+         "c": "？"
+        }
+       ],
+       "linkSlice": [],
+       "atSlice": [],
+       "imageListSlice": [],
+       "status": 1,
+       "operationStatus": 70,
+       "auditStatus": 2,
+       "sortWeight": 50,
+       "createdAtTs": 1795383109,
+       "updatedAtTs": 1795383111,
+       "firstIpLocation": "内蒙古",
+       "caption": [
+        {
+         "type": "text",
+         "id": "0"
+        },
+        {
+         "type": "newline",
+         "id": ""
+        }
+       ]
+      },
+      "user": {
+       "id": "5697037567561",
+       "nickname": "一大个面包",
+       "profile": "穷不改非，氪不改命。yj对我好点",
+       "avatar": "https://bbs.hycdn.cn/asset/avatar/41960ab5c9ef76ea49bd7ce9306fbb5d.webp",
+       "isCreator": false,
+       "identity": 1,
+       "latestIpLocation": "中国",
+       "isModerator": false,
+       "pendant": {
+        "id": 82,
+        "iconUrl": "https://bbs.hycdn.cn/image/2026/04/17/70118c82e54a8b3f241598626cb42dfb.webp",
+        "title": "",
+        "description": ""
+       },
+       "status": 1,
+       "operationStatus": 30,
+       "createdAtTs": "0",
+       "scoreInfoList": [
+        {
+         "gameId": 101,
+         "level": 6,
+         "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv6.webp",
+         "darkModeIconUrl": "",
+         "checkedDays": 0,
+         "score": 13011,
+         "gameName": "开拓芯",
+         "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv6.webp"
+        }
+       ]
+      },
+      "commentRts": {
+       "liked": "3",
+       "commented": "0"
+      },
+      "state": {
+       "like": false,
+       "collect": false
+      }
+     },
+     {
+      "comment": {
+       "id": "22672572",
+       "userId": "7368959211576",
+       "level": 2,
+       "itemId": "6503530",
+       "itemUserId": "5697037567561",
+       "parentId": "22671162",
+       "parentUserId": "2292904008425",
+       "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+       "textSlice": [
+        {
+         "id": "0",
+         "c": "他和米有什么关系吗"
+        }
+       ],
+       "linkSlice": [],
+       "atSlice": [],
+       "imageListSlice": [],
+       "status": 1,
+       "operationStatus": 70,
+       "auditStatus": 2,
+       "sortWeight": 50,
+       "createdAtTs": 1795376409,
+       "updatedAtTs": 1795376412,
+       "firstIpLocation": "黑龙江",
+       "caption": [
+        {
+         "type": "text",
+         "id": "0"
+        },
+        {
+         "type": "newline",
+         "id": ""
+        }
+       ]
+      },
+      "user": {
+       "id": "7368959211576",
+       "nickname": "生之灵梦",
+       "profile": "",
+       "avatar": "https://bbs.hycdn.cn/asset/avatar/e57cb36b58f60dffeb13edb48bb8cb85.webp",
+       "isCreator": false,
+       "identity": 1,
+       "latestIpLocation": "黑龙江",
+       "isModerator": false,
+       "pendant": {
+        "id": 32,
+        "iconUrl": "https://bbs.hycdn.cn/image/2025/05/12/4a078c1ee0a4dab709bddd607be4e80e.webp",
+        "title": "",
+        "description": ""
+       },
+       "status": 1,
+       "operationStatus": 30,
+       "createdAtTs": "0",
+       "scoreInfoList": [
+        {
+         "gameId": 101,
+         "level": 1,
+         "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+         "darkModeIconUrl": "",
+         "checkedDays": 0,
+         "score": 57,
+         "gameName": "开拓芯",
+         "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+        }
+       ]
+      },
+      "commentRts": {
+       "liked": "5",
+       "commented": "0"
+      },
+      "state": {
+       "like": false,
+       "collect": false
+      }
+     }
+    ]
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22666218",
+      "userId": "3753295985486",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"2\",\"type\":\"text\"},{\"contentId\":\"0\",\"type\":\"text\"},{\"contentId\":\"1\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "！？（bushi）"
+       },
+       {
+        "id": "1",
+        "c": "[​比心​]"
+       },
+       {
+        "id": "2",
+        "c": "ちんちん"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795320029,
+      "updatedAtTs": 1795320030,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "2"
+       },
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "3753295985486",
+      "nickname": "焚风科洛尼亚侧翼",
+      "profile": "We are unshakable！",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/e4f1e9b47d01daa91a7b00b50f474699.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "上海",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 2,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv2.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 438,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv2.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "1",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22668580",
+      "userId": "7983107886157",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "这谁啊？？"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795340895,
+      "updatedAtTs": 1795340896,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "7983107886157",
+      "nickname": "哈姆雷斯",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/04fd45d25fde55799b8e3df64ead6c29.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 1,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 14,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "1",
+      "commented": "2"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": [
+     {
+      "comment": {
+       "id": "22669441",
+       "userId": "6510429884237",
+       "level": 2,
+       "itemId": "6503530",
+       "itemUserId": "5697037567561",
+       "parentId": "22668580",
+       "parentUserId": "7983107886157",
+       "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+       "textSlice": [
+        {
+         "id": "0",
+         "c": "金智勋"
+        }
+       ],
+       "linkSlice": [],
+       "atSlice": [],
+       "imageListSlice": [],
+       "status": 1,
+       "operationStatus": 70,
+       "auditStatus": 2,
+       "sortWeight": 50,
+       "createdAtTs": 1795348557,
+       "updatedAtTs": 1795348559,
+       "firstIpLocation": "中国",
+       "caption": [
+        {
+         "type": "text",
+         "id": "0"
+        },
+        {
+         "type": "newline",
+         "id": ""
+        }
+       ]
+      },
+      "user": {
+       "id": "6510429884237",
+       "nickname": "请你讲一个幸福的故事吧",
+       "profile": "",
+       "avatar": "https://bbs.hycdn.cn/asset/avatar/f68eceae265e0f0f12cc62021cf82ec2.webp",
+       "isCreator": false,
+       "identity": 1,
+       "latestIpLocation": "中国",
+       "isModerator": false,
+       "status": 1,
+       "operationStatus": 30,
+       "createdAtTs": "0",
+       "scoreInfoList": [
+        {
+         "gameId": 101,
+         "level": 1,
+         "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+         "darkModeIconUrl": "",
+         "checkedDays": 0,
+         "score": 11,
+         "gameName": "开拓芯",
+         "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+        }
+       ]
+      },
+      "commentRts": {
+       "liked": "2",
+       "commented": "0"
+      },
+      "state": {
+       "like": false,
+       "collect": false
+      }
+     }
+    ]
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22674545",
+      "userId": "5956057726630",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"}],\"type\":\"paragraph\"},{\"alignment\":1,\"contents\":[{\"contentId\":\"2\",\"foregroundColor\":\"#222222\",\"type\":\"text\"},{\"contentId\":\"1\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "2",
+        "c": "正中靶心啊！"
+       },
+       {
+        "id": "0",
+        "c": "哈哈，伊利哇啦"
+       },
+       {
+        "id": "1",
+        "c": "[​比心​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795400517,
+      "updatedAtTs": 1795400517,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       },
+       {
+        "type": "text",
+        "id": "2"
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "5956057726630",
+      "nickname": "群星管理员",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/04fd45d25fde55799b8e3df64ead6c29.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 1,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 25,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "3",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22671188",
+      "userId": "7401988041820",
+      "level": 1,
+      "itemId": "6503530",
+      "itemUserId": "5697037567561",
+      "parentId": "6503530",
+      "parentUserId": "5697037567561",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"1\",\"type\":\"text\"},{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "1",
+        "c": "没有吧，是你太敏感了"
+       },
+       {
+        "id": "0",
+        "c": "[​比心​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795362799,
+      "updatedAtTs": 1795362802,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "7401988041820",
+      "nickname": "一觉睡到天明",
+      "profile": "zzz（睡到天黑）",
+      "avatar": "https://bbs.hycdn.cn/image/2026/10/24/c4498fbec1ff4fab4511129f23b4e70a.png",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "pendant": {
+       "id": 119,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/10/09/b8f6fd0d3a923db251e5d036106460b8.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 101,
+        "level": 2,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv2.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 1185,
+        "gameName": "开拓芯",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv2.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   }
+  ],
+  "pageToken": "2",
+  "pageSize": 10,
+  "hasMore": false,
+  "header": {},
+  "total": "33"
+ }
+}

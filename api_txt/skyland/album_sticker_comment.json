@@ -1,0 +1,1020 @@
+{
+ "code": 0,
+ "message": "OK",
+ "timestamp": "1795435413",
+ "data": {
+  "list": [
+   {
+    "meta": {
+     "comment": {
+      "id": "22632504",
+      "userId": "3261662427128",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"},{\"contentId\":\"1\",\"foregroundColor\":\"#222222\",\"type\":\"text\"},{\"contentId\":\"2\",\"foregroundColor\":\"#222222\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "我感觉"
+       },
+       {
+        "id": "1",
+        "c": "莱塔尼亚玩3塔3精准3奥术3聚合强得多，"
+       },
+       {
+        "id": "2",
+        "c": "折光、车尼尔换成溯星和遥，终极模拟隐秘核心骑士都冲不动，而且莱塔尼亚的输出核心是小羊而不是6塔给的乐部"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795001602,
+      "updatedAtTs": 1795001660,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "text",
+        "id": "2"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "3261662427128",
+      "nickname": "木白风",
+      "profile": "我爱吃！螺蛳粉！",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/b1b204790355ee7dda96b8bf40e40f90.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国台湾",
+      "isModerator": false,
+      "pendant": {
+       "id": 14,
+       "iconUrl": "https://bbs.hycdn.cn/image/2024/04/29/8b6ed4074bc41261f10f3bf5debf6940.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 6,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv6.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 15192,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv6.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "3",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22620324",
+      "userId": "9148403282026",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"id\":\"paopaotuantuan-6__paopaotuantuan6_2\",\"type\":\"emoji\"},{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"}],\"type\":\"paragraph\"},{\"alignment\":1,\"contents\":[{\"contentId\":\"1\",\"linkId\":\"0\",\"type\":\"link\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "你的莱塔尼亚很强，但是如果ban了精准奥术怎么办，那就只好拿出灵巧炎了😋"
+       },
+       {
+        "id": "1",
+        "c": "「卫戍协议·规程」拜松策略 高下限 均炎600层运营思路"
+       }
+      ],
+      "linkSlice": [
+       {
+        "id": "0",
+        "c": "https://www.skland.com/article?id=6490933&c_c=COPY"
+       }
+      ],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1794883848,
+      "updatedAtTs": 1794883850,
+      "firstIpLocation": "广东",
+      "caption": [
+       {
+        "type": "emoji",
+        "id": "paopaotuantuan-6__paopaotuantuan6_2"
+       },
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "9148403282026",
+      "nickname": "在修铁钳号",
+      "profile": "平平无奇的小猫工匠正在修理铁钳号₍˄·͈༝·͈˄*₎◞ ̑̑",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/cca4997eed33e2a73e238e885040cf6c.webp",
+      "isCreator": true,
+      "identity": 1,
+      "latestIpLocation": "广东",
+      "isModerator": false,
+      "pendant": {
+       "id": 120,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/10/19/d0ac051da4c47a400f9fa88243a00fb8.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 8,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv8.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 1,
+        "score": 36636,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv8.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "4",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": true,
+      "pinned": true
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22632143",
+      "userId": "2330374002389",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "有人一块卫吗"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1794998364,
+      "updatedAtTs": 1794998366,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "2330374002389",
+      "nickname": "吟得汀辰丶",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/b5945ea7790e0e5a82dcccb4ca1a421a.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 1,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv1.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 0,
+        "score": 54,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv1.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22663578",
+      "userId": "4794912534962",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "3"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795297827,
+      "updatedAtTs": 1795297828,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "4794912534962",
+      "nickname": "思念覆水难收",
+      "profile": "自恨不能使人看得我不至于如此下劣",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/d1d8de44e22b73d7d6cc7a374b0a3850.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "pendant": {
+       "id": 5,
+       "iconUrl": "https://bbs.hycdn.cn/image/2024/01/18/82e0e7ca02507330bfa7981d335b77ae.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 4,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv4.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 13,
+        "score": 6631,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv4.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22673586",
+      "userId": "5225692977716",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "[​点赞​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795392929,
+      "updatedAtTs": 1795392933,
+      "firstIpLocation": "安徽",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "5225692977716",
+      "nickname": "李浩你好",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/bc318d7a7d0ad01ba82266894696a53b.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "安徽",
+      "isModerator": false,
+      "pendant": {
+       "id": 83,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/04/24/0b35d59a94efef539917674a73ff60e2.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 4,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv4.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 41,
+        "score": 5633,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv4.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22669330",
+      "userId": "9012964817536",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "[​点赞​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795347911,
+      "updatedAtTs": 1795347913,
+      "firstIpLocation": "四川",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "9012964817536",
+      "nickname": "师兄不在家",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/49666c4dc1fa9e8b0c1d1cea31fd8749.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "四川",
+      "isModerator": false,
+      "pendant": {
+       "id": 14,
+       "iconUrl": "https://bbs.hycdn.cn/image/2024/04/29/8b6ed4074bc41261f10f3bf5debf6940.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 7,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv7.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 7,
+        "score": 23984,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv7.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22664787",
+      "userId": "9479182843411",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "[​点赞​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795311028,
+      "updatedAtTs": 1795311030,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "9479182843411",
+      "nickname": "岚嵐",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/04fd45d25fde55799b8e3df64ead6c29.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "pendant": {
+       "id": 20,
+       "iconUrl": "https://bbs.hycdn.cn/image/2024/10/25/e496f1d119b73c631980370742d99631.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 4,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv4.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 1,
+        "score": 5494,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv4.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22664072",
+      "userId": "4795001226655",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "[​点赞​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795306105,
+      "updatedAtTs": 1795306107,
+      "firstIpLocation": "日本",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "4795001226655",
+      "nickname": "天空之翼2号",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/110ab906d9f8f9f3e3b2b0d1d4992c6a.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "日本",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 4,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv4.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 38,
+        "score": 6971,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv4.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22652064",
+      "userId": "8743744433891",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"},{\"contentId\":\"0\",\"type\":\"text\"},{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "[​点赞​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795197737,
+      "updatedAtTs": 1795197738,
+      "firstIpLocation": "山东",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "8743744433891",
+      "nickname": "Bremesa",
+      "profile": "仰天大笑出门去，归来倚杖自叹息……",
+      "avatar": "https://bbs.hycdn.cn/image/2025/03/07/7496a6d729dc405a3b1a79dd5e83f59b.png",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "山东",
+      "isModerator": false,
+      "pendant": {
+       "id": 5,
+       "iconUrl": "https://bbs.hycdn.cn/image/2024/01/18/82e0e7ca02507330bfa7981d335b77ae.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 6,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv6.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 17,
+        "score": 16991,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv6.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22644547",
+      "userId": "4905844612141",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "[​点赞​]"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795132601,
+      "updatedAtTs": 1795132601,
+      "firstIpLocation": "中国",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "4905844612141",
+      "nickname": "你好丨橙子",
+      "profile": "魔法猫咪",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/20d03c07f76149c193fc2f1eee3939bc.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "pendant": {
+       "id": 119,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/10/09/b8f6fd0d3a923db251e5d036106460b8.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 8,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv8.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 463,
+        "score": 38736,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv8.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   }
+  ],
+  "pageToken": "2",
+  "pageSize": 10,
+  "hasMore": false,
+  "header": {
+   "commentPinned": {
+    "meta": {
+     "comment": {
+      "id": "22620324",
+      "userId": "9148403282026",
+      "level": 1,
+      "itemId": "6493827",
+      "itemUserId": "9148403282026",
+      "parentId": "6493827",
+      "parentUserId": "9148403282026",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"id\":\"paopaotuantuan-6__paopaotuantuan6_2\",\"type\":\"emoji\"},{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"}],\"type\":\"paragraph\"},{\"alignment\":1,\"contents\":[{\"contentId\":\"1\",\"linkId\":\"0\",\"type\":\"link\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "你的莱塔尼亚很强，但是如果ban了精准奥术怎么办，那就只好拿出灵巧炎了😋"
+       },
+       {
+        "id": "1",
+        "c": "「卫戍协议·规程」拜松策略 高下限 均炎600层运营思路"
+       }
+      ],
+      "linkSlice": [
+       {
+        "id": "0",
+        "c": "https://www.skland.com/article?id=6490933&c_c=COPY"
+       }
+      ],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1794883848,
+      "updatedAtTs": 1794883850,
+      "firstIpLocation": "广东",
+      "caption": [
+       {
+        "type": "emoji",
+        "id": "paopaotuantuan-6__paopaotuantuan6_2"
+       },
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       },
+       {
+        "type": "text",
+        "id": "1"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "9148403282026",
+      "nickname": "在修铁钳号",
+      "profile": "平平无奇的小猫工匠正在修理铁钳号₍˄·͈༝·͈˄*₎◞ ̑̑",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/cca4997eed33e2a73e238e885040cf6c.webp",
+      "isCreator": true,
+      "identity": 1,
+      "latestIpLocation": "广东",
+      "isModerator": false,
+      "pendant": {
+       "id": 120,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/10/19/d0ac051da4c47a400f9fa88243a00fb8.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 8,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv8.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 1,
+        "score": 36636,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv8.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "4",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": true,
+      "pinned": true
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   }
+  },
+  "total": "25"
+ }
+}

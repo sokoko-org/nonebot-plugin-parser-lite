@@ -1,0 +1,303 @@
+{
+ "code": 0,
+ "message": "OK",
+ "timestamp": "1795435125",
+ "data": {
+  "item": {
+   "id": "6508532",
+   "userId": "1557764525447",
+   "gameId": 1,
+   "cateId": 3,
+   "viewKind": 1,
+   "origin": 2,
+   "repost": 1,
+   "source": "",
+   "title": "当罗德岛的干员上网后belike:",
+   "coverImageId": "",
+   "cover": null,
+   "imageList": [
+    {
+     "id": "6b03b435f065b116edffd8a3",
+     "url": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp",
+     "width": "864",
+     "height": "648",
+     "size": "42202",
+     "format": "webp",
+     "kind": "static",
+     "description": "",
+     "infos": [
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp",
+       "width": "864",
+       "height": "648",
+       "format": "webp",
+       "kind": "",
+       "style": "origin"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp?x-oss-process=style/halfScreen",
+       "width": "655",
+       "height": "491",
+       "format": "webp",
+       "kind": "",
+       "style": "halfScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp?x-oss-process=style/fullScreen",
+       "width": "1404",
+       "height": "1053",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp?x-oss-process=style/thirdScreen",
+       "width": "436",
+       "height": "327",
+       "format": "webp",
+       "kind": "",
+       "style": "thirdScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp?x-oss-process=style/fullScreenLandscape",
+       "width": "918",
+       "height": "689",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreenLandscape"
+      }
+     ],
+     "isAIGC": false
+    }
+   ],
+   "videoList": [
+    {
+     "id": "6b03b4580932bada4e5b4584",
+     "cover": {
+      "id": "6b03b435f065b116edffd8a3",
+      "url": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp",
+      "width": "864",
+      "height": "648",
+      "size": "42202",
+      "format": "webp",
+      "kind": "static",
+      "description": "",
+      "infos": [],
+      "isAIGC": false
+     },
+     "description": "",
+     "status": "transcoded",
+     "infos": [
+      {
+       "url": "https://skland-vod.hycdn.cn/a0e7c9d5e6ee71f1bfd7f6f7f6580102/955dcf2ab272b4e70851d9fa442e8ca1-hd.m3u8?auth_key=1795405140-af23d5f4509a440cba21be878a867273-0-ad8710a4b54d95e10a3bccc3ebea3cbe",
+       "duration": "21246",
+       "width": "1920",
+       "height": "1080",
+       "size": "8594796",
+       "format": "m3u8",
+       "resolution": "1080P"
+      },
+      {
+       "url": "https://skland-vod.hycdn.cn/a0e7c9d5e6ee71f1bfd7f6f7f6580102/8f7c7998678273dfb0208f2bca93623f-sd.m3u8?auth_key=1795405140-e8441b5ee68d42cd8be1ab413795a8c7-0-c846dee83b74c61590cf3a4b53f59e13",
+       "duration": "21246",
+       "width": "1280",
+       "height": "720",
+       "size": "4509932",
+       "format": "m3u8",
+       "resolution": "720P"
+      },
+      {
+       "url": "https://skland-vod.hycdn.cn/a0e7c9d5e6ee71f1bfd7f6f7f6580102/3ed503241d3f9a97f3e585f3850949bf-ld.m3u8?auth_key=1795405140-ea0e488cc89f4fe5993138af9c6499c6-0-2f424ac518470ec52a51b606531b2807",
+       "duration": "21246",
+       "width": "854",
+       "height": "480",
+       "size": "2882604",
+       "format": "m3u8",
+       "resolution": "480P"
+      }
+     ],
+     "isAIGC": false
+    }
+   ],
+   "document": {
+    "id": "bb2f9839e1f5a346",
+    "blockIds": [],
+    "blockMap": {},
+    "authorMap": {},
+    "version": ""
+   },
+   "caption": [],
+   "tagIds": [
+    1610,
+    1605
+   ],
+   "status": 1,
+   "operationStatus": 70,
+   "auditStatus": 2,
+   "modifiable": 1,
+   "createdAtTs": "1795404900",
+   "updatedAtTs": "1795428229",
+   "latestEditAtTs": "1795404900",
+   "latestReplyAtTs": "1795428197",
+   "firstIpLocation": "浙江",
+   "latestIpLocation": "浙江",
+   "moderatorRecommend": 1,
+   "version": 0,
+   "editInfo": "",
+   "downloadEnable": 1,
+   "publishedAtTs": "1795404900",
+   "prePublishOn": false,
+   "thumbnail": "https://bbs.hycdn.cn/image/common/20261123/3817831/6b03b435f065b116edffd8a3_91c496d2.webp",
+   "isAIGCStatementOn": false
+  },
+  "user": {
+   "id": "1557764525447",
+   "nickname": "芜湖市南通区",
+   "profile": "谢谢你的关注",
+   "avatarCode": 257,
+   "avatar": "https://bbs.hycdn.cn/asset/avatar/3b644e2a2c70bf26459c7f0ca54226d4.webp",
+   "backgroundCode": 1,
+   "isCreator": true,
+   "status": 1,
+   "operationStatus": 30,
+   "identity": 1,
+   "kind": 1,
+   "latestIpLocation": "浙江",
+   "moderatorStatus": 4,
+   "moderatorChangeTime": 0,
+   "gender": 0,
+   "birthday": "1740672000",
+   "hgId": "1329491484290",
+   "creatorIdentifiers": [
+    {
+     "id": 4,
+     "name": "攻略作者",
+     "description": "攻略类内容作者，如角色养成、关卡攻略等",
+     "status": 1,
+     "applicable": 0,
+     "createdAtTs": 1782125368,
+     "updatedAtTs": 1782125368,
+     "i18nName": {},
+     "i18nDescription": {}
+    },
+    {
+     "id": 5,
+     "name": "视频作者",
+     "description": "视频类内容作者，如手书动画、混剪、杂谈、同人曲、配音视频等",
+     "status": 1,
+     "applicable": 0,
+     "createdAtTs": 1782125368,
+     "updatedAtTs": 1782125368,
+     "i18nName": {},
+     "i18nDescription": {}
+    }
+   ],
+   "scoreInfoList": [
+    {
+     "gameId": 1,
+     "level": 5,
+     "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv5.webp",
+     "darkModeIconUrl": "",
+     "checkedDays": 0,
+     "score": 10841,
+     "gameName": "明日方舟",
+     "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv5.webp"
+    }
+   ],
+   "pendant": {
+    "id": 97,
+    "iconUrl": "https://bbs.hycdn.cn/image/2026/06/03/a1697b9c0ff61fbf65835f9071318500.webp",
+    "title": "",
+    "description": ""
+   }
+  },
+  "tags": [
+   {
+    "id": 1610,
+    "name": "时间啊，向前！创作者应援",
+    "description": "投稿原创作品，瓜分80万海螺",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2026/10/28/1c084882d5a43bb887544f40b62dbe80.png",
+    "publishAtTs": 1793462400,
+    "createdAtTs": 1791968733,
+    "updatedAtTs": 1793175063,
+    "kind": 2,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   },
+   {
+    "id": 1605,
+    "name": "时间啊，向前！",
+    "description": "全新SideStory「时间啊，向前！」现已开启",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2026/10/29/aab5f13c86379707fbbfb8d4d9960fb9.png",
+    "publishAtTs": 1793488365,
+    "createdAtTs": 1791962628,
+    "updatedAtTs": 1793507025,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   }
+  ],
+  "itemRel": {
+   "like": false,
+   "collect": false
+  },
+  "userRel": {
+   "follow": false,
+   "fans": false,
+   "black": false,
+   "blacked": false,
+   "blocked": false,
+   "fansAtTs": 0
+  },
+  "itemRts": {
+   "liked": "8",
+   "collected": "3",
+   "reposted": "0",
+   "commented": "2",
+   "attitudes": [
+    {
+     "id": "default",
+     "count": "8",
+     "weight": 6
+    },
+    {
+     "id": "kiss",
+     "count": "0",
+     "weight": 5
+    },
+    {
+     "id": "call",
+     "count": "0",
+     "weight": 4
+    },
+    {
+     "id": "agree",
+     "count": "0",
+     "weight": 3
+    },
+    {
+     "id": "cry",
+     "count": "0",
+     "weight": 2
+    },
+    {
+     "id": "shock",
+     "count": "0",
+     "weight": 1
+    }
+   ]
+  },
+  "itemConfig": {
+   "itemVisibility": 2,
+   "commentSubmission": 2
+  },
+  "recommendationLabels": [],
+  "nameCardsInfo": {
+   "cards": []
+  }
+ }
+}

@@ -1,0 +1,669 @@
+{
+ "code": 0,
+ "message": "OK",
+ "timestamp": "1795435125",
+ "data": {
+  "item": {
+   "id": "6493827",
+   "userId": "9148403282026",
+   "gameId": 1,
+   "cateId": 4,
+   "viewKind": 2,
+   "origin": 1,
+   "repost": 1,
+   "source": "",
+   "title": "「卫戍协议 · 规程」莱塔尼亚从通用到进阶 运营思路",
+   "coverImageId": "6afbb7daf0311bbc88dfc796",
+   "cover": {
+    "id": "6afbb7daf0311bbc88dfc796",
+    "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp",
+    "width": "728",
+    "height": "1908",
+    "size": "141116",
+    "format": "webp",
+    "kind": "static",
+    "description": "",
+    "infos": [
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp",
+      "width": "728",
+      "height": "1908",
+      "format": "webp",
+      "kind": "",
+      "style": "origin"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/halfScreen",
+      "width": "332",
+      "height": "871",
+      "format": "webp",
+      "kind": "",
+      "style": "halfScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/fullScreen",
+      "width": "1157",
+      "height": "3034",
+      "format": "webp",
+      "kind": "",
+      "style": "fullScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/thirdScreen",
+      "width": "221",
+      "height": "580",
+      "format": "webp",
+      "kind": "",
+      "style": "thirdScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/fullScreenLandscape",
+      "width": "262",
+      "height": "689",
+      "format": "webp",
+      "kind": "",
+      "style": "fullScreenLandscape"
+     }
+    ],
+    "isAIGC": false
+   },
+   "imageList": [
+    {
+     "id": "6afbb7daf0311bbc88dfc796",
+     "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp",
+     "width": "728",
+     "height": "1908",
+     "size": "141116",
+     "format": "webp",
+     "kind": "static",
+     "description": "",
+     "infos": [
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp",
+       "width": "728",
+       "height": "1908",
+       "format": "webp",
+       "kind": "",
+       "style": "origin"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/halfScreen",
+       "width": "332",
+       "height": "871",
+       "format": "webp",
+       "kind": "",
+       "style": "halfScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/fullScreen",
+       "width": "1157",
+       "height": "3034",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/thirdScreen",
+       "width": "221",
+       "height": "580",
+       "format": "webp",
+       "kind": "",
+       "style": "thirdScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp?x-oss-process=style/fullScreenLandscape",
+       "width": "262",
+       "height": "689",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreenLandscape"
+      }
+     ],
+     "isAIGC": false
+    },
+    {
+     "id": "6afbb418868fe95b5987870b",
+     "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb418868fe95b5987870b_25ea9858.webp",
+     "width": "728",
+     "height": "1726",
+     "size": "124688",
+     "format": "webp",
+     "kind": "static",
+     "description": "",
+     "infos": [
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb418868fe95b5987870b_25ea9858.webp",
+       "width": "728",
+       "height": "1726",
+       "format": "webp",
+       "kind": "",
+       "style": "origin"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb418868fe95b5987870b_25ea9858.webp?x-oss-process=style/halfScreen",
+       "width": "367",
+       "height": "871",
+       "format": "webp",
+       "kind": "",
+       "style": "halfScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb418868fe95b5987870b_25ea9858.webp?x-oss-process=style/fullScreen",
+       "width": "1279",
+       "height": "3034",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb418868fe95b5987870b_25ea9858.webp?x-oss-process=style/thirdScreen",
+       "width": "244",
+       "height": "580",
+       "format": "webp",
+       "kind": "",
+       "style": "thirdScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb418868fe95b5987870b_25ea9858.webp?x-oss-process=style/fullScreenLandscape",
+       "width": "290",
+       "height": "689",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreenLandscape"
+      }
+     ],
+     "isAIGC": false
+    },
+    {
+     "id": "6afbb41a2330cb02f282dc67",
+     "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb41a2330cb02f282dc67_3e93bcde.webp",
+     "width": "728",
+     "height": "1818",
+     "size": "133430",
+     "format": "webp",
+     "kind": "static",
+     "description": "",
+     "infos": [
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb41a2330cb02f282dc67_3e93bcde.webp",
+       "width": "728",
+       "height": "1818",
+       "format": "webp",
+       "kind": "",
+       "style": "origin"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb41a2330cb02f282dc67_3e93bcde.webp?x-oss-process=style/halfScreen",
+       "width": "348",
+       "height": "871",
+       "format": "webp",
+       "kind": "",
+       "style": "halfScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb41a2330cb02f282dc67_3e93bcde.webp?x-oss-process=style/fullScreen",
+       "width": "1214",
+       "height": "3034",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb41a2330cb02f282dc67_3e93bcde.webp?x-oss-process=style/thirdScreen",
+       "width": "232",
+       "height": "580",
+       "format": "webp",
+       "kind": "",
+       "style": "thirdScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb41a2330cb02f282dc67_3e93bcde.webp?x-oss-process=style/fullScreenLandscape",
+       "width": "275",
+       "height": "689",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreenLandscape"
+      }
+     ],
+     "isAIGC": false
+    }
+   ],
+   "videoList": [],
+   "document": {
+    "id": "fd1c5e8ef206c428",
+    "blockIds": [
+     "d78f414ce0807e92",
+     "05d558911610e1ab",
+     "df1e7e90e0d41c55",
+     "94430380bd9e83b3",
+     "e55e6b7a7b842396"
+    ],
+    "blockMap": {
+     "05d558911610e1ab": {
+      "id": "05d558911610e1ab",
+      "parentId": "fd1c5e8ef206c428",
+      "align": "left",
+      "kind": "text",
+      "text": {
+       "inlineElements": [
+        {
+         "kind": "sticker",
+         "sticker": {
+          "id": "paopaotuantuan-6__paopaotuantuan6_4",
+          "text": "坚持"
+         }
+        },
+        {
+         "bold": false,
+         "italic": false,
+         "strikeThrough": false,
+         "color": "#222222",
+         "kind": "text",
+         "text": {
+          "text": "从通用策略运营，到进阶大嘴莫布和变形者运营，有谁还不会玩莱塔尼亚？!"
+         }
+        }
+       ],
+       "kind": "body"
+      }
+     },
+     "94430380bd9e83b3": {
+      "id": "94430380bd9e83b3",
+      "parentId": "fd1c5e8ef206c428",
+      "align": "left",
+      "kind": "text",
+      "text": {
+       "inlineElements": [
+        {
+         "kind": "sticker",
+         "sticker": {
+          "id": "paopaotuantuan-5__paopaotuantuan5_9",
+          "text": "阳光"
+         }
+        },
+        {
+         "bold": false,
+         "italic": false,
+         "strikeThrough": false,
+         "color": "#222222",
+         "kind": "text",
+         "text": {
+          "text": "制作不易，如有错漏欢迎指出，欢迎博士和谐讨论呐(◦˙▽˙◦)"
+         }
+        }
+       ],
+       "kind": "body"
+      }
+     },
+     "d78f414ce0807e92": {
+      "id": "d78f414ce0807e92",
+      "parentId": "fd1c5e8ef206c428",
+      "align": "left",
+      "kind": "text",
+      "text": {
+       "inlineElements": [
+        {
+         "kind": "sticker",
+         "sticker": {
+          "id": "paopaotuantuan-6__paopaotuantuan6_3",
+          "text": "祈祷"
+         }
+        },
+        {
+         "bold": false,
+         "italic": false,
+         "strikeThrough": false,
+         "color": "#222222",
+         "kind": "text",
+         "text": {
+          "text": "莱塔尼亚第一秘诀: 不要玩车尔尼策略"
+         }
+        }
+       ],
+       "kind": "body"
+      }
+     },
+     "df1e7e90e0d41c55": {
+      "id": "df1e7e90e0d41c55",
+      "parentId": "fd1c5e8ef206c428",
+      "align": "left",
+      "kind": "text",
+      "text": {
+       "inlineElements": [],
+       "kind": "body"
+      }
+     },
+     "e55e6b7a7b842396": {
+      "id": "e55e6b7a7b842396",
+      "parentId": "fd1c5e8ef206c428",
+      "align": "left",
+      "kind": "text",
+      "text": {
+       "inlineElements": [
+        {
+         "kind": "sticker",
+         "sticker": {
+          "id": "paopaotuantuan-5__paopaotuantuan5_10",
+          "text": "玩沙"
+         }
+        },
+        {
+         "bold": false,
+         "italic": false,
+         "strikeThrough": false,
+         "color": "#222222",
+         "kind": "text",
+         "text": {
+          "text": "如果本篇内容对各位博士有帮助，在这里希望可以点赞关注支持一下"
+         }
+        }
+       ],
+       "kind": "body"
+      }
+     }
+    },
+    "authorMap": {},
+    "version": ""
+   },
+   "caption": [
+    {
+     "kind": "sticker",
+     "sticker": {
+      "id": "paopaotuantuan-6__paopaotuantuan6_3",
+      "text": "祈祷"
+     }
+    },
+    {
+     "bold": false,
+     "italic": false,
+     "strikeThrough": false,
+     "color": "#222222",
+     "kind": "text",
+     "text": {
+      "text": "莱塔尼亚第一秘诀: 不要玩车尔尼策略"
+     }
+    },
+    {
+     "kind": "text",
+     "text": {
+      "text": " "
+     }
+    },
+    {
+     "kind": "sticker",
+     "sticker": {
+      "id": "paopaotuantuan-6__paopaotuantuan6_4",
+      "text": "坚持"
+     }
+    },
+    {
+     "bold": false,
+     "italic": false,
+     "strikeThrough": false,
+     "color": "#222222",
+     "kind": "text",
+     "text": {
+      "text": "从通用策略运营，到进阶大嘴莫布和变形者运营，有谁还不会玩莱塔尼亚？!"
+     }
+    },
+    {
+     "kind": "text",
+     "text": {
+      "text": " "
+     }
+    },
+    {
+     "kind": "sticker",
+     "sticker": {
+      "id": "paopaotuantuan-5__paopaotuantuan5_9",
+      "text": "阳光"
+     }
+    },
+    {
+     "bold": false,
+     "italic": false,
+     "strikeThrough": false,
+     "color": "#222222",
+     "kind": "text",
+     "text": {
+      "text": "制作不易，如有错漏欢迎指出，欢迎博士和谐讨论呐(◦˙▽˙◦)"
+     }
+    },
+    {
+     "kind": "text",
+     "text": {
+      "text": " "
+     }
+    },
+    {
+     "kind": "sticker",
+     "sticker": {
+      "id": "paopaotuantuan-5__paopaotuantuan5_10",
+      "text": "玩沙"
+     }
+    },
+    {
+     "bold": false,
+     "italic": false,
+     "strikeThrough": false,
+     "color": "#222222",
+     "kind": "text",
+     "text": {
+      "text": "如果本篇内容对各位博士有帮助，在这里希望可以点赞关注支持一下"
+     }
+    },
+    {
+     "kind": "text",
+     "text": {
+      "text": " "
+     }
+    }
+   ],
+   "tagIds": [
+    1369,
+    858,
+    1153,
+    1160,
+    1605
+   ],
+   "status": 1,
+   "operationStatus": 80,
+   "auditStatus": 2,
+   "modifiable": 1,
+   "createdAtTs": "1794880781",
+   "updatedAtTs": "1795392955",
+   "latestEditAtTs": "1794883880",
+   "latestReplyAtTs": "1795392929",
+   "firstIpLocation": "广东",
+   "latestIpLocation": "广东",
+   "moderatorRecommend": 1,
+   "version": 2,
+   "editInfo": "已编辑",
+   "downloadEnable": 0,
+   "publishedAtTs": "1794880781",
+   "prePublishOn": false,
+   "thumbnail": "https://bbs.hycdn.cn/image/common/20261117/2489549/6afbb7daf0311bbc88dfc796_8c0325ea.webp",
+   "isAIGCStatementOn": false
+  },
+  "user": {
+   "id": "9148403282026",
+   "nickname": "在修铁钳号",
+   "profile": "平平无奇的小猫工匠正在修理铁钳号₍˄·͈༝·͈˄*₎◞ ̑̑",
+   "avatarCode": 261,
+   "avatar": "https://bbs.hycdn.cn/asset/avatar/cca4997eed33e2a73e238e885040cf6c.webp",
+   "backgroundCode": 1,
+   "isCreator": true,
+   "status": 1,
+   "operationStatus": 30,
+   "identity": 1,
+   "kind": 1,
+   "latestIpLocation": "广东",
+   "moderatorStatus": 4,
+   "moderatorChangeTime": 0,
+   "gender": 0,
+   "birthday": "1134230400",
+   "hgId": "1226601249864",
+   "creatorIdentifiers": [
+    {
+     "id": 4,
+     "name": "攻略作者",
+     "description": "攻略类内容作者，如角色养成、关卡攻略等",
+     "status": 1,
+     "applicable": 0,
+     "createdAtTs": 1755503036,
+     "updatedAtTs": 1755503036,
+     "i18nName": {},
+     "i18nDescription": {}
+    }
+   ],
+   "scoreInfoList": [
+    {
+     "gameId": 1,
+     "level": 8,
+     "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv8.webp",
+     "darkModeIconUrl": "",
+     "checkedDays": 1,
+     "score": 36636,
+     "gameName": "明日方舟",
+     "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv8.webp"
+    }
+   ],
+   "pendant": {
+    "id": 120,
+    "iconUrl": "https://bbs.hycdn.cn/image/2026/10/19/d0ac051da4c47a400f9fa88243a00fb8.webp",
+    "title": "",
+    "description": ""
+   }
+  },
+  "tags": [
+   {
+    "id": 1369,
+    "name": "卫戍协议攻略",
+    "description": "参与投稿赢海螺~",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2026/11/08/3fee60b4ca6b1be5c4e410d63a40288d.png",
+    "publishAtTs": 1774610985,
+    "createdAtTs": 1774610988,
+    "updatedAtTs": 1794126417,
+    "kind": 2,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   },
+   {
+    "id": 858,
+    "name": "卫戍协议",
+    "description": "「卫戍协议：规程」现已上线！",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2026/11/06/7a5a524811935d9d3f1377a169542663.png",
+    "publishAtTs": 1731912357,
+    "createdAtTs": 1731912359,
+    "updatedAtTs": 1794131037,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   },
+   {
+    "id": 1153,
+    "name": "新手向",
+    "description": "新人启程指引，少走弯路更轻松。",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2025/09/30/c126bba216048ca155064a3e0558cf3c.png",
+    "publishAtTs": 1759213511,
+    "createdAtTs": 1759213513,
+    "updatedAtTs": 1759213513,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   },
+   {
+    "id": 1160,
+    "name": "一图流",
+    "description": "一张图带你速览关键要点。",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2025/09/30/aebefa5004e8c48e82142b42d3886a88.png",
+    "publishAtTs": 1759214953,
+    "createdAtTs": 1759214954,
+    "updatedAtTs": 1759214954,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   },
+   {
+    "id": 1605,
+    "name": "时间啊，向前！",
+    "description": "全新SideStory「时间啊，向前！」现已开启",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2026/10/29/aab5f13c86379707fbbfb8d4d9960fb9.png",
+    "publishAtTs": 1793488365,
+    "createdAtTs": 1791962628,
+    "updatedAtTs": 1793507025,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   }
+  ],
+  "itemRel": {
+   "like": false,
+   "collect": false
+  },
+  "userRel": {
+   "follow": false,
+   "fans": false,
+   "black": false,
+   "blacked": false,
+   "blocked": false,
+   "fansAtTs": 0
+  },
+  "itemRts": {
+   "liked": "294",
+   "collected": "30",
+   "reposted": "0",
+   "commented": "25",
+   "attitudes": [
+    {
+     "id": "default",
+     "count": "294",
+     "weight": 6
+    },
+    {
+     "id": "kiss",
+     "count": "0",
+     "weight": 5
+    },
+    {
+     "id": "call",
+     "count": "0",
+     "weight": 4
+    },
+    {
+     "id": "agree",
+     "count": "0",
+     "weight": 3
+    },
+    {
+     "id": "cry",
+     "count": "0",
+     "weight": 2
+    },
+    {
+     "id": "shock",
+     "count": "0",
+     "weight": 1
+    }
+   ]
+  },
+  "itemConfig": {
+   "itemVisibility": 2,
+   "commentSubmission": 2
+  },
+  "recommendationLabels": [],
+  "nameCardsInfo": {
+   "cards": []
+  }
+ }
+}

@@ -1,0 +1,365 @@
+{
+ "code": 0,
+ "message": "OK",
+ "timestamp": "1795435414",
+ "data": {
+  "list": [
+   {
+    "meta": {
+     "comment": {
+      "id": "22675284",
+      "userId": "8724868284688",
+      "level": 1,
+      "itemId": "6508532",
+      "itemUserId": "1557764525447",
+      "parentId": "6508532",
+      "parentUserId": "1557764525447",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "天气冷了来一杯银河能量饮料和羊肉吧"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [
+       {
+        "id": "6b03b88f5922832476b098d7",
+        "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b88f5922832476b098d7_65de0095.gif",
+        "width": 168,
+        "height": 92,
+        "size": 1220711,
+        "format": "gif",
+        "kind": 2,
+        "displayInfos": [
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b88f5922832476b098d7_65de0095.gif",
+          "width": 168,
+          "height": 92,
+          "size": 1220711,
+          "format": "",
+          "kind": 2,
+          "style": "origin"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b88f5922832476b098d7_65de0095.gif?x-oss-process=style/halfScreen",
+          "width": 655,
+          "height": 358,
+          "size": 1220711,
+          "format": "",
+          "kind": 2,
+          "style": "halfScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b88f5922832476b098d7_65de0095.gif?x-oss-process=style/fullScreen",
+          "width": 1404,
+          "height": 768,
+          "size": 1220711,
+          "format": "",
+          "kind": 2,
+          "style": "fullScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b88f5922832476b098d7_65de0095.gif?x-oss-process=style/thirdScreen",
+          "width": 436,
+          "height": 238,
+          "size": 1220711,
+          "format": "",
+          "kind": 2,
+          "style": "thirdScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b88f5922832476b098d7_65de0095.gif?x-oss-process=style/fullScreenLandscape",
+          "width": 1258,
+          "height": 689,
+          "size": 1220711,
+          "format": "",
+          "kind": 2,
+          "style": "fullScreenLandscape"
+         }
+        ],
+        "description": "",
+        "isAIGC": false
+       },
+       {
+        "id": "6b03b891edb708fcc8db5af0",
+        "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b891edb708fcc8db5af0_3e93bcde.webp",
+        "width": 1600,
+        "height": 2133,
+        "size": 88978,
+        "format": "webp",
+        "kind": 1,
+        "displayInfos": [
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b891edb708fcc8db5af0_3e93bcde.webp",
+          "width": 1600,
+          "height": 2133,
+          "size": 88978,
+          "format": "",
+          "kind": 1,
+          "style": "origin"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b891edb708fcc8db5af0_3e93bcde.webp?x-oss-process=style/halfScreen",
+          "width": 653,
+          "height": 871,
+          "size": 88978,
+          "format": "",
+          "kind": 1,
+          "style": "halfScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b891edb708fcc8db5af0_3e93bcde.webp?x-oss-process=style/fullScreen",
+          "width": 1404,
+          "height": 1871,
+          "size": 88978,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b891edb708fcc8db5af0_3e93bcde.webp?x-oss-process=style/thirdScreen",
+          "width": 435,
+          "height": 580,
+          "size": 88978,
+          "format": "",
+          "kind": 1,
+          "style": "thirdScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b891edb708fcc8db5af0_3e93bcde.webp?x-oss-process=style/fullScreenLandscape",
+          "width": 516,
+          "height": 689,
+          "size": 88978,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreenLandscape"
+         }
+        ],
+        "description": "",
+        "isAIGC": false
+       },
+       {
+        "id": "6b03b892b3d32b32e20934e0",
+        "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b892b3d32b32e20934e0_3e93bcde.webp",
+        "width": 1600,
+        "height": 2133,
+        "size": 106378,
+        "format": "webp",
+        "kind": 1,
+        "displayInfos": [
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b892b3d32b32e20934e0_3e93bcde.webp",
+          "width": 1600,
+          "height": 2133,
+          "size": 106378,
+          "format": "",
+          "kind": 1,
+          "style": "origin"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b892b3d32b32e20934e0_3e93bcde.webp?x-oss-process=style/halfScreen",
+          "width": 653,
+          "height": 871,
+          "size": 106378,
+          "format": "",
+          "kind": 1,
+          "style": "halfScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b892b3d32b32e20934e0_3e93bcde.webp?x-oss-process=style/fullScreen",
+          "width": 1404,
+          "height": 1871,
+          "size": 106378,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b892b3d32b32e20934e0_3e93bcde.webp?x-oss-process=style/thirdScreen",
+          "width": 435,
+          "height": 580,
+          "size": 106378,
+          "format": "",
+          "kind": 1,
+          "style": "thirdScreen"
+         },
+         {
+          "url": "https://bbs.hycdn.cn/image/common/20261123/7838152/6b03b892b3d32b32e20934e0_3e93bcde.webp?x-oss-process=style/fullScreenLandscape",
+          "width": 516,
+          "height": 689,
+          "size": 106378,
+          "format": "",
+          "kind": 1,
+          "style": "fullScreenLandscape"
+         }
+        ],
+        "description": "",
+        "isAIGC": false
+       }
+      ],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795405973,
+      "updatedAtTs": 1795405989,
+      "firstIpLocation": "云南",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "8724868284688",
+      "nickname": "疯狂的柠檬兔子",
+      "profile": "",
+      "avatar": "https://bbs.hycdn.cn/image/2026/11/01/98e60fb52010dede30e7cc92618af362.png",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "云南",
+      "isModerator": false,
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 2,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv2.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 5,
+        "score": 547,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv2.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "2",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": true,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   },
+   {
+    "meta": {
+     "comment": {
+      "id": "22677616",
+      "userId": "4256666208597",
+      "level": 1,
+      "itemId": "6508532",
+      "itemUserId": "1557764525447",
+      "parentId": "6508532",
+      "parentUserId": "1557764525447",
+      "format": "{\"data\":[{\"alignment\":1,\"contents\":[{\"contentId\":\"0\",\"foregroundColor\":\"#222222\",\"type\":\"text\"},{\"id\":\"amiya-1__amiya_angry\",\"type\":\"emoji\"},{\"id\":\"amiya-1__amiya_wuwu\",\"type\":\"emoji\"}],\"type\":\"paragraph\"}],\"version\":0}",
+      "textSlice": [
+       {
+        "id": "0",
+        "c": "蒂蒂不凶，蒂蒂不区"
+       }
+      ],
+      "linkSlice": [],
+      "atSlice": [],
+      "imageListSlice": [],
+      "status": 1,
+      "operationStatus": 70,
+      "auditStatus": 2,
+      "sortWeight": 50,
+      "createdAtTs": 1795428197,
+      "updatedAtTs": 1795428197,
+      "firstIpLocation": "江西",
+      "caption": [
+       {
+        "type": "text",
+        "id": "0"
+       },
+       {
+        "type": "emoji",
+        "id": "amiya-1__amiya_angry"
+       },
+       {
+        "type": "emoji",
+        "id": "amiya-1__amiya_wuwu"
+       },
+       {
+        "type": "newline",
+        "id": ""
+       }
+      ]
+     },
+     "user": {
+      "id": "4256666208597",
+      "nickname": "星泪一",
+      "profile": "rua来",
+      "avatar": "https://bbs.hycdn.cn/asset/avatar/7369620a67fe1120b269463d4a946d24.webp",
+      "isCreator": false,
+      "identity": 1,
+      "latestIpLocation": "中国",
+      "isModerator": false,
+      "pendant": {
+       "id": 120,
+       "iconUrl": "https://bbs.hycdn.cn/image/2026/10/19/d0ac051da4c47a400f9fa88243a00fb8.webp",
+       "title": "",
+       "description": ""
+      },
+      "status": 1,
+      "operationStatus": 30,
+      "createdAtTs": "0",
+      "scoreInfoList": [
+       {
+        "gameId": 1,
+        "level": 3,
+        "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv3.webp",
+        "darkModeIconUrl": "",
+        "checkedDays": 36,
+        "score": 3590,
+        "gameName": "明日方舟",
+        "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv3.webp"
+       }
+      ]
+     },
+     "commentRts": {
+      "liked": "0",
+      "commented": "0"
+     },
+     "relatedItemState": {
+      "first": false,
+      "pinned": false
+     },
+     "relatedItemUserState": {
+      "like": false
+     },
+     "state": {
+      "like": false,
+      "collect": false
+     }
+    },
+    "subMetas": []
+   }
+  ],
+  "pageToken": "2",
+  "pageSize": 10,
+  "hasMore": false,
+  "header": {},
+  "total": "2"
+ }
+}

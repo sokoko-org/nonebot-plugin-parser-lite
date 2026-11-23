@@ -1,0 +1,342 @@
+{
+ "code": 0,
+ "message": "OK",
+ "timestamp": "1795435126",
+ "data": {
+  "item": {
+   "id": "6448336",
+   "userId": "8225670536358",
+   "gameId": 1,
+   "cateId": 2,
+   "viewKind": 3,
+   "origin": 2,
+   "repost": 0,
+   "source": "",
+   "title": "从好心疼到还活着吗只花了一天",
+   "coverImageId": "6ae9546ced989a2c1f474639",
+   "cover": {
+    "id": "6ae9546ced989a2c1f474639",
+    "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp",
+    "width": "1080",
+    "height": "1440",
+    "size": "131504",
+    "format": "webp",
+    "kind": "static",
+    "description": "",
+    "infos": [
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp",
+      "width": "1080",
+      "height": "1440",
+      "format": "webp",
+      "kind": "",
+      "style": "origin"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/halfScreen",
+      "width": "653",
+      "height": "871",
+      "format": "webp",
+      "kind": "",
+      "style": "halfScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/fullScreen",
+      "width": "1404",
+      "height": "1872",
+      "format": "webp",
+      "kind": "",
+      "style": "fullScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/thirdScreen",
+      "width": "435",
+      "height": "580",
+      "format": "webp",
+      "kind": "",
+      "style": "thirdScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/fullScreenLandscape",
+      "width": "516",
+      "height": "689",
+      "format": "webp",
+      "kind": "",
+      "style": "fullScreenLandscape"
+     }
+    ],
+    "isAIGC": false
+   },
+   "imageList": [
+    {
+     "id": "6ae9546ced989a2c1f474639",
+     "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp",
+     "width": "1080",
+     "height": "1440",
+     "size": "131504",
+     "format": "webp",
+     "kind": "static",
+     "description": "",
+     "infos": [
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp",
+       "width": "1080",
+       "height": "1440",
+       "format": "webp",
+       "kind": "",
+       "style": "origin"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/halfScreen",
+       "width": "653",
+       "height": "871",
+       "format": "webp",
+       "kind": "",
+       "style": "halfScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/fullScreen",
+       "width": "1404",
+       "height": "1872",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/thirdScreen",
+       "width": "435",
+       "height": "580",
+       "format": "webp",
+       "kind": "",
+       "style": "thirdScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp?x-oss-process=style/fullScreenLandscape",
+       "width": "516",
+       "height": "689",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreenLandscape"
+      }
+     ],
+     "isAIGC": false
+    }
+   ],
+   "videoList": [],
+   "document": {
+    "id": "YFmXpHrdxKvd",
+    "blockIds": [
+     "srycvpPUb2T5",
+     "9KY4F3XimJl8"
+    ],
+    "blockMap": {
+     "9KY4F3XimJl8": {
+      "id": "9KY4F3XimJl8",
+      "parentId": "YFmXpHrdxKvd",
+      "align": "left",
+      "kind": "text",
+      "text": {
+       "inlineElements": [
+        {
+         "kind": "text",
+         "text": {
+          "text": "怎么这么可爱这个小熊，不定期打理还会长出线头衣服也变得皱巴巴的，乌萨斯你到底会不会养皇帝！上岛之后一定要好好照顾他..."
+         }
+        }
+       ],
+       "kind": "body"
+      }
+     },
+     "srycvpPUb2T5": {
+      "id": "srycvpPUb2T5",
+      "parentId": "YFmXpHrdxKvd",
+      "align": "left",
+      "kind": "image",
+      "image": {
+       "id": "6ae9546ced989a2c1f474639",
+       "url": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp",
+       "width": "1080",
+       "height": "1440",
+       "size": "131504",
+       "format": "webp",
+       "kind": "static",
+       "description": "",
+       "status": "",
+       "infos": [],
+       "isAIGC": false
+      }
+     }
+    },
+    "authorMap": {},
+    "version": "1.0.0"
+   },
+   "caption": [
+    {
+     "kind": "text",
+     "text": {
+      "text": "怎么这么可爱这个小熊，不定期打理还会长出线头衣服也变得皱巴巴的，乌萨斯你到底会不会养皇帝！上岛之后一定要好好照顾他..."
+     }
+    },
+    {
+     "kind": "text",
+     "text": {
+      "text": " "
+     }
+    }
+   ],
+   "tagIds": [
+    474,
+    1605
+   ],
+   "status": 1,
+   "operationStatus": 80,
+   "auditStatus": 2,
+   "modifiable": 1,
+   "createdAtTs": "1793676525",
+   "updatedAtTs": "1795415919",
+   "latestEditAtTs": "1793676526",
+   "latestReplyAtTs": "1795415878",
+   "firstIpLocation": "浙江",
+   "latestIpLocation": "浙江",
+   "moderatorRecommend": 1,
+   "version": 0,
+   "editInfo": "",
+   "downloadEnable": 1,
+   "publishedAtTs": "1793676525",
+   "prePublishOn": false,
+   "thumbnail": "https://bbs.hycdn.cn/image/common/20261103/4784075/6ae9546ced989a2c1f474639_0627b845.webp",
+   "isAIGCStatementOn": false
+  },
+  "user": {
+   "id": "8225670536358",
+   "nickname": "金鱼摇一摇",
+   "profile": "上一世我好事做尽这一世被批准打昨夜圆车（@明日方舟Arknights：五毛一条括号里的删掉）",
+   "avatarCode": 200118,
+   "avatar": "https://bbs.hycdn.cn/image/2025/08/02/05a57436227aa6b99265af3de5b85f8f.png",
+   "backgroundCode": 1,
+   "isCreator": true,
+   "status": 1,
+   "operationStatus": 30,
+   "identity": 1,
+   "kind": 1,
+   "latestIpLocation": "中国",
+   "moderatorStatus": 4,
+   "moderatorChangeTime": 0,
+   "gender": 0,
+   "hgId": "1342644719529",
+   "creatorIdentifiers": [
+    {
+     "id": 43,
+     "name": "游戏领域作者",
+     "description": "游戏领域创作者，如前瞻资讯、试玩体验、游戏心得等",
+     "status": 1,
+     "applicable": 0,
+     "createdAtTs": 1768472700,
+     "updatedAtTs": 1768472700,
+     "i18nName": {},
+     "i18nDescription": {}
+    }
+   ],
+   "scoreInfoList": [
+    {
+     "gameId": 1,
+     "level": 8,
+     "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv8.webp",
+     "darkModeIconUrl": "",
+     "checkedDays": 0,
+     "score": 30104,
+     "gameName": "明日方舟",
+     "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv8.webp"
+    }
+   ]
+  },
+  "tags": [
+   {
+    "id": 474,
+    "name": "明日方舟",
+    "description": "重铸未来，方舟启航。",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2023/07/12/f41650d51010e057bc3c211f72a4eeb2.png",
+    "publishAtTs": 1688025829,
+    "createdAtTs": 1688025830,
+    "updatedAtTs": 1689245493,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   },
+   {
+    "id": 1605,
+    "name": "时间啊，向前！",
+    "description": "全新SideStory「时间啊，向前！」现已开启",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2026/10/29/aab5f13c86379707fbbfb8d4d9960fb9.png",
+    "publishAtTs": 1793488365,
+    "createdAtTs": 1791962628,
+    "updatedAtTs": 1793507025,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   }
+  ],
+  "itemRel": {
+   "like": false,
+   "collect": false
+  },
+  "userRel": {
+   "follow": false,
+   "fans": false,
+   "black": false,
+   "blacked": false,
+   "blocked": false,
+   "fansAtTs": 0
+  },
+  "itemRts": {
+   "liked": "1072",
+   "collected": "97",
+   "reposted": "0",
+   "commented": "220",
+   "attitudes": [
+    {
+     "id": "default",
+     "count": "1072",
+     "weight": 6
+    },
+    {
+     "id": "kiss",
+     "count": "0",
+     "weight": 5
+    },
+    {
+     "id": "call",
+     "count": "0",
+     "weight": 4
+    },
+    {
+     "id": "agree",
+     "count": "0",
+     "weight": 3
+    },
+    {
+     "id": "cry",
+     "count": "0",
+     "weight": 2
+    },
+    {
+     "id": "shock",
+     "count": "0",
+     "weight": 1
+    }
+   ]
+  },
+  "itemConfig": {
+   "itemVisibility": 2,
+   "commentSubmission": 2
+  },
+  "recommendationLabels": [],
+  "nameCardsInfo": {
+   "cards": []
+  }
+ }
+}

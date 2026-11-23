@@ -1,0 +1,268 @@
+{
+ "code": 0,
+ "message": "OK",
+ "timestamp": "1795435124",
+ "data": {
+  "item": {
+   "id": "6503530",
+   "userId": "5697037567561",
+   "gameId": 101,
+   "cateId": 27,
+   "viewKind": 2,
+   "origin": 1,
+   "repost": 1,
+   "source": "",
+   "title": "串了吧？",
+   "coverImageId": "6b015d0e4756bc8c1c394dd1",
+   "cover": {
+    "id": "6b015d0e4756bc8c1c394dd1",
+    "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp",
+    "width": "562",
+    "height": "1004",
+    "size": "30414",
+    "format": "webp",
+    "kind": "static",
+    "description": "",
+    "infos": [
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp",
+      "width": "562",
+      "height": "1004",
+      "format": "webp",
+      "kind": "",
+      "style": "origin"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/halfScreen",
+      "width": "487",
+      "height": "871",
+      "format": "webp",
+      "kind": "",
+      "style": "halfScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/fullScreen",
+      "width": "1404",
+      "height": "2508",
+      "format": "webp",
+      "kind": "",
+      "style": "fullScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/thirdScreen",
+      "width": "324",
+      "height": "580",
+      "format": "webp",
+      "kind": "",
+      "style": "thirdScreen"
+     },
+     {
+      "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/fullScreenLandscape",
+      "width": "385",
+      "height": "689",
+      "format": "webp",
+      "kind": "",
+      "style": "fullScreenLandscape"
+     }
+    ],
+    "isAIGC": false
+   },
+   "imageList": [
+    {
+     "id": "6b015d0e4756bc8c1c394dd1",
+     "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp",
+     "width": "562",
+     "height": "1004",
+     "size": "30414",
+     "format": "webp",
+     "kind": "static",
+     "description": "",
+     "infos": [
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp",
+       "width": "562",
+       "height": "1004",
+       "format": "webp",
+       "kind": "",
+       "style": "origin"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/halfScreen",
+       "width": "487",
+       "height": "871",
+       "format": "webp",
+       "kind": "",
+       "style": "halfScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/fullScreen",
+       "width": "1404",
+       "height": "2508",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/thirdScreen",
+       "width": "324",
+       "height": "580",
+       "format": "webp",
+       "kind": "",
+       "style": "thirdScreen"
+      },
+      {
+       "url": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp?x-oss-process=style/fullScreenLandscape",
+       "width": "385",
+       "height": "689",
+       "format": "webp",
+       "kind": "",
+       "style": "fullScreenLandscape"
+      }
+     ],
+     "isAIGC": false
+    }
+   ],
+   "videoList": [],
+   "document": {
+    "id": "3893e976cab81730",
+    "blockIds": [],
+    "blockMap": {},
+    "authorMap": {},
+    "version": ""
+   },
+   "caption": [],
+   "tagIds": [
+    652
+   ],
+   "status": 1,
+   "operationStatus": 70,
+   "auditStatus": 2,
+   "modifiable": 1,
+   "createdAtTs": "1795251476",
+   "updatedAtTs": "1795433331",
+   "latestEditAtTs": "1795251477",
+   "latestReplyAtTs": "1795433252",
+   "firstIpLocation": "内蒙古",
+   "latestIpLocation": "内蒙古",
+   "moderatorRecommend": 1,
+   "version": 0,
+   "editInfo": "",
+   "downloadEnable": 0,
+   "publishedAtTs": "1795251476",
+   "prePublishOn": false,
+   "thumbnail": "https://bbs.hycdn.cn/image/common/20261121/5576912/6b015d0e4756bc8c1c394dd1_004865de.webp",
+   "isAIGCStatementOn": false
+  },
+  "user": {
+   "id": "5697037567561",
+   "nickname": "一大个面包",
+   "profile": "穷不改非，氪不改命。yj对我好点",
+   "avatarCode": 326,
+   "avatar": "https://bbs.hycdn.cn/asset/avatar/41960ab5c9ef76ea49bd7ce9306fbb5d.webp",
+   "backgroundCode": 1,
+   "isCreator": false,
+   "status": 1,
+   "operationStatus": 30,
+   "identity": 1,
+   "kind": 1,
+   "latestIpLocation": "中国",
+   "moderatorStatus": 4,
+   "moderatorChangeTime": 0,
+   "gender": 0,
+   "hgId": "1294311317550",
+   "creatorIdentifiers": [],
+   "scoreInfoList": [
+    {
+     "gameId": 101,
+     "level": 6,
+     "iconUrl": "https://bbs.hycdn.cn/asset/score/level-icon/Lv6.webp",
+     "darkModeIconUrl": "",
+     "checkedDays": 0,
+     "score": 13011,
+     "gameName": "开拓芯",
+     "levelUrl": "https://bbs.hycdn.cn/asset/score/level-name-thin/Lv6.webp"
+    }
+   ],
+   "pendant": {
+    "id": 82,
+    "iconUrl": "https://bbs.hycdn.cn/image/2026/04/17/70118c82e54a8b3f241598626cb42dfb.webp",
+    "title": "",
+    "description": ""
+   }
+  },
+  "tags": [
+   {
+    "id": 652,
+    "name": "开拓芯",
+    "description": "开拓芯是由鹰角网络发起，旨在鼓励与协助优秀团队进行游戏创作的扶持品牌。",
+    "status": 1,
+    "cover": "https://bbs.hycdn.cn/image/2023/12/07/146d9e0cbdd842a746483b1cb11c8a72.jpg",
+    "publishAtTs": 1701917226,
+    "createdAtTs": 1701917227,
+    "updatedAtTs": 1701917227,
+    "kind": 1,
+    "bulletinStatus": 0,
+    "isGameEvent": false,
+    "defaultViewKind": 3
+   }
+  ],
+  "itemRel": {
+   "like": false,
+   "collect": false
+  },
+  "userRel": {
+   "follow": false,
+   "fans": false,
+   "black": false,
+   "blacked": false,
+   "blocked": false,
+   "fansAtTs": 0
+  },
+  "itemRts": {
+   "liked": "170",
+   "collected": "31",
+   "reposted": "0",
+   "commented": "32",
+   "attitudes": [
+    {
+     "id": "default",
+     "count": "170",
+     "weight": 6
+    },
+    {
+     "id": "kiss",
+     "count": "0",
+     "weight": 5
+    },
+    {
+     "id": "call",
+     "count": "0",
+     "weight": 4
+    },
+    {
+     "id": "agree",
+     "count": "0",
+     "weight": 3
+    },
+    {
+     "id": "cry",
+     "count": "0",
+     "weight": 2
+    },
+    {
+     "id": "shock",
+     "count": "0",
+     "weight": 1
+    }
+   ]
+  },
+  "itemConfig": {
+   "itemVisibility": 2,
+   "commentSubmission": 2
+  },
+  "recommendationLabels": [],
+  "nameCardsInfo": {
+   "cards": []
+  }
+ }
+}
