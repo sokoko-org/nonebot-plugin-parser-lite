@@ -47,6 +47,7 @@
 | **壁吧专楼吧**       | ✅   | ✅         | 🚫   | 🚫         |
 | **TapTap**           | ✅   | ✅         | ✅   | 🚫         |
 | **网易大神**         | ✅   | ✅         | ✅   | 🚫         |
+| **森空岛**           | ✅   | ✅         | ✅   | 🚫         |
 
 | 平台           | 音频支持 | 评论区渲染 |
 | :------------- | :------- | :--------- |
@@ -207,7 +208,8 @@ plite_max_size=90
 # 可选值: ["acfun", "bilibili", "buff", "coolapk", "douban", "doubao",
 # "douyin", "ds", "duitang", "5eplay", "heybox", "hupu", "illu", "kuaishou",
 # "kugou", "kuwo", "linuxdo", "lofter", "miyoushe", "netease", "qsmusic",
-# "rednote", "taptap", "tieba", "weibo", "wmpvp", "x", "zhihu", "zlb"]
+# "rednote", "skyland", "taptap", "tieba", "weibo", "wmpvp", "x", "zhihu",
+# "zlb"]
 plite_disabled_platforms=["x"]
 
 # [可选] 解析冷却的平台范围：不配置或 null 为全部已启用平台，[] 为全部关闭
