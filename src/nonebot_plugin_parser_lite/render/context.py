@@ -115,7 +115,7 @@ async def build_theme_data(
     finally:
         _resource_limit.reset(token)
     if append_qrcode:
-        post["qrcode"] = _build_qrcode(result.url)
+        post["qrcode"] = _build_qrcode(result.url, color_scheme)
 
     data: ThemeData = {
         "schema_version": THEME_SCHEMA_VERSION,
@@ -404,11 +404,12 @@ async def _path_to_uri(value: Any) -> str:
     return (await Path(str(value)).resolve()).as_uri()
 
 
-def _build_qrcode(url: str) -> str:
+def _build_qrcode(url: str, color_scheme: str) -> str:
     qr = qrcode.QRCode(version=1, error_correction=1, box_size=10, border=1)
     qr.add_data(url)
     qr.make(fit=True)
-    image = qr.make_image(fill_color="black", back_color="white")
+    fill_color = "#fefefe" if color_scheme == "dark" else "#000000"
+    image = qr.make_image(fill_color=fill_color, back_color="transparent")
     buffer = BytesIO()
     image.save(buffer, format="PNG")  # pyright: ignore[reportCallIssue]
     return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}"
