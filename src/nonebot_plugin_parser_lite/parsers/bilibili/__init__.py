@@ -191,6 +191,10 @@ class BilibiliParser(BaseParser):
             if self.black_mids is None:
                 self.black_mids = set()
 
+    async def on_startup(self) -> None:
+        """预热黑名单"""
+        await self.load_black_list()
+
     async def raise_if_in_black_list(self, mid: int):
         """
         检查用户是否在黑名单中
@@ -198,7 +202,7 @@ class BilibiliParser(BaseParser):
         :raise TipException: 用户在黑名单中
         """
         if self.black_mids is None:
-            # 首次并发请求只加载一次黑名单
+            # 正常不会走这里兜底
             async with self._black_list_lock:
                 if self.black_mids is None:
                     await self.load_black_list()
