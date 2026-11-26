@@ -1,22 +1,24 @@
 """将 Theme API 数据渲染为编码后的图片"""
 
 import asyncio
+from collections.abc import Mapping
 
 # from datetime import datetime
 from io import BytesIO
 import re
-from typing import Literal
+from typing import Any, Literal
 
 from anyio import Path
 from jinja2 import Environment, FileSystemLoader
 from nonebot import logger
+from PIL import Image
 
 from ..config import gconfig, pconfig
 from ..utils.ffmpeg import FFmpeg
 from .context import ThemeData
 from .engine import render_html
 from .fonts import ensure_emoji_font, warmup_emoji_font
-from .theme import ThemeDefinition, ThemeManager
+from .theme import ThemeDefinition, ThemeManager, ThemeTemplate
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -65,8 +67,21 @@ async def render_theme_data(
         TEMPLATES_DIR, pconfig.theme_dirs
     ).resolve(data["theme_id"])
     selected = await theme.resolve_template(data["post"]["platform"]["id"])
-    env = _environment_for(selected.root)
-    html = await env.get_template(selected.name).render_async(data=data)
+    return await render_template(
+        selected, data, color_scheme=data["theme"], image_format=image_format
+    )
+
+
+async def render_template(
+    template: ThemeTemplate,
+    data: Mapping[str, Any],
+    *,
+    color_scheme: str,
+    image_format: Literal["jpeg", "webp"],
+) -> tuple[Literal["jpeg", "webp"], bytes]:
+    """渲染主题模板为图片；模板上下文只有 ``data``，并自动注入内置图标样式"""
+    env = _environment_for(template.root)
+    html = await env.get_template(template.name).render_async(data=data)
     icon_css = await _get_icon_css()
     style = f'<style data-parser-fallback="icon-css">\n{icon_css}\n</style>'
     head = re.search(r"<head\b[^>]*>", html, flags=re.IGNORECASE)
@@ -82,11 +97,18 @@ async def render_theme_data(
     canvas = await asyncio.to_thread(
         render_html,
         html,
-        base_url=selected.base_url,
-        color_scheme=data["theme"],
+        base_url=template.base_url,
+        color_scheme=color_scheme,
         emoji_font=emoji_font,
         emoji_style=pconfig.emoji_style,
     )
+    return await encode_canvas(canvas, image_format)
+
+
+async def encode_canvas(
+    canvas: Image.Image, image_format: Literal["jpeg", "webp"]
+) -> tuple[Literal["jpeg", "webp"], bytes]:
+    """编码并关闭画布，返回实际图片格式和图片内容"""
     if image_format == "webp" and max(canvas.size) > 16383:
         logger.warning("渲染结果尺寸超过 WebP 编码上限，已改用 JPEG 输出")
         image_format = "jpeg"

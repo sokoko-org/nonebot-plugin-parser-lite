@@ -312,6 +312,7 @@ def remove_nonebot_runtime(root: Path) -> None:
         root / PACKAGE / "render/message_render.py",
         root / PACKAGE / "render/forward.py",
         root / PACKAGE / "render/image_render.py",
+        root / PACKAGE / "matchers/stats.py",
     )
     for target in targets:
         if not target.exists() and not target.is_symlink():
@@ -321,7 +322,7 @@ def remove_nonebot_runtime(root: Path) -> None:
         else:
             target.unlink()
         migration_log(
-            f"移除独立版不需要的消息投递模块: {target.relative_to(root).as_posix()}"
+            f"移除独立版不需要的 NoneBot 运行时模块: {target.relative_to(root).as_posix()}"
         )
 
 

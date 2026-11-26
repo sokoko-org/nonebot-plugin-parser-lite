@@ -1,30 +1,15 @@
-from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from anyio import Path
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, PrivateMessageEvent
+from matcher_test_support import ADMIN_QQ, CURRENT_GROUP, TARGET_GROUP
+from matcher_test_support import command_context as context
 from nonebot.internal.params import DependencyCache
 from nonebot.matcher import matchers
 from nonebot_plugin_alconna import Match, UniMessage
-from nonebot_plugin_uninfo import (
-    Member,
-    Role,
-    Scene,
-    SceneType,
-    Session,
-    SupportScope,
-    User,
-    get_session,
-)
+from nonebot_plugin_uninfo import Member, Role, get_session
 import pytest
-from render_test_support import ROOT  # noqa: F401  初始化插件包导入环境
 
 from nonebot_plugin_parser_lite.matchers import filter as switches
-
-ADMIN_QQ = "10001"
-CURRENT_GROUP = "20001"
-TARGET_GROUP = "20002"
-BOT_QQ = "30001"
 
 
 @pytest.fixture
@@ -33,46 +18,6 @@ def switch_state(monkeypatch, tmp_path):
         switches, "_DISABLED_TARGETS_PATH", Path(tmp_path / "disabled.json")
     )
     monkeypatch.setattr(switches, "_DISABLED_TARGETS_SET", set())
-
-
-def context(*, superuser=True, private=False):
-    bot = Bot(
-        SimpleNamespace(
-            get_name=lambda: "OneBot V11",
-            config=SimpleNamespace(superusers={ADMIN_QQ} if superuser else set()),
-        ),  # pyright: ignore[reportArgumentType]
-        BOT_QQ,
-    )
-    event_data = {
-        "time": 1,
-        "self_id": int(BOT_QQ),
-        "post_type": "message",
-        "message_type": "private" if private else "group",
-        "sub_type": "friend" if private else "normal",
-        "user_id": int(ADMIN_QQ),
-        "message_id": 1,
-        "font": 0,
-        "message": [],
-        "original_message": [],
-        "raw_message": "",
-        "to_me": True,
-        "sender": {"user_id": int(ADMIN_QQ), "role": "admin"},
-    }
-    if not private:
-        event_data["group_id"] = int(CURRENT_GROUP)
-    event_class = PrivateMessageEvent if private else GroupMessageEvent
-    event = event_class.model_validate(event_data)
-    session = Session(
-        self_id=bot.self_id,
-        adapter="OneBot V11",
-        scope=SupportScope.qq_client,
-        scene=Scene(
-            ADMIN_QQ if private else CURRENT_GROUP,
-            SceneType.PRIVATE if private else SceneType.GROUP,
-        ),
-        user=User(ADMIN_QQ),
-    )
-    return bot, event, session
 
 
 async def run_switch(argument="", *, enabled=False, **kwargs):

@@ -138,6 +138,17 @@ class Config(BaseModel):
     """哔哩哔哩空降服务地址, wiki: https://github.com/hanydd/BilibiliSponsorBlock/wiki/API"""
     plite_bsb_categories: list[str] = []
     """参与裁切的片段分类，配置了服务地址时必填"""
+    plite_stats_max_days: int = 365
+    """解析统计命令可查询的最大天数"""
+    plite_stats_top_targets: int = 10
+    """全局解析统计展示的会话排行数量"""
+
+    @field_validator("plite_stats_max_days", "plite_stats_top_targets")
+    @classmethod
+    def validate_stats_limits(cls, value: int) -> int:
+        if value < 1:
+            raise ValueError("解析统计的天数和排行数量必须大于 0")
+        return value
 
     @field_validator("plite_download_command")
     @classmethod
@@ -385,6 +396,16 @@ class Config(BaseModel):
     def bsb_categories(self) -> list[str]:
         """参与裁切的片段分类"""
         return self.plite_bsb_categories
+
+    @property
+    def stats_max_days(self) -> int:
+        """解析统计命令可查询的最大天数"""
+        return self.plite_stats_max_days
+
+    @property
+    def stats_top_targets(self) -> int:
+        """全局解析统计展示的会话排行数量"""
+        return self.plite_stats_top_targets
 
 
 # 初始化配置实例

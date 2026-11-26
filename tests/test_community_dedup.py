@@ -1,72 +1,19 @@
 import asyncio
-from collections import OrderedDict
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
 
-from nonebot.matcher import current_event
-from nonebot_plugin_uninfo import Scene, SceneType, Session, SupportScope, User
+from matcher_test_support import patched_pipeline, search, session
 import pytest
-from render_test_support import set_send_layout
 
 from nonebot_plugin_parser_lite import matchers
 from nonebot_plugin_parser_lite.matchers import limit
-from nonebot_plugin_parser_lite.matchers.rule import SearchResult
 from nonebot_plugin_parser_lite.parsers.bilibili import BilibiliParser
-from nonebot_plugin_parser_lite.parsers.ds import DsParser
-from nonebot_plugin_parser_lite.parsers.registry import REGISTRY
 from nonebot_plugin_parser_lite.parsers.taptap import TapTapParser
-
-
-def session(target="20001", user="10001", *, private=False):
-    return Session(
-        self_id="30001",
-        adapter="OneBot V11",
-        scope=SupportScope.qq_client,
-        scene=Scene(target, SceneType.PRIVATE if private else SceneType.GROUP),
-        user=User(user),
-    )
-
-
-def search(url, parser=None):
-    if parser is None:
-        parser = TapTapParser if "taptap.cn" in url else DsParser
-    keyword, searched = parser.search_url(url)
-    return SearchResult(url, keyword, searched)
 
 
 @pytest.fixture
 def pipeline(monkeypatch):
-    parsed = AsyncMock(return_value=object())
-    rendered = AsyncMock(return_value="summary")
-    sent = AsyncMock()
-
-    async def content(*_args, **_kwargs):
-        yield "body"
-
-    monkeypatch.setattr(limit.ParseCooldown, "recent", OrderedDict())
-    monkeypatch.setattr(limit.ParseCooldown, "active", {})
-    monkeypatch.setattr(
-        REGISTRY,
-        "_keyword_class_map",
-        {
-            rule.keyword: parser
-            for parser in (TapTapParser, DsParser, BilibiliParser)
-            for rule in parser._key_patterns
-        },
-    )
-    monkeypatch.setattr(REGISTRY, "_loaded", True)
-    monkeypatch.setattr(matchers, "get_or_parse_result", parsed)
-    monkeypatch.setattr(matchers.RENDERER, "render_messages", rendered)
-    monkeypatch.setattr(matchers.RENDERER, "send_content", content)
-    monkeypatch.setattr(matchers, "send_with_media_fallback", sent)
-    monkeypatch.setattr(matchers.UniHelper, "message_reaction", AsyncMock())
-    monkeypatch.setattr(matchers.pconfig, "plite_lazy_download", False)
-    set_send_layout(monkeypatch)
-    monkeypatch.setattr(matchers.pconfig, "plite_parse_dedup_minutes", 30)
-    monkeypatch.setattr(matchers.pconfig, "plite_parse_dedup_platforms", None)
-    token = current_event.set(object())  # pyright: ignore[reportArgumentType]
-    yield SimpleNamespace(parsed=parsed, sent=sent)
-    current_event.reset(token)
+    with patched_pipeline(monkeypatch) as stubs:
+        yield stubs
 
 
 @pytest.mark.asyncio

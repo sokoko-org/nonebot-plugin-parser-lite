@@ -12,6 +12,7 @@ from .data import ParseResult
 from .exception import ParseException
 from .parsers.base import BaseParser
 from .render import ThemeData, render_theme_data, resolve_parse_result
+from .stats import STATS
 from .utils.common import LimitedSizeDict
 from .utils.log import logger
 from .utils.scheduler import scheduler
@@ -66,12 +67,14 @@ def _ensure_runtime_started() -> None:
 async def shutdown_runtime() -> None:
     from .download import DOWNLOADER
     from .render.fonts import shutdown_emoji_fonts
+    from .stats import close_stats
 
     global _runtime_started
     _runtime_started = False
     await scheduler.shutdown()
     await shutdown_emoji_fonts()
     await DOWNLOADER.aclose()
+    await close_stats()
     clear_result_cache()
 
 
@@ -228,13 +231,19 @@ class Parser:
             matched = self.match(source) if isinstance(source, str) else source
             if step is ParseStep.MATCH:
                 return matched
+            platform = str(matched.parser_type.platform.name)
             result = _RESULT_CACHE.get(matched.cache_key)
             if result is None:
-                parser = await self._instance(matched.parser_type)
-                result = await parser.parse(matched.keyword, matched.searched)
+                try:
+                    parser = await self._instance(matched.parser_type)
+                    result = await parser.parse(matched.keyword, matched.searched)
+                except Exception:
+                    await STATS.record(platform, success=False)
+                    raise
                 _RESULT_CACHE[matched.cache_key] = result
             else:
                 logger.debug("命中解析结果缓存: %s", matched.cache_key)
+            await STATS.record(platform, success=True)
         if step is ParseStep.PARSE:
             return result
         resolved = await resolve_parse_result(

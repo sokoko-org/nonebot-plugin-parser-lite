@@ -162,7 +162,35 @@ configure(plite_max_comments=10, plite_disabled_platforms=["x"])
 - 首次进入异步解析时，会在当前事件循环自动注册周期缓存清理任务
 - 应用程序退出前，可调用 `await shutdown_runtime()` 关闭后台定时任务
 
+### 3. 解析统计
+
+可以使用以下方法来查询
+
+```python
+from nonebot_plugin_parser_lite import query_stats
+
+summary = await query_stats(days=7)
+print(summary.total.success, summary.total.failure)
+for platform, count in summary.platforms.items():
+    print(platform, count.total, count.failure)
+for hour, count in summary.hourly.items():  # 0-23 时，本地时间
+    print(hour, count.total)
+
+# 原始记录，可按任意粒度自行统计
+from datetime import datetime, timedelta
+from nonebot_plugin_parser_lite import query_records
+
+for record in await query_records(since=datetime.now() - timedelta(hours=1)):
+    print(record.time.isoformat(), record.platform, record.success)
+
+# 渲染统计图（趋势柱状图 + 平台排行）
+from pathlib import Path
+from nonebot_plugin_parser_lite import render_stats_image
+
+image_format, image = await render_stats_image(summary, platform_names={"bilibili": "哔哩哔哩"})
+Path(f"stats.{image_format}").write_bytes(image)
+```
+
 ## 第三方许可
 
 本项目自身代码采用 [MIT](LICENSE)。第三方代码和资源保留各自许可，来源、许可例外及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
-

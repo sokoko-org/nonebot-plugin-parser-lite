@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ data.theme }}">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{{ data.stats.title }}</title>
+        <link rel="stylesheet" href="tailwind.css" />
+    </head>
+    <body class="m-0 w-[620px] font-sans antialiased">
+        {% set s = data.stats %}
+        {% macro rate(value) %}{% if value is none %}-{% else %}{{ '%.1f' | format(value) }}%{% endif %}{% endmacro %}
+        {% macro tile(label, value, extra="") %}
+        <div class="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-3 dark:border-slate-800 dark:bg-slate-900">
+            <div class="text-xs text-slate-500 dark:text-slate-400">{{ label }}</div>
+            <div class="mt-1 text-[22px] font-bold leading-7 {{ extra }}">{{ value }}</div>
+        </div>
+        {% endmacro %}
+        {% macro section(title, legend=false) %}
+        <section class="mt-4 rounded-xl border border-slate-200 bg-white px-[18px] py-4 dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center justify-between">
+                <div class="text-[15px] font-bold">{{ title }}</div>
+                {% if legend %}
+                <div class="flex gap-3 text-xs text-slate-500 dark:text-slate-400">
+                    <span class="flex items-center gap-1"><span class="inline-block size-2 rounded-sm bg-blue-500 dark:bg-blue-400"></span>成功</span>
+                    <span class="flex items-center gap-1"><span class="inline-block size-2 rounded-sm bg-rose-500 dark:bg-rose-400"></span>失败</span>
+                </div>
+                {% endif %}
+            </div>
+            {{ caller() }}
+        </section>
+        {% endmacro %}
+        {% macro bars(items, height) %}
+        <div class="mt-3.5 flex items-end gap-[3px]" style="height: {{ height }}px">
+            {% for bar in items %}
+            <div class="flex h-full flex-1 flex-col justify-end">
+                {% if bar.total %}
+                <div class="text-center text-[10px] text-slate-500 dark:text-slate-400">{{ bar.total }}</div>
+                <div class="flex flex-col overflow-hidden rounded-t-[3px]" style="height: {{ bar.success_pct + bar.failure_pct }}%">
+                    <div class="bg-rose-500 dark:bg-rose-400" style="height: {{ (bar.failure_pct * 100 / (bar.success_pct + bar.failure_pct)) | round(2) }}%"></div>
+                    <div class="flex-1 bg-blue-500 dark:bg-blue-400"></div>
+                </div>
+                {% else %}
+                <div class="h-0.5 rounded-sm bg-slate-100 dark:bg-slate-800"></div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endmacro %}
+        {% macro ranking(rows) %}
+        {% for row in rows %}
+        <div class="mt-2.5 flex items-center gap-2.5 text-[13px]">
+            <div class="w-[170px] shrink-0 truncate">{{ row.name }}</div>
+            <div class="flex h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div class="bg-blue-500 dark:bg-blue-400" style="width: {{ row.success_pct }}%"></div>
+                <div class="bg-rose-500 dark:bg-rose-400" style="width: {{ row.failure_pct }}%"></div>
+            </div>
+            <div class="w-[150px] shrink-0 whitespace-nowrap text-right text-slate-500 dark:text-slate-400">
+                <b class="text-slate-900 dark:text-slate-100">{{ row.total }}</b>
+                {%- if row.failure %} · <span class="text-rose-500 dark:text-rose-400">失败 {{ row.failure }}</span>{% endif %} · {{ rate(row.rate) }}
+            </div>
+        </div>
+        {% else %}
+        <div class="mt-3 text-[13px] text-slate-500 dark:text-slate-400">暂无解析记录</div>
+        {% endfor %}
+        {% endmacro %}
+
+        <main class="w-[620px] rounded-2xl bg-slate-50 p-7 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+            <div class="flex items-end justify-between">
+                <div>
+                    <div class="text-[26px] font-bold">{{ s.title }}</div>
+                    <div class="mt-1 break-all text-[13px] text-slate-500 dark:text-slate-400">{{ s.since }} ~ {{ s.until }} · {{ s.scope.label }}</div>
+                </div>
+                <div class="whitespace-nowrap rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[13px] text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">近 {{ s.days }} 天</div>
+            </div>
+
+            <div class="mt-5 flex gap-2.5">
+                {{ tile("总解析", s.total.total) }}
+                {{ tile("成功率", rate(s.total.rate)) }}
+                {{ tile("失败", s.total.failure, "text-rose-500 dark:text-rose-400" if s.total.failure else "") }}
+                {{ tile("日均", s.average) }}
+                {{ tile("峰值 " ~ s.peak.date[5:] if s.peak else "峰值", s.peak.total if s.peak else "-") }}
+            </div>
+
+            {% call section("解析趋势（" ~ s.chart.unit ~ "）", legend=true) %}
+            {{ bars(s.chart.bars, 140) }}
+            <div class="mt-1.5 flex gap-[3px]">
+                {% for bar in s.chart.bars %}<div class="flex-1 whitespace-nowrap text-center text-[10px] text-slate-500 dark:text-slate-400">{{ bar.label }}</div>{% endfor %}
+            </div>
+            {% endcall %}
+
+            {% if s.total.total %}
+            {% call section("活跃时段", legend=true) %}
+            {{ bars(s.hourly, 90) }}
+            <div class="mt-1.5 flex gap-[3px]">
+                {% for item in s.hourly %}<div class="flex-1 text-center text-[10px] text-slate-500 dark:text-slate-400">{% if item.hour % 3 == 0 %}{{ item.hour }}{% endif %}</div>{% endfor %}
+            </div>
+            {% endcall %}
+            {% endif %}
+
+            {% call section("平台排行") %}{{ ranking(s.platforms) }}{% endcall %}
+            {% if s.scope.global %}
+            {% call section("会话排行") %}{{ ranking(s.targets) }}{% endcall %}
+            {% endif %}
+
+            <div class="mt-4 text-right text-xs text-slate-500 dark:text-slate-400">{{ data.meta.bot_name }} · {{ data.meta.rendering_time }}</div>
+        </main>
+    </body>
+</html>
