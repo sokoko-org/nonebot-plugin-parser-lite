@@ -2,14 +2,16 @@
 
 import asyncio
 import base64
+from collections.abc import Callable, Coroutine, Iterable
 import contextlib
 from dataclasses import dataclass
+from functools import partial
 import hashlib
 from io import BytesIO
 import tarfile
-from typing import Final, Literal
+from typing import Final, Literal, TypeVar
 
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup, Comment, Stylesheet
 from httpx import HTTPError
 import regex
 import ujson
@@ -21,6 +23,7 @@ from ..path import data_dir
 from ..utils.log import logger
 
 EmojiStyle = Literal["system", "twitter", "google"]
+T = TypeVar("T")
 FONT_DIR = data_dir / "fonts"
 LOCAL_FONT_TIMEOUT: Final = 0.7
 """等待本地字体缓存落地的秒数，超时则认为需要联网下载"""
@@ -54,16 +57,25 @@ class EmojiFont:
     digest: str
 
 
-@dataclass(frozen=True, slots=True)
-class FontRelease:
-    version: str
-    urls: tuple[str, ...]
-    integrity: str
-
-
 _FONTS: dict[str, EmojiFont | None] = {}
-_FONT_TASKS: dict[str, asyncio.Task[EmojiFont | None]] = {}
-_UPDATE_TASKS: dict[str, asyncio.Task[None]] = {}
+"""已准备好的字体，纯数据可跨事件循环共享；None 表示本次运行准备失败"""
+_TASKS: dict[str, asyncio.Task[None]] = {}
+"""进行中的准备/更新任务，结束后自动移除；只在创建它的事件循环中有效"""
+
+
+def _provider(style: EmojiStyle) -> str:
+    return "twitter" if style == "system" else style
+
+
+def _spawn(key: str, coro: Coroutine[None, None, None]) -> asyncio.Task[None]:
+    task = _TASKS[key] = asyncio.create_task(coro)
+
+    def discard(done: asyncio.Task[None]) -> None:
+        if _TASKS.get(key) is done:
+            del _TASKS[key]
+
+    task.add_done_callback(discard)
+    return task
 
 
 def _make_font(provider: str, data: bytes) -> EmojiFont:
@@ -74,76 +86,65 @@ def _make_font(provider: str, data: bytes) -> EmojiFont:
 
 
 async def _load_cached_font(provider: str) -> tuple[EmojiFont, str] | None:
+    """读取本地字体，返回 (字体, 版本)；摘要不符说明写入不完整"""
     manifest = FONT_DIR / f"{provider}.json"
     if not await manifest.is_file():
         return None
     metadata = ujson.loads(await manifest.read_text(encoding="utf-8"))
-    data = await (FONT_DIR / metadata["file"]).read_bytes()
-    font = _make_font(provider, data)
+    font = _make_font(provider, await (FONT_DIR / metadata["file"]).read_bytes())
     if font.digest != metadata["sha256"]:
         raise ValueError("本地字体内容与摘要不符")
     return font, metadata["version"]
 
 
-async def _save_font(provider: str, version: str, data: bytes, digest: str) -> None:
+async def _save_font(provider: str, version: str, font: EmojiFont) -> None:
     await FONT_DIR.mkdir(parents=True, exist_ok=True)
-    filename = f"{provider}-{version}.woff2"
-    metadata = ujson.dumps({"version": version, "file": filename, "sha256": digest})
-    for target, content in (
-        (FONT_DIR / filename, data),
-        (FONT_DIR / f"{provider}.json", metadata.encode()),
+    filename = f"{provider}.woff2"
+    metadata = {"version": version, "file": filename, "sha256": font.digest}
+    (data,) = font.resources.values()
+    for name, content in (
+        (filename, data),
+        (f"{provider}.json", ujson.dumps(metadata).encode()),
     ):
-        temporary = target.with_name(f"{target.name}.tmp")
+        temporary = FONT_DIR / f"{name}.tmp"
         await temporary.write_bytes(content)
-        await temporary.replace(target)
-    async for previous in FONT_DIR.glob(f"{provider}-*.woff2"):
-        if previous.name != filename:
-            try:
-                await previous.unlink(missing_ok=True)
-            except OSError as exc:
-                logger.warning(f"清理旧 emoji 字体失败: {previous}: {exc}")
+        await temporary.replace(FONT_DIR / name)
+    # 旧版本按版本号命名字体文件
+    async for legacy in FONT_DIR.glob(f"{provider}-*.woff2"):
+        with contextlib.suppress(OSError):
+            await legacy.unlink()
 
 
-async def _get(urls: tuple[str, ...], *, max_size: int) -> bytes:
+async def _get(urls: Iterable[str], max_size: int, parse: Callable[[bytes], T]) -> T:
+    """依次尝试各镜像，返回第一个下载并解析成功的结果"""
     errors = []
     for url in urls:
         try:
             async with asyncio.timeout(15):
-                return await DOWNLOADER.content(url, max_size=max_size)
+                data = await DOWNLOADER.content(url, max_size=max_size)
+            return await asyncio.to_thread(parse, data)
         except (
             DownloadException,
             RetryableDownloadError,
             HTTPError,
             TimeoutError,
+            ValueError,
+            KeyError,
+            tarfile.TarError,
         ) as exc:
             errors.append(f"{url}: {exc}")
     raise DownloadException("; ".join(errors))
 
 
-async def _latest_release(provider: str) -> FontRelease:
-    package, _ = FONT_PACKAGES[provider]
-
-    metadata = ujson.loads(
-        await _get(
-            tuple(f"{registry}/{package}/latest" for registry in NPM_REGISTRIES),
-            max_size=MAX_METADATA_BYTES,
-        )
-    )
-    version = metadata["version"]
-    return FontRelease(
-        version,
-        tuple(
-            f"{registry}/{package}/-/{package.rsplit('/', 1)[-1]}-{version}.tgz"
-            for registry in reversed(NPM_REGISTRIES)
-        ),
-        metadata["dist"]["integrity"],
-    )
+def _parse_release(raw: bytes) -> tuple[str, str]:
+    """npm ``latest`` 元数据 -> (版本, 完整性校验值)"""
+    metadata = ujson.loads(raw)
+    return metadata["version"], metadata["dist"]["integrity"]
 
 
-def _extract_font(provider: str, release: FontRelease, data: bytes) -> bytes:
-    algorithm, expected = release.integrity.split("-", 1)
-    actual = base64.b64encode(hashlib.new(algorithm, data).digest()).decode()
-    if actual != expected:
+def _extract_font(provider: str, integrity: str, data: bytes) -> bytes:
+    algorithm, expected = integrity.split("-", 1)
+    if base64.b64encode(hashlib.new(algorithm, data).digest()).decode() != expected:
         raise ValueError(f"{provider} 字体包完整性校验失败")
     with tarfile.open(fileobj=BytesIO(data), mode="r|gz") as archive:
         for info in archive:
@@ -153,112 +154,96 @@ def _extract_font(provider: str, release: FontRelease, data: bytes) -> bytes:
                 raise ValueError(
                     f"{provider} 字体类型无效或超过 {MAX_FONT_BYTES} 字节限制"
                 )
-            member = archive.extractfile(info)
-            if member is not None:
+            if member := archive.extractfile(info):
                 with member:
                     return member.read(MAX_FONT_BYTES)
     raise ValueError(f"{provider} 字体包缺少 WOFF2 字体")
 
 
-async def _download_font(provider: str, release: FontRelease) -> bytes:
-    errors = []
-    for url in release.urls:
-        try:
-            data = await _get((url,), max_size=MAX_FONT_ARCHIVE_BYTES)
-            return await asyncio.to_thread(_extract_font, provider, release, data)
-        except (DownloadException, ValueError, KeyError, tarfile.TarError) as exc:
-            errors.append(f"{url}: {exc}")
-    raise ValueError("; ".join(errors))
-
-
 async def _fetch_font(provider: str, cached_version: str | None) -> EmojiFont | None:
-    """联网检查版本并在有更新时下载，返回新字体；无更新或失败返回 None"""
-    release = await _latest_release(provider)
-    if cached_version is not None and cached_version == release.version:
+    """从 npm 获取最新字体；与本地版本相同时返回 None"""
+    package = FONT_PACKAGES[provider][0]
+    version, integrity = await _get(
+        (f"{registry}/{package}/latest" for registry in NPM_REGISTRIES),
+        MAX_METADATA_BYTES,
+        _parse_release,
+    )
+    if version == cached_version:
         return None
-    data = await _download_font(provider, release)
+    tarball = f"{package}/-/{package.rsplit('/', 1)[-1]}-{version}.tgz"
+    data = await _get(
+        (f"{registry}/{tarball}" for registry in reversed(NPM_REGISTRIES)),
+        MAX_FONT_ARCHIVE_BYTES,
+        partial(_extract_font, provider, integrity),
+    )
     font = _make_font(provider, data)
-    await _save_font(provider, release.version, data, font.digest)
-    logger.info(f"已更新 {provider} emoji 字体: {release.version}")
+    await _save_font(provider, version, font)
+    logger.info(f"已更新 {provider} emoji 字体: {version}")
     return font
 
 
 async def _update_font(provider: str, cached_version: str | None) -> None:
-    """后台更新字体缓存；结果留给下次渲染使用，不阻塞当前渲染"""
     try:
-        font = await _fetch_font(provider, cached_version)
-    except (DownloadException, OSError, ValueError, KeyError, tarfile.TarError) as exc:
-        logger.warning(f"检查或更新 {provider} emoji 字体失败，沿用本地字体: {exc}")
-        return
-    if font is not None:
-        # 已有渲染正在使用旧字体对象，替换缓存即可，不影响进行中的渲染
-        _FONTS[provider] = font
+        if font := await _fetch_font(provider, cached_version):
+            _FONTS[provider] = font
+    except (DownloadException, OSError) as exc:
+        logger.warning(
+            f"无法获取 {provider} emoji 字体，请检查 npm 或镜像站连接: {exc}"
+        )
 
 
-async def _prepare_font(provider: str) -> EmojiFont | None:
-    """准备字体：本地缓存可用时立即返回，版本检查放到后台进行"""
-    cached = None
+async def _prepare_font(provider: str) -> None:
+    """本地字体可用时立即生效，版本检查放到后台；否则联网下载"""
     try:
         cached = await _load_cached_font(provider)
     except (OSError, ValueError, KeyError) as exc:
         logger.warning(f"读取 {provider} emoji 字体缓存失败，将重新下载: {exc}")
+        cached = None
+    if cached is None:
+        await _update_font(provider, None)
+        _FONTS.setdefault(provider, None)
+    else:
+        _FONTS[provider] = cached[0]
+        _spawn(f"{provider}:update", _update_font(provider, cached[1]))
 
-    if cached is not None:
-        # 本地字体已经可用，不必为了版本检查而等待网络
-        _UPDATE_TASKS[provider] = asyncio.create_task(
-            _update_font(provider, cached[1])
-        )
-        return cached[0]
 
-    try:
-        return await _fetch_font(provider, None)
-    except (DownloadException, OSError, ValueError, KeyError, tarfile.TarError) as exc:
-        logger.warning(
-            f"无法准备 {provider} emoji 字体，请检查 npm 或镜像站连接: {exc}"
-        )
-        return None
+def _start(provider: str) -> asyncio.Task[None]:
+    """返回当前事件循环中的准备任务；其他事件循环留下的任务不能 await，直接重建"""
+    task = _TASKS.get(provider)
+    if task is None or task.get_loop() is not asyncio.get_running_loop():
+        task = _spawn(provider, _prepare_font(provider))
+    return task
 
 
 def warmup_emoji_font(style: EmojiStyle) -> None:
-    """启动字体准备任务"""
-    provider = "twitter" if style == "system" else style
-    if provider not in _FONTS and provider not in _FONT_TASKS:
-        _FONT_TASKS[provider] = asyncio.create_task(_prepare_font(provider))
+    """启动字体准备；版本检查每次进程启动一次"""
+    if _provider(style) not in _FONTS:
+        _start(_provider(style))
 
 
 async def shutdown_emoji_fonts() -> None:
-    """关闭下载器前停止仍在运行的字体准备与后台更新任务"""
-    tasks = (*_FONT_TASKS.values(), *_UPDATE_TASKS.values())
+    """停止当前事件循环中的字体任务；已加载的字体保留"""
+    loop = asyncio.get_running_loop()
+    tasks = [task for task in _TASKS.values() if task.get_loop() is loop]
     for task in tasks:
         task.cancel()
     await asyncio.gather(*tasks, return_exceptions=True)
-    _FONT_TASKS.clear()
-    _UPDATE_TASKS.clear()
 
 
 async def ensure_emoji_font(style: EmojiStyle) -> EmojiFont | None:
-    """每次启动检查一次版本；并发预热和渲染共享同一任务及结果
+    """返回可用字体；并发的预热与渲染共享同一准备任务
 
-    ``system`` 样式下字体只是系统 emoji 之外的兜底，首次下载未完成时直接
-    使用系统字族渲染，不让首张图片等待网络
+    ``system`` 样式下字体只是系统 emoji 之外的兜底：本地字体读取很快，
+    需要联网下载时不等待，直接用系统字族渲染这一张图
     """
-    provider = "twitter" if style == "system" else style
+    provider = _provider(style)
     if provider not in _FONTS:
-        warmup_emoji_font(style)
-        task = _FONT_TASKS[provider]
-        if style == "system" and not task.done():
-            # 读取本地缓存只需几毫秒，给准备任务一个落地的机会；
-            # 真正要联网下载时则直接放行，用系统字族渲染这一张图
-            with contextlib.suppress(TimeoutError):
-                await asyncio.wait_for(asyncio.shield(task), LOCAL_FONT_TIMEOUT)
-            if not task.done():
-                return None
-        try:
-            _FONTS[provider] = await asyncio.shield(task)
-        finally:
-            if task.done():
-                _FONT_TASKS.pop(provider, None)
-    font = _FONTS[provider]
+        task = asyncio.shield(_start(provider))
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(
+                task, LOCAL_FONT_TIMEOUT if style == "system" else None
+            )
+    font = _FONTS.get(provider)
     if font is None and style != "system":
         raise RuntimeError(f"无法准备 {provider} emoji 字体，请检查 npm 或镜像站连接")
     return font
@@ -269,7 +254,8 @@ def apply_emoji_font(
 ) -> None:
     if font is not None:
         stylesheet = page.new_tag("style")
-        stylesheet.string = font.css
+        # 须与解析出的 <style> 同类型，否则 get_text() 读不到，后续改写会清空它
+        stylesheet.string = Stylesheet(font.css)
         (page.head or page).insert(0, stylesheet)
     families = (
         (*SYSTEM_EMOJI_FAMILIES, "ParserEmoji")
