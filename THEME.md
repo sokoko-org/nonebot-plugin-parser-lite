@@ -55,6 +55,7 @@ my-theme/
 ├── default.html.jinja    # 默认兜底模板（通用）
 ├── music.html.jinja      # 音乐类平台通用模板
 ├── netease.html.jinja    # 网易云音乐专属模板
+├── stats.html.jinja      # 解析统计图模板（可选）
 ├── theme.css             # 主题自定义样式表
 └── assets/               # 静态资源目录
     ├── logo.png
@@ -174,6 +175,56 @@ acfun, bilibili, douyin, kuaishou, kugou, netease, x, weibo, rednote,
 qsmusic, kuwo, tieba, zhihu, duitang, heybox, lofter, buff, coolapk,
 illu, hupu, miyoushe, douban, 5eplay, doubao, linuxdo, wmpvp, zlb,
 taptap, ds, qqmusic
+```
+
+### 3. 解析统计图模板 (`stats.html.jinja`)
+
+统计图模板的上下文只有 `data`，字符串均已转义
+
+```javascript
+data.schema_version; // [number] 协议版本号 (1)
+data.theme; // [string] "light" | "dark"
+data.theme_id; // [string] 当前生效的主题 ID
+data.meta; // [object] bot_name / rendering_time / width，同帖子模板
+data.stats; // [object] 统计数据
+```
+
+#### `data.stats`
+
+| 字段        | 类型             | 说明                                                                         |
+| ----------- | ---------------- | ---------------------------------------------------------------------------- |
+| `title`     | `string`         | 图表标题                                                                     |
+| `days`      | `number`         | 统计天数（含今天）                                                           |
+| `since`     | `string`         | 起始日期 `YYYY-MM-DD`                                                        |
+| `until`     | `string`         | 结束日期 `YYYY-MM-DD`（今天）                                                |
+| `scope`     | `object`         | `global`（是否全部会话）、`target`（会话标识或 `null`）、`label`（展示文本） |
+| `total`     | `Count`          | 总计                                                                         |
+| `average`   | `number`         | 日均次数（一位小数）                                                         |
+| `peak`      | `object \| null` | 次数最多的一天：`date`、`total`；无记录时为 `null`                           |
+| `chart`     | `object`         | 趋势图：`bucket_days`（每柱天数）、`unit`（如「每柱 3 天」）、`bars`         |
+| `hourly`    | `array`          | 24 项，按 0-23 时排列（本地时间），每项为 `Count` 加 `hour`                  |
+| `platforms` | `array`          | 平台排行，每项为 `Count` 加 `id`、`name`                                     |
+| `targets`   | `array`          | 会话排行（仅全局解析统计，否则为空数组），每项为 `Count` 加 `id`、`name`     |
+
+排行超出上限的部分会合并为一项，其 `id` 为 `null`、`name` 为「其他 N 项」
+
+`chart.bars` 每项为 `Count` 加 `start`、`end`（该柱覆盖的日期）和 `label`（建议显示的横轴标签，可能为空字符串）
+
+#### `Count` 通用字段
+
+| 字段          | 类型             | 说明                                                |
+| ------------- | ---------------- | --------------------------------------------------- |
+| `total`       | `number`         | 总次数                                              |
+| `success`     | `number`         | 成功次数                                            |
+| `failure`     | `number`         | 失败次数                                            |
+| `rate`        | `number \| null` | 成功率 0-100（一位小数），无记录时为 `null`         |
+| `success_pct` | `number`         | 成功数相对同组最大总数的百分比，可直接用作柱高/条宽 |
+| `failure_pct` | `number`         | 失败数相对同组最大总数的百分比                      |
+
+```jinja
+{% for bar in data.stats.hourly %}
+  <div class="bar" style="height: {{ bar.success_pct + bar.failure_pct }}%">{{ bar.total }}</div>
+{% endfor %}
 ```
 
 ## 五、Theme API v1 数据结构
@@ -598,5 +649,6 @@ body {
 - 内置默认主题源码：`src/nonebot_plugin_parser_lite/render/templates/`
   - `default.html.jinja` - 默认模板
   - `music.html.jinja` - 音乐类平台模板（唱片播放器样式）
+  - `stats.html.jinja` - 解析统计图模板
   - `macros.jinja` - 可复用的 Jinja2 宏定义
   - `icon.css` - 内置图标样式

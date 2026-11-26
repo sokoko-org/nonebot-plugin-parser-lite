@@ -30,11 +30,14 @@ from ..parsers.registry import REGISTRY
 from ..render import RENDERER
 from ..render.fonts import shutdown_emoji_fonts
 from ..render.image import warmup_themes
+from ..stats import STATS, close_stats
 from ..utils.cache import CacheManager
 from ..utils.common import LimitedSizeDict
 from .filter import _make_target_key
 from .limit import ParseCooldown, ParseState
 from .rule import Searched, SearchResult, _extract_text, on_keyword_regex
+from .stats import handle_global_stats as handle_global_stats
+from .stats import handle_stats as handle_stats
 
 if TYPE_CHECKING:
     from ..parsers.bilibili import BilibiliParser
@@ -96,6 +99,7 @@ async def _on_shutdown() -> None:
     await shutdown_emoji_fonts()
     await REGISTRY.aclose_all()
     await DOWNLOADER.aclose()
+    await close_stats()
 
 
 async def get_or_parse_result(sr: SearchResult) -> ParseResult:
@@ -136,13 +140,23 @@ async def parser_handler(
     dedup_enabled = dedup_platforms is None or (
         parser_cls is not None and parser_cls.platform.name in dedup_platforms
     )
-    key = _make_target_key(session), sr.cache_key
+    target = _make_target_key(session)
+    platform = str(parser_cls.platform.name) if parser_cls else sr.keyword
+    key = target, sr.cache_key
     context = ParseCooldown.acquire(key) if dedup_enabled else nullcontext(ParseState())
     async with context as state:
         if state is None:
             return
         if not state.succeeded:
-            await _parse_and_send(session, sr, state)
+            # 只统计解析本身；解析成功后渲染或发送失败不计为解析失败
+            state.parsed = False
+            try:
+                await _parse_and_send(session, sr, state)
+            except Exception:
+                await STATS.record(platform, target, success=state.parsed)
+                raise
+            # TipException 由 with_reaction 吞掉，此时 parsed 仍为 False
+            await STATS.record(platform, target, success=state.parsed)
         if state.result is None:
             return
         if pconfig.lazy_download:
@@ -159,6 +173,8 @@ async def _parse_and_send(
     state: ParseState | None = None,
 ):
     result = await get_or_parse_result(sr)
+    if state:
+        state.parsed = True
     summary_msg = await RENDERER.render_messages(result)
     summary_in_forward = pconfig.card_delivery == "forward"
     if summary_msg and not summary_in_forward:

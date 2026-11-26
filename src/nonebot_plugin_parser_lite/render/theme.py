@@ -110,6 +110,15 @@ class ThemeDefinition:
 
         raise ThemeError(f"主题 {self.id!r} 缺少可用模板")
 
+    async def resolve_named_template(self, name: str) -> ThemeTemplate:
+        """选择专用模板，主题未提供时回退到内置模板"""
+        if not _is_safe_relative_path(name):
+            raise ThemeError(f"非法模板名: {name!r}")
+        for root in (self.root, self.fallback_root):
+            if root is not None and await (root / name).is_file():
+                return ThemeTemplate(name, root)
+        raise ThemeError(f"主题 {self.id!r} 缺少模板 {name!r}")
+
     async def template_for(self, platform: str) -> str:
         """返回选中模板文件名"""
         return (await self.resolve_template(platform)).name

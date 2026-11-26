@@ -20,12 +20,16 @@ if TYPE_CHECKING:
         shutdown_runtime,
     )
     from .render import ThemeData, render_theme_data, resolve_parse_result
+    from .render.stats import render_stats_image
+    from .stats import ParseRecord, ParseStatsSummary, query_records, query_stats
 
 __version__ = "{{VERSION}}"
 
 __all__ = [
     "Config",
     "MatchResult",
+    "ParseRecord",
+    "ParseStatsSummary",
     "ParseStep",
     "Parser",
     "RenderResult",
@@ -34,6 +38,9 @@ __all__ = [
     "configure",
     "match",
     "parse",
+    "query_records",
+    "query_stats",
+    "render_stats_image",
     "render_theme_data",
     "resolve_parse_result",
     "shutdown_runtime",
@@ -43,6 +50,8 @@ _EXPORTS = {
     "Config": (".config", "Config"),
     "configure": (".config", "configure"),
     "MatchResult": (".pipeline", "MatchResult"),
+    "ParseRecord": (".stats", "ParseRecord"),
+    "ParseStatsSummary": (".stats", "ParseStatsSummary"),
     "ParseStep": (".pipeline", "ParseStep"),
     "Parser": (".pipeline", "Parser"),
     "RenderResult": (".pipeline", "RenderResult"),
@@ -50,6 +59,9 @@ _EXPORTS = {
     "clear_result_cache": (".pipeline", "clear_result_cache"),
     "match": (".pipeline", "match"),
     "parse": (".pipeline", "parse"),
+    "query_records": (".stats", "query_records"),
+    "query_stats": (".stats", "query_stats"),
+    "render_stats_image": (".render.stats", "render_stats_image"),
     "render_theme_data": (".render", "render_theme_data"),
     "resolve_parse_result": (".render", "resolve_parse_result"),
     "shutdown_runtime": (".pipeline", "shutdown_runtime"),

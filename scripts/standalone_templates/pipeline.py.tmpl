@@ -12,6 +12,7 @@ from .data import ParseResult
 from .exception import ParseException
 from .parsers.base import BaseParser
 from .render import ThemeData, render_theme_data, resolve_parse_result
+from .stats import STATS
 from .utils.common import LimitedSizeDict
 from .utils.log import logger
 from .utils.scheduler import scheduler
@@ -66,12 +67,14 @@ def _ensure_runtime_started() -> None:
 async def shutdown_runtime() -> None:
     from .download import DOWNLOADER
     from .render.fonts import shutdown_emoji_fonts
+    from .stats import close_stats
 
     global _runtime_started
     _runtime_started = False
     await scheduler.shutdown()
     await shutdown_emoji_fonts()
     await DOWNLOADER.aclose()
+    await close_stats()
     clear_result_cache()
 
 
@@ -163,6 +166,7 @@ class Parser:
         color_scheme: str | None = None,
         theme_id: str | None = None,
         image_format: Literal["jpeg", "webp"] | None = None,
+        target: str = "",
     ) -> MatchResult: ...
 
     @overload
@@ -174,6 +178,7 @@ class Parser:
         color_scheme: str | None = None,
         theme_id: str | None = None,
         image_format: Literal["jpeg", "webp"] | None = None,
+        target: str = "",
     ) -> ParseResult: ...
 
     @overload
@@ -185,6 +190,7 @@ class Parser:
         color_scheme: str | None = None,
         theme_id: str | None = None,
         image_format: Literal["jpeg", "webp"] | None = None,
+        target: str = "",
     ) -> ThemeData: ...
 
     @overload
@@ -196,6 +202,7 @@ class Parser:
         color_scheme: str | None = None,
         theme_id: str | None = None,
         image_format: Literal["jpeg", "webp"] | None = None,
+        target: str = "",
     ) -> RenderResult: ...
 
     @overload
@@ -207,6 +214,7 @@ class Parser:
         color_scheme: str | None = None,
         theme_id: str | None = None,
         image_format: Literal["jpeg", "webp"] | None = None,
+        target: str = "",
     ) -> MatchResult | ParseResult | ThemeData | RenderResult: ...
 
     async def parse(
@@ -217,7 +225,12 @@ class Parser:
         color_scheme: str | None = None,
         theme_id: str | None = None,
         image_format: Literal["jpeg", "webp"] | None = None,
+        target: str = "",
     ) -> MatchResult | ParseResult | ThemeData | RenderResult:
+        """解析到 ``until`` 指定的步骤
+
+        :param target: 解析统计中的会话标记，用于按会话查询和排行；为空时只计入总数与平台统计
+        """
         _ensure_runtime_started()
         step = ParseStep(until)
         if isinstance(source, ParseResult):
@@ -228,13 +241,19 @@ class Parser:
             matched = self.match(source) if isinstance(source, str) else source
             if step is ParseStep.MATCH:
                 return matched
+            platform = str(matched.parser_type.platform.name)
             result = _RESULT_CACHE.get(matched.cache_key)
             if result is None:
-                parser = await self._instance(matched.parser_type)
-                result = await parser.parse(matched.keyword, matched.searched)
+                try:
+                    parser = await self._instance(matched.parser_type)
+                    result = await parser.parse(matched.keyword, matched.searched)
+                except Exception:
+                    await STATS.record(platform, target, success=False)
+                    raise
                 _RESULT_CACHE[matched.cache_key] = result
             else:
                 logger.debug("命中解析结果缓存: %s", matched.cache_key)
+            await STATS.record(platform, target, success=True)
         if step is ParseStep.PARSE:
             return result
         resolved = await resolve_parse_result(
