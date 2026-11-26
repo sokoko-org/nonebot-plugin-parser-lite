@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 # 缓存结果
 _RESULT_CACHE = LimitedSizeDict[str, ParseResult](max_size=50)
 _PARSE_TASKS: dict[str, asyncio.Task[ParseResult]] = {}
-_BV_PATTERN = re.compile(r"BV[0-9A-Za-z]{10}")
+_BV_PATTERN = re.compile(r"BV1[1-9A-HJ-NP-Za-km-z]{9}")
 _URL_PATTERN = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 
 
@@ -219,7 +219,7 @@ def _register_bilibili_matchers() -> None:
         @on_alconna(
             Alconna(
                 "bm",
-                Args["bv", r"re:BV[A-Za-z0-9]{10}"]["page?", int, 1],
+                Args["bv", r"re:BV1[1-9A-HJ-NP-Za-km-z]{9}"]["page?", int, 1],
             ),
             priority=3,
             block=True,
