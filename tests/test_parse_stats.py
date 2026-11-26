@@ -257,7 +257,8 @@ async def test_parser_handler_records_success_failure_and_dedup(pipeline, store)
 
 
 @pytest.mark.asyncio
-async def test_command_sends_rendered_image(store, no_font_download):
+async def test_command_sends_rendered_image(store, no_font_download, monkeypatch):
+    monkeypatch.setattr(stats_render.pconfig, "plite_render_format", "jpeg")
     await store.record("bilibili", GROUP_KEY, success=True)
     message, _ = await run_stats(
         stats_matcher.handle_global_stats, days_arg(30), render=True
