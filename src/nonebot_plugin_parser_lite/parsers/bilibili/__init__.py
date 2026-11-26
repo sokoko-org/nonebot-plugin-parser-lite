@@ -255,10 +255,10 @@ class BilibiliParser(BaseParser):
 
     @handle(
         "bilibili.com",
-        r"/(?P<bvid>BV[0-9A-Za-z]{10})",
+        r"/(?P<bvid>BV1[1-9A-HJ-NP-Za-km-z]{9})",
         params={"p": {"default": "1", "as_int": True, "required": False}},
     )
-    @handle("BV", r"^(?P<bvid>BV[0-9a-zA-Z]{10})(?:\s)?(?P<p>\d{1,3})?$")
+    @handle("BV", r"(?P<bvid>BV1[1-9A-HJ-NP-Za-km-z]{9})")
     @handle("bilibili.com", "/list/watchlater", params={"bvid": {}})
     async def _parse_bv(self, searched: MatchWithParams):
         """解析视频信息"""
@@ -272,7 +272,7 @@ class BilibiliParser(BaseParser):
         r"/av(?P<avid>\d{6,})",
         params={"p": {"default": "1", "as_int": True, "required": False}},
     )
-    @handle("av", r"^av(?P<avid>\d{6,})(?:\s)?(?P<p>\d{1,3})?$")
+    @handle("av", r"av(?P<avid>\d{6,})")
     async def _parse_av(self, searched: MatchWithParams):
         """解析视频信息"""
         avid = int(searched["avid"])
