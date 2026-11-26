@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from .render.stats import render_stats_image
     from .stats import ParseRecord, ParseStatsSummary, query_records, query_stats
 
-__version__ = "1.4.2rc4"
+__version__ = "1.4.2rc5"
 
 __all__ = [
     "Config",
