@@ -148,13 +148,15 @@ async def parser_handler(
         if state is None:
             return
         if not state.succeeded:
+            # 只统计解析本身；解析成功后渲染或发送失败不计为解析失败
+            state.parsed = False
             try:
                 await _parse_and_send(session, sr, state)
             except Exception:
-                await STATS.record(platform, target, success=False)
+                await STATS.record(platform, target, success=state.parsed)
                 raise
-            # TipException 由 with_reaction 吞掉，此时 result 仍为 None
-            await STATS.record(platform, target, success=state.result is not None)
+            # TipException 由 with_reaction 吞掉，此时 parsed 仍为 False
+            await STATS.record(platform, target, success=state.parsed)
         if state.result is None:
             return
         if pconfig.lazy_download:
@@ -171,6 +173,8 @@ async def _parse_and_send(
     state: ParseState | None = None,
 ):
     result = await get_or_parse_result(sr)
+    if state:
+        state.parsed = True
     summary_msg = await RENDERER.render_messages(result)
     summary_in_forward = pconfig.card_delivery == "forward"
     if summary_msg and not summary_in_forward:

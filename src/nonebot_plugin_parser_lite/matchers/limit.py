@@ -13,6 +13,7 @@ from ..data import ParseResult
 @dataclass(slots=True)
 class ParseState:
     succeeded: bool = False
+    parsed: bool = False
     result: ParseResult | None = None
     output_started: bool = False
 

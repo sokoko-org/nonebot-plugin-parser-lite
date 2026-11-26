@@ -41,7 +41,7 @@ class ParseRecord:
     """解析时间，带本地时区"""
     platform: str
     target: str
-    """会话标识，独立版为空字符串"""
+    """会话标识"""
     success: bool
 
     @property
@@ -309,7 +309,8 @@ class ParseStats:
                 count.add(success, failure)
         summary.platforms = _to_counts(platforms)  # pyright: ignore[reportArgumentType]
         summary.targets = (
-            _to_counts(targets)  # pyright: ignore[reportArgumentType]
+            # target 为空时，不作为会话参与排行
+            _to_counts(row for row in targets if row[0])  # pyright: ignore[reportArgumentType]
             if target is None
             else (
                 {target: StatsCount(summary.total.success, summary.total.failure)}

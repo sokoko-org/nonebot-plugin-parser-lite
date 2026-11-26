@@ -63,6 +63,10 @@ async def test_records_persist_and_aggregate(store, tmp_path):
     assert summary.platforms["bilibili"].failure == 1
     assert list(summary.targets) == ["g1", "g2"]
 
+    # 独立版记录的 target 为空，不作为会话参与排行
+    await store.record("bilibili", success=True)
+    assert list((await store.query(7)).targets) == ["g1", "g2"]
+
     only_g2 = await store.query(7, "g2")
     assert only_g2.total.total == 1
     assert list(only_g2.platforms) == ["bilibili"]
@@ -247,8 +251,14 @@ async def test_parser_handler_records_success_failure_and_dedup(pipeline, store)
     with patch.object(UniMessage, "send", AsyncMock()):
         await matchers.parser_handler(session("20003"), search(TAPTAP_URL))
 
+    # 解析成功但发送失败，仍计为解析成功
+    pipeline.parsed.side_effect = None
+    pipeline.sent.side_effect = RuntimeError("send failed")
+    with pytest.raises(RuntimeError):
+        await matchers.parser_handler(session("20004"), search(TAPTAP_URL))
+
     summary = await store.query(1)
-    assert (summary.total.success, summary.total.failure) == (1, 2)
+    assert (summary.total.success, summary.total.failure) == (2, 2)
     assert list(summary.platforms) == ["taptap"]
     assert summary.targets["QQClient_GROUP_20001"].success == 1
     assert summary.targets["QQClient_GROUP_20002"].failure == 1
