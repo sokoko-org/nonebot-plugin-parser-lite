@@ -3,19 +3,18 @@ name: Publish standalone branch
 on:
   push:
     branches: [main]
+    # 默认全部触发，再排除与独立版无关的路径（后面的规则覆盖前面的）
+    # 产物与 standalone 分支一致时不会推送，误触发也无副作用
     paths:
+      - '**'
+      - '!docs/**'
+      - '!assets/**'
+      - '!tests/**'
+      - '!api_txt/**'
+      - '!README.md' # 独立版使用 scripts/standalone_templates/README.md
+      - '!THEME.md'
+      - '!.github/**'
       - '.github/workflows/standalone.yml'
-      - 'LICENSE'
-      - 'THIRD-PARTY-NOTICES.md'
-      - 'requirements.txt'
-      - 'pyproject.toml'
-      - 'setup.py'
-      - 'MANIFEST.in'
-      - 'ruff.toml'
-      - 'scripts/generate_standalone.py'
-      - 'scripts/verify_standalone.py'
-      - 'scripts/standalone_templates/**'
-      - 'src/nonebot_plugin_parser_lite/**'
   workflow_dispatch:
 
 concurrency:
@@ -69,41 +68,33 @@ jobs:
           git fetch origin
 
           source_main="$(git rev-parse HEAD)"
-          latest_main="$(git rev-parse origin/main)"
-          if [[ "$source_main" != "$latest_main" ]]; then
+          if [[ "$source_main" != "$(git rev-parse origin/main)" ]]; then
             echo "main advanced during generation; the newer workflow run will publish it"
             exit 0
           fi
 
-          publish_index="$(mktemp)"
-          rm -f "$publish_index"
-          export GIT_INDEX_FILE="$publish_index"
-          git read-tree --empty
-          git add -- README.md LICENSE THIRD-PARTY-NOTICES.md requirements.txt pyproject.toml setup.py MANIFEST.in \
+          # 独立版分支只包含这些路径（git add 只收录列出的路径，无需再做额外校验）
+          publish_paths=(
+            README.md LICENSE THIRD-PARTY-NOTICES.md
+            requirements.txt pyproject.toml setup.py MANIFEST.in
             src/nonebot_plugin_parser_lite
+          )
 
-          unexpected_paths="$(git ls-files | awk -F/ '
-            $1 != "README.md" &&
-            $1 != "LICENSE" &&
-            $1 != "THIRD-PARTY-NOTICES.md" &&
-            $1 != "requirements.txt" &&
-            $1 != "pyproject.toml" &&
-            $1 != "setup.py" &&
-            $1 != "MANIFEST.in" &&
-            !($1 == "src" && $2 == "nonebot_plugin_parser_lite")
-          ')"
-          if [[ -n "$unexpected_paths" ]]; then
-            echo "refusing to publish unexpected paths:"
-            printf '%s\n' "$unexpected_paths"
-            exit 1
-          fi
-
+          export GIT_INDEX_FILE="$(mktemp -u)"
+          git read-tree --empty
+          git add -- "${publish_paths[@]}"
           tree="$(git write-tree)"
+
           parents=()
-          if git rev-parse --verify refs/remotes/origin/standalone >/dev/null 2>&1; then
-            parents=(-p "$(git rev-parse refs/remotes/origin/standalone)")
+          if git rev-parse --verify -q refs/remotes/origin/standalone >/dev/null; then
+            parent="$(git rev-parse refs/remotes/origin/standalone)"
+            if [[ "$tree" == "$(git rev-parse "$parent^{tree}")" ]]; then
+              echo "standalone tree unchanged, nothing to publish"
+              exit 0
+            fi
+            parents=(-p "$parent")
           fi
-          commit="$(printf '%s\n' "auto: publish standalone for $source_main" |
-            git commit-tree "$tree" "${parents[@]}")"
+
+          commit="$(git commit-tree "$tree" "${parents[@]}" -m "auto: publish standalone for $source_main")"
           echo "publishing standalone for ${source_main:0:12}"
           git push origin "$commit:refs/heads/standalone"

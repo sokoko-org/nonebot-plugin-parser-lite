@@ -3,6 +3,10 @@ name: Tests
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+    # 纯文档改动不跑测试
+    paths-ignore:
+      - 'docs/**'
+      - 'assets/**'
   workflow_dispatch:
 
 permissions:
