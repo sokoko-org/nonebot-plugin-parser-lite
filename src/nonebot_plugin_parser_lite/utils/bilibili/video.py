@@ -139,7 +139,7 @@ class Video:
         self.credential = credential
         self.info: view_pb2.ViewReply | None = None
 
-    async def get_info(self) -> view_pb2.ViewReply:
+    async def get_info(self) -> view_pb2.ViewReply | view_pb2.ActivitySeason:
         """
         获取视频信息
 
@@ -154,6 +154,9 @@ class Video:
                 access_token=self.credential.access_token if self.credential else "",
                 dedeuserid=self.credential.dedeuserid if self.credential else "",
             )
+        if not self.info.pages and self.info.HasField("activity_season"):
+            return self.info.activity_season
+
         return self.info
 
     async def get_up_mid(self) -> int:
@@ -172,7 +175,7 @@ class Video:
         :return: 是否是番剧
         """
         info = await self.get_info()
-        return info.HasField("season")
+        return isinstance(info, view_pb2.ViewReply) and info.HasField("season")
 
     async def get_cid(self, page_index: int) -> int:
         """
