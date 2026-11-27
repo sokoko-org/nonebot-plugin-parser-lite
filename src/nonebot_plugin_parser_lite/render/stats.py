@@ -1,8 +1,4 @@
-"""解析统计图渲染
-
-统计图同样走主题系统：当前主题提供 ``stats.html.jinja`` 时使用主题模板，
-否则回退到内置模板。模板上下文只有 ``data``，结构见 THEME.md「统计图」一节。
-"""
+"""解析统计图渲染"""
 
 from collections.abc import Mapping
 from datetime import date, datetime

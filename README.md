@@ -1,205 +1,91 @@
-# Parser Lite 独立版指南
+<p align="center">
+  <img src="https://raw.githubusercontent.com/sokoko-org/nonebot-plugin-parser-lite/main/assets/readme/banner.svg" width="100%" alt="nonebot-plugin-parser-lite：B 站与小红书的实际渲染卡片">
+</p>
 
-这是自动生成的独立模块版本，可直接在其他应用项目中使用
+<h3 align="center">Parser Lite · 独立版</h3>
+
+<p align="center">
+  不依赖 NoneBot 的多平台链接分享解析库。<br>
+  匹配分享链接 → 结构化解析 → 主题渲染成图片 → 解析统计，可接入任意 Python 应用。
+</p>
+
+<p align="center">
+  <a href="https://www.python.org"><img src="https://img.shields.io/badge/python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+"></a>
+  <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/standalone.yml"><img src="https://img.shields.io/github/actions/workflow/status/sokoko-org/nonebot-plugin-parser-lite/standalone.yml?branch=main&style=flat-square&logo=github&label=生成" alt="生成状态"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/sokoko-org/nonebot-plugin-parser-lite?style=flat-square&label=许可证" alt="MIT 许可证"></a>
+</p>
+
+<p align="center">
+  <a href="https://parser-docs.sokoko.org/docs/standalone/">独立版文档</a> ·
+  <a href="https://parser-docs.sokoko.org/docs/standalone/pipeline/">解析流水线</a> ·
+  <a href="https://parser-docs.sokoko.org/docs/guide/configuration/">配置项</a> ·
+  <a href="https://parser-docs.sokoko.org/docs/platforms/">支持的平台</a> ·
+  <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/issues/new/choose">问题反馈</a>
+</p>
 
 > [!IMPORTANT]
 >
-> 严禁将本项目用于任何非法用途。请遵守所在地法律法规、内容平台服务协议和著作权规则，并仅处理你有权下载、保存或传播的内容。
+> 严禁将本项目用于任何非法用途。请遵守所在地法律法规、平台服务协议与著作权规则，仅处理你有权下载、保存或传播的内容。
 >
-> 因使用不当造成的一切责任由使用者承担，本项目维护者不承担相关责任。本项目与下列平台不存在隶属、授权或合作关系。
+> 因使用不当造成的一切责任由使用者承担。本项目与所支持的平台不存在隶属、授权或合作关系。
 
----
+> [!NOTE]
+> 本分支由 [`main`](https://github.com/sokoko-org/nonebot-plugin-parser-lite) **自动生成**，请勿直接向此分支提交。需要 NoneBot2 插件请使用 `main` 分支。
 
-## 📦 安装与项目集成
+## 核心能力
 
-需要 Python **3.11 或更高版本**
+- **32 个平台** — 与 NoneBot 版完全一致，见 [支持的平台](https://parser-docs.sokoko.org/docs/platforms/)。
+- **分阶段流水线** — 匹配 / 解析 / 生成渲染数据 / 渲染图片，可以停在任意一步，也可以从中间结果继续。
+- **主题渲染** — 共用 NoneBot 版的 [主题系统](https://parser-docs.sokoko.org/docs/themes/)，输出 WebP / JPEG 图片 bytes。
+- **解析统计** — 按会话记录与查询，并渲染统计图。
 
-以下安装方式任选其一
+## 安装
 
-### 下载构建产物安装
-
-从 Release 下载独立版 wheel，或在 [Actions](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml) 下载通用 wheel 安装
-
-### 从 Git 或源码安装
+需要 Python >= 3.11。
 
 ```shell
 python -m pip install "nonebot-plugin-parser-lite-standalone @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@standalone"
 ```
 
-安装完成后即可在项目中导入使用
+也可以从 [Release](https://github.com/sokoko-org/nonebot-plugin-parser-lite/releases) 下载 wheel，或把 `src/nonebot_plugin_parser_lite` 复制进项目后执行 `pip install -r requirements.txt`。
 
-### 手动复制到项目
-
-将 `src/nonebot_plugin_parser_lite` 复制到你的项目中
-
-```text
-your_project/
-├── nonebot_plugin_parser_lite/
-│   ├── parsers/
-│   ├── utils/
-│   └── __init__.py
-└── your_code.py
-```
-
-并在项目环境安装运行依赖
-
-```shell
-python -m pip install -r requirements.txt
-```
-
-## 🚀 快速上手
-
-### 1. 文本解析流水线
-
-解析入口接收文本，也可以接收已有的 `MatchResult` 或 `ParseResult` 继续后续阶段
-通过 `until` 参数控制执行到哪一步
-
-- `ParseStep.MATCH`：仅匹配阶段
-- `ParseStep.PARSE`：结构化解析（默认）
-- `ParseStep.RESOLVE`：生成渲染数据（会触发媒体下载）
-- `ParseStep.RENDER`：返回 `RenderResult`，含解析结果、实际图片格式和图片 bytes
+## 快速上手
 
 ```python
-from nonebot_plugin_parser_lite import ParseStep, Parser
+import asyncio
+from pathlib import Path
 
-async with Parser() as parser:
-    # 1. 仅匹配
-    matched = await parser.parse(text, until=ParseStep.MATCH)
+from nonebot_plugin_parser_lite import Parser, ParseStep
 
-    # 2. 结构化解析
-    result = await parser.parse(matched, until=ParseStep.PARSE)
 
-    # 3. 生成模板数据（含媒体下载）
-    render_data = await parser.parse(result, until=ParseStep.RESOLVE)
+async def main() -> None:
+    async with Parser() as parser:
+        rendered = await parser.parse(
+            "看看这个 https://www.bilibili.com/video/BV1CtYu6DE11",
+            until=ParseStep.RENDER,
+        )
+        print(rendered.result.title)
+        Path(f"post.{rendered.image_format}").write_bytes(rendered.image)
 
-    # 4. 从解析结果继续生成图片，也可直接传入 text
-    rendered = await parser.parse(result, until=ParseStep.RENDER)
 
-    # 可从渲染结果获取原始媒体
-    for media in rendered.result.iter_sendable_media():
-        media_path = await media.get_path()
-
-    from pathlib import Path
-
-    Path(f"post.{rendered.image_format}").write_bytes(rendered.image)
-
-# 注：示例用 async with 便于演示，用完即关闭
+asyncio.run(main())
 ```
 
 > [!TIP]
->
-> 长期运行的应用**推荐持久复用同一个 `Parser` 实例**，而不是每次解析都新建后 `aclose()`
->
-> 各解析器的启动钩子会在该实例首次用到对应平台时执行一次，其初始化状态随实例保留，供后续解析复用
->
-> 重复新建实例会反复触发启动钩子并丢失这些状态
->
-> ```python
-> parser = Parser()  # 应用启动时创建一次并长期持有
-> try:
->     result = await parser.parse(text)
->     # ... 后续复用同一个 parser ...
-> finally:
->     await parser.aclose()        # 应用退出时关闭
->     await shutdown_runtime()     # 关闭后台定时任务
-> ```
+> 长期运行的应用请**复用同一个 `Parser` 实例**，退出时调用 `await parser.aclose()` 与 `await shutdown_runtime()`，详见 [解析流水线](https://parser-docs.sokoko.org/docs/standalone/pipeline/#复用-parser-实例)。
 
-`RenderResult.result` 保留传入的解析结果及其媒体
-仅需生成渲染数据，或已有渲染数据时，也可直接使用底层接口
+配置通过同名环境变量或 `configure()` 设置，数据默认存放在当前目录的 `.parser-lite/`，见 [配置与运行时](https://parser-docs.sokoko.org/docs/standalone/config/)。
 
-```python
-from nonebot_plugin_parser_lite import resolve_parse_result
+## 文档
 
-render_data = await resolve_parse_result(result, color_scheme="dark", theme_id="custom")
-```
+| 主题                              | 链接                                                                   |
+| :-------------------------------- | :--------------------------------------------------------------------- |
+| 安装与公开 API                    | [概览与安装](https://parser-docs.sokoko.org/docs/standalone/)          |
+| 四个阶段、按需加载平台、底层接口  | [解析流水线](https://parser-docs.sokoko.org/docs/standalone/pipeline/) |
+| 环境变量、`configure()`、数据目录 | [配置与运行时](https://parser-docs.sokoko.org/docs/standalone/config/) |
+| `query_stats()`、统计图           | [解析统计](https://parser-docs.sokoko.org/docs/standalone/stats/)      |
+| 自定义渲染主题                    | [主题开发](https://parser-docs.sokoko.org/docs/themes/)                |
 
-```python
-from pathlib import Path
-from nonebot_plugin_parser_lite import render_theme_data
+## License
 
-image_format, image = await render_theme_data(render_data)
-Path(f"post.{image_format}").write_bytes(image)
-```
-
-### 2. 按需加载指定平台
-
-若只需使用特定平台，建议直接导入对应 Parser，避免加载无用模块
-
-```python
-from nonebot_plugin_parser_lite import Parser
-from nonebot_plugin_parser_lite.parsers.bilibili import BilibiliParser
-
-async with Parser([BilibiliParser]) as parser:
-    result = await parser.parse("看看这个 https://www.bilibili.com/video/BV1xx411c7mD")
-```
-
-### 3. 底层调用方式
-
-```python
-from nonebot_plugin_parser_lite.parsers.bilibili import BilibiliParser
-
-parser = BilibiliParser()
-keyword, searched = parser.search_url("https://www.bilibili.com/video/BV1xx411c7mD")
-result = await parser.parse(keyword, searched)
-await parser.aclose()
-```
-
-## ⚙️ 配置与缓存
-
-### 1. 环境变量与动态配置
-
-配置默认读取同名环境变量
-
-```python
-from nonebot_plugin_parser_lite import configure
-
-configure(plite_max_comments=10, plite_disabled_platforms=["x"])
-```
-
-### 2. 缓存与定时任务
-
-- 缓存根目录默认为当前目录下的 `.parser-lite`（可通过配置项 `PARSER_LITE_BASE_DIR` 修改）
-- 首次进入异步解析时，会在当前事件循环自动注册周期缓存清理任务
-- 应用程序退出前，可调用 `await shutdown_runtime()` 关闭后台定时任务
-
-### 3. 解析统计
-
-可以通过传入 `target` 来确保解析统计正确记录解析会话，不传入则只能使用全局查询，分会话查询无结果
-
-`target` 的格式没有要求，能够区分就行，统计图里会原样展示
-
-```python
-result = await parser.parse(text, target="group:123456")
-```
-
-可以使用以下方法来查询
-
-```python
-from nonebot_plugin_parser_lite import query_stats
-
-summary = await query_stats(days=7)
-only_group = await query_stats(days=7, target="group:123456")
-print(summary.total.success, summary.total.failure)
-for platform, count in summary.platforms.items():
-    print(platform, count.total, count.failure)
-for hour, count in summary.hourly.items():  # 0-23 时，本地时间
-    print(hour, count.total)
-
-# 原始记录，可按任意粒度自行统计
-from datetime import datetime, timedelta
-from nonebot_plugin_parser_lite import query_records
-
-for record in await query_records(since=datetime.now() - timedelta(hours=1)):
-    print(record.time.isoformat(), record.platform, record.success)
-
-# 渲染统计图（趋势柱状图 + 平台排行；全局统计且有会话标记时附带会话排行）
-from pathlib import Path
-from nonebot_plugin_parser_lite import render_stats_image
-
-image_format, image = await render_stats_image(summary, platform_names={"bilibili": "哔哩哔哩"})
-Path(f"stats.{image_format}").write_bytes(image)
-```
-
-## 第三方许可
-
-本项目自身代码采用 [MIT](LICENSE)。第三方代码和资源保留各自许可，来源、许可例外及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+本项目代码采用 [MIT](LICENSE) 开源；第三方代码和资源保留各自许可，见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
