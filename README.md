@@ -1,383 +1,81 @@
-<div align="center">
-<a href="https://v2.nonebot.dev/store">
-    <img src="https://raw.githubusercontent.com/fllesser/nonebot-plugin-template/refs/heads/resource/.docs/NoneBotPlugin.svg" width="310" alt="logo">
+<p align="center">
+  <img src="./assets/readme/banner.svg" width="100%" alt="nonebot-plugin-parser-lite：B 站与小红书的实际渲染卡片">
+</p>
 
-</a>
+<p align="center">
+  基于 <a href="https://github.com/nonebot/nonebot2">NoneBot2</a> 的多平台链接分享解析插件。<br>
+  自动识别分享链接、BV 号与小程序卡片，提取视频、图文、音频与热评，并渲染成适合群聊直接浏览的卡片。
+</p>
 
-## ✨ [Nonebot2](https://github.com/nonebot/nonebot2) 链接分享自动解析插件 ✨
+<p align="center">
+  <a href="https://www.python.org"><img src="https://img.shields.io/badge/python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+"></a>
+  <a href="https://github.com/nonebot/nonebot2"><img src="https://img.shields.io/badge/NoneBot-2-EA5252?style=flat-square" alt="NoneBot2"></a>
+  <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/sokoko-org/nonebot-plugin-parser-lite/build.yml?branch=main&style=flat-square&logo=github&label=构建" alt="构建状态"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/sokoko-org/nonebot-plugin-parser-lite?style=flat-square&label=许可证" alt="MIT 许可证"></a>
+</p>
 
-[![Code style: djlint](https://img.shields.io/badge/html%20style-djlint-blue.svg)](https://www.djlint.com)
-
-</div>
+<p align="center">
+  <a href="https://parser-docs.sokoko.org">使用文档</a> ·
+  <a href="https://parser-docs.sokoko.org/docs/guide/quick-start/">快速开始</a> ·
+  <a href="https://parser-docs.sokoko.org/docs/guide/configuration/">配置说明</a> ·
+  <a href="https://parser-docs.sokoko.org/docs/platforms/">支持的平台</a> ·
+  <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/issues/new/choose">问题反馈</a>
+</p>
 
 > [!IMPORTANT]
 >
-> 严禁将本项目用于任何非法用途。请遵守所在地法律法规、内容平台服务协议和著作权规则，并仅处理你有权下载、保存或传播的内容。
+> 严禁将本项目用于任何非法用途。请遵守所在地法律法规、平台服务协议与著作权规则，仅处理你有权下载、保存或传播的内容。
 >
-> 因使用不当造成的一切责任由使用者承担，本项目维护者不承担相关责任。本项目与下列平台不存在隶属、授权或合作关系。
+> 因使用不当造成的一切责任由使用者承担。本项目与所支持的平台不存在隶属、授权或合作关系。
 
-如果你需要不依赖 `nonebot2` 的插件，请切换到 [`standalone`](https://github.com/sokoko-org/nonebot-plugin-parser-lite/tree/standalone) 分支
+## 核心能力
 
-## 📖 支持的平台
+> 分享链接、短链、BV / av 号、小程序与分享卡片 → 自动识别 → 媒体解析 → 卡片渲染与发送
 
-| 平台                 | 图文 | 评论区渲染 | 视频 | Live Photo |
-| :------------------- | :--- | :--------- | :--- | :--------- |
-| **B 站**             | ✅   | ✅         | ✅   | ✅         |
-| **抖音**             | ✅   | ✅         | ✅   | ✅         |
-| **微博**             | ✅   | ✅         | ✅   | ✅         |
-| **小红书**           | ✅   | ✅         | ✅   | ✅         |
-| **快手**             | ✅   | ✅         | ✅   | 🚫         |
-| **AcFun**            | ✅   | ❌         | ✅   | 🚫         |
-| **X (Twitter)**      | ✅   | ❌         | ✅   | 🚫         |
-| **百度贴吧**         | ✅   | ✅         | ✅   | 🚫         |
-| **知乎**             | ✅   | ✅         | ✅   | 🚫         |
-| **堆糖**             | ✅   | ✅         | 🚫   | 🚫         |
-| **小黑盒**           | ✅   | ✅         | ✅   | ✅         |
-| **ILLU**             | ✅   | ✅         | 🚫   | 🚫         |
-| **LOFTER**           | ✅   | ✅         | 🚫   | 🚫         |
-| **网易 BUFF**        | ✅   | ✅         | 🚫   | 🚫         |
-| **酷安**             | ✅   | ✅         | 🚫   | 🚫         |
-| **虎扑**             | ✅   | ✅         | ✅   | 🚫         |
-| **米游社**           | ✅   | ✅         | ✅   | 🚫         |
-| **豆瓣**             | ✅   | ✅         | 🚫   | 🚫         |
-| **5EPlay**           | ✅   | ✅         | ✅   | 🚫         |
-| **豆包**             | 🚫   | 🚫         | ✅   | 🚫         |
-| **Linux Do**         | ✅   | ✅         | 🚫   | 🚫         |
-| **完美世界竞技平台** | ✅   | ✅         | ✅   | 🚫         |
-| **壁吧专楼吧**       | ✅   | ✅         | 🚫   | 🚫         |
-| **TapTap**           | ✅   | ✅         | ✅   | 🚫         |
-| **网易大神**         | ✅   | ✅         | ✅   | 🚫         |
-| **森空岛**           | ✅   | ✅         | ✅   | 🚫         |
+- **32 个平台** — B 站、抖音、微博、小红书、知乎、贴吧等内容平台，以及网易云、QQ 音乐等 6 个音乐平台。
+- **零指令触发** — 群友发链接即解析，无需复制资源地址或记忆命令。
+- **评论区与富文本** — 热评、楼中楼、贴纸、投票、引用与 Live Photo 一并渲染进卡片。
+- **灵活的发送方式** — 自由组合卡片 / 正文 / 视频 / 音频，支持合并转发与懒下载。
+- **可替换的主题** — Jinja2 + CSS 渲染主题，按时间自动切换日夜模式，见 [主题商店](https://github.com/sokoko-org/nonebot-plugin-parser-themes)。
 
-| 平台           | 音频支持 | 评论区渲染 |
-| :------------- | :------- | :--------- |
-| **网易云音乐** | ✅       | ❌         |
-| **酷狗音乐**   | ✅       | ❌         |
-| **汽水音乐**   | ✅       | ❌         |
-| **酷我音乐**   | ✅       | ✅         |
-| **QQ音乐**     | ✅       | ❌         |
-| **咪咕音乐**   | ✅       | ✅         |
+## 快速开始
 
-> 部分音乐平台的特定音源解析由第三方服务实现，请介意者按需选择是否开启
-
-> 💡 **标识说明**
->
-> - ✅ 表示完整支持解析与富文本渲染
-> - ❌ 表示插件尚未适配该模块
-> - 🚫 表示该平台暂无此类内容形态 (如有遗漏或平台更新，欢迎提交 Issue 告知)
-> - **图文**：指代一切以文本为主体、图片混排、多图相册、社区长文、问答、多媒体笔记等内容形态
-
-支持的链接，可参考 [测试链接](https://github.com/fllesser/nonebot-plugin-parser/blob/master/tests/others/test_urls.md)
-
-## 💿 安装
-
-需要 Python **3.11 或更高版本**
-
-### 从 Actions 安装
-
-从 [Actions](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml) 中下载通用 wheel 安装
-
-### 从 Git 安装
-
-<details>
-<summary>pip</summary>
-
-```shell
-python -m pip install "nonebot-plugin-parser-lite @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@main"
-```
-
-指定版本安装时，将 `main` 替换为实际 tag 或 hash
-
-```shell
-python -m pip install "nonebot-plugin-parser-lite @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@<tag>"
-```
-
-</details>
-
-<details>
-<summary>uv</summary>
+需要 Python >= 3.11，可选安装 FFmpeg（Live Photo、B 站音视频合并）。
 
 ```shell
 uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --branch main
 ```
 
-指定版本安装时，使用 `--tag`：
+加载插件后在群里发一条链接即可，所有配置都有默认值。pip 安装、指定版本与手动安装见 [快速开始](https://parser-docs.sokoko.org/docs/guide/quick-start/)；不使用 NoneBot 请看 [独立版](https://parser-docs.sokoko.org/docs/standalone/)。
 
-```shell
-uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --tag <tag>
-```
+## 常用指令
 
-</details>
+- `@机器人 开启解析` / `@机器人 关闭解析` — 开关当前会话的解析。
+- `bm <BV号>` — 下载 B 站音频，也可引用一条链接后发送。
+- `@机器人 blogin` — 扫码登录 B 站，仅超级用户。
+- `@机器人 解析统计` / `@机器人 全局解析统计` — 查看解析趋势与平台排行，[效果预览](https://parser-docs.sokoko.org/docs/features/stats/)。
 
-指定版本安装仅支持 `1.3.7+`, 更早的版本请使用手动安装
+## 文档与社区
 
-### 手动安装
+- **使用文档** — [parser-docs.sokoko.org](https://parser-docs.sokoko.org)（源码位于 [`docs/`](docs)）
+- **主题开发** — [主题开发指南](https://parser-docs.sokoko.org/docs/themes/)
+- **独立版** — [独立版文档](https://parser-docs.sokoko.org/docs/standalone/)（发布在 [`standalone`](https://github.com/sokoko-org/nonebot-plugin-parser-lite/tree/standalone) 分支）
+- **交流反馈** — [Discussions](https://github.com/sokoko-org/nonebot-plugin-parser-lite/discussions) · [Issues](https://github.com/sokoko-org/nonebot-plugin-parser-lite/issues/new/choose)
 
-将 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录后手动安装依赖
+## 致谢
 
-<details>
-<summary>pip</summary>
+- [fllesser/nonebot-plugin-parser](https://github.com/fllesser/nonebot-plugin-parser) — 原始项目
+- [LoCCai/nonebot-plugin-parser-m](https://github.com/LoCCai/nonebot-plugin-parser-m) — 本项目基于此项目开发并大幅重构
+- [adrienbrault/blitz-py](https://github.com/adrienbrault/blitz-py) — 高性能高兼容的渲染引擎
 
-```shell
-python -m pip install -r requirements.txt
-```
+以及更多参考项目与贡献者，完整名单见 [致谢与许可](https://parser-docs.sokoko.org/docs/about/credits/)。
 
-</details>
+<p align="center">
+  <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=sokoko-org/nonebot-plugin-parser-lite" alt="项目贡献者">
+  </a>
+</p>
 
-<details>
-<summary>uv</summary>
+## License
 
-```shell
-uv add --requirements ./xxx/requirements.txt
-```
-
-</details>
-
-## 🎈 特性
-
-- 评论区渲染支持
-- 通用的基础模板，便于拓展自定义
-- 富文本内容渲染支持
-
-<details>
-<summary>渲染效果</summary>
-
-|                                                                              哔哩哔哩                                                                               |                                                                               小红书                                                                                |
-| :-----------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| <img width="1240" height="2772" alt="029e59fa-8808-58e6-b403-031bb7696295" src="https://github.com/user-attachments/assets/6bd2817a-69bd-4952-9093-f71de637c8aa" /> | <img width="1240" height="4856" alt="02db1e9c-691b-5485-b312-3280a1d02898" src="https://github.com/user-attachments/assets/0e615688-063e-453c-83d3-c328c17eae12" /> |
-
-</details>
-
-## ⚙️ 配置
-
-> [!NOTE]
->
-> 插件会自动使用系统环境中的http系统代理进行网络请求
-
-下面的内容可以粘贴到 `.env` 或 `.env.dev` / `.env.prod` 等文件
-
-<details>
-<summary>配置项</summary>
-
-```bash
-# [可选] nonebot2 内置配置，若服务器上传带宽太低或报错发送消息超时，建议调高，防止超时
-API_TIMEOUT=100
-
-# [可选] 文件发送的超时秒数，由适配器(Onebot)支持；未设置时沿用默认等待时间
-plite_file_upload_timeout=null
-
-# [可选] 允许的 B 站视频编码，越靠前的编码优先级越高
-# 可选 "avc"(H.264，体积较大), "hev"(HEVC), "av01"(AV1), "unknown"(未知)
-# 后两项在不同设备可能有兼容性问题，如需完全避免，可只填一项，如 '["avc"]'
-plite_bili_video_codes=["avc", "av01", "hev", "unknown"]
-
-# [可选] B 站视频清晰度
-# 144P(5), 240P(6), 360P(16), 480P(32), 720P(64), 720P+(74), 1080p(80),
-# 人工智能修复画质(100), 1080P+(112), 1080P_60(116), 4k(120), HDR(125),
-# DOLBY(126), 8K(127)
-plite_bili_video_quality=80
-
-# [可选] B 站音频流音质上限，按选择优先级从低到高：
-# 64K(30216)、132K(30232)、192K(30280)、Hi-Res 无损(30251)、杜比全景声(30250)
-# 默认 30280，限制的是下载源流；单独请求音频时仍会转码为 MP3
-plite_bili_audio_quality=30280
-
-# [可选] B 站下载 CDN 地区；default 不替换地区， zh、en、ja、proxy（网宿全网多线）
-plite_bili_cdn_region="default"
-
-# [可选] 自定义 B 站下载 CDN 域名，设置后优先于地区配置
-# 留空则使用地区配置；只接受 bilivideo.com 域名，不要包含协议、端口或路径
-plite_bili_cdn_domain=""
-
-# [可选] 音频解析，是否需要上传群文件
-plite_need_upload_audio=False
-
-# [可选] 视频解析，是否需要上传群文件
-plite_need_upload_video=False
-
-# [可选] 视频，图片，音频是否使用 base64 发送
-# 注意：编解码和传输 base64 会占用更多的内存,性能和带宽, 甚至可能会使 websocket 连接崩溃
-# 因此该配置项仅推荐 nonebot 和 协议端不在同一机器的用户配置
-plite_use_base64=False
-
-# [可选] 音视频下载最大文件大小，单位 MB，超过该配置将阻断下载
-plite_max_size=90
-
-# [可选] 全局禁止的解析
-# 示例 plite_disabled_platforms=["bilibili", "douyin"] 表示禁止了哔哩哔哩和抖音
-# 可选值: ["acfun", "bilibili", "buff", "coolapk", "douban", "doubao",
-# "douyin", "ds", "duitang", "5eplay", "heybox", "hupu", "illu", "kuaishou",
-# "kugou", "kuwo", "linuxdo", "lofter", "miyoushe", "netease", "qsmusic",
-# "rednote", "skyland", "taptap", "tieba", "weibo", "wmpvp", "x", "zhihu",
-# "zlb"]
-plite_disabled_platforms=["x"]
-
-# [可选] 解析冷却的平台范围：不配置或 null 为全部已启用平台，[] 为全部关闭
-# 示例 ["taptap", "ds"] 仅对 TapTap、网易大神开启；["bilibili"] 仅对 B 站开启
-# 此项不会禁用平台本身的解析
-plite_parse_dedup_platforms=null
-
-# [可选] 所选平台：同会话相同链接或编号成功解析后的忽略分钟数
-plite_parse_dedup_minutes=30
-
-# [可选] 发送哪些内容块
-# card 为总结卡片；关闭懒下载时可省略，开启时始终单独发送。其余可选项：
-#   url    原始 URL　　　　embed  在线播放链接
-#   content 解析正文(文字/图片/贴纸/链接/引用/投票)
-#   cover  视频封面　　　video  视频　　audio  音频
-plite_send_components=["card", "content", "cover", "video", "audio"]
-
-# [可选] 哪些内容进转发。关闭懒下载时，要完全不发卡片，只需从 plite_send_components 删掉 card
-# card  入列：关闭懒下载时，总结卡片与已启用的内容一起转发，卡片放在第一条
-# video 入列：视频并入转发（需协议端支持转发节点中发送 Video / File）
-# content / cover 入列：正文体进入转发（超过 4 项时始终使用合并转发）
-plite_forward_components=["content", "cover"]
-
-# [可选] 是否在解析结果中添加原始URL二维码
-plite_append_qrcode=False
-
-# 合并转发遇到明确的媒体上传错误时，只重发失败的分包：先省略视频并保留其他内容；
-# 若再次上传失败或没有视频，则将媒体替换为文字，仍以合并转发发送
-# 降级消息会补上缺失的标题、作者和原链接
-
-# [可选] 是否开启懒下载模式，仅在用户请求时才下载视频
-plite_lazy_download=False
-
-# [可选] 懒下载是否发送命令提示
-plite_lazy_download_tip=False
-
-# [可选] 懒下载模式等待命令超时时间
-plite_lazy_download_timeout=30
-
-# [可选] 在懒下载模式中用户请求下载视频时的命令列表
-plite_download_command=["xz", "下载"]
-
-# [可选] 是否使用 ffmpeg 转码 Live Photo，若设备配置不佳，请禁用此功能
-# 禁用后将分别发送 Live Photo 底图和动图部分
-plite_live_photo=True
-
-# [可选] 最大评论数量,设为零则不请求评论
-plite_max_comments=5
-
-# [可选] 纯文本文本长度阈值，超过此长度的文本将会强制转发
-plite_forward_text_threshold=1000
-
-# [可选] 最大下载重试次数
-plite_max_retries=3
-
-# [可选] 白天时间范围 [开始, 结束]，格式 h:m；范围内为浅色主题，范围外为夜间模式
-# 支持跨午夜范围，例如 ["22:30", "6:00"]
-plite_day_range=["6:00", "19:00"]
-
-# [可选] 渲染主题 ID，默认使用 default
-plite_render_theme="default"
-
-# [可选] 额外主题目录；可填写主题目录，或包含多个主题子目录的目录
-plite_theme_dirs=[]
-
-# [可选] 知乎 cookie, 需要具有登录态的cookie才能完整获取回答内容
-# 必须包含 z_c0 项，建议包含 d_c0, _xsrf 项
-plite_zhihu_ck="z_c0=xxxx"
-
-# [可选] linuxdo cookie, 部分帖子需要登录或有一定的阅读等级才可以查看
-# 首次成功请求后会把服务器更新的 Cookie 保存到插件配置目录 linuxdo_cookies.txt
-# 配置项非空时会优先使用它并补齐缓存；清空后才使用缓存文件
-plite_linuxdo_ck="xxxx"
-
-# [可选] X cookie, R18帖子和帖子翻译需要登录才可以查看
-plite_x_ck="auth_token=xxx"
-
-# [可选] 渲染图片格式，jpeg会丢失透明度但可能兼容性更好，仅建议在默认格式无法发送时更改
-plite_render_format="webp"
-
-# [可选] emoji 样式，不改变主题的正文字体
-# system（默认）：优先系统 emoji 字体，以下载的 Twemoji 兜底
-# twitter：固定使用 Twemoji；google：固定使用 Noto Color Emoji
-plite_emoji_style="system"
-
-# [可选] 媒体倍速规则，格式 `平台:作者id:倍速`
-# 示例 plite_media_speedup_rules=["bilibili:123456:1.25"] 表示该 UP 主的音视频以 1.25 倍速发送
-plite_media_speedup_rules=[]
-
-# [可选] 媒体倍速并发操作数
-plite_media_transcode_concurrency=1
-
-# [可选] 哔哩哔哩空降服务地址, wiki: https://github.com/hanydd/BilibiliSponsorBlock/wiki/API
-# 留空表示不启用
-plite_bsb_api_base=""
-
-# [可选] 参与裁切的片段分类，配置了空降服务地址时必填
-# 可选分类参考服务器提供者提供的分类列表
-plite_bsb_categories=[]
-
-# [可选] 解析统计命令可查询的最大天数
-plite_stats_max_days=365
-
-# [可选] 全局解析统计展示的会话排行数量，其余合并为「其他」
-plite_stats_top_targets=10
-```
-
-</details>
-
-### 📦 发送组合
-
-块的含义（`SendComponent`）
-
-|   块    |                       含义                        |      可否禁用      |
-| :-----: | :-----------------------------------------------: | :----------------: |
-|  card   |                  渲染的总结卡片                   | 关闭懒下载时可禁用 |
-|   url   |                  解析源原始链接                   |         是         |
-|  embed  |               在线播放链接（如有）                |         是         |
-| content | 解析正文：文字 / 图片 / 贴纸 / 链接 / 引用 / 投票 |         是         |
-|  cover  |                     视频封面                      |         是         |
-|  video  |                       视频                        |         是         |
-|  audio  |                       音频                        |         是         |
-
-- **`plite_send_components`**：要发送的内容。关闭懒下载时，如果不想要总结卡片，可以从列表移除 `card`。开启懒下载时，卡片始终先单独发送
-- **`plite_forward_components`**：哪些已启用的内容需要合并转发，正文节点超过 4 项时始终会进入合并转发
-
-## 🎉 使用
-
-|     指令     |          参数           |         权限          | 需要@ | 范围 |                       说明                        |
-| :----------: | :---------------------: | :-------------------: | :---: | :--: | :-----------------------------------------------: |
-|   开启解析   |       可选目标 ID       | SUPERUSER/OWNER/ADMIN |  是   | 全部 |   开启当前会话解析；仅 SUPERUSER 可指定其他目标   |
-|   关闭解析   |       可选目标 ID       | SUPERUSER/OWNER/ADMIN |  是   | 全部 |   关闭当前会话解析；仅 SUPERUSER 可指定其他目标   |
-|      bm      | bv号或引用一个链接/卡片 |           -           |  否   | 全部 |                   下载 B 站音频                   |
-|    blogin    |            -            |       SUPERUSER       |  是   | 全部 |                 扫码获取 B 站凭证                 |
-|   解析统计   |        可选天数         | SUPERUSER/OWNER/ADMIN |  是   | 全部 |      展示当前会话近 N 天的解析趋势和平台排行      |
-| 全局解析统计 |        可选天数         |       SUPERUSER       |  是   | 全部 | 展示全部会话近 N 天的解析趋势、平台排行和会话排行 |
-
-不带参数时，群聊和频道指令操作当前会话，私聊指令操作当前用户
-
-超级管理员可以指定其他目标：群聊中填写群号，私聊中填写用户 ID
-
-私聊中关闭解析后，该用户在同一平台的私聊、群聊和频道中都不能触发解析
-
-## 🎨 渲染主题
-
-[**主题商店**](https://github.com/sokoko-org/nonebot-plugin-parser-themes)
-
-主题开发文档 -> [`THEME.md`](THEME.md)
-
-主题可以放入插件数据目录下的 `themes/` 文件夹，或通过 `plite_theme_dirs` 配置指定外部目录
-
-## 🎉 致谢
-
-本项目自身代码采用 [MIT](LICENSE)。第三方代码和资源保留各自许可，来源、许可例外及修改说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
-
-<a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=sokoko-org/nonebot-plugin-parser-lite" />
-</a>
-
-- [fllesser/nonebot-plugin-parser](https://github.com/fllesser/nonebot-plugin-parser) 原始项目
-- [LoCCai/nonebot-plugin-parser-m](https://github.com/LoCCai/nonebot-plugin-parser-m) 本项目基于此项目开发，并在此基础上进行了大幅重构
-- [lumina37/aiotieba](https://github.com/lumina37/aiotieba) 贴吧解析参考
-- [ikenxuan/karin-plugin-kkk](https://github.com/ikenxuan/karin-plugin-kkk) 部分逻辑参考
-- [ikenxuan/amagi](https://github.com/ikenxuan/amagi) 部分接口参考
-- [Uesugi Hanako](https://github.com/negichan) 渲染模板设计和部分签名算法
-- [soloxiaoye2022](https://github.com/soloxiaoye2022) 部分签名算法
-- [nemo2011/bilibili-api (RIP)](https://github.com/Nemo2011/bilibili-api) 部分接口参考
-- [bilibili-API-collect](https://sessionhu.github.io/bilibili-API-collect) biliProtobuf 定义来源
-- [10miaomiao/bilimiao2](https://github.com/10miaomiao/bilimiao2) biliProtobuf 用法参考
-- [adrienbrault/blitz-py](https://github.com/adrienbrault/blitz-py) 高性能高兼容的渲染引擎
-- 致2026年的你们
+本项目代码采用 [MIT](LICENSE) 开源；第三方代码和资源保留各自许可，见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
