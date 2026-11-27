@@ -14,7 +14,6 @@ from ...exception import DownloadException, TipException
 from ...utils.bilibili.a2v import bv2av
 from ...utils.bilibili.bangumi import Bangumi
 from ...utils.bilibili.bilibili.app.dynamic.v2 import dynamic_pb2, opus_pb2
-from ...utils.bilibili.bilibili.app.view.v1 import view_pb2
 from ...utils.bilibili.bilibili.main.community.reply.v1 import reply_pb2
 from ...utils.bilibili.client import HEADERS
 from ...utils.bilibili.comment import CommentResourceType, get_comments
@@ -324,7 +323,7 @@ class BilibiliParser(BaseParser):
         """
 
         video = await self._get_video(bvid=bvid, avid=avid)
-        video_info: view_pb2.ViewReply = await video.get_info()
+        video_info = await video.get_info()
         arc = video_info.arc
 
         await self.raise_if_in_black_list(arc.author.mid)
