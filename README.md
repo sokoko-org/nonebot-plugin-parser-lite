@@ -10,8 +10,8 @@
 <p align="center">
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+"></a>
   <a href="https://github.com/nonebot/nonebot2"><img src="https://img.shields.io/badge/NoneBot-2-EA5252?style=flat-square" alt="NoneBot2"></a>
-  <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/sokoko-org/nonebot-plugin-parser-lite/build.yml?branch=main&style=flat-square&logo=github&label=构建" alt="构建状态"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/sokoko-org/nonebot-plugin-parser-lite?style=flat-square&label=许可证" alt="MIT 许可证"></a>
+  <a href="https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/sokoko-org/nonebot-plugin-parser-lite/build.yml?branch=main&style=flat-square&logo=github&label=%E6%9E%84%E5%BB%BA" alt="构建状态"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/sokoko-org/nonebot-plugin-parser-lite?style=flat-square&label=%E8%AE%B8%E5%8F%AF%E8%AF%81" alt="MIT 许可证"></a>
 </p>
 
 <p align="center">
