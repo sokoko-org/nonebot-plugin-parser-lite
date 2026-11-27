@@ -10,6 +10,7 @@ import render_test_support as support
 from nonebot_plugin_parser_lite.parsers import bilibili
 from nonebot_plugin_parser_lite.parsers.bilibili import sponsorblock
 from nonebot_plugin_parser_lite.parsers.bilibili.sponsorblock import SponsorBlock
+from nonebot_plugin_parser_lite.utils.bilibili.video import view_pb2
 
 
 def row(start, end, category="sponsor", action="skip", cid="9", recorded=600):
@@ -137,7 +138,7 @@ async def test_full_ad_labels_and_full_skip_coverage_are_distinct(
 
 @pytest.fixture
 def video_parser(monkeypatch):
-    info = bilibili.view_pb2.ViewReply(bvid="BV17x411w7KC")
+    info = view_pb2.ViewReply(bvid="BV17x411w7KC")
     info.arc.duration, info.arc.title, info.arc.desc = 900, "title", "视频简介"
     info.arc.author.name = "tester"
     page = info.pages.add().page
