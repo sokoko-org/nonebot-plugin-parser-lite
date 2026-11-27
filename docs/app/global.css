@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+:root {
+  /* 初音青：浅色背景下加深一级保证对比度 */
+  --color-fd-primary: #1f9e95;
+  --color-fd-primary-foreground: #ffffff;
+  /* 提示框 info 也用初音青，避免默认蓝色 */
+  --color-fd-info: #1f9e95;
+}
+
+.dark {
+  --color-fd-primary: #39c5bb;
+  --color-fd-primary-foreground: #06201e;
+  --color-fd-info: #39c5bb;
+}
+
+.brand-gradient-text {
+  background: linear-gradient(100deg, #1f9e95 0%, #39c5bb 45%, #f0447f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ===== 首页动效 ===== */
+
+/* 背景描边字：进场时描出笔画 */
+.outline-draw {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: outline-draw 2.6s ease-in-out forwards;
+}
+@keyframes outline-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 首屏内容上浮淡入 */
+.hero-rise > * {
+  animation: hero-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-rise > *:nth-child(2) { animation-delay: 0.08s; }
+.hero-rise > *:nth-child(3) { animation-delay: 0.16s; }
+.hero-rise > *:nth-child(4) { animation-delay: 0.24s; }
+.hero-rise > *:nth-child(5) { animation-delay: 0.32s; }
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+/* 平台跑马灯 */
+.marquee {
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
+.marquee-row {
+  animation: marquee 48s linear infinite;
+}
+.marquee-row[data-reverse] {
+  animation-direction: reverse;
+  animation-duration: 56s;
+}
+.marquee:hover .marquee-row {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* 滚动提示 */
+.scroll-hint {
+  animation: scroll-hint 2s ease-in-out infinite;
+}
+@keyframes scroll-hint {
+  50% {
+    transform: translateY(6px);
+    opacity: 0.5;
+  }
+}
+
+/* 卡牌翻面的弹性缓动 */
+.ease-elastic {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outline-draw,
+  .hero-rise > *,
+  .marquee-row,
+  .scroll-hint {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

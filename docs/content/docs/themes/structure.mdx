@@ -1,0 +1,128 @@
+---
+title: 目录结构与加载
+description: theme.json、主题加载顺序与模板回退规则
+icon: FolderTree
+---
+
+## 目录结构
+
+最小主题只需要两个文件：
+
+<Files>
+  <Folder name="my-theme" defaultOpen>
+    <File name="theme.json" />
+    <File name="default.html.jinja" />
+  </Folder>
+</Files>
+
+按需扩展平台专属模板与静态资源：
+
+<Files>
+  <Folder name="my-theme" defaultOpen>
+    <File name="theme.json" />
+    <File name="default.html.jinja" />
+    <File name="music.html.jinja" />
+    <File name="netease.html.jinja" />
+    <File name="stats.html.jinja" />
+    <File name="theme.css" />
+    <Folder name="assets" defaultOpen>
+      <File name="logo.png" />
+      <File name="background.webp" />
+    </Folder>
+  </Folder>
+</Files>
+
+| 文件 | 说明 |
+| :--- | :--- |
+| `theme.json` | 主题元数据，**必需** |
+| `default.html.jinja` | 默认兜底模板，**必需**，没有匹配到平台模板时使用 |
+| `music.html.jinja` | 音乐平台通用模板，可选 |
+| `<平台 ID>.html.jinja` | 平台专属模板，可选 |
+| `stats.html.jinja` | [解析统计图](/docs/themes/stats)模板，可选 |
+| CSS / 静态资源 | 文件名不限，以相对路径引入 |
+
+## theme.json
+
+```json title="theme.json"
+{
+  "schema_version": 1,
+  "id": "my-custom-theme",
+  "name": "极简暗黑主题",
+  "desc": "适用于各大平台的暗色调优雅渲染主题",
+  "author": "开发者名称",
+  "version": "1.0.0"
+}
+```
+
+| 字段 | 必填 | 类型 | 说明 |
+| :--- | :---: | :--- | :--- |
+| `schema_version` | 否 | `number` | 规范版本，目前固定为 `1`（缺省即 `1`）。版本不兼容的主题会被忽略 |
+| `id` | **是** | `string` | 唯一标识。仅允许小写字母、数字、`.`、`_`、`-`，且以字母或数字开头 |
+| `name` | 否 | `string` | 展示名称，缺省时使用 `id` |
+| `desc` | 否 | `string` | 简要描述 |
+| `author` | 否 | `string` | 作者 |
+| `version` | 否 | `string` | 版本号。**更新版本号可强制刷新渲染缓存** |
+
+## 加载顺序
+
+插件按以下顺序检索主题，**同一 `id` 以先找到的为准**：
+
+1. `plite_theme_dirs` 中的目录（按配置顺序）
+2. 插件数据目录下的 `themes/`
+3. 插件内置的 `render/templates/`
+
+```text
+community-themes-pack/        ← 可直接作为 plite_theme_dirs 的一项
+├── pink-cute/
+│   ├── theme.json
+│   └── default.html.jinja
+└── minimal-mono/
+    ├── theme.json
+    └── default.html.jinja
+```
+
+<Callout type="warn">
+  `theme.json` 损坏、`id` 不合法或版本不兼容的主题会被跳过；`plite_render_theme` 指向的主题不可用时自动回退到内置 `default`。
+</Callout>
+
+## 模板回退规则
+
+以网易云音乐（`netease`）为例，查找顺序为：
+
+```text
+1. netease.html.jinja         平台专属
+      ▼
+2. music.html.jinja           仅音乐平台会查找这一级
+      ▼
+3. default.html.jinja         当前主题的通用兜底
+      ▼
+4. 内置 default.html.jinja    插件内置的最终兜底
+```
+
+`stats.html.jinja` 不走这条回退链：当前主题提供就用主题的，否则直接用内置统计图模板。
+
+### 音乐平台
+
+会额外查找 `music.html.jinja` 的平台：
+
+| 平台 ID | 平台 |
+| :--- | :--- |
+| `netease` | 网易云音乐 |
+| `kugou` | 酷狗音乐 |
+| `kuwo` | 酷我音乐 |
+| `qsmusic` | 汽水音乐 |
+| `qqmusic` | QQ 音乐 |
+| `migu` | 咪咕音乐 |
+
+### 平台 ID
+
+<Callout type="error">模板文件名必须使用**小写平台 ID**，不能使用中文名：应为 `netease.html.jinja`，而非 `网易云音乐.html.jinja`。</Callout>
+
+全部平台 ID（与 [支持的平台](/docs/platforms) 中的「配置 ID」一致）：
+
+```text
+acfun, bilibili, douyin, kuaishou, kugou, netease, x, weibo, rednote,
+qsmusic, kuwo, tieba, zhihu, duitang, heybox, lofter, buff, coolapk,
+illu, hupu, miyoushe, douban, 5eplay, doubao, linuxdo, wmpvp, zlb,
+taptap, ds, qqmusic, migu, skyland
+```

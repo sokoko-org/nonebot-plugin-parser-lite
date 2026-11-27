@@ -1,0 +1,74 @@
+---
+title: 解析统计
+description: 记录会话、查询统计、渲染统计图
+icon: ChartColumn
+---
+
+独立版同样会记录每次解析，并可以渲染成与 NoneBot 版相同的[统计图](/docs/themes/stats)。
+
+## 记录会话
+
+调用 `parse()` 时传入 `target` 标记会话。格式没有要求，能区分即可，统计图里会原样展示：
+
+```python
+result = await parser.parse(text, target="group:123456")
+```
+
+<Callout type="info">不传 `target` 的解析只计入总数和平台统计，按会话查询时不会出现。</Callout>
+
+## 查询
+
+```python
+from nonebot_plugin_parser_lite import query_stats
+
+summary = await query_stats(days=7)
+only_group = await query_stats(days=7, target="group:123456")
+
+print(summary.total.success, summary.total.failure)
+for platform, count in summary.platforms.items():  # 按次数降序
+    print(platform, count.total, count.failure)
+for hour, count in summary.hourly.items():  # 0-23 时，本地时间
+    print(hour, count.total)
+```
+
+`ParseStatsSummary` 字段：
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `days` / `since` / `until` | `int` / `date` / `date` | 统计区间 |
+| `target` | `str \| None` | 查询的会话，`None` 为全部 |
+| `total` | `StatsCount` | 总计，含 `success`、`failure`、`total` |
+| `platforms` | `dict[str, StatsCount]` | 平台统计，按次数降序 |
+| `targets` | `dict[str, StatsCount]` | 会话统计，按次数降序 |
+| `daily` | `dict[date, StatsCount]` | 每日统计，包含无记录的日期 |
+| `hourly` | `dict[int, StatsCount]` | 0–23 时分布，包含无记录的小时 |
+
+需要其他粒度时，可以取原始记录自行统计。`query_records()` 支持 `since`、`until`、`target`、`platform`、`limit` 过滤：
+
+```python
+from datetime import datetime, timedelta
+
+from nonebot_plugin_parser_lite import query_records
+
+for record in await query_records(since=datetime.now() - timedelta(hours=1)):
+    print(record.time.isoformat(), record.platform, record.target, record.success)
+```
+
+## 渲染统计图
+
+```python
+from pathlib import Path
+
+from nonebot_plugin_parser_lite import render_stats_image
+
+image_format, image = await render_stats_image(
+    summary,
+    platform_names={"bilibili": "哔哩哔哩"},
+    color_scheme="light",  # 可选，缺省按 plite_day_range 判断
+)
+Path(f"stats.{image_format}").write_bytes(image)
+```
+
+统计图包含趋势柱状图、24 小时分布与平台排行；**全局统计**（不指定 `target`）且有会话标记时，还会附带会话排行：
+
+<StatsPreview />

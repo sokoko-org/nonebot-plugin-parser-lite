@@ -1,0 +1,90 @@
+---
+title: 概览与安装
+description: 不依赖 NoneBot，在任意 Python 项目中使用解析与渲染能力
+icon: Package
+---
+
+独立版由 `main` 分支**自动生成**，发布在 [`standalone`](https://github.com/sokoko-org/nonebot-plugin-parser-lite/tree/standalone) 分支。它移除了 NoneBot 与消息发送相关的部分，只保留**链接匹配 → 结构化解析 → 主题渲染 → 解析统计**，可以接进任意 Python 应用（Discord / Telegram 机器人、Web 服务、脚本等）。
+
+<Callout type="info">需要 Python **3.11 或更高版本**。平台支持、渲染主题与 NoneBot 版完全一致。</Callout>
+
+## 安装
+
+<Tabs items={['Git', '构建产物', '手动复制']}>
+<Tab value="Git">
+
+```bash
+python -m pip install "nonebot-plugin-parser-lite-standalone @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@standalone"
+```
+
+</Tab>
+<Tab value="构建产物">
+
+从 [Release](https://github.com/sokoko-org/nonebot-plugin-parser-lite/releases) 下载独立版 wheel，或在 [Actions → Build artifacts](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml) 中下载 `standalone-*` 产物：
+
+```bash
+python -m pip install ./nonebot_plugin_parser_lite_standalone-*.whl
+```
+
+</Tab>
+<Tab value="手动复制">
+
+把 `standalone` 分支的 `src/nonebot_plugin_parser_lite` 复制进你的项目：
+
+```text
+your_project/
+├── nonebot_plugin_parser_lite/
+│   ├── parsers/
+│   ├── utils/
+│   └── __init__.py
+└── your_code.py
+```
+
+再安装运行依赖：
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+</Tab>
+</Tabs>
+
+## 最小示例
+
+```python
+import asyncio
+from pathlib import Path
+
+from nonebot_plugin_parser_lite import Parser, ParseStep
+
+
+async def main() -> None:
+    async with Parser() as parser:
+        rendered = await parser.parse(
+            "看看这个 https://www.bilibili.com/video/BV1CtYu6DE11",
+            until=ParseStep.RENDER,
+        )
+        print(rendered.result.title)
+        Path(f"post.{rendered.image_format}").write_bytes(rendered.image)
+
+
+asyncio.run(main())
+```
+
+## 公开 API
+
+| 名称 | 说明 |
+| :--- | :--- |
+| `Parser` | 解析流水线，见 [解析流水线](/docs/standalone/pipeline) |
+| `ParseStep` | 执行到哪一步：`MATCH` / `PARSE` / `RESOLVE` / `RENDER` |
+| `match()` / `parse()` | 一次性调用的便捷函数，内部临时创建 `Parser` |
+| `MatchResult` / `RenderResult` / `ThemeData` | 各阶段的返回类型 |
+| `resolve_parse_result()` / `render_theme_data()` | 底层渲染接口 |
+| `Config` / `configure()` | 配置，见 [配置与运行时](/docs/standalone/config) |
+| `clear_result_cache()` / `shutdown_runtime()` | 清空解析缓存 / 关闭后台任务 |
+| `query_stats()` / `query_records()` / `render_stats_image()` | 解析统计，见 [解析统计](/docs/standalone/stats) |
+| `ParseStatsSummary` / `ParseRecord` | 统计数据类型 |
+
+<Callout type="warn">
+  独立版的源码由 `scripts/generate_standalone.py` 从 `main` 生成，**不要直接向 `standalone` 分支提交**。修改请在 `main` 的 `src/` 或 `scripts/standalone_templates/` 中进行。
+</Callout>

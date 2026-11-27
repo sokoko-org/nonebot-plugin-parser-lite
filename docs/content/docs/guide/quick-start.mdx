@@ -1,0 +1,116 @@
+---
+title: 快速开始
+description: 安装插件并完成第一次解析
+icon: Rocket
+---
+
+<Steps>
+<Step>
+
+### 准备环境
+
+- Python **3.11 或更高版本**
+- 一个可以运行的 [NoneBot2](https://nonebot.dev) 项目与协议端（如 OneBot V11）
+- 可选：[FFmpeg](https://ffmpeg.org)，用于 Live Photo 转码、B 站音视频合并、媒体倍速等功能
+
+</Step>
+<Step>
+
+### 安装插件
+
+插件目前通过 Git 或构建产物分发，任选一种：
+
+<Tabs items={['uv', 'pip', 'Actions 构建产物', '手动安装']}>
+<Tab value="uv">
+
+```bash
+uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --branch main
+```
+
+指定版本：
+
+```bash
+uv add git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git --tag <tag>
+```
+
+</Tab>
+<Tab value="pip">
+
+```bash
+python -m pip install "nonebot-plugin-parser-lite @ git+https://github.com/sokoko-org/nonebot-plugin-parser-lite.git@main"
+```
+
+指定版本时，将 `main` 替换为实际的 tag 或 commit hash。
+
+</Tab>
+<Tab value="Actions 构建产物">
+
+前往 [Actions → Build artifacts](https://github.com/sokoko-org/nonebot-plugin-parser-lite/actions/workflows/build.yml)，下载最新一次运行产出的通用 wheel，然后：
+
+```bash
+python -m pip install ./nonebot_plugin_parser_lite-*.whl
+```
+
+</Tab>
+<Tab value="手动安装">
+
+将仓库中的 `src/nonebot_plugin_parser_lite` 文件夹复制到机器人的插件加载目录，再安装依赖：
+
+```bash
+python -m pip install -r requirements.txt
+# 或
+uv add --requirements ./xxx/requirements.txt
+```
+
+</Tab>
+</Tabs>
+
+<Callout type="info">指定版本安装仅支持 `1.3.7+`，更早的版本请使用手动安装。</Callout>
+
+</Step>
+<Step>
+
+### 加载插件
+
+如果使用 `nb-cli` / `pyproject.toml` 管理插件，在 `[tool.nonebot]` 中加入：
+
+```toml title="pyproject.toml"
+[tool.nonebot]
+plugins = ["nonebot_plugin_parser_lite"]
+```
+
+插件依赖 `nonebot-plugin-alconna`、`nonebot-plugin-uninfo`、`nonebot-plugin-apscheduler`、`nonebot-plugin-localstore`，安装时会自动带上并在启动时加载。
+
+</Step>
+<Step>
+
+### 发一条链接试试
+
+启动机器人后，在群里发送任意受支持平台的分享链接、BV 号或分享卡片，例如：
+
+```text
+https://www.bilibili.com/video/BV1CtYu6DE11
+```
+
+插件会先给这条消息贴上 🔨 表示正在解析，发送完渲染卡片与媒体后再贴上 🍼；解析失败则贴 ❌。回应是叠加的，🔨 会保留。私聊等不支持表情回应的场景会自动跳过。
+
+</Step>
+</Steps>
+
+## 建议的初始配置
+
+所有配置都有默认值，**不写任何配置也能直接使用**。若群文件上传慢或经常超时，建议在 `.env` 里先加上这一行：
+
+```bash title=".env"
+# NoneBot 内置配置，上传带宽较低时调大，防止发送超时
+API_TIMEOUT=100
+```
+
+需要登录态的平台（知乎、Linux Do、X）以及 B 站扫码登录，见 [Cookie 与登录](/docs/advanced/cookies)。
+
+<Cards>
+  <Card title="配置项" href="/docs/guide/configuration" />
+  <Card title="指令" href="/docs/guide/commands" />
+</Cards>
+
+<Callout>不使用 NoneBot？请看 [独立版](/docs/standalone)。</Callout>

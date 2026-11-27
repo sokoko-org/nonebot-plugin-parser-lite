@@ -1,0 +1,68 @@
+---
+title: B 站专项
+description: 清晰度、编码、音质、CDN 与空降助手
+icon: Tv
+---
+
+## 视频清晰度
+
+`plite_bili_video_quality`，默认 `80`（1080P）。部分高画质需要登录态，见 [blogin](/docs/advanced/cookies#b-站扫码登录)。
+
+| 值 | 清晰度 | 值 | 清晰度 |
+| :--: | :--- | :--: | :--- |
+| `5` | 144P | `100` | 智能修复 |
+| `6` | 240P | `112` | 1080P+ |
+| `16` | 360P | `116` | 1080P 60 帧 |
+| `32` | 480P | `120` | 4K |
+| `64` | 720P | `125` | HDR |
+| `74` | 720P+ | `126` | 杜比视界 |
+| `80` | 1080P | `127` | 8K |
+
+## 视频编码
+
+`plite_bili_video_codes`，按优先级排列。
+
+| 值 | 编码 | 说明 |
+| :--- | :--- | :--- |
+| `avc` | H.264 | 兼容性最好，体积较大 |
+| `hev` | HEVC / H.265 | 部分设备可能无法播放 |
+| `av01` | AV1 | 部分设备可能无法播放 |
+| `unknown` | 未知 | 兜底 |
+
+如需完全避免兼容性问题，只保留一项：`plite_bili_video_codes=["avc"]`。
+
+## 音质
+
+`plite_bili_audio_quality` 限制下载的**源音频流**上限，默认 `30280`（192K）。按优先级从低到高：
+
+| 值 | 音质 |
+| :--: | :--- |
+| `30216` | 64K |
+| `30232` | 132K |
+| `30280` | 192K |
+| `30251` | Hi-Res 无损 |
+| `30250` | 杜比全景声 |
+
+使用 `bm` 指令单独请求音频时，仍会转码为 MP3 发送。
+
+## 下载 CDN
+
+| 配置项 | 说明 |
+| :--- | :--- |
+| `plite_bili_cdn_region` | `default` 不替换；`zh` / `en` / `ja` 为对应地区；`proxy` 为网宿全网多线 |
+| `plite_bili_cdn_domain` | 自定义域名，优先于地区配置。只接受 `bilivideo.com` 域名，不要包含协议、端口或路径 |
+
+## 空降助手
+
+接入 [BilibiliSponsorBlock](https://github.com/hanydd/BilibiliSponsorBlock/wiki/API) 后，下载的视频会自动裁掉广告、恰饭等片段。
+
+```bash title=".env"
+plite_bsb_api_base="https://example.com"
+plite_bsb_categories=["sponsor", "selfpromo"]
+```
+
+`plite_bsb_categories` 在配置了服务地址时必填，可选分类以服务提供者给出的分类列表为准。
+
+## 识别范围
+
+除常规链接与 `b23.tv` 短链外，插件会在消息全文中查找 **BV / av 号**，并支持 QQ 小程序与分享卡片。

@@ -1,0 +1,75 @@
+---
+title: 使用与概览
+description: 更换主题，以及主题是如何被渲染出来的
+icon: Palette
+---
+
+卡片由 **Jinja2 模板 + CSS** 渲染，再交给 [blitz-py](https://github.com/adrienbrault/blitz-py) 排版并绘制成图片。可以直接用主题商店里的主题，也可以自己写一套。
+
+## 使用主题
+
+1. 从 [主题商店](https://github.com/sokoko-org/nonebot-plugin-parser-themes) 下载主题
+2. 放进插件数据目录下的 `themes/` 文件夹，或用 `plite_theme_dirs` 指定外部目录
+3. 在 `.env` 中切换：
+
+```bash title=".env"
+plite_render_theme="my-custom-theme"
+plite_theme_dirs=["D:/bot/themes/my-custom-theme", "D:/bot/themes/community-themes-pack"]
+```
+
+`plite_theme_dirs` 的每一项既可以是**单个主题目录**，也可以是**包含多个主题子目录的根目录**。找不到指定主题时回退到内置 `default`。
+
+<Callout type="info">
+  插件数据目录由 [nonebot-plugin-localstore](https://github.com/nonebot/plugin-localstore) 管理，可以用 `nb localstore` 查看实际路径。[独立版](/docs/standalone/config#数据目录)则位于 `PARSER_LITE_BASE_DIR/data`。
+</Callout>
+
+### 日夜模式
+
+`plite_day_range` 决定什么时候用浅色主题，默认 `["6:00", "19:00"]`，范围之外渲染为夜间模式，支持跨午夜区间，如 `["22:30", "6:00"]`。模板通过 `data.theme`（`"light"` / `"dark"`）感知当前模式。
+
+## 渲染流程
+
+```text
+平台解析器
+   └─> ParseResult（原始数据）
+         └─> Theme API v1 数据
+               └─> 匹配最佳模板（Jinja）
+                     └─> 渲染 HTML
+                           └─> Blitz 布局与绘制
+                                 └─> 发送图片消息
+```
+
+模板上下文**只有一个根对象 `data`**，模板要做的就是把 `data` 里的内容排版出来：
+
+```jinja
+{{ data.post.title }}
+{{ data.post.author.name }}
+
+{% for item in data.post.content %}
+  {{ item.type }}
+{% endfor %}
+```
+
+<Callout type="warn">渲染时对 http(s) 的访问会被忽略，也不支持 JavaScript，所需资源请放在主题目录内。</Callout>
+
+## 开发指南
+
+<Cards>
+  <Card title="目录结构与加载" href="/docs/themes/structure" description="theme.json、加载顺序、模板回退规则" />
+  <Card title="Theme API 数据" href="/docs/themes/data" description="data.meta 与 data.post 的全部字段" />
+  <Card title="正文内容类型" href="/docs/themes/content" description="文本、图片、视频、贴纸、投票等的结构" />
+  <Card title="统计图模板" href="/docs/themes/stats" description="stats.html.jinja 的数据结构" />
+  <Card title="编写规范与 FAQ" href="/docs/themes/guidelines" description="转义、main 容器、CSS、调试与缓存" />
+</Cards>
+
+<Callout>本指南的源文件位于仓库 `docs/content/docs/themes/`，原 `THEME.md` 已迁移至此。</Callout>
+
+## 参考样例
+
+- [sokoko-org/nonebot-plugin-parser-themes](https://github.com/sokoko-org/nonebot-plugin-parser-themes)：`pink-cute`、`minimal-mono`、`hatsune-miku` 等示例主题源码
+- 内置主题源码 [`src/nonebot_plugin_parser_lite/render/templates/`](https://github.com/sokoko-org/nonebot-plugin-parser-lite/tree/main/src/nonebot_plugin_parser_lite/render/templates)：
+  - `default.html.jinja`：默认模板
+  - `music.html.jinja`：音乐平台模板（唱片播放器样式）
+  - `stats.html.jinja`：解析统计图模板
+  - `macros.jinja`：可复用的 Jinja2 宏
+  - `icon.css`：内置图标样式

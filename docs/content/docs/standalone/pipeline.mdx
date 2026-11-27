@@ -1,0 +1,109 @@
+---
+title: 解析流水线
+description: Parser 的四个阶段、按需加载平台与底层接口
+icon: Workflow
+---
+
+## 四个阶段
+
+`Parser.parse()` 接收文本，也可以接收上一阶段的结果继续执行，通过 `until` 控制执行到哪一步：
+
+| ParseStep | 返回 | 说明 |
+| :--- | :--- | :--- |
+| `MATCH` | `MatchResult` | 仅匹配链接，不发请求 |
+| `PARSE` | `ParseResult` | 结构化解析（**默认**） |
+| `RESOLVE` | `ThemeData` | 生成渲染数据，**会触发媒体下载** |
+| `RENDER` | `RenderResult` | 渲染图片，包含解析结果、图片格式与 bytes |
+
+```python
+from pathlib import Path
+
+from nonebot_plugin_parser_lite import ParseStep, Parser
+
+async with Parser() as parser:
+    # 1. 仅匹配
+    matched = await parser.parse(text, until=ParseStep.MATCH)
+
+    # 2. 结构化解析
+    result = await parser.parse(matched, until=ParseStep.PARSE)
+
+    # 3. 生成模板数据（含媒体下载）
+    render_data = await parser.parse(result, until=ParseStep.RESOLVE)
+
+    # 4. 从解析结果继续生成图片，也可以直接传入 text
+    rendered = await parser.parse(result, until=ParseStep.RENDER)
+
+    # 渲染结果里保留了原始媒体
+    for media in rendered.result.iter_sendable_media():
+        media_path = await media.get_path()
+
+    Path(f"post.{rendered.image_format}").write_bytes(rendered.image)
+```
+
+`parse()` 还接受以下关键字参数：
+
+| 参数 | 说明 |
+| :--- | :--- |
+| `color_scheme` | `"light"` / `"dark"`，缺省时按 `plite_day_range` 自动判断 |
+| `theme_id` | 本次渲染使用的主题 ID，缺省为 `plite_render_theme` |
+| `image_format` | `"webp"` / `"jpeg"`，缺省为 `plite_render_format` |
+| `target` | 解析统计中的会话标记，见 [解析统计](/docs/standalone/stats) |
+
+同一链接的解析结果会被缓存，重复解析直接命中缓存；需要时可调用 `clear_result_cache()` 清空。
+
+## 复用 Parser 实例
+
+<Callout type="info" title="长期运行的应用请复用同一个 Parser">
+  各解析器的启动钩子会在实例**首次用到对应平台时执行一次**，初始化状态（如登录凭证、签名参数）随实例保留。每次解析都新建再 `aclose()` 会反复触发启动钩子并丢失这些状态。
+</Callout>
+
+```python
+from nonebot_plugin_parser_lite import Parser, shutdown_runtime
+
+parser = Parser()  # 应用启动时创建一次并长期持有
+try:
+    result = await parser.parse(text)
+    # ... 后续复用同一个 parser ...
+finally:
+    await parser.aclose()       # 应用退出时关闭
+    await shutdown_runtime()    # 关闭后台定时任务
+```
+
+## 按需加载平台
+
+只用到部分平台时，直接传入对应的解析器类，避免加载用不到的模块：
+
+```python
+from nonebot_plugin_parser_lite import Parser
+from nonebot_plugin_parser_lite.parsers.bilibili import BilibiliParser
+
+async with Parser([BilibiliParser]) as parser:
+    result = await parser.parse("看看这个 https://www.bilibili.com/video/BV1CtYu6DE11")
+```
+
+## 底层接口
+
+已有 `ParseResult`，只想生成渲染数据或单独渲染：
+
+```python
+from pathlib import Path
+
+from nonebot_plugin_parser_lite import render_theme_data, resolve_parse_result
+
+render_data = await resolve_parse_result(result, color_scheme="dark", theme_id="custom")
+image_format, image = await render_theme_data(render_data)
+Path(f"post.{image_format}").write_bytes(image)
+```
+
+`render_data` 就是主题模板拿到的 `data`，结构见 [Theme API 数据](/docs/themes/data)。
+
+也可以绕过流水线，直接调用单个解析器：
+
+```python
+from nonebot_plugin_parser_lite.parsers.bilibili import BilibiliParser
+
+parser = BilibiliParser()
+keyword, searched = parser.search_url("https://www.bilibili.com/video/BV1CtYu6DE11")
+result = await parser.parse(keyword, searched)
+await parser.aclose()
+```

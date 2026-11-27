@@ -1,0 +1,124 @@
+---
+title: 配置项
+description: 全部 plite_* 配置项、默认值与说明
+icon: Settings
+---
+
+所有配置写入 NoneBot 的 `.env` / `.env.dev` / `.env.prod` 文件，**全部可选**。列表类型的值请使用 JSON 写法，例如 `plite_disabled_platforms=["x"]`。
+
+<Callout type="info">插件会自动使用系统环境中的 HTTP 代理发起网络请求。</Callout>
+
+## 平台开关
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_disabled_platforms` | `[]` | 全局禁用的平台，取值见 [支持的平台](/docs/platforms) 中的「配置 ID」 |
+| `plite_parse_dedup_platforms` | `null` | 参与解析冷却的平台。`null` 为全部已启用平台，`[]` 为全部关闭。不会禁用平台本身 |
+| `plite_parse_dedup_minutes` | `0` | 同一会话内相同链接 / 编号成功解析后的忽略分钟数；`0` 时只抑制并发重复解析 |
+
+```bash title=".env"
+# 关闭 X 与抖音
+plite_disabled_platforms=["x", "douyin"]
+
+# 只对 B 站开启 30 分钟冷却
+plite_parse_dedup_platforms=["bilibili"]
+plite_parse_dedup_minutes=30
+```
+
+## 发送内容
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_send_components` | `["card","content","cover","video","audio"]` | 发送哪些内容块，见 [发送组合](/docs/features/send-components) |
+| `plite_forward_components` | `["content","cover"]` | 哪些内容块进入合并转发 |
+| `plite_append_qrcode` | `false` | 在卡片中附加原始链接的二维码 |
+| `plite_max_comments` | `5` | 渲染的最大评论数，设为 `0` 则不请求评论 |
+| `plite_forward_text_threshold` | `1000` | 纯文本超过该长度时强制使用合并转发 |
+| `plite_live_photo` | `true` | 使用 FFmpeg 转码 Live Photo；关闭后分别发送底图与动图 |
+
+## 懒下载
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_lazy_download` | `false` | 开启后只发卡片，用户发送下载命令时才下载媒体 |
+| `plite_lazy_download_tip` | `false` | 发送卡片后附带命令提示 |
+| `plite_lazy_download_timeout` | `30` | 等待下载命令的超时秒数 |
+| `plite_download_command` | `["xz","下载"]` | 下载命令，第一个为主命令，其余为别名 |
+
+详见 [懒下载](/docs/features/lazy-download)。
+
+## 文件与传输
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_max_size` | `90` | 音视频最大下载体积（MB），超过则阻断下载 |
+| `plite_max_retries` | `3` | 下载最大重试次数 |
+| `plite_need_upload_audio` | `false` | 音频以群文件形式上传 |
+| `plite_need_upload_video` | `false` | 视频以群文件形式上传 |
+| `plite_file_upload_timeout` | `null` | 文件发送超时秒数，由适配器（OneBot）支持；未设置时沿用默认 |
+| `plite_use_base64` | `false` | 媒体以 base64 发送 |
+
+<Callout type="warn" title="关于 base64">
+  编解码与传输 base64 会占用更多内存、CPU 与带宽，甚至可能导致 WebSocket 连接崩溃。仅推荐 NoneBot 与协议端**不在同一台机器**时开启。
+</Callout>
+
+## 渲染
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_render_theme` | `"default"` | 渲染主题 ID |
+| `plite_theme_dirs` | `[]` | 额外主题目录，可以是单个主题目录，也可以是包含多个主题子目录的目录 |
+| `plite_day_range` | `["6:00","19:00"]` | 白天时间范围 `h:m`，范围内为浅色主题，范围外为夜间模式；支持跨午夜，如 `["22:30","6:00"]` |
+| `plite_render_format` | `"webp"` | 卡片图片格式，`webp` 或 `jpeg`。`jpeg` 会丢失透明度，仅在默认格式无法发送时更改 |
+| `plite_emoji_style` | `"system"` | Emoji 样式：`system` 优先系统字体并以 Twemoji 兜底；`twitter` 固定 Twemoji；`google` 固定 Noto Color Emoji |
+
+## B 站
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_bili_video_codes` | `["avc","av01","hev","unknown"]` | 允许的视频编码，越靠前优先级越高 |
+| `plite_bili_video_quality` | `80` | 视频清晰度（1080P） |
+| `plite_bili_audio_quality` | `30280` | 音频流音质上限（192K） |
+| `plite_bili_cdn_region` | `"default"` | 下载 CDN 地区：`default` / `zh` / `en` / `ja` / `proxy` |
+| `plite_bili_cdn_domain` | `null` | 自定义 CDN 域名，优先于地区配置 |
+| `plite_bsb_api_base` | `null` | 空降助手（SponsorBlock）服务地址，留空不启用 |
+| `plite_bsb_categories` | `[]` | 参与裁切的片段分类，配置了服务地址时必填 |
+
+各取值的完整说明见 [B 站专项](/docs/features/bilibili)。
+
+## 媒体倍速
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_media_speedup_rules` | `[]` | 规则格式 `平台:作者id:倍速` |
+| `plite_media_transcode_concurrency` | `1` | 倍速转码并发数 |
+
+```bash title=".env"
+# 该 UP 主的音视频以 1.25 倍速发送
+plite_media_speedup_rules=["bilibili:123456:1.25"]
+```
+
+规则在启动时校验，平台不存在或倍速不是数字会直接报错，避免静默失效。
+
+## Cookie
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_zhihu_ck` | `null` | 知乎 Cookie，必须含 `z_c0` |
+| `plite_linuxdo_ck` | `null` | Linux Do Cookie |
+| `plite_x_ck` | `null` | X Cookie，如 `auth_token=xxx` |
+
+详见 [Cookie 与登录](/docs/advanced/cookies)。
+
+## 解析统计
+
+| 配置项 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `plite_stats_max_days` | `365` | 统计指令可查询的最大天数 |
+| `plite_stats_top_targets` | `10` | 全局统计展示的会话排行数量，其余合并为「其他」 |
+
+## NoneBot 相关
+
+| 配置项 | 建议值 | 说明 |
+| :--- | :--- | :--- |
+| `API_TIMEOUT` | `100` | NoneBot 内置配置。上传带宽较低或发送消息超时时调大 |

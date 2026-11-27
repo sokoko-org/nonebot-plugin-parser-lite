@@ -1,0 +1,21 @@
+---
+title: 懒下载
+description: 先发卡片，用户需要时再下载媒体
+icon: Download
+---
+
+大群里不是每条视频都有人想看。开启懒下载后，插件**只发送总结卡片**，等用户发送下载命令时才真正下载并发送视频 / 音频，可以显著节省带宽与存储。
+
+```bash title=".env"
+plite_lazy_download=true
+plite_lazy_download_tip=true        # 卡片后提示可用的下载命令
+plite_lazy_download_timeout=30      # 等待命令的秒数
+plite_download_command=["xz", "下载"]
+```
+
+## 行为说明
+
+- 卡片发出后，同一会话中的**同一用户**在超时时间内发送 `xz` 或 `下载` 即可获取媒体
+- 下载命令的第一个为主命令，其余为别名；开启懒下载时至少要配置一条命令
+- 同一用户的下载任务进行中时，重复请求会提示「资源正在下载或发送中」
+- 开启懒下载时卡片**始终先单独发送**，此时 `plite_send_components` 中的 `card` 不可关闭，其余内容块仍按[发送组合](/docs/features/send-components)发送

@@ -1,0 +1,53 @@
+---
+title: Cookie 与登录
+description: 需要登录态的平台如何配置
+icon: KeyRound
+---
+
+大多数平台**不需要任何登录态**即可解析。下列情况需要额外配置。
+
+## B 站扫码登录
+
+向机器人发送（需要 @，仅 SUPERUSER）：
+
+```text
+@机器人 blogin
+```
+
+机器人会发送二维码，使用 B 站 App 扫码确认即可，凭证会保存到插件配置目录的 `bilibili_credential.json`，并由插件自动刷新。登录后可获取更高的清晰度与更稳定的接口访问。
+
+## 知乎
+
+需要具有登录态的 Cookie 才能完整获取回答内容。
+
+```bash title=".env"
+plite_zhihu_ck="z_c0=xxxx; d_c0=xxxx; _xsrf=xxxx"
+```
+
+**必须**包含 `z_c0`，建议同时包含 `d_c0` 与 `_xsrf`。
+
+## Linux Do
+
+部分帖子需要登录或达到一定阅读等级才能查看。
+
+```bash title=".env"
+plite_linuxdo_ck="xxxx"
+```
+
+首次请求成功后，服务器更新的 Cookie 会保存到插件配置目录的 `linuxdo_cookies.txt`。配置项非空时优先使用配置并补齐缓存；清空配置项后才使用缓存文件。
+
+## X (Twitter)
+
+R18 帖子与帖子翻译需要登录才能查看。
+
+```bash title=".env"
+plite_x_ck="auth_token=xxx"
+```
+
+## 获取 Cookie
+
+1. 在浏览器中登录对应网站
+2. 按 <kbd>F12</kbd> 打开开发者工具 → **应用 (Application)** → **Cookie**
+3. 复制所需字段，按 `name=value; name2=value2` 的格式填写
+
+<Callout type="error">Cookie 等同于账号密码，请勿泄露或提交到公开仓库。</Callout>

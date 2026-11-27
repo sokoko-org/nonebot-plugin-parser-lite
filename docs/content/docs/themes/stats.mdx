@@ -1,0 +1,58 @@
+---
+title: 统计图模板
+description: stats.html.jinja 的数据结构与内置效果
+icon: ChartColumn
+---
+
+[解析统计](/docs/features/stats)同样走主题系统：当前主题提供 `stats.html.jinja` 时使用主题模板，否则回退到内置模板。下面是内置模板渲染的全局统计：
+
+<StatsPreview />
+
+## 数据结构
+
+上下文同样只有 `data`，字符串已转义：
+
+```javascript
+data.schema_version // [number] 协议版本号 (1)
+data.theme          // [string] "light" | "dark"
+data.theme_id       // [string] 当前生效的主题 ID
+data.meta           // [object] bot_name / rendering_time / width，同帖子模板
+data.stats          // [object] 统计数据
+```
+
+### data.stats
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `title` | `string` | 图表标题 |
+| `days` | `number` | 统计天数（含今天） |
+| `since` / `until` | `string` | 起止日期 `YYYY-MM-DD`，`until` 为今天 |
+| `scope` | `object` | `global`（是否全部会话）、`target`（会话标识或 `null`）、`label`（展示文本） |
+| `total` | `Count` | 总计 |
+| `average` | `number` | 日均次数（一位小数） |
+| `peak` | `object \| null` | 次数最多的一天：`date`、`total`；无记录时为 `null` |
+| `chart` | `object` | 趋势图：`bucket_days`（每柱天数）、`unit`（如「每柱 3 天」）、`bars` |
+| `hourly` | `array` | 24 项，按 0–23 时（本地时间），每项为 `Count` 加 `hour` |
+| `platforms` | `array` | 平台排行，每项为 `Count` 加 `id`、`name` |
+| `targets` | `array` | 会话排行，仅全局统计有数据，否则为空数组 |
+
+- 趋势图最多 31 根柱子，天数更多时自动按多天合并
+- 排行超出上限的部分合并为一项，其 `id` 为 `null`、`name` 为「其他 N 项」
+- `chart.bars` 每项为 `Count` 加 `start`、`end`（该柱覆盖的日期）和 `label`（建议的横轴标签，可能为空字符串）
+
+### Count
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `total` | `number` | 总次数 |
+| `success` | `number` | 成功次数 |
+| `failure` | `number` | 失败次数 |
+| `rate` | `number \| null` | 成功率 0–100（一位小数），无记录时为 `null` |
+| `success_pct` | `number` | 成功数相对同组最大总数的百分比，可直接用作柱高 / 条宽 |
+| `failure_pct` | `number` | 失败数相对同组最大总数的百分比 |
+
+```jinja title="24 小时分布柱状图"
+{% for bar in data.stats.hourly %}
+  <div class="bar" style="height: {{ bar.success_pct + bar.failure_pct }}%">{{ bar.total }}</div>
+{% endfor %}
+```

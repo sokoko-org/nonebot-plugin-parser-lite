@@ -1,0 +1,82 @@
+---
+title: 发送组合
+description: 控制解析结果发送哪些内容、哪些进入合并转发
+icon: Layers
+---
+
+一次解析的结果被拆分为若干**内容块**，你可以自由决定发送哪些、以什么形式发送。清单的顺序就是发送顺序。
+
+## 内容块
+
+| 块 | 含义 | 可否禁用 |
+| :--- | :--- | :--- |
+| `card` | 渲染的总结卡片 | 关闭懒下载时可禁用 |
+| `url` | 解析源原始链接 | 是 |
+| `embed` | 在线播放链接（如有） | 是 |
+| `content` | 解析正文：文字 / 图片 / 贴纸 / 链接 / 引用 / 投票 | 是 |
+| `cover` | 视频封面 | 是 |
+| `video` | 视频 | 是 |
+| `audio` | 音频 | 是 |
+
+## 两个配置项
+
+- **`plite_send_components`**：要发送的内容。关闭懒下载时，不想要总结卡片就从列表中移除 `card`；开启懒下载时，卡片始终先单独发送
+- **`plite_forward_components`**：哪些已启用的内容进入合并转发
+
+| 加入 `plite_forward_components` 的块 | 效果 |
+| :--- | :--- |
+| `card` | 关闭懒下载时，卡片与其他已启用内容一起转发，卡片位于第一条 |
+| `video` | 视频并入转发（需要协议端支持在转发节点中发送 Video / File） |
+| `content` / `cover` | 正文进入转发；正文节点超过 4 项时始终使用合并转发 |
+
+## 常见组合
+
+<Tabs items={['默认', '只要卡片', '全部塞进转发', '只要视频']}>
+<Tab value="默认">
+
+```bash
+plite_send_components=["card", "content", "cover", "video", "audio"]
+plite_forward_components=["content", "cover"]
+```
+
+先发卡片，正文与封面合并转发，再单独发视频 / 音频。
+
+</Tab>
+<Tab value="只要卡片">
+
+```bash
+plite_send_components=["card"]
+```
+
+刷屏最少，适合活跃的大群。
+
+</Tab>
+<Tab value="全部塞进转发">
+
+```bash
+plite_send_components=["card", "content", "cover", "video", "audio"]
+plite_forward_components=["card", "content", "cover", "video"]
+```
+
+所有内容收进一条合并转发，需协议端支持转发中的视频节点。
+
+</Tab>
+<Tab value="只要视频">
+
+```bash
+plite_send_components=["video", "audio"]
+```
+
+不渲染卡片，只发媒体。
+
+</Tab>
+</Tabs>
+
+## 发送失败时的降级
+
+合并转发遇到明确的媒体上传错误时，插件只重发失败的分包：
+
+1. 先省略视频并保留其他内容重新发送
+2. 若再次失败或本来就没有视频，则把媒体替换为文字，仍以合并转发发送
+
+降级消息会补上缺失的标题、作者和原链接，确保信息不丢失。

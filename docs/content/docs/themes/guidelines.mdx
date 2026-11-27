@@ -1,0 +1,109 @@
+---
+title: 编写规范与 FAQ
+description: 转义、容器结构、CSS 资源与常见问题
+icon: ListChecks
+---
+
+## Jinja2 转义原则
+
+<Callout type="error" title="不要使用 |e 过滤器">
+  数据在传入 Jinja2 前已统一转义，Jinja 环境的自动转义也已关闭。
+
+  - 正确：`{{ post.title }}`
+  - 错误：`{{ post.title | e }}`（会被双重转义，显示成 `&amp;lt;`）
+</Callout>
+
+## 必须有 main 容器
+
+截图区域取自 HTML 中的 `<main>` 节点，模板**必须包含 `<main>`**：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ data.theme }}">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="theme.css" />
+  </head>
+  <body>
+    <main class="theme-card">
+      <!-- 内容 -->
+    </main>
+  </body>
+</html>
+```
+
+## CSS 与静态资源
+
+**相对路径**：CSS 与图片使用相对路径，起点是**主题根目录**。
+
+```html
+<link rel="stylesheet" href="theme.css" />
+<img src="assets/background.png" alt="背景" />
+```
+
+**内置图标**：渲染器会自动注入 `icon.css`，无需引入外部图标库即可使用：
+
+```html
+<i class="fa-icon fa-heart"></i>
+<i class="fa-icon fa-comment-dots"></i>
+<i class="fa-icon fa-play"></i>
+<i class="fa-icon fa-eye"></i>
+<i class="fa-icon fa-star"></i>
+<i class="fa-icon fa-share-nodes"></i>
+<i class="fa-icon fa-wand-magic-sparkles"></i>
+```
+
+**深浅色**：结合 `data.theme` 切换：
+
+```css
+:root {
+  --bg-color: #ffffff;
+  --text-color: #202020;
+}
+
+[data-theme='dark'] {
+  --bg-color: #1a1a1a;
+  --text-color: #f5f5f5;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+```
+
+## 常见问题
+
+<Accordions>
+<Accordion title="主题模板没有生效">
+
+1. `theme.json` 中的 `id` 是否与 `plite_render_theme` 一致
+2. `id` 是否符合命名规则（小写字母、数字、`.`、`_`、`-`，以字母或数字开头）
+3. `plite_theme_dirs` 是否指向主题目录或其父目录
+4. 平台模板文件名是否为小写平台 ID，如 `bilibili.html.jinja`
+
+</Accordion>
+<Accordion title="改了 CSS / HTML 但效果没变">
+
+渲染结果默认有缓存。开发调试时**递增 `theme.json` 的 `version`**（如 `1.0.0` → `1.0.1`）即可强制刷新。
+
+</Accordion>
+<Accordion title="图片显示为占位图">
+
+- 检查相对路径，起点是主题根目录
+- 确认格式受支持：PNG、JPEG、WebP、GIF
+- 资源获取失败时会自动使用 1×1 透明占位图
+
+</Accordion>
+<Accordion title="如何查看模板拿到的数据">
+
+在模板中临时输出 `data`：
+
+```jinja
+<pre style="font-size: 10px; overflow: auto;">
+{{ data | tojson(indent=2) }}
+</pre>
+```
+
+</Accordion>
+</Accordions>

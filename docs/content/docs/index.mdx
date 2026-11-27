@@ -1,0 +1,38 @@
+---
+title: 简介
+description: 一个 NoneBot2 链接分享自动解析插件
+icon: House
+---
+
+`nonebot-plugin-parser-lite` 是一个 [NoneBot2](https://github.com/nonebot/nonebot2) 插件。群友发出的分享链接会被它自动识别，插件随后拉取视频、图文、音频和评论区，并渲染成一张可以直接在群聊里阅读的卡片。
+
+<Showcase />
+
+## 它能做什么
+
+- **零指令触发**：识别链接、短链、BV / av 号、QQ 小程序与分享卡片
+- **30+ 个平台**：B 站、抖音、微博、小红书、知乎、贴吧……以及 6 个音乐平台
+- **评论区渲染**：热评与楼中楼直接画进卡片
+- **富文本还原**：文字、图片、贴纸、链接、引用、投票、Live Photo
+- **发送方式可调**：自由组合卡片 / 正文 / 封面 / 视频 / 音频，支持合并转发与懒下载
+- **主题系统**：Jinja2 + CSS 自定义渲染主题，按时间自动切换日夜模式
+- **解析统计**：按会话或全局查看解析趋势与平台排行
+
+## 从这里开始
+
+<Cards>
+  <Card title="快速开始" href="/docs/guide/quick-start" description="安装、加载插件并完成第一次解析" />
+  <Card title="支持的平台" href="/docs/platforms" description="每个平台能解析哪些内容" />
+  <Card title="配置项" href="/docs/guide/configuration" description="全部 plite_* 配置项及默认值" />
+  <Card title="主题开发" href="/docs/themes" description="更换或自己编写卡片主题" />
+  <Card title="独立版" href="/docs/standalone" description="不依赖 NoneBot，在任意 Python 项目中使用" />
+  <Card title="解析统计" href="/docs/features/stats" description="解析趋势、平台与会话排行" />
+</Cards>
+
+<Callout type="warn" title="使用须知">
+  严禁将本项目用于任何非法用途。请遵守所在地法律法规、平台服务协议与著作权规则，并仅处理你有权下载、保存或传播的内容。详见 [免责声明](/docs/about/disclaimer)。
+</Callout>
+
+## 不使用 NoneBot？
+
+[独立版](/docs/standalone) 移除了 NoneBot 依赖，保留匹配、解析、渲染与统计能力，可以接入任意 Python 项目。

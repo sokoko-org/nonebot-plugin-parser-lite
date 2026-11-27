@@ -1,0 +1,47 @@
+---
+title: 配置与运行时
+description: 环境变量、动态配置、数据目录与后台任务
+icon: SlidersHorizontal
+---
+
+## 配置
+
+独立版与 NoneBot 版共用同一套 `plite_*` 配置项，全部说明见 [配置项](/docs/guide/configuration)。
+
+**环境变量**：启动时读取与配置项同名的环境变量（大小写均可），值按 JSON 解析，解析失败则作为字符串：
+
+```bash
+export PLITE_MAX_COMMENTS=10
+export PLITE_DISABLED_PLATFORMS='["x"]'
+```
+
+**代码中修改**：`configure()` 会就地更新共享配置，已经导入的引用同样生效：
+
+```python
+from nonebot_plugin_parser_lite import configure
+
+configure(plite_max_comments=10, plite_disabled_platforms=["x"])
+```
+
+## 独立版专属环境变量
+
+| 变量 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `PARSER_LITE_BASE_DIR` | `./.parser-lite` | 数据根目录 |
+| `PARSER_LITE_NICKNAME` | `parser-lite` | 机器人名称，显示在卡片页脚（`data.meta.bot_name`） |
+| `LOG_LEVEL` | `INFO` | 日志级别 |
+
+## 数据目录
+
+`PARSER_LITE_BASE_DIR` 下包含：
+
+| 子目录 | 内容 |
+| :--- | :--- |
+| `cache/` | 下载的媒体与渲染缓存 |
+| `config/` | 登录凭证等（如 `bilibili_credential.json`、`linuxdo_cookies.txt`） |
+| `data/` | 解析统计数据库，以及 `themes/` 自定义主题目录 |
+
+## 后台任务
+
+- 首次进入异步解析时，会在当前事件循环中**自动注册**周期性的缓存清理任务
+- 应用退出前调用 `await shutdown_runtime()` 关闭后台任务

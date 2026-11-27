@@ -1,0 +1,31 @@
+---
+title: 支持的平台
+description: 各平台可解析的内容形态
+icon: Globe
+---
+
+## 内容平台
+
+<PlatformMatrix />
+
+## 音乐平台
+
+<PlatformMatrix kind="music" />
+
+<Callout>
+  部分音乐平台的特定音源解析由第三方服务实现，介意者可通过 [`plite_disabled_platforms`](/docs/guide/configuration#平台开关) 关闭对应平台。
+</Callout>
+
+## 图例
+
+| 标识 | 含义 |
+| :--: | :--- |
+| ✅ | 完整支持解析与富文本渲染 |
+| ❌ | 插件尚未适配该模块 |
+| 🚫 | 该平台暂无此类内容形态（如有遗漏或平台更新，欢迎提交 Issue） |
+
+**图文** 指一切以文本为主体、图片混排、多图相册、社区长文、问答、多媒体笔记等内容形态。
+
+**配置 ID** 即 `plite_disabled_platforms`、`plite_parse_dedup_platforms` 等配置项中使用的平台标识，音乐平台的 ID 依次为 `netease`、`kugou`、`qsmusic`、`kuwo`、`qqmusic`、`migu`。
+
+可解析的链接格式可参考 [测试链接](https://github.com/fllesser/nonebot-plugin-parser/blob/master/tests/others/test_urls.md)。

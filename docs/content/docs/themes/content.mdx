@@ -1,0 +1,174 @@
+---
+title: 正文内容类型
+description: post.content 中各类内容项的结构与渲染建议
+icon: Shapes
+---
+
+`post.content` 包含帖子的全部正文元素，模板需要按 `type` 分别渲染：
+
+| type | 说明 |
+| :--- | :--- |
+| [`text`](#text) | 文本 |
+| [`image` / `cover`](#image--cover) | 图片与封面 |
+| [`live_photo`](#live_photo) | 实况照片 |
+| [`graphic`](#graphic) | 带说明的独立图片 |
+| [`sticker`](#sticker) | 贴纸 / 表情 |
+| [`video` / `audio`](#video--audio) | 音视频 |
+| [`link` / `quote`](#link--quote) | 链接卡片与引用 |
+| [`poll`](#poll) | 投票 |
+| [`unknown`](#unknown) | 未知类型兜底 |
+
+## text
+
+```json
+{ "type": "text", "text": "第一行正文\n第二行正文" }
+```
+
+文本可能包含换行符，建议：
+
+```css
+.text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+```
+
+## image / cover
+
+```json
+{
+  "type": "image",
+  "src": "file:///path/to/img.png",
+  "layout": "grid",
+  "width": 800,
+  "height": 400,
+  "orientation": "landscape",
+  "source_url": "https://..."
+}
+```
+
+`cover` 结构相同，额外带 `alt`。音乐平台的第一张图片或封面卡片会被标记为 `cover`。
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `src` | `string` | 本地文件 URI |
+| `layout` | `string` | 布局建议：`"grid"`（网格）或 `"x"`（横向推特流） |
+| `width` / `height` | `number` | 像素尺寸 |
+| `orientation` | `string` | `"portrait"`（高 / 宽 ≥ 0.9）或 `"landscape"` |
+| `source_url` | `string` | 原始网络地址，不建议模板直接请求 |
+
+## live_photo
+
+与 `image` 字段相同，额外带 `is_live: true`。可据此在图片上叠加「实况 / Live」角标。
+
+## graphic
+
+```json
+{
+  "type": "graphic",
+  "src": "file:///path/to/img.png",
+  "width": 800,
+  "height": 400,
+  "orientation": "landscape",
+  "alt": "...",
+  "source_url": "https://..."
+}
+```
+
+`graphic` 是带说明的独立图片，**不要**混入普通多图网格展示。
+
+## sticker
+
+```json
+{ "type": "sticker", "src": "...", "size": "small", "description": "笑哭", "source_url": "..." }
+```
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `src` | `string \| null` | 贴纸图片 URI |
+| `size` | `string` | `small` 或 `medium` |
+| `description` | `string` | 贴纸描述 |
+
+`src` 为 `null` 时应回退显示描述文字，如 `[笑哭]`。
+
+## video / audio
+
+```json
+{ "type": "video", "src": "封面URI", "duration": "01:23", "speedup": "1.25x", "size": "12.34MB", "source_url": "..." }
+```
+
+```json
+{ "type": "audio", "duration": "03:45", "speedup": null, "size": "7.63MB", "source_url": "..." }
+```
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `src` | `string \| null` | 视频封面 URI；音频为 `null` |
+| `duration` | `string` | 时长，如 `"01:23"` |
+| `speedup` | `string \| null` | 倍速标签，1 倍速时为 `null`，见 [媒体倍速](/docs/guide/configuration#媒体倍速) |
+| `size` | `string` | 文件大小，如 `"12.34MB"` |
+
+## link / quote
+
+```json
+{
+  "type": "link",
+  "url": "string",
+  "title": "string",
+  "site_name": "string | null",
+  "description": "string | null",
+  "icon": "uri | null",
+  "preview": "uri | null"
+}
+```
+
+```json
+{ "type": "quote", "text": "引用内容", "title": "string | null", "url": "string | null", "icon": "uri | null" }
+```
+
+## poll
+
+```json
+{
+  "type": "poll",
+  "title": "string | null",
+  "options": [{ "text": "选项 A", "votes": 10, "percentage": 62.5, "image": "uri | null" }],
+  "option_vote_total": 123,
+  "total_votes": 123,
+  "total_voters": 123,
+  "multiple": false,
+  "closed": false,
+  "close_at": "2026-...",
+  "has_images": false
+}
+```
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `title` | `string \| null` | 投票标题 |
+| `options` | `array` | 选项，`percentage` 已算好百分比 |
+| `option_vote_total` | `number` | 选项票数之和 |
+| `total_votes` | `number \| null` | 平台返回的总票数（多选时可能大于投票人数） |
+| `total_voters` | `number \| null` | 投票人数 |
+| `multiple` | `boolean` | 是否多选 |
+| `closed` | `boolean` | 是否已结束 |
+| `close_at` | `string \| null` | 结束时间（平台原始格式） |
+| `has_images` | `boolean` | 是否有选项图片 |
+
+```jinja
+<div class="poll-bar" style="width: {{ '%.2f'|format(option.percentage) }}%"></div>
+```
+
+## unknown
+
+为了向前兼容，无法识别的新类型统一为 `type="unknown"`。模板最后应留一个兜底分支：
+
+```jinja
+{% if item.type == 'text' %}
+  <p>{{ item.text }}</p>
+{% elif item.type == 'image' %}
+  <img src="{{ item.src }}" />
+{% else %}
+  <p class="unknown-type">{{ item.text }}</p>
+{% endif %}
+```

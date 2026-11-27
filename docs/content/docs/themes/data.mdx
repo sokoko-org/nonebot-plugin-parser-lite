@@ -1,0 +1,85 @@
+---
+title: Theme API 数据
+description: 帖子模板中 data 对象的完整结构（Theme API v1）
+icon: Braces
+---
+
+```javascript
+data.schema_version // [number] 协议版本号 (1)
+data.theme          // [string] 当前色彩模式："light" | "dark"
+data.theme_id       // [string] 当前生效的主题 ID
+data.meta           // [object] 渲染元数据
+data.post           // [object] 帖子 / 动态主数据
+```
+
+所有字符串在传入模板前**已统一转义**，直接输出即可，见 [Jinja2 转义原则](/docs/themes/guidelines#jinja2-转义原则)。
+
+## data.meta
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `bot_name` | `string` | 机器人名称 |
+| `rendering_time` | `string` | 渲染时间，`YYYY-MM-DD HH:MM:SS` |
+| `width` | `number` | 建议卡片容器宽度（默认 `620`） |
+| `ambient_rgb` | `string` | 背景强调色的 RGB 通道，如 `"99, 102, 241"` |
+
+## data.post
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `title` | `string \| null` | 标题 |
+| `url` | `string` | 原帖链接 |
+| `formatted_datetime` | `string` | 格式化的发布时间，无时间时为空字符串 |
+| `timestamp` | `number \| null` | 秒级时间戳 |
+| `platform` | `object` | 平台信息，见下 |
+| `author` | `object` | 作者信息，见下 |
+| `content` | `array` | 正文内容项，见 [正文内容类型](/docs/themes/content) |
+| `stats` | `object` | 交互统计，见下 |
+| `comments` | `array` | 评论列表 |
+| `repost` | `object \| null` | 转发的原帖，结构与 `post` 相同 |
+| `qrcode` | `string \| null` | 原链接二维码 Data URI，需开启 `plite_append_qrcode` |
+| `ai_summary` | `string \| null` | AI 摘要 |
+| `extra` | `object` | 平台扩展参数，结构因平台而异，使用前请判空 |
+
+### post.platform
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `id` | `string` | 平台 ID，如 `"bilibili"` |
+| `name` | `string` | 显示名称，如 `"哔哩哔哩"` |
+| `logo` | `string` | 平台图标 URI，获取失败时为内置占位图 |
+
+### post.author
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `name` | `string` | 昵称 |
+| `id` | `string \| null` | 作者 ID |
+| `avatar` | `string` | 头像 URI |
+| `description` | `string \| null` | 个人简介 |
+| `location` | `string \| null` | IP 归属地 |
+
+### post.stats
+
+基础指标均已格式化为字符串（如 `"1.2万"`）：
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| `view_count` | `string \| null` | 浏览数 |
+| `like_count` | `string \| null` | 点赞数 |
+| `collect_count` | `string \| null` | 收藏数 |
+| `share_count` | `string \| null` | 分享数 |
+| `comment_count` | `string \| null` | 评论数 |
+| `extra` | `array` | 平台特殊统计项，每项含 `key`、`label`、`value` |
+
+```jinja title="渲染平台特殊统计项"
+{% for item in post.stats.extra %}
+  {% if item.value is not none %}
+    <span class="stat-item stat-{{ item.key }}">
+      <i class="fa-icon fa-{{ item.key }}"></i>
+      <b>{{ item.value }}</b>
+      <small>{{ item.label }}</small>
+    </span>
+  {% endif %}
+{% endfor %}
+```

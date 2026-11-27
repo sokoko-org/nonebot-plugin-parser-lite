@@ -1,0 +1,72 @@
+---
+title: 常见问题
+description: 安装与使用中的常见问题
+icon: CircleQuestionMark
+---
+
+<Accordions>
+<Accordion title="发送了链接但没有任何反应">
+
+- 确认插件已加载：启动日志中应出现 `启用平台: ...`
+- 确认该平台没有被 `plite_disabled_platforms` 禁用
+- 确认当前会话没有被 `关闭解析`
+- 如果刚刚解析过同一个链接，可能命中了 [解析冷却](/docs/guide/configuration#平台开关)
+
+</Accordion>
+<Accordion title="视频发送超时或失败">
+
+- 调大 NoneBot 的 `API_TIMEOUT`，例如 `API_TIMEOUT=100`
+- 使用 OneBot 时可设置 `plite_file_upload_timeout`
+- 降低 B 站清晰度，或调小 `plite_max_size`
+- 尝试 `plite_need_upload_video=true` 改为上传群文件
+
+</Accordion>
+<Accordion title="视频能发出但手机上无法播放">
+
+多半是 HEVC / AV1 编码的兼容性问题，将 B 站编码限定为 H.264：
+
+```bash
+plite_bili_video_codes=["avc"]
+```
+
+</Accordion>
+<Accordion title="协议端和 NoneBot 不在同一台机器，媒体发不出去">
+
+协议端无法读取 NoneBot 本地的文件路径。开启 `plite_use_base64=true`，注意它会显著增加内存与带宽占用。
+
+</Accordion>
+<Accordion title="卡片图片发送失败">
+
+部分协议端不支持 WebP，改为 JPEG：
+
+```bash
+plite_render_format="jpeg"
+```
+
+</Accordion>
+<Accordion title="Live Photo 很慢或占用很高">
+
+Live Photo 需要 FFmpeg 转码。设备性能不足时关闭它，插件会分别发送底图与动图：
+
+```bash
+plite_live_photo=false
+```
+
+</Accordion>
+<Accordion title="卡片里的 emoji 显示为方块">
+
+尝试固定使用下载的 emoji 字体：
+
+```bash
+plite_emoji_style="twitter"
+```
+
+</Accordion>
+<Accordion title="知乎回答只显示了一部分">
+
+需要配置带登录态的 `plite_zhihu_ck`，见 [Cookie 与登录](/docs/advanced/cookies#知乎)。
+
+</Accordion>
+</Accordions>
+
+没有找到答案？前往 [Discussions](https://github.com/sokoko-org/nonebot-plugin-parser-lite/discussions) 提问，确认是插件缺陷后再提交 [Issue](https://github.com/sokoko-org/nonebot-plugin-parser-lite/issues)。
