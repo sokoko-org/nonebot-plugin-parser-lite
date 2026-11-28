@@ -6,9 +6,7 @@ from anyio import Path
 from pydantic import BaseModel, field_validator, model_validator
 
 from .constants import PlatformEnum, SendComponent
-from .path import cache_dir as _cache_dir
-from .path import config_dir as _config_dir
-from .path import data_dir as _data_dir
+from .path import cache_dir, config_dir, data_dir
 from .utils.bilibili.video import BiliAudioQuality, BiliVideoCodecs, BiliVideoQuality
 
 
@@ -196,17 +194,17 @@ class Config(BaseModel):
     @property
     def cache_dir(self) -> Path:
         """插件缓存目录"""
-        return _cache_dir
+        return cache_dir
 
     @property
     def config_dir(self) -> Path:
         """插件配置目录"""
-        return _config_dir
+        return config_dir
 
     @property
     def data_dir(self) -> Path:
         """插件数据目录"""
-        return _data_dir
+        return data_dir
 
     @property
     def max_size(self) -> int:
