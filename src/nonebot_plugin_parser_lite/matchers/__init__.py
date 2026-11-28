@@ -27,6 +27,7 @@ from ..download import DOWNLOADER
 from ..helper import UniHelper
 from ..parsers.base import BaseParser, ParseResult
 from ..parsers.registry import REGISTRY
+from ..path import cache_dir, config_dir, data_dir
 from ..render import RENDERER
 from ..render.fonts import shutdown_emoji_fonts
 from ..render.image import warmup_themes
@@ -79,15 +80,17 @@ async def _on_startup() -> None:
     logger.info(f"启用平台: {', '.join(sorted(REGISTRY.enabled_platforms))}")
 
     patterns = [
-        pattern
-        for cls_ in REGISTRY.enabled_classes
-        for pattern in cls_._key_patterns
+        pattern for cls_ in REGISTRY.enabled_classes for pattern in cls_._key_patterns
     ]
     matcher = on_keyword_regex(*patterns)
     matcher.append_handler(parser_handler)
 
     # 注册平台专属的附加匹配器
     register_extra_matchers()
+
+    await data_dir.mkdir(parents=True, exist_ok=True)
+    await config_dir.mkdir(parents=True, exist_ok=True)
+    await cache_dir.mkdir(parents=True, exist_ok=True)
 
     # 逐个执行各解析器自身的启动钩子
     await REGISTRY.run_startup()
